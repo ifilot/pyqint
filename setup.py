@@ -1,5 +1,4 @@
 import subprocess
-
 from setuptools import Extension, setup
 from Cython.Build import cythonize
 
@@ -22,16 +21,32 @@ extension_kwargs = pkgconfig('eigen3', extension_kwargs)
 ext_modules = [
     Extension(
         "pyqint",
-        ["pyqint.pyx"],
+        ["pyqint/pyqint.pyx"],
         extra_compile_args=['-fopenmp', '-O3'],
         extra_link_args=['-fopenmp', '-O3'],
         **extension_kwargs
     )
 ]
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
-    name='pyqint',
+    name='pyqint-ifilot',
+    version="0.1.0",
+    author="Ivo Filot",
+    author_email="ivo@ivofilot.nl",
+    description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/ifilot/pyqint",
     ext_modules=cythonize(ext_modules,
                           language_level = "3",
                           build_dir="build"),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: POSIX",
+    ],
+    python_requires='>=3.6',
 )

@@ -1,19 +1,19 @@
 # distutils: language = c++
 
 # Integrals
-cdef extern from "src/integrals.cpp":
+cdef extern from "integrals.cpp":
     pass
 
 # contracted and primitive Gaussians
-cdef extern from "src/cgf.cpp":
+cdef extern from "cgf.cpp":
     pass
 
 # Gamma and incomplete Gamma function
-cdef extern from "src/gamma.cpp":
+cdef extern from "gamma.cpp":
     pass
 
 # Declare the class with cdef
-cdef extern from "src/cgf.h":
+cdef extern from "cgf.h":
     cdef cppclass GTO:
         GTO() except +
         GTO(float, float, float, float, float, int, int, int) except +
@@ -24,7 +24,7 @@ cdef extern from "src/cgf.h":
         void add_gto(float, float, int, int, int) except +
 
 # Declare the class with cdef
-cdef extern from "src/integrals.h":
+cdef extern from "integrals.h":
     cdef cppclass Integrator:
         Integrator() except +
         float overlap(GTO, GTO) except +
