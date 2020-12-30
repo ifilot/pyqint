@@ -25,30 +25,14 @@ if os.name == 'nt':
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
 
-def pkgconfig(package, kw):
-    flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
-    output = subprocess.getoutput(
-        'pkg-config --cflags --libs {}'.format(package))
-    for token in output.strip().split():
-        kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
-    return kw
-
-# specify source files
-extension_kwargs = {
-    'include_dirs': [],
-}
-
-if os.name == 'posix':
-    # load eigen3
-    extension_kwargs = pkgconfig('eigen3', extension_kwargs)
+if os.name == "posix":
+    os.environ['CFLAGS'] = '-I/usr/include/eigen3'
+    #os.environ['CXX'] = '/usr/bin/cpp'
 
 ext_modules = [
     Extension(
         "pyqint.pyqint",
         ["pyqint/pyqint.pyx"],
-        #extra_compile_args=['-fopenmp', '-O3'],
-        #extra_link_args=['-fopenmp', '-O3'],
-        **extension_kwargs
     )
 ]
 
@@ -56,8 +40,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name='pyqint-ifilot',
-    version="0.1.0",
+    name='pyqint',
+    version="0.1.3",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
@@ -73,4 +57,5 @@ setup(
         "Operating System :: POSIX",
     ],
     python_requires='>=3.6',
+    install_requires=['numpy'],
 )
