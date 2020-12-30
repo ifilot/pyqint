@@ -1,0 +1,32 @@
+package:
+  name: "pyqint"
+  version: "0.1.1"
+
+source:
+  git_rev: 8865949
+  git_url: https://github.com/ifilot/pyqint
+
+requirements:
+  host:
+    - pip
+    - python
+    - setuptools
+    - cython
+
+  run:
+    - python
+    - numpy
+
+test:
+  requires:
+    - numpy
+  source_files:
+    - tests/*.py
+  commands:
+    - python tests/test_overlap.py
+
+about:
+  home: https://github.com/ifilot/pyqint
+  license: GPL3
+  license_family: GPL
+  summary: Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations
