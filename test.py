@@ -1,4 +1,4 @@
-from pyqint import PyQInt, gto, cgf
+from pyqint.pyqint import PyQInt, cgf, gto
 from copy import deepcopy
 import numpy as np
 

@@ -20,7 +20,7 @@ extension_kwargs = pkgconfig('eigen3', extension_kwargs)
 
 ext_modules = [
     Extension(
-        "pyqint",
+        "pyqint.pyqint",
         ["pyqint/pyqint.pyx"],
         extra_compile_args=['-fopenmp', '-O3'],
         extra_link_args=['-fopenmp', '-O3'],

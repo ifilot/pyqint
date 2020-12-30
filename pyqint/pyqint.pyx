@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from pyqint cimport Integrator, GTO
+from .pyqint cimport Integrator, GTO
 
 class gto:
     """
