@@ -38,6 +38,25 @@ GTO::GTO(double _c,
     this->calculate_normalization_constant();
 }
 
+GTO::GTO(double _c,
+         double _x,
+         double _y,
+         double _z,
+         double _alpha,
+         unsigned int _l,
+         unsigned int _m,
+         unsigned int _n):
+    c(_c),
+    alpha(_alpha),
+    l(_l),
+    m(_m),
+    n(_n),
+    position(vec3(_x,_y,_z)) {
+
+    // calculate the normalization constant
+    this->calculate_normalization_constant();
+}
+
 /*
  * @fn get_amp
  * @brief Gets the amplitude of the GTO
@@ -100,7 +119,7 @@ vec3 GTO::get_grad(const vec3& r) const {
  * @return void
  */
 void GTO::calculate_normalization_constant() {
-    static const double pi = 3.14159265359;
+    static const double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
 
     double nom =   std::pow(2.0, 2.0 * (l + m + n) + 3.0 / 2.0) *
                    std::pow(alpha, (l + m + n) + 3.0 / 2.0);
@@ -123,6 +142,15 @@ CGF::CGF():
     r(vec3(0,0,0)) {
         // do nothing
 }
+
+/*
+ * @fn CGF
+ * @brief Default constructor
+ *
+ * @return CGF
+ */
+CGF::CGF(double x, double y, double z) :
+    r(vec3(x,y,z)) {}
 
 /*
  * @fn CGF
@@ -184,44 +212,43 @@ vec3 CGF::get_grad(const vec3& r) const {
  */
 void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the list)
                   double alpha,       // alpha value
-                  double c,           // coefficient
-                  const vec3& vec3) { // position
+                  double c) {         // coefficient
 
     switch(type) {
         // S ORBITAL
         case GTO_S:
-            gtos.push_back(GTO(c, r, alpha, 0,0,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,0,0));
         break;
 
         // P ORBITALS
         case GTO_PX:
-            gtos.push_back(GTO(c, r, alpha, 1,0,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 1,0,0));
         break;
         case GTO_PY:
-            gtos.push_back(GTO(c, r, alpha, 0,1,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,1,0));
         break;
         case GTO_PZ:
-            gtos.push_back(GTO(c, r, alpha, 0,0,1));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,0,1));
         break;
 
         // D ORBITALS
         case GTO_DX2:
-            gtos.push_back(GTO(c, r, alpha, 2,0,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 2,0,0));
         break;
         case GTO_DXY:
-            gtos.push_back(GTO(c, r, alpha, 1,1,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 1,1,0));
         break;
         case GTO_DXZ:
-            gtos.push_back(GTO(c, r, alpha, 1,0,1));
+            this->gtos.push_back(GTO(c, this->r, alpha, 1,0,1));
         break;
         case GTO_DY2:
-            gtos.push_back(GTO(c, r, alpha, 0,2,0));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,2,0));
         break;
         case GTO_DYZ:
-            gtos.push_back(GTO(c, r, alpha, 0,1,1));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,1,1));
         break;
         case GTO_DZ2:
-            gtos.push_back(GTO(c, r, alpha, 0,0,2));
+            this->gtos.push_back(GTO(c, this->r, alpha, 0,0,2));
         break;
 
         default:
@@ -229,6 +256,26 @@ void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the 
             exit(-1);
         break;
     }
+}
+
+/*
+ * @fn add_GTO
+ * @brief Add a GTO to the CGF
+ *
+ * @param double c              coefficient
+ * @param double alpha          alpha value
+ * @param unsigned int l        l angular momentum x
+ * @param unsigned int m        m angular momentum y
+ * @param unsigned int n        n angular momentum z
+ *
+ * @return void
+ */
+void CGF::add_gto(double c,
+                  double alpha,
+                  unsigned int l,
+                  unsigned int m,
+                  unsigned int n) {
+    this->gtos.push_back(GTO(c, this->r, alpha, l, m, n));
 }
 
 /*

@@ -46,6 +46,33 @@ private:
     double norm;            // normalization constant
 
 public:
+    // empty constructor
+    GTO(){}
+
+    /*
+     * @fn GTO
+     * @brief Construct Gaussian Type Orbital
+     *
+     * @param _c        coefficient
+     * @param _x        position of the Gaussian
+     * @param _y        position of the Gaussian
+     * @param _z        position of the Gaussian
+     * @param _alpha    alpha value in the exponent
+     * @param _l        power of x in the polynomial
+     * @param _m        power of y in the polynomial
+     * @param _n        power of z in the polynomial
+     *
+     * returns double value of the incomplete Gamma Function
+     */
+    GTO(double _c,
+        double _x,
+        double _y,
+        double _z,
+        double _alpha,
+        unsigned int _l,
+        unsigned int _m,
+        unsigned int _n);
+
     /*
      * @fn GTO
      * @brief Construct Gaussian Type Orbital
@@ -201,6 +228,14 @@ public:
      *
      * @return CGF
      */
+    CGF(double x, double y, double z);
+
+    /*
+     * @fn CGF
+     * @brief Default constructor
+     *
+     * @return CGF
+     */
     CGF(const vec3& _r);
 
     // type of GTOs to add
@@ -292,14 +327,30 @@ public:
      * @param unsigned int type     type of the orbital (see above for the list)
      * @param double alpha          alpha value
      * @param double c              coefficient
-     * @param const vec3& vec3      position
      *
      * @return void
      */
     void add_gto(unsigned int type,
                  double alpha,
-                 double c,
-                 const vec3& vec3);
+                 double c);
+
+    /*
+     * @fn add_GTO
+     * @brief Add a GTO to the CGF
+     *
+     * @param double c              coefficient
+     * @param double alpha          alpha value
+     * @param unsigned int l        l angular momentum x
+     * @param unsigned int m        m angular momentum y
+     * @param unsigned int n        n angular momentum z
+     *
+     * @return void
+     */
+    void add_gto(double c,
+                 double alpha,
+                 unsigned int l,
+                 unsigned int m,
+                 unsigned int n);
 
     /*
      * @fn set_position
