@@ -9,6 +9,7 @@ source:
 requirements:
   build:
     - numpy
+    - tqdm
 
   host:
     - pip
@@ -16,15 +17,18 @@ requirements:
     - setuptools
     - cython
     - numpy
+    - tqdm
 
   run:
     - python
     - numpy
+    - tqdm
 
 test:
   requires:
     - numpy
     - setuptools
+    - tqdm
   source_files:
     - tests/*.py
   commands:
