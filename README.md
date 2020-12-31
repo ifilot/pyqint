@@ -1,6 +1,7 @@
 # PyQInt
 
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
+[![PyPI](https://img.shields.io/pypi/v/pyqint?style=flat-square)](https://pypi.org/project/pyqint/)
 
 __Table of Contents__
 
@@ -22,6 +23,7 @@ PyQInt is a Python package for calculating one- and two-electron integrals as en
 
 ### Anaconda
 
+[![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/platforms.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/downloads.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/installer/conda.svg)](https://conda.anaconda.org/ifilot)
@@ -33,6 +35,11 @@ conda install -c ifilot pyqint
 ```
 
 ### PyPi
+
+[![PyPI](https://img.shields.io/pypi/v/pyqint?color=green&style=flat-square)](https://pypi.org/project/pyqint/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pypi?style=flat-square)](https://pypi.org/project/pyqint/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyqint?style=flat-square)
+
 
 Open a terminal and type
 
