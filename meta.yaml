@@ -33,7 +33,7 @@ test:
   source_files:
     - tests/*.py
   commands:
-    - nosetests tests/test_overlap.py
+    - nosetests tests/*.py
 
 about:
   home: https://github.com/ifilot/pyqint
