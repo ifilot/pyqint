@@ -1,9 +1,9 @@
 package:
   name: "pyqint"
-  version: "0.1.1"
+  version: "0.4.0"
 
 source:
-  git_rev: 8865949
+  git_rev: master
   git_url: https://github.com/ifilot/pyqint
 
 requirements:
@@ -20,10 +20,14 @@ requirements:
 test:
   requires:
     - numpy
+    - setuptools
   source_files:
     - tests/*.py
   commands:
     - python tests/test_overlap.py
+    - python tests/test_kinetic.py
+    - python tests/test_nuclear.py
+    - python tests/test_repulsion.py
 
 about:
   home: https://github.com/ifilot/pyqint
