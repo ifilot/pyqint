@@ -29,3 +29,6 @@ cdef extern from "integrals.h":
         Integrator() except +
         float overlap(GTO, GTO) except +
         float overlap(CGF, CGF) except +
+
+        float kinetic(GTO, GTO) except +
+        float kinetic(CGF, CGF) except +
