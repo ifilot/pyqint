@@ -37,7 +37,7 @@ class TestOverlap(unittest.TestCase):
 
         S11 = 1.0
         S12 = 0.65931845
-        np.testing.assert_almost_equal(S[0,0], S11,86)
+        np.testing.assert_almost_equal(S[0,0], S11, 8)
         np.testing.assert_almost_equal(S[1,1], S11, 8)
         np.testing.assert_almost_equal(S[0,1], S12, 8)
 

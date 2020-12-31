@@ -30,16 +30,16 @@ class TestKinetic(unittest.TestCase):
         cgf2 = deepcopy(cgf1)
         cgf2.p[2] = 1.4
 
-        S = np.zeros((2,2))
-        S[0,0] = integrator.kinetic(cgf1, cgf1)
-        S[0,1] = S[1,0] = integrator.kinetic(cgf1, cgf2)
-        S[1,1] = integrator.kinetic(cgf2, cgf2)
+        T = np.zeros((2,2))
+        T[0,0] = integrator.kinetic(cgf1, cgf1)
+        T[0,1] = T[1,0] = integrator.kinetic(cgf1, cgf2)
+        T[1,1] = integrator.kinetic(cgf2, cgf2)
 
-        S11 = 0.7600315809249878
-        S12 = 0.2364544570446014
-        np.testing.assert_almost_equal(S[0,0], S11,86)
-        np.testing.assert_almost_equal(S[1,1], S11, 8)
-        np.testing.assert_almost_equal(S[0,1], S12, 8)
+        T11 = 0.7600315809249878
+        T12 = 0.2364544570446014
+        np.testing.assert_almost_equal(T[0,0], T11, 8)
+        np.testing.assert_almost_equal(T[1,1], T11, 8)
+        np.testing.assert_almost_equal(T[0,1], T12, 8)
 
 if __name__ == '__main__':
     unittest.main()

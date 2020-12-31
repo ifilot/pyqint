@@ -32,3 +32,6 @@ cdef extern from "integrals.h":
 
         float kinetic(GTO, GTO) except +
         float kinetic(CGF, CGF) except +
+
+        float nuclear(GTO, GTO, float, float, float) except +
+        float nuclear(CGF, CGF, float, float, float, int) except +

@@ -95,6 +95,7 @@ public:
      *
      * @param const CGF& cgf1       Contracted Gaussian Function
      * @param const CGF& cgf2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
      * @param unsigned int charge   charge of the nucleus in a.u.
      *
      * Calculates the value of < cgf1 | V | cgf2 >
@@ -102,6 +103,38 @@ public:
      * @return double value of the nuclear integral
      */
     double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge);
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const CGF& cgf1       Contracted Gaussian Function
+     * @param const CGF& cgf2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     *
+     * Calculates the value of < cgf1 | V | cgf2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) {
+        return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
+    }
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const GTO& gto1       Contracted Gaussian Function
+     * @param const GTO& gto2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus);
 
     /**
      * @fn nuclear
@@ -115,7 +148,9 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus);
+    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) {
+        return this->nuclear(gto1, gto2, vec3(cx, cy, cz));
+    }
 
     /**
      * @fn repulsion
