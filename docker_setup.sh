@@ -13,7 +13,6 @@ function repair_wheel {
 
 # Compile wheels
 for PYBIN in /opt/python/cp3*/bin; do
-    "${PYBIN}/python" -m pip install cython
     "${PYBIN}/python" /io/setup.py bdist_wheel
 done
 
