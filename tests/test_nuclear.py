@@ -1,5 +1,5 @@
 import unittest
-from pyqint.pyqint import PyQInt, cgf, gto
+from pyqint import PyQInt, cgf, gto
 from copy import deepcopy
 import numpy as np
 
