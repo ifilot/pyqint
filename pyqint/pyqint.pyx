@@ -1,6 +1,9 @@
 # distutils: language = c++
 
 from .pyqint cimport Integrator, GTO
+import numpy as np
+from multiprocessing import Pool
+import tqdm
 
 class gto:
     """
@@ -157,3 +160,48 @@ cdef class PyQInt:
 
     def teindex(self, i, j, k, l):
         return self.integrator.teindex(i, j, k, l)
+
+    def build_integrals(self, cgfs, nuclei):
+        # number of cgfs
+        N = len(cgfs)
+
+        # build empty matrices
+        S = np.zeros((N,N))
+        T = np.zeros((N,N))
+        V = np.zeros((N,N))
+        teint = np.multiply(np.ones(self.integrator.teindex(N,N,N,N)), -1.0)
+
+        for i, cgf1 in enumerate(cgfs):
+            for j, cgf2 in enumerate(cgfs):
+                S[i,j] = self.overlap(cgf1, cgf2)
+                T[i,j] = self.kinetic(cgf1, cgf2)
+
+                for nucleus in nuclei:
+                    V[i,j] += self.nuclear(cgf1, cgf2, nucleus[0], nucleus[1])
+
+        # build pool of jobs
+        jobarray = [None] * self.teindex(N,N,N,N)
+        for i, cgf1 in enumerate(cgfs):
+            for j, cgf2 in enumerate(cgfs):
+                ij = i*(i+1)/2 + j
+                for k, cgf3 in enumerate(cgfs):
+                    for l, cgf4 in enumerate(cgfs):
+                        kl = k * (k+1)/2 + l
+                        if ij <= kl:
+                            idx = self.teindex(i,j,k,l)
+                            if teint[idx] < 0:
+                                jobarray[idx] = (cgfs[i],cgfs[j],cgfs[k],cgfs[l])
+
+
+        jobs = []
+        for job in jobarray:
+            if job:
+                jobs.append(job)
+
+
+        print(jobs)
+        print(len(jobs))
+        with Pool(2) as p:
+            res = list(tqdm.tqdm(p.imap(func=self.repulsion, iterable=jobs), total=len(jobs)))
+
+        return S, T, V, teint
