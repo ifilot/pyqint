@@ -51,7 +51,7 @@ pip install pyqint
 
 ### Overlap integrals
 ```python
-import pyqint
+from pyqint.pyqint import PyQInt, cgf, gto
 import numpy as np
 from copy import deepcopy
 
@@ -81,7 +81,7 @@ print(S)
 
 ### Kinetic integrals
 ```python
-import pyqint
+from pyqint.pyqint import PyQInt, cgf, gto
 import numpy as np
 from copy import deepcopy
 
@@ -111,7 +111,7 @@ print(T)
 
 ### Nuclear attraction integrals
 ```python
-import pyqint
+from pyqint.pyqint import PyQInt, cgf, gto
 import numpy as np
 from copy import deepcopy
 
@@ -147,7 +147,7 @@ print(V1,V2)
 ### Two-electron integrals
 
 ```python
-import pyqint
+from pyqint.pyqint import PyQInt, cgf, gto
 import numpy as np
 from copy import deepcopy
 
