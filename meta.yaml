@@ -38,3 +38,4 @@ about:
   license: GPL3
   license_family: GPL
   summary: Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations
+  description: See the package README.md for more information.
