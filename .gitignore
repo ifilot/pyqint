@@ -144,3 +144,4 @@ docs/build/*
 # build folder
 build/*
 dist/*
+wheelhouse/*

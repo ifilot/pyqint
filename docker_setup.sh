@@ -1,9 +1,23 @@
 #!/bin/bash
 
-PYTHON=/opt/python/cp37-cp37m/bin/python
+set -e -u -x
 
-$PYTHON -m pip install cython==0.29.14
-$PYTHON setup.py build_ext --inplace
-$PYTHON setup.py bdist_wheel
-auditwheel show dist/pyqint*.whl
-auditwheel repair dist/pyqint*.whl
+function repair_wheel {
+    wheel="$1"
+    if ! auditwheel show "$wheel"; then
+        echo "Skipping non-platform wheel $wheel"
+    else
+        auditwheel repair "$wheel" -w /io/wheelhouse/
+    fi
+}
+
+# Compile wheels
+for PYBIN in /opt/python/cp3*/bin; do
+    "${PYBIN}/python" -m pip install cython
+    "${PYBIN}/python" /io/setup.py bdist_wheel
+done
+
+# Bundle external shared libraries into the wheels
+for whl in dist/*.whl; do
+    repair_wheel "$whl"
+done

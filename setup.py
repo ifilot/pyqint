@@ -41,7 +41,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.1.3",
+    version="0.1.4",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
@@ -56,6 +56,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     install_requires=['numpy'],
 )
