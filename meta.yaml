@@ -7,11 +7,15 @@ source:
   git_url: https://github.com/ifilot/pyqint
 
 requirements:
+  build:
+    - numpy
+
   host:
     - pip
     - python
     - setuptools
     - cython
+    - numpy
 
   run:
     - python
