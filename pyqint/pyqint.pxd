@@ -35,3 +35,8 @@ cdef extern from "integrals.h":
 
         float nuclear(GTO, GTO, float, float, float) except +
         float nuclear(CGF, CGF, float, float, float, int) except +
+
+        float repulsion(GTO, GTO, GTO, GTO) except +
+        float repulsion(CGF, CGF, CGF, CGF) except +
+
+        int teindex(int, int, int, int) except +
