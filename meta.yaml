@@ -33,7 +33,7 @@ test:
   source_files:
     - tests/*.py
   commands:
-    - nosetests tests/*.py
+    - nosetests tests/test_integrals.py tests/test_overlap.py tests/test_kinetic.py tests/test_nuclear.py tests/test_repulsion.py
 
 about:
   home: https://github.com/ifilot/pyqint
