@@ -31,7 +31,7 @@ if os.name == "posix":
 ext_modules = [
     Extension(
         "pyqint.pyqint",
-        ["pyqint/pyqint.pyx", "pyqint/molecule.py"],
+        ["pyqint/pyqint.pyx"],
     ),
 ]
 
@@ -50,6 +50,12 @@ setup(
     ext_modules=cythonize(ext_modules[0],
                           language_level = "3",
                           build_dir="build"),
+    packages=['pyqint'],
+    package_data={'pyqint': ['basis/sto3g.json',
+                             'basis/sto6g.json',
+                             'basis/p321.json',
+                             'basis/p631.json']},
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

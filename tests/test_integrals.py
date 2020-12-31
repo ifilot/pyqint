@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto
+from pyqint import PyQInt, cgf, gto, Molecule
 from copy import deepcopy
 import numpy as np
 import multiprocessing
@@ -15,23 +15,11 @@ class TestIntegrals(unittest.TestCase):
         # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen separated by 1.4 a.u.
-        cgf1 = cgf([0.0, 0.0, 0.0])
-
-        cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
-        cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
-        cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
-
-        cgf2 = deepcopy(cgf1)
-        cgf2.p[2] = 1.4
-
-        # build list of CGFs
-        cgfs = []
-        cgfs.append(cgf1)
-        cgfs.append(cgf2)
-
-        # position and charge of nuclei
-        nuclei = [[cgf1.p, 1], [cgf2.p, 1]]
+        # build hydrogen molecule
+        mol = Molecule()
+        mol.add_atom('H', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
@@ -75,55 +63,12 @@ class TestIntegrals(unittest.TestCase):
         # construct integrator object
         integrator = PyQInt()
 
-        # define sto-3g coefficient for hydrogen
-        coeff_hydrogen = {
-            "1s": [[  0.154329, 3.425251],
-                   [  0.535328, 0.623914],
-                   [  0.444635, 0.168855]]
-        }
-
-        # define sto-3g coefficients for oxygen
-        coeff_oxygen = {
-            "1s": [[ 0.154329,130.709320],
-                   [ 0.535328, 23.808861],
-                   [ 0.444635,  6.443608]],
-            "2s": [[-0.099967,  5.033151],
-                   [ 0.399513,  1.169596],
-                   [ 0.700115,  0.380389]],
-            "2p": [[ 0.155916,  5.033151],
-                   [ 0.607684,  1.169596],
-                   [ 0.391957,  0.380389]],
-        }
-
-        # build cgfs
-        cgfs = []
-        h_pos = [[0.7570, 0.5860, 0.0000], [-0.757, 0.5860, 0.0000]] # positions of the two hydrogen atoms
-        o_pos = [0,0,0] # position of the oxygen atom
-        for pos in h_pos:
-            for key, value in coeff_hydrogen.items():
-                if key.endswith("s"):
-                    cgfs.append(cgf(pos))
-                    for coeff, alpha in value:
-                        cgfs[-1].add_gto(coeff, alpha, 0, 0, 0)
-
-        for key, value in coeff_oxygen.items():
-            if key.endswith("s"):
-                cgfs.append(cgf(o_pos))
-                for coeff, alpha in value:
-                    cgfs[-1].add_gto(coeff, alpha, 0, 0, 0)
-            if key.endswith("p"):
-                cgfs.append(cgf(o_pos)) # x
-                for coeff, alpha in value:
-                    cgfs[-1].add_gto(coeff, alpha, 1, 0, 0)
-                cgfs.append(cgf(o_pos)) # y
-                for coeff, alpha in value:
-                    cgfs[-1].add_gto(coeff, alpha, 0, 1, 0)
-                cgfs.append(cgf(o_pos)) # z
-                for coeff, alpha in value:
-                    cgfs[-1].add_gto(coeff, alpha, 0, 0, 1)
-
-        # position and charge of nuclei
-        nuclei = [[h_pos[0], 1], [h_pos[1], 1], [o_pos, 8]]
+        # build water molecule
+        mol = Molecule()
+        mol.add_atom('H', 0.7570, 0.5860, 0.0)
+        mol.add_atom('H', -0.7570, 0.5860, 0.0)
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        cgfs, nuclei = mol.build_basis('sto3g')
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()

@@ -145,3 +145,4 @@ docs/build/*
 build/*
 dist/*
 wheelhouse/*
+test.py
