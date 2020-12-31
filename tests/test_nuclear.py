@@ -6,6 +6,12 @@ import numpy as np
 class TestNuclear(unittest.TestCase):
 
     def test_gto_nuclear(self):
+        """
+        Test nuclear attraction integral for GTOs
+
+        V^{(c)}_ij = <gto_i | -1 / |r-Rc| | gto_j>
+        """
+
         # construct integrator object
         integrator = PyQInt()
 
@@ -18,9 +24,15 @@ class TestNuclear(unittest.TestCase):
         np.testing.assert_almost_equal(nuclear, result, 8)
 
     def test_cgf_nuclear(self):
+        """
+        Test nuclear attraction integrals for contracted Gaussians
+
+        V^{(c)}_ij = <cgf_i | -Zc / |r-Rc| | cgf_j>
+        """
+
         integrator = PyQInt()
 
-        # build cgf for hydrogen seperated by 1.4 a.u.
+        # build cgf for hydrogen separated by 1.4 a.u.
         cgf1 = cgf([0.0, 0.0, 0.0])
 
         cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)

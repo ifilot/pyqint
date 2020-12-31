@@ -6,6 +6,12 @@ import numpy as np
 class TestKinetic(unittest.TestCase):
 
     def test_gto_kinetic(self):
+        """
+        Test kinetic integrals for primitive GTOs
+
+        Tij = <gto_I | -1/2 nabla^{2} | gto_j>
+        """
+
         # construct integrator object
         integrator = PyQInt()
 
@@ -18,9 +24,16 @@ class TestKinetic(unittest.TestCase):
         np.testing.assert_almost_equal(kinetic, result, 8)
 
     def test_cgf_kinetic(self):
+        """
+        Test kinetic integrals for contracted Gaussians
+
+        Tij = <cgf_i | -1/2 nabla^{2} | cgf_j>
+        """
+
+        # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen seperated by 1.4 a.u.
+        # build cgf for hydrogen separated by 1.4 a.u.
         cgf1 = cgf([0.0, 0.0, 0.0])
 
         cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)

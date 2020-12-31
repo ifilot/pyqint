@@ -6,6 +6,12 @@ import numpy as np
 class TestOverlap(unittest.TestCase):
 
     def test_gto_overlap(self):
+        """
+        Test kinetic integrals for GTOs
+
+        Sij = <gto_i | gto_j>
+        """
+
         # construct integrator object
         integrator = PyQInt()
 
@@ -18,9 +24,16 @@ class TestOverlap(unittest.TestCase):
         np.testing.assert_almost_equal(overlap, result, 8)
 
     def test_cgf_overlap(self):
+        """
+        Test kinetic integrals for contracted Gaussians
+
+        Sij = <cgf_i | cgf_j>
+        """
+
+        # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen seperated by 1.4 a.u.
+        # build cgf for hydrogen separated by 1.4 a.u.
         cgf1 = cgf([0.0, 0.0, 0.0])
 
         cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)

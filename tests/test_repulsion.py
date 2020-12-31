@@ -6,6 +6,12 @@ import numpy as np
 class TestRepulsion(unittest.TestCase):
 
     def test_gto_repulsion(self):
+        """
+        Test two-electron integrals for primitive GTOs
+
+        (ij|kl) = <gto_i gto_j | r_ij | gto_k gto_l>
+        """
+
         # construct integrator object
         integrator = PyQInt()
 
@@ -18,9 +24,16 @@ class TestRepulsion(unittest.TestCase):
         np.testing.assert_almost_equal(repulsion, result, 8)
 
     def test_cgf_repulsion(self):
+        """
+        Test two-electron integrals for contracted Gaussians
+
+        (ij|kl) = <cgf_i cgf_j | r_ij | cgf_k cgf_l>
+        """
+
+        # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen seperated by 1.4 a.u.
+        # build cgf for hydrogen separated by 1.4 a.u.
         cgf1 = cgf([0.0, 0.0, 0.0])
 
         cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
@@ -41,10 +54,15 @@ class TestRepulsion(unittest.TestCase):
         np.testing.assert_almost_equal(T1122, 0.5696758031845093, 8)
         np.testing.assert_almost_equal(T1112, 0.44410762190818787, 8)
         np.testing.assert_almost_equal(T2121, 0.2970285713672638, 8)
+
+        # test similarity between two-electron integrals
         self.assertEqual(T1222, T1112)
         self.assertEqual(T1122, T2211)
 
     def test_two_electron_indices(self):
+        """
+        Test unique two-electron indices
+        """
         integrator = PyQInt()
 
         self.assertEqual(integrator.teindex(1,1,2,1), integrator.teindex(1,1,1,2))
