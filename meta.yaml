@@ -29,13 +29,11 @@ test:
     - numpy
     - setuptools
     - tqdm
+    - nose
   source_files:
     - tests/*.py
   commands:
-    - python tests/test_overlap.py
-    - python tests/test_kinetic.py
-    - python tests/test_nuclear.py
-    - python tests/test_repulsion.py
+    - nosetests tests/test_overlap.py
 
 about:
   home: https://github.com/ifilot/pyqint
