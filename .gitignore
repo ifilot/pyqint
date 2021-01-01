@@ -146,3 +146,4 @@ build/*
 dist/*
 wheelhouse/*
 test.py
+nose_debug

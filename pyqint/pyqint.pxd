@@ -17,11 +17,13 @@ cdef extern from "cgf.h":
     cdef cppclass GTO:
         GTO() except +
         GTO(float, float, float, float, float, int, int, int) except +
+        float get_amp(float, float, float) except +
 
     cdef cppclass CGF:
         CGF() except +
         CGF(float, float, float) except +
         void add_gto(float, float, int, int, int) except +
+        float get_amp(float, float, float) except +
 
 # Declare the class with cdef
 cdef extern from "integrals.h":

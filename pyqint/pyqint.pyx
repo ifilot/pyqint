@@ -28,6 +28,21 @@ class cgf:
     def add_gto(self, c, alpha, l, m, n):
         self.gtos.append(gto(c, self.p, alpha, l, m, n))
 
+    def get_amps(self, coord):
+        cdef CGF *c_cgf
+
+        # create cgf
+        c_cgf = new CGF(self.p[0], self.p[1], self.p[2])
+        for gto in self.gtos:
+            c_cgf.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        amp = np.zeros(coord.shape[0])
+
+        for i,row in enumerate(coord):
+            amp[i] = c_cgf.get_amp(row[0], row[1], row[2])
+
+        return amp
+
 cdef class PyQInt:
     cdef Integrator *integrator
     integrator_uint = 0
