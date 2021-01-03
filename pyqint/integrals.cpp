@@ -66,7 +66,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
     // it is more efficient to first 'unroll' the fourfold nested loop
     // into a single vector of jobs to execute
-    std::vector<std::array<unsigned int, 4>> jobs;
+    std::vector<std::array<unsigned int, 5>> jobs;
     for(unsigned int i=0; i<sz; i++) {
         for(unsigned int j=0; j<sz; j++) {
             unsigned int ij = i*(i+1)/2 + j;
@@ -75,9 +75,14 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                     unsigned int kl = k * (k+1)/2 + l;
                     if(ij <= kl) {
                         unsigned int idx = this->teindex(i,j,k,l);
+
+                        if(idx >= tedouble.size()) {
+                            throw std::runtime_error("Process tried to access illegal array position");
+                        }
+
                         if(tedouble[idx] < 0) {
                             tedouble[idx] = 1.0;
-                            jobs.push_back({i,j,k,l});
+                            jobs.push_back({idx, i, j, k, l});
                         }
                     }
                 }
@@ -88,11 +93,11 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     // evaluate jobs
     #pragma omp parallel for schedule(dynamic)
     for(unsigned int s=0; s<jobs.size(); s++) {
-        unsigned int i = jobs[s][0];
-        unsigned int j = jobs[s][1];
-        unsigned int k = jobs[s][2];
-        unsigned int l = jobs[s][3];
-        unsigned int idx = this->teindex(i,j,k,l);
+        const unsigned int idx = jobs[s][0];
+        const unsigned int i = jobs[s][1];
+        const unsigned int j = jobs[s][2];
+        const unsigned int k = jobs[s][3];
+        const unsigned int l = jobs[s][4];
         tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
     }
 

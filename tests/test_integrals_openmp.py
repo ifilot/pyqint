@@ -3,9 +3,11 @@ from pyqint import PyQInt, Molecule
 import numpy as np
 import multiprocessing
 import os
+from nose.tools import nottest
 
 class TestIntegralsOpenMP(unittest.TestCase):
 
+    @nottest
     def test_integrals_h2o_openmp_sto3g(self):
         """
         Test automatic integral evaluation for water molecule
@@ -40,6 +42,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_sto6g(self):
         """
         Test automatic integral evaluation for water molecule
@@ -74,6 +77,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_p321(self):
         """
         Test automatic integral evaluation for water molecule
@@ -108,6 +112,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_p631(self):
         """
         Test automatic integral evaluation for water molecule
