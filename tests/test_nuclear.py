@@ -33,7 +33,7 @@ class TestNuclear(unittest.TestCase):
         integrator = PyQInt()
 
         # build hydrogen molecule
-        mol = Molecule()
+        mol = Molecule("H2")
         mol.add_atom('H', 0.0, 0.0, 0.0)
         mol.add_atom('H', 0.0, 0.0, 1.4)
         cgfs, nuclei = mol.build_basis('sto3g')
