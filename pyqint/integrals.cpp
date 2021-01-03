@@ -50,6 +50,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     Eigen::MatrixXd V = Eigen::MatrixXd::Zero(sz, sz);
 
     // calculate the integral values using the integrator class
+    #pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<sz; i++) {
         for(unsigned int j=0; j<sz; j++) {
             S(i,j) = this->overlap(cgfs[i], cgfs[j]);
@@ -62,7 +63,10 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
     // calculate all two-electron integrals
     std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
-    #pragma omp parallel for
+
+    // it is more efficient to first 'unroll' the fourfold nested loop
+    // into a single vector of jobs to execute
+    std::vector<std::array<unsigned int, 4>> jobs;
     for(unsigned int i=0; i<sz; i++) {
         for(unsigned int j=0; j<sz; j++) {
             unsigned int ij = i*(i+1)/2 + j;
@@ -71,11 +75,25 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                     unsigned int kl = k * (k+1)/2 + l;
                     if(ij <= kl) {
                         unsigned int idx = this->teindex(i,j,k,l);
-                        tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
+                        if(tedouble[idx] < 0) {
+                            tedouble[idx] = 1.0;
+                            jobs.push_back({i,j,k,l});
+                        }
                     }
                 }
             }
         }
+    }
+
+    // evaluate jobs
+    #pragma omp parallel for schedule(dynamic)
+    for(unsigned int s=0; s<jobs.size(); s++) {
+        unsigned int i = jobs[s][0];
+        unsigned int j = jobs[s][1];
+        unsigned int k = jobs[s][2];
+        unsigned int l = jobs[s][3];
+        unsigned int idx = this->teindex(i,j,k,l);
+        tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
     }
 
     // package everything into results vector, will be unpacked in
