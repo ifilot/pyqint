@@ -27,7 +27,87 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator(){}
+Integrator::Integrator(){
+    this->init();
+}
+
+/**
+ * @brief      Evaluate all integrals for cgfs in buffer
+ */
+std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
+                                              const std::vector<int>& charges,
+                                              const std::vector<double>& px,
+                                              const std::vector<double>& py,
+                                              const std::vector<double>& pz) {
+    std::vector<double> results;
+
+    unsigned int sz = cgfs.size();
+
+    // Construct 2x2 matrices to hold values for the overlap,
+    // kinetic and two nuclear integral values, respectively.
+    Eigen::MatrixXd S = Eigen::MatrixXd::Zero(sz, sz);
+    Eigen::MatrixXd T = Eigen::MatrixXd::Zero(sz, sz);
+    Eigen::MatrixXd V = Eigen::MatrixXd::Zero(sz, sz);
+
+    // calculate the integral values using the integrator class
+    #pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<sz; i++) {
+        for(unsigned int j=0; j<sz; j++) {
+            S(i,j) = this->overlap(cgfs[i], cgfs[j]);
+            T(i,j) = this->kinetic(cgfs[i], cgfs[j]);
+            for(unsigned int k=0; k<charges.size(); k++) {
+                V(i,j) += this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
+            }
+        }
+    }
+
+    // calculate all two-electron integrals
+    std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
+
+    // it is more efficient to first 'unroll' the fourfold nested loop
+    // into a single vector of jobs to execute
+    std::vector<std::array<unsigned int, 4>> jobs;
+    for(unsigned int i=0; i<sz; i++) {
+        for(unsigned int j=0; j<sz; j++) {
+            unsigned int ij = i*(i+1)/2 + j;
+            for(unsigned int k=0; k<sz; k++) {
+                for(unsigned int l=0; l<sz; l++) {
+                    unsigned int kl = k * (k+1)/2 + l;
+                    if(ij <= kl) {
+                        unsigned int idx = this->teindex(i,j,k,l);
+                        if(tedouble[idx] < 0) {
+                            tedouble[idx] = 1.0;
+                            jobs.push_back({i,j,k,l});
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // evaluate jobs
+    #pragma omp parallel for schedule(dynamic)
+    for(unsigned int s=0; s<jobs.size(); s++) {
+        unsigned int i = jobs[s][0];
+        unsigned int j = jobs[s][1];
+        unsigned int k = jobs[s][2];
+        unsigned int l = jobs[s][3];
+        unsigned int idx = this->teindex(i,j,k,l);
+        tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
+    }
+
+    // package everything into results vector, will be unpacked in
+    // connected Python class
+    std::vector<double> Svec(S.data(), S.data()+sz*sz);
+    results.insert(results.end(), Svec.begin(), Svec.end());
+    std::vector<double> Tvec(T.data(), T.data() + sz*sz);
+    results.insert(results.end(), Tvec.begin(), Tvec.end());
+    std::vector<double> Vvec(V.data(), V.data() + sz*sz);
+    results.insert(results.end(), Vvec.begin(), Vvec.end());
+    results.insert(results.end(), tedouble.begin(), tedouble.end());
+
+    return results;
+}
 
 /**
  * @fn overlap
@@ -41,6 +121,7 @@ Integrator::Integrator(){}
  * @return double value of the overlap integral
  */
 double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) {
+    this->init();
     double sum = 0.0;
 
     // loop over all GTOs inside the CGF, calculate the overlap integrals
@@ -483,4 +564,9 @@ const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned 
     }
 
     return ij * (ij + 1) / 2 + kl;
+}
+
+void Integrator::init() {
+    this->compile_date = std::string(__DATE__);
+    this->compile_time = std::string(__TIME__);
 }

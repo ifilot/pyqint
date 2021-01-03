@@ -178,6 +178,18 @@ public:
     const double get_amp(const vec3& r) const;
 
     /*
+     * @fn get_amp
+     * @brief Gets the amplitude of the GTO
+     *
+     * @param vec3 r    coordinates
+     *
+     * @return const double amplitude
+     */
+    inline double get_amp(double x, double y, double z) const {
+        return this->get_amp(vec3(x,y,z));
+    }
+
+    /*
      * @fn get_gradient
      * @brief Gets the gradient of the GTO
      *
@@ -309,6 +321,18 @@ public:
      * @return const double amplitude
      */
     const double get_amp(const vec3& r) const;
+
+    /*
+     * @fn get_amp
+     * @brief Gets the amplitude of the GTO
+     *
+     * @param vec3 r    coordinates
+     *
+     * @return const double amplitude
+     */
+    inline double get_amp(double x, double y, double z) const {
+        return this->get_amp(vec3(x,y,z));
+    }
 
     /*
      * @fn get_amp

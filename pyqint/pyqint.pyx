@@ -1,32 +1,33 @@
 # distutils: language = c++
 
-from .pyqint cimport Integrator, GTO
-import numpy as np
+from .pyqint cimport Integrator, GTO, CGF
 from multiprocessing import Pool
 import tqdm
+import numpy as np
 
-class gto:
-    """
-    Primitive Gaussian Type Orbital
-    """
-    def __init__(self, _c, _p, _alpha, _l, _m, _n):
-        self.c = _c
-        self.p = _p
-        self.alpha = _alpha
-        self.l = _l
-        self.m = _m
-        self.n = _n
+cdef class PyGTO:
+    cdef GTO gto
 
-class cgf:
-    """
-    Contracted Gaussian Type Orbital
-    """
-    def __init__(self, _p):
-        self.gtos = []
-        self.p = _p
+    def __cinit__(self, _c, _p, _alpha, _l, _m, _n):
+        self.gto = GTO(_c, _p[0], _p[1], _p[2], _alpha, _l, _m, _n)
+
+    def get_amp(self, x, y, z):
+        return self.gto.get_amp(x, y, z)
+
+cdef class PyCGF:
+    cdef CGF cgf
+
+    def __cinit__(self, _p):
+        self.cgf = CGF(_p[0], _p[1], _p[2])
 
     def add_gto(self, c, alpha, l, m, n):
-        self.gtos.append(gto(c, self.p, alpha, l, m, n))
+        self.cgf.add_gto(c, alpha, l, m, n)
+
+    def get_amp(self, x, y, z):
+        return self.cgf.get_amp(x, y, z)
+
+    def get_amp(self, r):
+        return self.cgf.get_amp(r[0], r[1], r[2])
 
 cdef class PyQInt:
     cdef Integrator *integrator
@@ -43,6 +44,14 @@ cdef class PyQInt:
 
     def __setstate__(self, d):
         self.integrator = new Integrator()
+
+    def get_compile_info(self):
+        compile_info = {
+            "date": self.integrator.get_compile_date(),
+            "time": self.integrator.get_compile_time()
+        }
+
+        return compile_info
 
     def overlap_gto(self, gto1, gto2):
 
@@ -182,7 +191,7 @@ cdef class PyQInt:
         S = np.zeros((N,N))
         T = np.zeros((N,N))
         V = np.zeros((N,N))
-        teint = np.multiply(np.ones(self.integrator.teindex(N,N,N,N)), -1.0)
+        teint = np.multiply(np.ones(self.teindex(N,N,N,N)), -1.0)
 
         for i, cgf1 in enumerate(cgfs):
             for j, cgf2 in enumerate(cgfs):
@@ -201,7 +210,7 @@ cdef class PyQInt:
                     for l, cgf4 in enumerate(cgfs):
                         kl = k * (k+1)/2 + l
                         if ij <= kl:
-                            idx = self.teindex(i,j,k,l)
+                            idx = self.integrator.teindex(i,j,k,l)
                             if teint[idx] < 0:
                                 jobs[idx] = cgfs[i],cgfs[j],cgfs[k],cgfs[l]
 
@@ -211,5 +220,36 @@ cdef class PyQInt:
         else:       # do not show a progress bar
             with Pool(npar) as p:
                 teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs))
+
+        return S, T, V, teint
+
+    def build_integrals_openmp(self, cgfs, nuclei):
+        cdef vector[CGF] c_cgfs
+        cdef vector[int] charges
+        cdef vector[double] px
+        cdef vector[double] py
+        cdef vector[double] pz
+
+        # add CGFs to buffer
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # add nuclei to buffer
+        for nucleus in nuclei:
+            charges.push_back(nucleus[1])
+            px.push_back(nucleus[0][0])
+            py.push_back(nucleus[0][1])
+            pz.push_back(nucleus[0][2])
+
+        results = np.array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz))
+
+        sz = len(cgfs)
+        ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
+        S = results[0:sz*sz].reshape((sz,sz))
+        T = results[sz*sz:sz*sz*2].reshape((sz,sz))
+        V = results[sz*sz*2:sz*sz*3].reshape((sz,sz))
+        teint = results[sz*sz*3:].reshape(ntei)
 
         return S, T, V, teint

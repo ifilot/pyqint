@@ -23,11 +23,16 @@
 
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
+#include <string>
 
 #include "gamma.h"
 #include "cgf.h"
 
 class Integrator {
+private:
+    std::string compile_date;
+    std::string compile_time;
+
 public:
     /**
      * @fn Integrator
@@ -36,6 +41,15 @@ public:
      * @return Integrator class
      */
     Integrator();
+
+    /**
+     * @brief      Evaluate all integrals for cgfs in buffer
+     */
+    std::vector<double> evaluate_cgfs(const std::vector<CGF>& cgfs,
+                                      const std::vector<int>& charges,
+                                      const std::vector<double>& px,
+                                      const std::vector<double>& py,
+                                      const std::vector<double>& pz);
 
     /**
      * @fn overlap
@@ -184,11 +198,13 @@ public:
 
     const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
 
-    /*********************************
-     *
-     * PRIVATE FUNCTIONS AND VARIABLES
-     *
-     *********************************/
+    const char* get_compile_date() const {
+        return this->compile_date.c_str();
+    }
+
+    const char* get_compile_time() const {
+        return this->compile_time.c_str();
+    }
 
 private:
     /*
@@ -327,4 +343,6 @@ private:
     double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q);
     double B0(int i, int r, double q);
     double fact_ratio2(const int a, const int b);
+
+    void init();
 };

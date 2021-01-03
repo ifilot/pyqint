@@ -1,5 +1,5 @@
 import unittest
-from pyqint.pyqint import PyQInt, cgf, gto
+from pyqint import PyQInt, cgf, gto, Molecule
 from copy import deepcopy
 import numpy as np
 
@@ -21,7 +21,7 @@ class TestOverlap(unittest.TestCase):
         gto3 = gto(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         overlap = integrator.overlap_gto(gto1, gto1)
         result = 0.31055691838264465
-        np.testing.assert_almost_equal(overlap, result, 8)
+        np.testing.assert_almost_equal(overlap, result, 4)
 
     def test_cgf_overlap(self):
         """
@@ -33,26 +33,22 @@ class TestOverlap(unittest.TestCase):
         # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen separated by 1.4 a.u.
-        cgf1 = cgf([0.0, 0.0, 0.0])
-
-        cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
-        cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
-        cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
-
-        cgf2 = deepcopy(cgf1)
-        cgf2.p[2] = 1.4
+        # build hydrogen molecule
+        mol = Molecule("H2")
+        mol.add_atom('H', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
 
         S = np.zeros((2,2))
-        S[0,0] = integrator.overlap(cgf1, cgf1)
-        S[0,1] = S[1,0] = integrator.overlap(cgf1, cgf2)
-        S[1,1] = integrator.overlap(cgf2, cgf2)
+        S[0,0] = integrator.overlap(cgfs[0], cgfs[0])
+        S[0,1] = S[1,0] = integrator.overlap(cgfs[0], cgfs[1])
+        S[1,1] = integrator.overlap(cgfs[1], cgfs[1])
 
         S11 = 1.0
         S12 = 0.65931845
-        np.testing.assert_almost_equal(S[0,0], S11, 8)
-        np.testing.assert_almost_equal(S[1,1], S11, 8)
-        np.testing.assert_almost_equal(S[0,1], S12, 8)
+        np.testing.assert_almost_equal(S[0,0], S11, 4)
+        np.testing.assert_almost_equal(S[1,1], S11, 4)
+        np.testing.assert_almost_equal(S[0,1], S12, 4)
 
 if __name__ == '__main__':
     unittest.main()

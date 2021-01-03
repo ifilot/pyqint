@@ -1,5 +1,7 @@
 # distutils: language = c++
 
+from libcpp.vector cimport vector
+
 # Integrals
 cdef extern from "integrals.cpp":
     pass
@@ -16,27 +18,34 @@ cdef extern from "gamma.cpp":
 cdef extern from "cgf.h":
     cdef cppclass GTO:
         GTO() except +
-        GTO(float, float, float, float, float, int, int, int) except +
+        GTO(double, double, double, double, double, int, int, int) except +
+        double get_amp(double, double, double) except +
 
     cdef cppclass CGF:
         CGF() except +
-        CGF(float, float, float) except +
-        void add_gto(float, float, int, int, int) except +
+        CGF(double, double, double) except +
+        void add_gto(double, double, int, int, int) except +
+        double get_amp(double, double, double) except +
 
 # Declare the class with cdef
 cdef extern from "integrals.h":
     cdef cppclass Integrator:
         Integrator() except +
-        float overlap(GTO, GTO) except +
-        float overlap(CGF, CGF) except +
+        double overlap(GTO, GTO) except +
+        double overlap(CGF, CGF) except +
 
-        float kinetic(GTO, GTO) except +
-        float kinetic(CGF, CGF) except +
+        double kinetic(GTO, GTO) except +
+        double kinetic(CGF, CGF) except +
 
-        float nuclear(GTO, GTO, float, float, float) except +
-        float nuclear(CGF, CGF, float, float, float, int) except +
+        double nuclear(GTO, GTO, double, double, double) except +
+        double nuclear(CGF, CGF, double, double, double, int) except +
 
-        float repulsion(GTO, GTO, GTO, GTO) except +
-        float repulsion(CGF, CGF, CGF, CGF) except +
+        double repulsion(GTO, GTO, GTO, GTO) except +
+        double repulsion(CGF, CGF, CGF, CGF) except +
 
         int teindex(int, int, int, int) except +
+
+        const char* get_compile_date() except+
+        const char* get_compile_time() except+
+
+        vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except+
