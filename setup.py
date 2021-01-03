@@ -29,7 +29,7 @@ if os.name == "posix":
     os.environ['CFLAGS'] = '-I/usr/include/eigen3'
 
 if os.name == 'posix':
-    extra_compile_args = ["-O3", "-Wno-date-time", "-fopenmp"]
+    extra_compile_args = ["-Wno-date-time", "-fopenmp"]
     extra_link_args = ["-fopenmp"]
 elif os.name == 'nt':
     extra_compile_args = []
