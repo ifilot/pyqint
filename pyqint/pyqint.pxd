@@ -42,3 +42,6 @@ cdef extern from "integrals.h":
         float repulsion(CGF, CGF, CGF, CGF) except +
 
         int teindex(int, int, int, int) except +
+
+        const char* get_compile_date() except+
+        const char* get_compile_time() except+

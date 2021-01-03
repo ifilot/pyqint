@@ -1,9 +1,7 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule
-from copy import deepcopy
+from pyqint import Evaluator, Molecule
 import numpy as np
 import multiprocessing
-import os
 
 class TestIntegrals(unittest.TestCase):
 
@@ -13,7 +11,7 @@ class TestIntegrals(unittest.TestCase):
         """
 
         # construct integrator object
-        integrator = PyQInt()
+        evaluator = Evaluator()
 
         # build hydrogen molecule
         mol = Molecule()
@@ -23,7 +21,7 @@ class TestIntegrals(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+        S, T, V, teint = evaluator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
 
         # overlap integrals
         S_result = np.matrix([[1.0, 0.65931845],
@@ -61,7 +59,7 @@ class TestIntegrals(unittest.TestCase):
         """
 
         # construct integrator object
-        integrator = PyQInt()
+        evaluator = Evaluator()
 
         # build water molecule
         mol = Molecule()
@@ -72,7 +70,7 @@ class TestIntegrals(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+        S, T, V, teint = evaluator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap.npy'))

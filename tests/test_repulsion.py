@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto
+from pyqint import PyQInt, cgf, gto, Molecule
 from copy import deepcopy
 import numpy as np
 
@@ -33,22 +33,18 @@ class TestRepulsion(unittest.TestCase):
         # construct integrator object
         integrator = PyQInt()
 
-        # build cgf for hydrogen separated by 1.4 a.u.
-        cgf1 = cgf([0.0, 0.0, 0.0])
+        # build hydrogen molecule
+        mol = Molecule()
+        mol.add_atom('H', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
 
-        cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
-        cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
-        cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
-
-        cgf2 = deepcopy(cgf1)
-        cgf2.p[2] = 1.4
-
-        T1111 = integrator.repulsion(cgf1, cgf1, cgf1, cgf1)
-        T1122 = integrator.repulsion(cgf1, cgf1, cgf2, cgf2)
-        T1112 = integrator.repulsion(cgf1, cgf1, cgf1, cgf2)
-        T2121 = integrator.repulsion(cgf2, cgf1, cgf2, cgf1)
-        T1222 = integrator.repulsion(cgf1, cgf2, cgf2, cgf2)
-        T2211 = integrator.repulsion(cgf2, cgf2, cgf1, cgf1)
+        T1111 = integrator.repulsion(cgfs[0], cgfs[0], cgfs[0], cgfs[0])
+        T1122 = integrator.repulsion(cgfs[0], cgfs[0], cgfs[1], cgfs[1])
+        T1112 = integrator.repulsion(cgfs[0], cgfs[0], cgfs[0], cgfs[1])
+        T2121 = integrator.repulsion(cgfs[1], cgfs[0], cgfs[1], cgfs[0])
+        T1222 = integrator.repulsion(cgfs[0], cgfs[1], cgfs[1], cgfs[1])
+        T2211 = integrator.repulsion(cgfs[1], cgfs[1], cgfs[0], cgfs[0])
 
         np.testing.assert_almost_equal(T1111, 0.7746056914329529, 8)
         np.testing.assert_almost_equal(T1122, 0.5696758031845093, 8)

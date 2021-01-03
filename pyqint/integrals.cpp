@@ -27,7 +27,9 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator(){}
+Integrator::Integrator(){
+    this->init();
+}
 
 /**
  * @fn overlap
@@ -41,6 +43,7 @@ Integrator::Integrator(){}
  * @return double value of the overlap integral
  */
 double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) {
+    this->init();
     double sum = 0.0;
 
     // loop over all GTOs inside the CGF, calculate the overlap integrals
@@ -483,4 +486,9 @@ const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned 
     }
 
     return ij * (ij + 1) / 2 + kl;
+}
+
+void Integrator::init() {
+    this->compile_date = std::string(__DATE__);
+    this->compile_time = std::string(__TIME__);
 }

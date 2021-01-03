@@ -1,47 +1,34 @@
 # distutils: language = c++
 
-from .pyqint cimport Integrator, GTO
+from .pyqint cimport Integrator, GTO, CGF
 import numpy as np
-from multiprocessing import Pool
-import tqdm
 
-class gto:
-    """
-    Primitive Gaussian Type Orbital
-    """
-    def __init__(self, _c, _p, _alpha, _l, _m, _n):
-        self.c = _c
-        self.p = _p
-        self.alpha = _alpha
-        self.l = _l
-        self.m = _m
-        self.n = _n
+cdef class PyGTO:
+    cdef GTO gto
 
-class cgf:
-    """
-    Contracted Gaussian Type Orbital
-    """
-    def __init__(self, _p):
-        self.gtos = []
-        self.p = _p
+    def __cinit__(self, _c, _p, _alpha, _l, _m, _n):
+        self.gto = GTO(_c, _p[0], _p[1], _p[2], _alpha, _l, _m, _n)
+
+    def __getstate__(self):
+        return self.__class__
+
+    def get_amp(self, x, y, z):
+        return self.gto.get_amp(x, y, z)
+
+cdef class PyCGF:
+    cdef CGF cgf
+
+    def __cinit__(self, _p):
+        self.cgf = CGF(_p[0], _p[1], _p[2])
 
     def add_gto(self, c, alpha, l, m, n):
-        self.gtos.append(gto(c, self.p, alpha, l, m, n))
+        self.cgf.add_gto(c, alpha, l, m, n)
 
-    def get_amps(self, coord):
-        cdef CGF *c_cgf
+    def get_amp(self, x, y, z):
+        return self.cgf.get_amp(x, y, z)
 
-        # create cgf
-        c_cgf = new CGF(self.p[0], self.p[1], self.p[2])
-        for gto in self.gtos:
-            c_cgf.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        amp = np.zeros(coord.shape[0])
-
-        for i,row in enumerate(coord):
-            amp[i] = c_cgf.get_amp(row[0], row[1], row[2])
-
-        return amp
+    def get_amp(self, r):
+        return self.cgf.get_amp(r[0], r[1], r[2])
 
 cdef class PyQInt:
     cdef Integrator *integrator
@@ -58,6 +45,14 @@ cdef class PyQInt:
 
     def __setstate__(self, d):
         self.integrator = new Integrator()
+
+    def get_compile_info(self):
+        compile_info = {
+            "date": self.integrator.get_compile_date(),
+            "time": self.integrator.get_compile_time()
+        }
+
+        return compile_info
 
     def overlap_gto(self, gto1, gto2):
 
@@ -188,43 +183,3 @@ cdef class PyQInt:
 
     def teindex(self, i, j, k, l):
         return self.integrator.teindex(i, j, k, l)
-
-    def build_integrals(self, cgfs, nuclei, npar=4, verbose=False):
-        # number of cgfs
-        N = len(cgfs)
-
-        # build empty matrices
-        S = np.zeros((N,N))
-        T = np.zeros((N,N))
-        V = np.zeros((N,N))
-        teint = np.multiply(np.ones(self.integrator.teindex(N,N,N,N)), -1.0)
-
-        for i, cgf1 in enumerate(cgfs):
-            for j, cgf2 in enumerate(cgfs):
-                S[i,j] = self.overlap(cgf1, cgf2)
-                T[i,j] = self.kinetic(cgf1, cgf2)
-
-                for nucleus in nuclei:
-                    V[i,j] += self.nuclear(cgf1, cgf2, nucleus[0], nucleus[1])
-
-        # build pool of jobs
-        jobs = [None] * (self.teindex(N-1,N-1,N-1,N-1)+1)
-        for i, cgf1 in enumerate(cgfs):
-            for j, cgf2 in enumerate(cgfs):
-                ij = i*(i+1)/2 + j
-                for k, cgf3 in enumerate(cgfs):
-                    for l, cgf4 in enumerate(cgfs):
-                        kl = k * (k+1)/2 + l
-                        if ij <= kl:
-                            idx = self.teindex(i,j,k,l)
-                            if teint[idx] < 0:
-                                jobs[idx] = cgfs[i],cgfs[j],cgfs[k],cgfs[l]
-
-        if verbose: # show a progress bar
-            with Pool(npar) as p:
-                teint = list(tqdm.tqdm(p.imap(func=self.repulsion_contracted, iterable=jobs), total=len(jobs)))
-        else:       # do not show a progress bar
-            with Pool(npar) as p:
-                teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs))
-
-        return S, T, V, teint

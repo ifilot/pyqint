@@ -15,6 +15,9 @@ class TestCGF(unittest.TestCase):
         # construct integrator object
         integrator = PyQInt()
 
+        # get compile info
+        compile_info = integrator.get_compile_info()
+
         # build hydrogen molecule
         mol = Molecule()
         mol.add_atom('H', 0.0, 0.0, 0.0)
@@ -24,11 +27,16 @@ class TestCGF(unittest.TestCase):
         coords = []
         for x in np.linspace(0, 10, 10):
             coords.append([x, x, x])
-        coords = np.array(coords)
-        amps = cgfs[0].get_amps(coords)
 
+        # results
         ans = [6.2825e-01, 7.1229e-02, 6.8672e-03, 3.0000e-04, 3.7662e-06,
                1.3536e-08, 1.3927e-11, 4.1021e-15, 3.4591e-19, 8.3505e-24]
+
+        # test for each coord
+        amps = []
+        for i,coord in enumerate(coords):
+            amp = cgfs[0].get_amp(coord)
+            amps.append(amp)
 
         np.testing.assert_almost_equal(amps, ans, 4)
 

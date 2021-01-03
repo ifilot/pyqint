@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto
+from pyqint import PyQInt, cgf, gto, Molecule
 from copy import deepcopy
 import numpy as np
 
@@ -32,25 +32,21 @@ class TestNuclear(unittest.TestCase):
 
         integrator = PyQInt()
 
-        # build cgf for hydrogen separated by 1.4 a.u.
-        cgf1 = cgf([0.0, 0.0, 0.0])
-
-        cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
-        cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
-        cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
-
-        cgf2 = deepcopy(cgf1)
-        cgf2.p[2] = 1.4
+        # build hydrogen molecule
+        mol = Molecule()
+        mol.add_atom('H', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
 
         V1 = np.zeros((2,2))
-        V1[0,0] = integrator.nuclear(cgf1, cgf1, cgf1.p, 1)
-        V1[0,1] = V1[1,0] = integrator.nuclear(cgf1, cgf2, cgf1.p, 1)
-        V1[1,1] = integrator.nuclear(cgf2, cgf2, cgf1.p, 1)
+        V1[0,0] = integrator.nuclear(cgfs[0], cgfs[0], cgfs[0].p, 1)
+        V1[0,1] = V1[1,0] = integrator.nuclear(cgfs[0], cgfs[1], cgfs[0].p, 1)
+        V1[1,1] = integrator.nuclear(cgfs[1], cgfs[1], cgfs[0].p, 1)
 
         V2 = np.zeros((2,2))
-        V2[0,0] = integrator.nuclear(cgf1, cgf1, cgf2.p, 1)
-        V2[0,1] = V2[1,0] = integrator.nuclear(cgf1, cgf2, cgf2.p, 1)
-        V2[1,1] = integrator.nuclear(cgf2, cgf2, cgf2.p, 1)
+        V2[0,0] = integrator.nuclear(cgfs[0], cgfs[0], cgfs[1].p, 1)
+        V2[0,1] = V2[1,0] = integrator.nuclear(cgfs[0], cgfs[1], cgfs[1].p, 1)
+        V2[1,1] = integrator.nuclear(cgfs[1], cgfs[1], cgfs[1].p, 1)
 
         V11 = -1.2266135215759277
         V12 = -0.5974172949790955

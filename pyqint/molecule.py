@@ -2,7 +2,7 @@
 
 import json
 import os
-from .pyqint import cgf
+from .cgf import cgf
 
 class Molecule:
     """
