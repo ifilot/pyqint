@@ -14,6 +14,8 @@ __Table of Contents__
     - [Kinetic integrals](#kinetic-integrals)
     - [Nuclear attraction integrals](#nuclear-attraction-integrals)
     - [Two-electron integrals](#two-electron-integrals)
+    - [Construction of Contracted Gaussian Functions](#construction-of-contracted-gaussian-functions)
+    - [Quick evaluation of integrals](#parallel-evaluation-of-integrals)
 
 ## Purpose
 
@@ -178,4 +180,47 @@ print(T1112)
 print(T2121)
 print(T1222)
 print(T2211)
+```
+
+### Construction of Contracted Gaussian Functions
+
+```python
+from pyqint import PyQInt, Molecule
+import numpy as np
+
+# construct integrator object
+integrator = PyQInt()
+
+# build hydrogen molecule
+mol = Molecule()
+mol.add_atom('H', 0.0, 0.0, 0.0)
+mol.add_atom('H', 0.0, 0.0, 1.4)
+cgfs, nuclei = mol.build_basis('sto3g')
+
+print(cgfs, nuclei)
+```
+
+### Parallel evaluation of integrals
+
+From a collection of Contracted Gaussian Functions, the complete set of overlap, kinetic, nuclear attraction and two-electron integrals
+can be quickly evaluated using the `build_integrals` function. Using the `npar` argument, the number of threads to be spawned can be set.
+
+```python
+from pyqint import PyQInt, Molecule
+import numpy as np
+
+# construct integrator object
+integrator = PyQInt()
+
+# build hydrogen molecule
+mol = Molecule()
+mol.add_atom('H', 0.0, 0.0, 0.0)
+mol.add_atom('H', 0.0, 0.0, 1.4)
+cgfs, nuclei = mol.build_basis('sto3g')
+
+# evaluate all integrals
+ncpu = multiprocessing.cpu_count()
+S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+
+print(S, T, V, teint)
 ```
