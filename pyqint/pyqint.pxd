@@ -1,6 +1,7 @@
 # distutils: language = c++
 
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 
 # Integrals
 cdef extern from "integrals.cpp":
@@ -45,7 +46,9 @@ cdef extern from "integrals.h":
 
         int teindex(int, int, int, int) except +
 
-        const char* get_compile_date() except+
-        const char* get_compile_time() except+
-
         vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except+
+
+        string get_compiler_version() except+
+        string get_openmp_version() except+
+        string get_compile_date() except+
+        string get_compile_time() except+

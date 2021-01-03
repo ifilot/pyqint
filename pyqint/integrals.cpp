@@ -50,12 +50,13 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     Eigen::MatrixXd V = Eigen::MatrixXd::Zero(sz, sz);
 
     // calculate the integral values using the integrator class
-    #pragma omp parallel for schedule(dynamic)
+    //#pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<sz; i++) {
         for(unsigned int j=0; j<sz; j++) {
             S(i,j) = this->overlap(cgfs[i], cgfs[j]);
             T(i,j) = this->kinetic(cgfs[i], cgfs[j]);
             for(unsigned int k=0; k<charges.size(); k++) {
+                // there is a race condition here!!
                 V(i,j) += this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
             }
         }
@@ -80,7 +81,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                             throw std::runtime_error("Process tried to access illegal array position");
                         }
 
-                        if(tedouble[idx] < 0) {
+                        if(tedouble[idx] < 0.0) {
                             tedouble[idx] = 1.0;
                             jobs.push_back({idx, i, j, k, l});
                         }
@@ -105,10 +106,13 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     // connected Python class
     std::vector<double> Svec(S.data(), S.data()+sz*sz);
     results.insert(results.end(), Svec.begin(), Svec.end());
+
     std::vector<double> Tvec(T.data(), T.data() + sz*sz);
     results.insert(results.end(), Tvec.begin(), Tvec.end());
+
     std::vector<double> Vvec(V.data(), V.data() + sz*sz);
     results.insert(results.end(), Vvec.begin(), Vvec.end());
+
     results.insert(results.end(), tedouble.begin(), tedouble.end());
 
     return results;
@@ -278,7 +282,7 @@ double Integrator::nuclear(const GTO& gto1, const GTO& gto2, const vec3 &nucleus
  *
  * @return double value of the repulsion integral
  */
-double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4) {
+double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4) const {
     double sum = 0;
 
     for(unsigned int i=0; i< cgf1.size(); i++) {
@@ -308,7 +312,7 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
  *
  * @return double value of the repulsion integral
  */
-double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) {
+double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
     return repulsion(gto1.get_position(), gto1.get_norm(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
                      gto2.get_position(), gto2.get_norm(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
@@ -392,12 +396,12 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
  * @return new gaussian product center
  */
 vec3 Integrator::gaussian_product_center(double alpha1, const vec3& a,
-                                         double alpha2, const vec3& b) {
+                                         double alpha2, const vec3& b) const {
     return (alpha1 * a + alpha2 * b) / (alpha1 + alpha2);
 }
 
 double Integrator::binomial_prefactor(int s, int ia, int ib,
-                                      double xpa, double xpb) {
+                                      double xpa, double xpb) const {
     double sum = 0.0;
 
     for (int t=0; t < s+1; t++) {
@@ -412,7 +416,7 @@ double Integrator::binomial_prefactor(int s, int ia, int ib,
     return sum;
 }
 
-double Integrator::binomial(int a, int b) {
+double Integrator::binomial(int a, int b) const {
     if( (a < 0) | (b < 0) | (a-b < 0) ) {
         return 1.0;
     }
@@ -450,7 +454,7 @@ double Integrator::nuclear(const vec3& a,
     return -2.0 * pi / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
 }
 
-std::vector<double> Integrator::A_array(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) {
+std::vector<double> Integrator::A_array(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) const {
     int imax = l1 + l2 + 1;
     std::vector<double> arrA(imax, 0);
 
@@ -466,7 +470,7 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
     return arrA;
 }
 
-double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) {
+double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
                     std::pow(-1,u) * boost::math::factorial<double>(i)*std::pow(cpx,i-2*r-2*u)*
                     std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
@@ -475,7 +479,7 @@ double Integrator::A_term(const int i, const int r, const int u, const int l1, c
 double Integrator::repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,
                          const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
                          const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
-                         const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) {
+                         const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const {
 
     static const double pi = 3.14159265359;
     double rab2 = (a-b).squaredNorm();
@@ -510,7 +514,7 @@ double Integrator::repulsion(const vec3 &a, const double norma, const int la, co
 
 std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,const int l4,
         const double p, const double a, const double b, const double q, const double c, const double d,
-        const double g1, const double g2, const double delta) {
+        const double g1, const double g2, const double delta) const {
 
     int imax = l1 + l2 + l3 + l4 + 1;
     std::vector<double> arrB(imax,0);
@@ -533,7 +537,7 @@ std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,c
 
 double Integrator::B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
         const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
-        const double gamma2, const double delta) {
+        const double gamma2, const double delta) const {
     return fB(i1,l1,l2,px,ax,bx,r1,gamma1)*
         pow(-1,i2) * fB(i2,l3,l4,qx,cx,dx,r2,gamma2)*
         pow(-1,u)*fact_ratio2(i1+i2-2*(r1+r2),u)*
@@ -541,19 +545,19 @@ double Integrator::B_term(const int i1, const int i2, const int r1, const int r2
         pow(delta,i1+i2-2*(r1+r2)-u);
 }
 
-double Integrator::fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double g) {
+double Integrator::fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double g) const {
     return binomial_prefactor(i, l1, l2, p-a, p-b) * B0(i, r, g);
 }
 
-double Integrator::B0(int i, int r, double g) {
+double Integrator::B0(int i, int r, double g) const {
     return fact_ratio2(i,r) * pow(4*g,r-i);
 }
 
-double Integrator::fact_ratio2(const int a, const int b) {
+double Integrator::fact_ratio2(const int a, const int b) const {
     return boost::math::factorial<double>(a) / boost::math::factorial<double>(b) / boost::math::factorial<double>(a - 2*b);
 }
 
-const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) {
+const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const {
     if(i < j) {
         std::swap(i,j);
     }
@@ -572,6 +576,14 @@ const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned 
 }
 
 void Integrator::init() {
+    std::unordered_map<unsigned,std::string> map{
+    {200505,"2.5"},{200805,"3.0"},{201107,"3.1"},{201307,"4.0"},{201511,"4.5"},{201811,"5.0"},{202011,"5.1"}};
+
     this->compile_date = std::string(__DATE__);
     this->compile_time = std::string(__TIME__);
+    this->openmp_version = map.at(_OPENMP);
+
+    #ifdef __GNUC__
+    this->compiler_version = __VERSION__;
+    #endif
 }
