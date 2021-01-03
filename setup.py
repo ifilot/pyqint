@@ -28,12 +28,19 @@ if os.name == 'nt':
 if os.name == "posix":
     os.environ['CFLAGS'] = '-I/usr/include/eigen3'
 
+if os.name == 'posix':
+    extra_compile_args = ["-O3", "-Wno-date-time", "-fopenmp"]
+    extra_link_args = ["-fopenmp"]
+elif os.name == 'nt':
+    extra_compile_args = []
+    extra_link_args = []
+
 ext_modules = [
     Extension(
         "pyqint.pyqint",
         ["pyqint/pyqint.pyx"],
-        extra_compile_args=["-O3", "-Wno-date-time", "-fopenmp"], # overrule some arguments
-        extra_link_args=["-fopenmp"]
+        extra_compile_args=extra_compile_args, # overrule some arguments
+        extra_link_args=extra_link_args
     ),
 ]
 
