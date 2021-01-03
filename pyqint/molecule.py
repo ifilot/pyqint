@@ -8,12 +8,21 @@ class Molecule:
     """
     Molecule class
     """
-    def __init__(self):
+    def __init__(self, _name='unknown'):
         self.atoms = []
         self.charges = []
+        self.name = _name
 
-    def add_atom(self, atom, x, y, z):
-        self.atoms.append([atom, x, y, z])
+    def add_atom(self, atom, x, y, z, unit='bohr'):
+        ang2bohr = 1.88973
+
+        if unit == "bohr":
+            self.atoms.append([atom, x, y, z])
+        elif unit == "angstrom":
+            self.atoms.append([atom, x*ang2bohr, y*ang2bohr, z*ang2bohr])
+        else:
+            raise RuntimeError("Invalid unit encountered: %s" % unit)
+
         self.charges.append(0)
 
     def build_basis(self, name):

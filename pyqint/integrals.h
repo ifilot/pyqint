@@ -43,6 +43,15 @@ public:
     Integrator();
 
     /**
+     * @brief      Evaluate all integrals for cgfs in buffer
+     */
+    std::vector<double> evaluate_cgfs(const std::vector<CGF>& cgfs,
+                                      const std::vector<int>& charges,
+                                      const std::vector<double>& px,
+                                      const std::vector<double>& py,
+                                      const std::vector<double>& pz);
+
+    /**
      * @fn overlap
      * @brief Calculates overlap integral of two CGF
      *

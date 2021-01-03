@@ -21,7 +21,7 @@ class TestNuclear(unittest.TestCase):
         gto3 = gto(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         nuclear = integrator.nuclear_gto(gto1, gto1, [0.0, 0.0, 1.0])
         result = -0.31049036979675293
-        np.testing.assert_almost_equal(nuclear, result, 8)
+        np.testing.assert_almost_equal(nuclear, result, 4)
 
     def test_cgf_nuclear(self):
         """
@@ -51,12 +51,12 @@ class TestNuclear(unittest.TestCase):
         V11 = -1.2266135215759277
         V12 = -0.5974172949790955
         V22 = -0.6538270711898804
-        np.testing.assert_almost_equal(V1[0,0], V11, 8)
-        np.testing.assert_almost_equal(V1[1,1], V22, 8)
-        np.testing.assert_almost_equal(V1[0,1], V12, 8)
-        np.testing.assert_almost_equal(V2[0,0], V22, 8)
-        np.testing.assert_almost_equal(V2[1,1], V11, 8)
-        np.testing.assert_almost_equal(V2[0,1], V12, 8)
+        np.testing.assert_almost_equal(V1[0,0], V11, 4)
+        np.testing.assert_almost_equal(V1[1,1], V22, 4)
+        np.testing.assert_almost_equal(V1[0,1], V12, 4)
+        np.testing.assert_almost_equal(V2[0,0], V22, 4)
+        np.testing.assert_almost_equal(V2[1,1], V11, 4)
+        np.testing.assert_almost_equal(V2[0,1], V12, 4)
 
 if __name__ == '__main__':
     unittest.main()

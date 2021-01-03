@@ -32,6 +32,8 @@ ext_modules = [
     Extension(
         "pyqint.pyqint",
         ["pyqint/pyqint.pyx"],
+        extra_compile_args=["-O3", "-Wno-date-time", "-fopenmp"], # overrule some arguments
+        extra_link_args=["-fopenmp"]
     ),
 ]
 

@@ -1,7 +1,8 @@
 import unittest
-from pyqint import Evaluator, Molecule
+from pyqint import PyQInt, Molecule
 import numpy as np
 import multiprocessing
+import os
 
 class TestIntegrals(unittest.TestCase):
 
@@ -11,7 +12,7 @@ class TestIntegrals(unittest.TestCase):
         """
 
         # construct integrator object
-        evaluator = Evaluator()
+        integrator = PyQInt()
 
         # build hydrogen molecule
         mol = Molecule()
@@ -21,7 +22,7 @@ class TestIntegrals(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = evaluator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
 
         # overlap integrals
         S_result = np.matrix([[1.0, 0.65931845],
@@ -45,13 +46,13 @@ class TestIntegrals(unittest.TestCase):
         T1212 = 0.2970285713672638
 
         # perform tests
-        np.testing.assert_almost_equal(S, S_result, 8)
-        np.testing.assert_almost_equal(T, T_result, 8)
-        np.testing.assert_almost_equal(V, V_result, 8)
-        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,0,0)], T1111, 8)
-        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,1,1)], T1122, 8)
-        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,0,1)], T1112, 8)
-        np.testing.assert_almost_equal(teint[integrator.teindex(0,1,0,1)], T1212, 8)
+        np.testing.assert_almost_equal(S, S_result, 4)
+        np.testing.assert_almost_equal(T, T_result, 4)
+        np.testing.assert_almost_equal(V, V_result, 4)
+        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,0,0)], T1111, 4)
+        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,1,1)], T1122, 4)
+        np.testing.assert_almost_equal(teint[integrator.teindex(0,0,0,1)], T1112, 4)
+        np.testing.assert_almost_equal(teint[integrator.teindex(0,1,0,1)], T1212, 4)
 
     def test_integrals_h2o(self):
         """
@@ -59,7 +60,7 @@ class TestIntegrals(unittest.TestCase):
         """
 
         # construct integrator object
-        evaluator = Evaluator()
+        integrator = PyQInt()
 
         # build water molecule
         mol = Molecule()
@@ -70,7 +71,41 @@ class TestIntegrals(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = evaluator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+
+        # load results from npy files
+        S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap.npy'))
+        T_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_kinetic.npy'))
+        V_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_nuclear.npy'))
+        teint_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_teint.npy'))
+
+        # assessment
+        self.assertEqual(len(cgfs), 7)
+        self.assertEqual(S.shape[0], S.shape[1])
+        self.assertEqual(S.shape[0], len(cgfs))
+        np.testing.assert_almost_equal(S, S_result, 4)
+        np.testing.assert_almost_equal(T, T_result, 4)
+        np.testing.assert_almost_equal(V, V_result, 4)
+        np.testing.assert_almost_equal(teint, teint_result, 4)
+
+    def test_integrals_h2o_openmp(self):
+        """
+        Test automatic integral evaluation for water molecule
+        """
+
+        # construct integrator object
+        integrator = PyQInt()
+
+        # build water molecule
+        mol = Molecule()
+        mol.add_atom('H', 0.7570, 0.5860, 0.0)
+        mol.add_atom('H', -0.7570, 0.5860, 0.0)
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        # evaluate all integrals
+        ncpu = multiprocessing.cpu_count()
+        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap.npy'))

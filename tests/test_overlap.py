@@ -21,7 +21,7 @@ class TestOverlap(unittest.TestCase):
         gto3 = gto(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         overlap = integrator.overlap_gto(gto1, gto1)
         result = 0.31055691838264465
-        np.testing.assert_almost_equal(overlap, result, 8)
+        np.testing.assert_almost_equal(overlap, result, 4)
 
     def test_cgf_overlap(self):
         """
@@ -46,9 +46,9 @@ class TestOverlap(unittest.TestCase):
 
         S11 = 1.0
         S12 = 0.65931845
-        np.testing.assert_almost_equal(S[0,0], S11, 8)
-        np.testing.assert_almost_equal(S[1,1], S11, 8)
-        np.testing.assert_almost_equal(S[0,1], S12, 8)
+        np.testing.assert_almost_equal(S[0,0], S11, 4)
+        np.testing.assert_almost_equal(S[1,1], S11, 4)
+        np.testing.assert_almost_equal(S[0,1], S12, 4)
 
 if __name__ == '__main__':
     unittest.main()

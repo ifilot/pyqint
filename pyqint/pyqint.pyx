@@ -1,6 +1,8 @@
 # distutils: language = c++
 
 from .pyqint cimport Integrator, GTO, CGF
+from multiprocessing import Pool
+import tqdm
 import numpy as np
 
 cdef class PyGTO:
@@ -8,9 +10,6 @@ cdef class PyGTO:
 
     def __cinit__(self, _c, _p, _alpha, _l, _m, _n):
         self.gto = GTO(_c, _p[0], _p[1], _p[2], _alpha, _l, _m, _n)
-
-    def __getstate__(self):
-        return self.__class__
 
     def get_amp(self, x, y, z):
         return self.gto.get_amp(x, y, z)
@@ -183,3 +182,74 @@ cdef class PyQInt:
 
     def teindex(self, i, j, k, l):
         return self.integrator.teindex(i, j, k, l)
+
+    def build_integrals(self, cgfs, nuclei, npar=4, verbose=False):
+        # number of cgfs
+        N = len(cgfs)
+
+        # build empty matrices
+        S = np.zeros((N,N))
+        T = np.zeros((N,N))
+        V = np.zeros((N,N))
+        teint = np.multiply(np.ones(self.teindex(N,N,N,N)), -1.0)
+
+        for i, cgf1 in enumerate(cgfs):
+            for j, cgf2 in enumerate(cgfs):
+                S[i,j] = self.overlap(cgf1, cgf2)
+                T[i,j] = self.kinetic(cgf1, cgf2)
+
+                for nucleus in nuclei:
+                    V[i,j] += self.nuclear(cgf1, cgf2, nucleus[0], nucleus[1])
+
+        # build pool of jobs
+        jobs = [None] * (self.teindex(N-1,N-1,N-1,N-1)+1)
+        for i, cgf1 in enumerate(cgfs):
+            for j, cgf2 in enumerate(cgfs):
+                ij = i*(i+1)/2 + j
+                for k, cgf3 in enumerate(cgfs):
+                    for l, cgf4 in enumerate(cgfs):
+                        kl = k * (k+1)/2 + l
+                        if ij <= kl:
+                            idx = self.integrator.teindex(i,j,k,l)
+                            if teint[idx] < 0:
+                                jobs[idx] = cgfs[i],cgfs[j],cgfs[k],cgfs[l]
+
+        if verbose: # show a progress bar
+            with Pool(npar) as p:
+                teint = list(tqdm.tqdm(p.imap(func=self.repulsion_contracted, iterable=jobs), total=len(jobs)))
+        else:       # do not show a progress bar
+            with Pool(npar) as p:
+                teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs))
+
+        return S, T, V, teint
+
+    def build_integrals_openmp(self, cgfs, nuclei):
+        cdef vector[CGF] c_cgfs
+        cdef vector[int] charges
+        cdef vector[double] px
+        cdef vector[double] py
+        cdef vector[double] pz
+
+        # add CGFs to buffer
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # add nuclei to buffer
+        for nucleus in nuclei:
+            charges.push_back(nucleus[1])
+            px.push_back(nucleus[0][0])
+            py.push_back(nucleus[0][1])
+            pz.push_back(nucleus[0][2])
+
+        results = np.array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz))
+
+        sz = len(cgfs)
+        ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
+        S = results[0:sz*sz].reshape((sz,sz))
+        T = results[sz*sz:sz*sz*2].reshape((sz,sz))
+        V = results[sz*sz*2:sz*sz*3].reshape((sz,sz))
+        teint = results[sz*sz*3:].reshape(ntei)
+
+        return S, T, V, teint
