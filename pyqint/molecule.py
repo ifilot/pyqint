@@ -13,6 +13,13 @@ class Molecule:
         self.charges = []
         self.name = _name
 
+    def __str__(self):
+        res = "Molecule: %s\n" % self.name
+        for atom in self.atoms:
+            res += " %s (%f,%f,%f)\n" % (atom[0], atom[1], atom[2], atom[3])
+
+        return res
+
     def add_atom(self, atom, x, y, z, unit='bohr'):
         ang2bohr = 1.88973
 

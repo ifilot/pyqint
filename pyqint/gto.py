@@ -31,6 +31,10 @@ class gto:
         self.n = d[5]
         self.gto = PyGTO(self.c, self.p, self.alpha, self.l, self.m, self.n)
 
+    def __str__(self):
+        return "GTO : c=%f, alpha=%f, l=%i, m=%i, n=%i, R=(%f,%f,%f)\n" \
+            % (self.c, self.alpha, self.l, self.m, self.n, self.p[0], self.p[1], self.p[2])
+
     def __reduce__(self):
         """
         Used to pickle the class
