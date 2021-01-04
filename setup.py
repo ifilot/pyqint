@@ -49,7 +49,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.6.0",
+    version="0.7.0",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
