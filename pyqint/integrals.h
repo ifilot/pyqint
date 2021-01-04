@@ -45,19 +45,19 @@ public:
      */
     Integrator();
 
-    inline const char* get_compiler_version() {
+    inline const char* get_compiler_version() const {
         return this->compiler_version.c_str();
     }
 
-    inline const char* get_compile_time() {
+    inline const char* get_compile_time() const {
         return this->compile_time.c_str();
     }
 
-    inline const char* get_compile_date() {
+    inline const char* get_compile_date() const {
         return this->compile_date.c_str();
     }
 
-    inline const char* get_openmp_version() {
+    inline const char* get_openmp_version() const {
         return this->openmp_version.c_str();
     }
 
@@ -68,7 +68,7 @@ public:
                                       const std::vector<int>& charges,
                                       const std::vector<double>& px,
                                       const std::vector<double>& py,
-                                      const std::vector<double>& pz);
+                                      const std::vector<double>& pz) const;
 
     /**
      * @fn overlap
@@ -81,7 +81,7 @@ public:
      *
      * @return double value of the overlap integral
      */
-    double overlap(const CGF& cgf1, const CGF& cgf2);
+    double overlap(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
      * @fn overlap
@@ -94,7 +94,7 @@ public:
      *
      * @return double value of the overlap integral
      */
-    double overlap(const GTO& gto1, const GTO& gto2);
+    double overlap(const GTO& gto1, const GTO& gto2) const;
 
     /**
      * @fn kinetic
@@ -107,7 +107,7 @@ public:
      *
      * @return double value of the kinetic integral
      */
-    double kinetic(const CGF& cgf1, const CGF& cgf2);
+    double kinetic(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
      * @fn kinetic
@@ -120,7 +120,7 @@ public:
      *
      * @return double value of the kinetic integral
      */
-    double kinetic(const GTO& gto1, const GTO& gto2);
+    double kinetic(const GTO& gto1, const GTO& gto2) const;
 
     /**
      * @fn nuclear
@@ -135,7 +135,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge);
+    double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge) const;
 
     /**
      * @fn nuclear
@@ -150,7 +150,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) {
+    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) const {
         return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
     }
 
@@ -167,7 +167,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus);
+    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus) const;
 
     /**
      * @fn nuclear
@@ -181,7 +181,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) {
+    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) const {
         return this->nuclear(gto1, gto2, vec3(cx, cy, cz));
     }
 
@@ -242,7 +242,7 @@ private:
      * @return double value of the overlap integral
      */
     double overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b);
+                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const;
 
     /**
      * @fn nuclear
@@ -268,7 +268,7 @@ private:
                    const vec3& b,
                    int l2, int m2, int n2,
                    double alpha2,
-                   const vec3& c);
+                   const vec3& c) const;
 
     /**
      * @fn nuclear
@@ -305,7 +305,7 @@ private:
      *
      * @return double value of the one dimensional overlap integral
      */
-    double overlap_1D(int l1, int l2, double x1, double x2, double gamma);
+    double overlap_1D(int l1, int l2, double x1, double x2, double gamma) const;
 
     /************************
      *

@@ -38,7 +38,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                                               const std::vector<int>& charges,
                                               const std::vector<double>& px,
                                               const std::vector<double>& py,
-                                              const std::vector<double>& pz) {
+                                              const std::vector<double>& pz) const {
     std::vector<double> results;
 
     unsigned int sz = cgfs.size();
@@ -48,16 +48,26 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     Eigen::MatrixXd S = Eigen::MatrixXd::Zero(sz, sz);
     Eigen::MatrixXd T = Eigen::MatrixXd::Zero(sz, sz);
     Eigen::MatrixXd V = Eigen::MatrixXd::Zero(sz, sz);
+    std::vector<Eigen::MatrixXd> Vn(charges.size(), Eigen::MatrixXd::Zero(sz, sz));
 
     // calculate the integral values using the integrator class
-    //#pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<sz; i++) {
-        for(unsigned int j=0; j<sz; j++) {
-            S(i,j) = this->overlap(cgfs[i], cgfs[j]);
-            T(i,j) = this->kinetic(cgfs[i], cgfs[j]);
+        for(unsigned int j=i; j<sz; j++) {
+            S(i,j) = S(j,i) = this->overlap(cgfs[i], cgfs[j]);
+            T(i,j) = T(j,i) = this->kinetic(cgfs[i], cgfs[j]);
             for(unsigned int k=0; k<charges.size(); k++) {
                 // there is a race condition here!!
-                V(i,j) += this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
+                Vn[k](i,j) = Vn[k](j,i) = this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
+            }
+        }
+    }
+
+    // combine all nuclear attraction integrals
+    for(unsigned int i=0; i<sz; i++) {
+        for(unsigned int j=0; j<sz; j++) {
+            for(unsigned int k=0; k<charges.size(); k++) {
+                V(i,j) += Vn[k](i,j);
             }
         }
     }
@@ -129,8 +139,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
  *
  * @return double value of the overlap integral
  */
-double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) {
-    this->init();
+double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) const {
     double sum = 0.0;
 
     // loop over all GTOs inside the CGF, calculate the overlap integrals
@@ -159,7 +168,7 @@ double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) {
  *
  * @return double value of the overlap integral
  */
-double Integrator::overlap(const GTO& gto1, const GTO& gto2) {
+double Integrator::overlap(const GTO& gto1, const GTO& gto2) const {
     return this->overlap(gto1.get_alpha(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_position(),
                          gto2.get_alpha(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_position());
 }
@@ -175,7 +184,7 @@ double Integrator::overlap(const GTO& gto1, const GTO& gto2) {
  *
  * @return double value of the kinetic integral
  */
-double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) {
+double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) const {
     double sum = 0.0;
 
     // loop over all GTOs inside the CGF, calculate the kinetic integrals
@@ -204,7 +213,7 @@ double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) {
  *
  * @return double value of the kinetic integral
  */
-double Integrator::kinetic(const GTO& gto1, const GTO& gto2) {
+double Integrator::kinetic(const GTO& gto1, const GTO& gto2) const {
     double term0 = gto2.get_alpha() *
                    (2.0 * ( gto2.get_l() + gto2.get_m() + gto2.get_n() ) + 3.0 ) *
                    this->overlap(gto1, gto2);
@@ -236,7 +245,7 @@ double Integrator::kinetic(const GTO& gto1, const GTO& gto2) {
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge) {
+double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge) const {
     double sum = 0.0;
 
     for(unsigned int k = 0; k < cgf1.size(); k++) {
@@ -264,7 +273,7 @@ double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear(const GTO& gto1, const GTO& gto2, const vec3 &nucleus) {
+double Integrator::nuclear(const GTO& gto1, const GTO& gto2, const vec3 &nucleus) const {
     return nuclear(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
                    gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
 }
@@ -340,7 +349,7 @@ double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, 
  * @return double value of the overlap integral
  */
 double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                           double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) {
+                           double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const {
 
     static const double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
 
@@ -371,7 +380,7 @@ double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsi
  *
  * @return double value of the one dimensional overlap integral
  */
-double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma) {
+double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma) const {
     double sum = 0.0;
 
     for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
@@ -427,9 +436,9 @@ double Integrator::nuclear(const vec3& a,
                int l1, int m1, int n1, double alpha1,
                const vec3& b,
                int l2, int m2, int n2,
-               double alpha2, const vec3& c) {
+               double alpha2, const vec3& c) const {
 
-    static const double pi = 3.14159265359;
+    static const double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
 
     double gamma = alpha1 + alpha2;
 
@@ -577,7 +586,14 @@ const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned 
 
 void Integrator::init() {
     std::unordered_map<unsigned,std::string> map{
-    {200505,"2.5"},{200805,"3.0"},{201107,"3.1"},{201307,"4.0"},{201511,"4.5"},{201811,"5.0"},{202011,"5.1"}};
+        {200505,"2.5"},
+        {200805,"3.0"},
+        {201107,"3.1"},
+        {201307,"4.0"},
+        {201511,"4.5"},
+        {201811,"5.0"},
+        {202011,"5.1"}
+    };
 
     this->compile_date = std::string(__DATE__);
     this->compile_time = std::string(__TIME__);
