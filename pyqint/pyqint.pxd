@@ -7,6 +7,10 @@ from libcpp.string cimport string
 cdef extern from "integrals.cpp":
     pass
 
+# Plotter
+cdef extern from "plotter.cpp":
+    pass
+
 # contracted and primitive Gaussians
 cdef extern from "cgf.cpp":
     pass
@@ -15,7 +19,7 @@ cdef extern from "cgf.cpp":
 cdef extern from "gamma.cpp":
     pass
 
-# Declare the class with cdef
+# Contracted Gaussian Functions class
 cdef extern from "cgf.h":
     cdef cppclass GTO:
         GTO() except +
@@ -28,7 +32,13 @@ cdef extern from "cgf.h":
         void add_gto(double, double, int, int, int) except +
         double get_amp(double, double, double) except +
 
-# Declare the class with cdef
+# Plotter class
+cdef extern from "plotter.h":
+    cdef cppclass Plotter:
+        Plotter() except +
+        vector[double] plot_wavefunction(vector[double], vector[double], vector[CGF]) except+
+
+# Integrator class
 cdef extern from "integrals.h":
     cdef cppclass Integrator:
         Integrator() except +

@@ -9,7 +9,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
     def test_integrals_h2o_openmp_sto3g(self):
         """
-        Test automatic integral evaluation for water molecule
+        Test OpenMP integral evaluation for H2O using sto-3g basis set
         """
 
         # construct integrator object
@@ -43,7 +43,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
     def test_integrals_h2o_openmp_sto6g(self):
         """
-        Test automatic integral evaluation for water molecule
+        Test OpenMP integral evaluation for H2O using sto-6g basis set
         """
 
         # construct integrator object
@@ -77,7 +77,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
     def test_integrals_h2o_openmp_p321(self):
         """
-        Test automatic integral evaluation for water molecule
+        Test OpenMP integral evaluation for H2O using p-321 basis set
         """
 
         # construct integrator object
@@ -111,7 +111,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
     def test_integrals_h2o_openmp_p631(self):
         """
-        Test automatic integral evaluation for water molecule
+        Test OpenMP integral evaluation for H2O using p-631 basis set
         """
 
         # construct integrator object
