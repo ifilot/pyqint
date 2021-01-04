@@ -27,7 +27,7 @@ std::vector<double> Plotter::plot_wavefunction(const std::vector<double>& grid, 
     std::vector<double> results(grid.size() / 3, 0.0);
 
     #pragma omp parallel for
-    for(unsigned int i=0; i<grid.size(); i+=3) {
+    for(int i=0; i<grid.size(); i+=3) { // have to use signed int for MSVC OpenMP here
         for(unsigned int j=0; j<coeff.size(); j++) {
             results[i/3] += coeff[j] * cgfs[j].get_amp(grid[i], grid[i+1], grid[i+2]);
         }

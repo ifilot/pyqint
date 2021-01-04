@@ -52,7 +52,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
     // calculate the integral values using the integrator class
     #pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0; i<sz; i++) {
+    for(int i=0; i<sz; i++) {  // have to use signed int for MSVC OpenMP here
         for(unsigned int j=i; j<sz; j++) {
             S(i,j) = S(j,i) = this->overlap(cgfs[i], cgfs[j]);
             T(i,j) = T(j,i) = this->kinetic(cgfs[i], cgfs[j]);
@@ -103,7 +103,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
     // evaluate jobs
     #pragma omp parallel for schedule(dynamic)
-    for(unsigned int s=0; s<jobs.size(); s++) {
+    for(int s=0; s<jobs.size(); s++) {  // have to use signed int for MSVC OpenMP here
         const unsigned int idx = jobs[s][0];
         const unsigned int i = jobs[s][1];
         const unsigned int j = jobs[s][2];
@@ -585,7 +585,7 @@ const unsigned int Integrator::teindex(unsigned int i, unsigned int j, unsigned 
 }
 
 void Integrator::init() {
-    std::unordered_map<unsigned,std::string> map{
+    std::unordered_map<unsigned int, std::string> map{
         {200505,"2.5"},
         {200805,"3.0"},
         {201107,"3.1"},
@@ -597,9 +597,19 @@ void Integrator::init() {
 
     this->compile_date = std::string(__DATE__);
     this->compile_time = std::string(__TIME__);
-    this->openmp_version = map.at(_OPENMP);
 
     #ifdef __GNUC__
-    this->compiler_version = __VERSION__;
+        this->openmp_version = map.at(_OPENMP);
+        this->compiler_version = __VERSION__;
+        this->compiler_type = "GNU/GCC";
+    # else
+        this->openmp_version = "unknown";
+        this->compiler_version = "unknown";
+    #endif
+
+    #ifdef _MSC_VER
+        this->openmp_version = boost::lexical_cast<std::string>(_OPENMP);
+        this->compiler_version = boost::lexical_cast<std::string>(_MSC_FULL_VER);
+        this->compiler_type = "MSVC";
     #endif
 }

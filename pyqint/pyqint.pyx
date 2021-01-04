@@ -50,12 +50,14 @@ cdef class PyQInt:
         compile_date = self.integrator.get_compile_date()
         compile_time = self.integrator.get_compile_time()
         openmp_version = self.integrator.get_openmp_version()
+        compiler_type = self.integrator.get_compiler_type()
 
         compile_info = {
             "compiler_version" : compiler_version.decode('utf8'),
             "compile_date" : compile_date.decode('utf8'),
             "compile_time" : compile_time.decode('utf8'),
             "openmp_version" : openmp_version.decode('utf8'),
+            "compiler_type" : compiler_type.decode('utf8'),
         }
 
         return compile_info

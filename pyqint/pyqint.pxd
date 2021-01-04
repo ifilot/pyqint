@@ -62,3 +62,4 @@ cdef extern from "integrals.h":
         string get_openmp_version() except+
         string get_compile_date() except+
         string get_compile_time() except+
+        string get_compiler_type() except+

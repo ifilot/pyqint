@@ -23,6 +23,7 @@
 
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -35,6 +36,7 @@ private:
     std::string compile_time;
     std::string openmp_version;
     std::string compiler_version;
+    std::string compiler_type;
 
 public:
     /**
@@ -59,6 +61,10 @@ public:
 
     inline const char* get_openmp_version() const {
         return this->openmp_version.c_str();
+    }
+
+    inline const char* get_compiler_type() const {
+        return this->compiler_type.c_str();
     }
 
     /**
