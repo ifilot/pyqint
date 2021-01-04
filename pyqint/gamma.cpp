@@ -38,7 +38,7 @@
 
 #include "gamma.h"
 
-double GammaInc::Fgamma(const double m, double x) {
+double GammaInc::Fgamma(const double m, double x) const {
     double tiny = 0.00000001;
     x = std::max(std::abs(x),tiny);
     double val = gamm_inc(m+0.5,x);
@@ -58,7 +58,7 @@ double GammaInc::Fgamma(const double m, double x) {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gamm_inc(const double a, const double x) {
+double GammaInc::gamm_inc(const double a, const double x) const {
     double gammap = gammp(a,x);
     double gln = gammln(a);
     return exp(gln) * gammap;
@@ -76,7 +76,7 @@ double GammaInc::gamm_inc(const double a, const double x) {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gammp(const double a, double x) {
+double GammaInc::gammp(const double a, double x) const {
     static const int ASWITCH = 100;
 
     if(x < 0.0 || a <= 0.0) {
@@ -104,7 +104,7 @@ double GammaInc::gammp(const double a, double x) {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gser(const double a, const double x) {
+double GammaInc::gser(const double a, const double x) const {
     double EPS = std::numeric_limits<double>::epsilon();
 
     double sum, del, ap;
@@ -122,7 +122,7 @@ double GammaInc::gser(const double a, const double x) {
     }
 }
 
-double GammaInc::gammln(const double xx) {
+double GammaInc::gammln(const double xx) const {
     int j;
     double x, tmp, y, ser;
     static const double cof[14]={57.1562356658629235,-59.5979603554754912,
@@ -152,7 +152,7 @@ double GammaInc::gammln(const double xx) {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gcf(const double a, const double x) {
+double GammaInc::gcf(const double a, const double x) const {
     double EPS = std::numeric_limits<double>::epsilon();
     double FPMIN = std::numeric_limits<double>::min() / EPS;
 
@@ -191,7 +191,7 @@ double GammaInc::gcf(const double a, const double x) {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gammpapprox(double a, double x, int psig) {
+double GammaInc::gammpapprox(double a, double x, int psig) const {
     static const int ngau = 18;
 
     double y[18] = {0.0021695375159141994,

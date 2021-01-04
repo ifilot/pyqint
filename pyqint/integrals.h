@@ -24,6 +24,7 @@
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
 #include <string>
+#include <unordered_map>
 
 #include "gamma.h"
 #include "cgf.h"
@@ -32,6 +33,8 @@ class Integrator {
 private:
     std::string compile_date;
     std::string compile_time;
+    std::string openmp_version;
+    std::string compiler_version;
 
 public:
     /**
@@ -42,6 +45,22 @@ public:
      */
     Integrator();
 
+    inline const char* get_compiler_version() const {
+        return this->compiler_version.c_str();
+    }
+
+    inline const char* get_compile_time() const {
+        return this->compile_time.c_str();
+    }
+
+    inline const char* get_compile_date() const {
+        return this->compile_date.c_str();
+    }
+
+    inline const char* get_openmp_version() const {
+        return this->openmp_version.c_str();
+    }
+
     /**
      * @brief      Evaluate all integrals for cgfs in buffer
      */
@@ -49,7 +68,7 @@ public:
                                       const std::vector<int>& charges,
                                       const std::vector<double>& px,
                                       const std::vector<double>& py,
-                                      const std::vector<double>& pz);
+                                      const std::vector<double>& pz) const;
 
     /**
      * @fn overlap
@@ -62,7 +81,7 @@ public:
      *
      * @return double value of the overlap integral
      */
-    double overlap(const CGF& cgf1, const CGF& cgf2);
+    double overlap(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
      * @fn overlap
@@ -75,7 +94,7 @@ public:
      *
      * @return double value of the overlap integral
      */
-    double overlap(const GTO& gto1, const GTO& gto2);
+    double overlap(const GTO& gto1, const GTO& gto2) const;
 
     /**
      * @fn kinetic
@@ -88,7 +107,7 @@ public:
      *
      * @return double value of the kinetic integral
      */
-    double kinetic(const CGF& cgf1, const CGF& cgf2);
+    double kinetic(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
      * @fn kinetic
@@ -101,7 +120,7 @@ public:
      *
      * @return double value of the kinetic integral
      */
-    double kinetic(const GTO& gto1, const GTO& gto2);
+    double kinetic(const GTO& gto1, const GTO& gto2) const;
 
     /**
      * @fn nuclear
@@ -116,7 +135,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge);
+    double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge) const;
 
     /**
      * @fn nuclear
@@ -131,7 +150,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) {
+    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) const {
         return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
     }
 
@@ -148,7 +167,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus);
+    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus) const;
 
     /**
      * @fn nuclear
@@ -162,7 +181,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) {
+    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) const {
         return this->nuclear(gto1, gto2, vec3(cx, cy, cz));
     }
 
@@ -179,7 +198,7 @@ public:
      *
      * @return double value of the repulsion integral
      */
-    double repulsion(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4);
+    double repulsion(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4) const;
 
     /**
      * @fn repulsion
@@ -194,17 +213,9 @@ public:
      *
      * @return double value of the repulsion integral
      */
-    double repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4);
+    double repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const;
 
-    const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l);
-
-    const char* get_compile_date() const {
-        return this->compile_date.c_str();
-    }
-
-    const char* get_compile_time() const {
-        return this->compile_time.c_str();
-    }
+    const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
 
 private:
     /*
@@ -231,7 +242,7 @@ private:
      * @return double value of the overlap integral
      */
     double overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b);
+                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const;
 
     /**
      * @fn nuclear
@@ -257,7 +268,7 @@ private:
                    const vec3& b,
                    int l2, int m2, int n2,
                    double alpha2,
-                   const vec3& c);
+                   const vec3& c) const;
 
     /**
      * @fn nuclear
@@ -280,7 +291,7 @@ private:
     double repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,
                      const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
                      const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
-                     const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad);
+                     const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @fn overlap_1D
@@ -294,7 +305,7 @@ private:
      *
      * @return double value of the one dimensional overlap integral
      */
-    double overlap_1D(int l1, int l2, double x1, double x2, double gamma);
+    double overlap_1D(int l1, int l2, double x1, double x2, double gamma) const;
 
     /************************
      *
@@ -315,34 +326,34 @@ private:
      * @return new gaussian product center
      */
     vec3 gaussian_product_center(double alpha1, const vec3 &a,
-                                 double alpha2, const vec3 &b);
+                                 double alpha2, const vec3 &b) const;
 
-    double binomial_prefactor(int s, int ia, int ib, double xpa, double xpb);
+    double binomial_prefactor(int s, int ia, int ib, double xpa, double xpb) const;
 
-    double binomial(int a, int b);
+    double binomial(int a, int b) const;
 
     std::vector<double> A_array(const int l1, const int l2,
                                 const double pa, const double pb,
-                                const double cp, const double g);
+                                const double cp, const double g) const;
 
     double A_term(const int i, const int r, const int u,
                   const int l1, const int l2,
                   const double pax, const double pbx,
-                  const double cpx, const double gamma);
+                  const double cpx, const double gamma) const;
 
-    double gamma(const double m, double x);
+    double gamma(const double m, double x) const;
 
     std::vector<double> B_array(const int l1,const int l2,const int l3,const int l4,
                                 const double p, const double a, const double b, const double q, const double c, const double d,
-                                const double g1, const double g2, const double delta);
+                                const double g1, const double g2, const double delta) const;
 
     double B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
     const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
-    const double gamma2, const double delta);
+    const double gamma2, const double delta) const;
 
-    double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q);
-    double B0(int i, int r, double q);
-    double fact_ratio2(const int a, const int b);
+    double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
+    double B0(int i, int r, double q) const;
+    double fact_ratio2(const int a, const int b) const;
 
     void init();
 };

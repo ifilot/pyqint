@@ -44,7 +44,7 @@
 
 class GammaInc {
 public:
-    double Fgamma(const double m, double x);
+    double Fgamma(const double m, double x) const;
 
     /*
      * @fn gamm_inc
@@ -59,7 +59,7 @@ public:
      *
      * returns double value of the incomplete Gamma Function
      */
-    double gamm_inc(const double a, const double x);
+    double gamm_inc(const double a, const double x) const;
 
     /*
      * @fn gamm_inc
@@ -73,7 +73,7 @@ public:
      *
      * returns double value of the incomplete Gamma Function
      */
-    double gammp(const double m, const double x);
+    double gammp(const double m, const double x) const;
 
 private:
     /*
@@ -85,10 +85,10 @@ private:
      *
      * returns double value of the incomplete Gamma Function
      */
-    double gser(const double a, const double x);
+    double gser(const double a, const double x) const;
 
 
-    double gammln(const double xx);
+    double gammln(const double xx) const;
 
     /*
      * @fn gcf
@@ -99,7 +99,7 @@ private:
      *
      * returns double value of the incomplete Gamma Function
      */
-    double gcf(const double a, const double x);
+    double gcf(const double a, const double x) const;
 
     /*
      * @fn gammpapprox
@@ -113,5 +113,5 @@ private:
      *
      * returns double value of the incomplete Gamma Function
      */
-    double gammpapprox(double a, double x, int psig);
+    double gammpapprox(double a, double x, int psig) const;
 };

@@ -31,5 +31,19 @@ class TestString(unittest.TestCase):
         ans += " H (0.000000,0.000000,1.400000)\n"
         self.assertEqual(str(mol), ans)
 
+    def test_compiler_info(self):
+        """
+        Test automatic integral evaluation for hydrogen molecule
+        """
+
+        # construct integrator object
+        integrator = PyQInt()
+
+        compiler_info = integrator.get_compile_info()
+        self.assertTrue(len(compiler_info["compiler_version"]) > 4)
+        self.assertTrue(len(compiler_info["compile_date"]) > 10)
+        self.assertTrue(len(compiler_info["compile_time"]) > 4)
+        self.assertTrue(len(compiler_info["openmp_version"]) > 2)
+
 if __name__ == '__main__':
     unittest.main()

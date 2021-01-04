@@ -46,9 +46,16 @@ cdef class PyQInt:
         self.integrator = new Integrator()
 
     def get_compile_info(self):
+        compiler_version = self.integrator.get_compiler_version()
+        compile_date = self.integrator.get_compile_date()
+        compile_time = self.integrator.get_compile_time()
+        openmp_version = self.integrator.get_openmp_version()
+
         compile_info = {
-            "date": self.integrator.get_compile_date(),
-            "time": self.integrator.get_compile_time()
+            "compiler_version" : compiler_version.decode('utf8'),
+            "compile_date" : compile_date.decode('utf8'),
+            "compile_time" : compile_time.decode('utf8'),
+            "openmp_version" : openmp_version.decode('utf8'),
         }
 
         return compile_info
@@ -230,7 +237,7 @@ cdef class PyQInt:
         cdef vector[double] py
         cdef vector[double] pz
 
-        # add CGFs to buffer
+        # build CGFS objects
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
@@ -253,3 +260,24 @@ cdef class PyQInt:
         teint = results[sz*sz*3:].reshape(ntei)
 
         return S, T, V, teint
+
+    def plot_wavefunction(self, grid, coeff, cgfs):
+        cdef vector[CGF] c_cgfs
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # make list of doubles
+        cdef vector[double] c_grid = grid.flatten()
+
+        # make list of coefficients
+        cdef vector[double] c_coeff = coeff
+
+        # build plotter and plot grid
+        cdef Plotter plotter = Plotter()
+        res = plotter.plot_wavefunction(c_grid, c_coeff, c_cgfs)
+
+        return np.array(res)
