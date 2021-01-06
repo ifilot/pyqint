@@ -181,6 +181,40 @@ public:
      *
      * @param const GTO& gto1       Contracted Gaussian Function
      * @param const GTO& gto2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param unsigned int coord    Cartesian direction to take derivative towards
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    double nuclear_deriv(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const GTO& gto1       Contracted Gaussian Function
+     * @param const GTO& gto2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param unsigned int coord    Cartesian direction to take derivative towards
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    inline double nuclear_deriv(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
+        return this->nuclear_deriv(gto1, gto2, vec3(rx, ry, rz), coord);
+    }
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const GTO& gto1       Contracted Gaussian Function
+     * @param const GTO& gto2       Contracted Gaussian Function
      * @param unsigned int charge   charge of the nucleus in a.u.
      *
      * Calculates the value of < gto1 | V | gto2 >
@@ -290,6 +324,29 @@ private:
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
      * @param double alpha2     Gaussian exponent of the second GTO
+     * @param vec3 c            Nuclear position
+     * @param coord             Cartesian direction to derive nuclear coordinate towards
+     *
+     * @return double value of the nuclear integral derived towards nuclear coordinate
+     */
+    double nuclear_deriv(const vec3& a, int l1, int m1, int n1, double alpha1,
+                         const vec3& b, int l2, int m2, int n2,
+                         double alpha2, const vec3& c, unsigned int coord) const;
+
+    /**
+     * @fn nuclear
+     * @brief Performs nuclear integral evaluation
+     *
+     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param unsigned int l1   Power of x component of the polynomial of the first GTO
+     * @param unsigned int m1   Power of y component of the polynomial of the first GTO
+     * @param unsigned int n1   Power of z component of the polynomial of the first GTO
+     * @param double alpha1     Gaussian exponent of the first GTO
+     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param unsigned int l2   Power of x component of the polynomial of the second GTO
+     * @param unsigned int m2   Power of y component of the polynomial of the second GTO
+     * @param unsigned int n2   Power of z component of the polynomial of the second GTO
+     * @param double alpha2     Gaussian exponent of the second GTO
      * @param vec3 c
      *
      * @return double value of the nuclear integral
@@ -341,6 +398,10 @@ private:
     std::vector<double> A_array(const int l1, const int l2,
                                 const double pa, const double pb,
                                 const double cp, const double g) const;
+
+    std::vector<double> A_array_deriv(const int l1, const int l2,
+                                      const double pa, const double pb,
+                                      const double cp, const double g) const;
 
     double A_term(const int i, const int r, const int u,
                   const int l1, const int l2,
