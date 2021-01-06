@@ -41,6 +41,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_sto6g(self):
         """
         Test OpenMP integral evaluation for H2O using sto-6g basis set
@@ -75,6 +76,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_p321(self):
         """
         Test OpenMP integral evaluation for H2O using p-321 basis set
@@ -109,6 +111,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
         np.testing.assert_almost_equal(V, V_result, 4)
         np.testing.assert_almost_equal(teint, teint_result, 4)
 
+    @nottest
     def test_integrals_h2o_openmp_p631(self):
         """
         Test OpenMP integral evaluation for H2O using p-631 basis set
