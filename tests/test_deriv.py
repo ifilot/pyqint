@@ -185,8 +185,8 @@ class TestDeriv(unittest.TestCase):
 
         # build gtos
         nucleus = np.array([-0.5, 0.0, 0.0])
-        gto1 = gto(0.154329,  nucleus, 3.425251, 1, 0, 0)
-        gto2 = gto(0.154329, -nucleus, 3.425251, 1, 0, 0)
+        gto1 = gto(0.154329,  nucleus, 3.425251, 0, 0, 0)
+        gto2 = gto(0.154329, -nucleus, 3.425251, 0, 0, 0)
 
         t1a = integrator.nuclear_gto_deriv_op(gto1, gto1, nucleus, 0)
         t1b = integrator.nuclear_gto_deriv_bf(gto1, gto1, nucleus, 0)

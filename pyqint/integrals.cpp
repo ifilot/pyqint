@@ -577,9 +577,9 @@ std::vector<double> Integrator::A_array_deriv(const int l1, const int l2, const 
 
     for(int i=0; i<imax; i++) {
         for(int r=0; r<=i/2; r++) {
-            for(int u=0; u<=(i-2*r)/2; u++) {
+            for(int u=0; u<=(i-2*r+1)/2; u++) {
                 int iI = i - 2 * r - u;
-                arrA[iI] += A_term(i, r, u, l1, l2, pa, pb, cp, g);
+                arrA[iI] += A_term(i+1, r, u, l1, l2, pa, pb, cp, g);
             }
         }
     }
