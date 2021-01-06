@@ -522,32 +522,41 @@ double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, doubl
     vec3 p = gaussian_product_center(alpha1, a, alpha2, b);
     double rab2 = (a-b).squaredNorm();
     double rcp2 = (c-p).squaredNorm();
+    double rcpcoord = (c-p)[coord];
 
-    std::vector<double> ax;
-    if(coord == 0) {
-        ax = A_array_deriv(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
-    } else {
-        ax = A_array(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
-    }
-    std::vector<double> ay;
-    if(coord == 1) {
-        ay = A_array_deriv(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
-    } else {
-        ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
-    }
-    std::vector<double> az;
-    if(coord == 2) {
-        az = A_array_deriv(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
-    } else {
-        az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
+    std::vector<double> ax = A_array(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
+    std::vector<double> ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
+    std::vector<double> az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
+
+    std::vector<double> ad;
+    switch(coord) {
+        case 0: // x coordinate
+            ad = A_array_deriv(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
+        break;
+        case 1: // y coordinate
+            ad = A_array_deriv(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
+        break;
+        case 2: // z coordinate
+            ad = A_array_deriv(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
+        break;
     }
 
     double sum = 0.0;
 
-    for(int i=0; i<=l1+l2;i++) {
-        for(int j=0; j<=m1+m2;j++) {
-            for(int k=0; k<=n1+n2;k++) {
-                sum += ax[i] * ay[j] * az[k] * this->gamma_inc.Fgamma(i+j+k,rcp2*gamma);
+    // build arrays of all values; based on which coordinate derivative is requested,
+    // different indices are generated to ensure by which all different cases
+    // can be handled in one set of nested loops
+    const std::array<int, 3> itmax = {l1 + l2, m1 + m2, n1 + n2};
+    const std::array<std::vector<double>, 3> v = {ax, ay, az};
+    const unsigned int v0 = coord;
+    const unsigned int v1 = (coord+1)%3;
+    const unsigned int v2 = (coord+2)%3;
+
+    for(int i=0; i<=itmax[v0];i++) {
+        for(int j=0; j<=itmax[v1];j++) {
+            for(int k=0; k<=itmax[v2];k++) {
+                sum += (v[v0][i] * -2.0 * gamma * rcpcoord * this->gamma_inc.Fgamma(i+j+k+1,rcp2*gamma)
+                        + ad[i] * this->gamma_inc.Fgamma(i+j+k,rcp2*gamma)) * v[v1][j] * v[v2][k];
             }
         }
     }
@@ -577,9 +586,16 @@ std::vector<double> Integrator::A_array_deriv(const int l1, const int l2, const 
 
     for(int i=0; i<imax; i++) {
         for(int r=0; r<=i/2; r++) {
-            for(int u=0; u<=(i-2*r+1)/2; u++) {
+            for(int u=0; u<=(i-2*r)/2; u++) {
                 int iI = i - 2 * r - u;
-                arrA[iI] += A_term(i+1, r, u, l1, l2, pa, pb, cp, g);
+                int cppow = i-2*r-2*u; // power in the coefficient cp
+
+                double term = A_term(i, r, u, l1, l2, pa, pb, cp, g);
+
+                if(cppow != 0 && cp != 0.0) {
+                    term *= -1.0 * cppow / cp;
+                    arrA[iI] += term;
+                }
             }
         }
     }
