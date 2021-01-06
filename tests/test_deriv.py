@@ -326,6 +326,31 @@ class TestDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(fx1, ans1, 4)
         np.testing.assert_almost_equal(fx2, ans2, 4)
 
+        # assert that the nuclear gradient in the x direction is zero because the
+        # basis functions spawn from this atom
+        self.assertTrue(np.abs(fx1) < 1e-8)
+
+        ## assert that the nuclear gradient has a meaningful number
+        self.assertTrue(np.abs(fx2) > 1e-1)
+
+        fx3 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], 0)
+        fx4 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[1][0], nuclei[1][1], 0)
+
+        ans3 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], 0)
+        ans4 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[1][0], nuclei[1][1], 0)
+
+        np.testing.assert_almost_equal(fx3, ans3, 4)
+        np.testing.assert_almost_equal(fx4, ans4, 4)
+
+        fy1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 1)
+        fy2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 1)
+
+        ans5 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 1)
+        ans6 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 1)
+
+        np.testing.assert_almost_equal(fy1, ans5, 4)
+        np.testing.assert_almost_equal(fy2, ans6, 4)
+
 
 def calculate_force_finite_difference(cgf1, cgf2, nucleus, charge, coord):
     # build integrator object
