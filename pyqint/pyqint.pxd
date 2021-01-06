@@ -53,6 +53,7 @@ cdef extern from "integrals.h":
         double nuclear_deriv_bf(GTO, GTO, double, double, double, int) except +
         double nuclear_deriv_op(GTO, GTO, double, double, double, int) except +
         double nuclear(CGF, CGF, double, double, double, int) except +
+        double nuclear_deriv(CGF, CGF, double, double, double, int, int) except +
 
         double repulsion(GTO, GTO, GTO, GTO) except +
         double repulsion(CGF, CGF, CGF, CGF) except +

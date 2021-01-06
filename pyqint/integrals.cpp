@@ -265,6 +265,55 @@ double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus
  * @fn nuclear
  * @brief Calculates nuclear integral of two CGF
  *
+ * @param const CGF& cgf1       Contracted Gaussian Function
+ * @param const CGF& cgf2       Contracted Gaussian Function
+ * @param unsigned int charge   charge of the nucleus in a.u.
+ *
+ * Calculates the value of < cgf1 | V | cgf2 >
+ *
+ * @return double value of the nuclear integral
+ */
+double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus,
+    unsigned int charge, unsigned int coord) const {
+    double sum = 0.0;
+
+    for(unsigned int k = 0; k < cgf1.size(); k++) {
+        for(unsigned int l = 0; l < cgf2.size(); l++) {
+
+            // only take the derivative of the basis functions into account
+            // if the basis functions originate from the same center as
+            // we are calculating the derivative
+            double t1 = 0.0;
+            if((cgf1.get_r() - nucleus).squaredNorm() < 0.0001) {
+                t1 = this->nuclear_deriv_bf(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord);
+            }
+
+            // only take the derivative of the basis functions into account
+            // if the basis functions originate from the same center as
+            // we are calculating the derivative
+            double t2 = 0.0;
+            if((cgf2.get_r() - nucleus).squaredNorm() < 0.0001) {
+                t2 = this->nuclear_deriv_bf(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord);
+            }
+
+            // take the derivative of the operator towards the coordinate
+            double t3 = this->nuclear_deriv_op(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord);
+
+            sum += cgf1.get_norm_gto(k) *
+                   cgf2.get_norm_gto(l) *
+                   cgf1.get_coefficient_gto(k) *
+                   cgf2.get_coefficient_gto(l) *
+                   (t1 + t2 + t3);
+        }
+    }
+
+    return sum * (double)charge;
+}
+
+/**
+ * @fn nuclear
+ * @brief Calculates nuclear integral of two CGF
+ *
  * @param const GTO& gto1       Contracted Gaussian Function
  * @param const GTO& gto2       Contracted Gaussian Function
  * @param unsigned int charge   charge of the nucleus in a.u.
@@ -528,6 +577,8 @@ double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, doubl
     std::vector<double> ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
     std::vector<double> az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
 
+    // build array of doubles for the derivatives towards C[coord] appearing
+    // in each of the terms
     std::vector<double> ad;
     switch(coord) {
         case 0: // x coordinate
@@ -555,6 +606,9 @@ double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, doubl
     for(int i=0; i<=itmax[v0];i++) {
         for(int j=0; j<=itmax[v1];j++) {
             for(int k=0; k<=itmax[v2];k++) {
+
+                // apply product rule as both the terms as well as the incomplete gamma function
+                // have terms in C[coord]
                 sum += (v[v0][i] * -2.0 * gamma * rcpcoord * this->gamma_inc.Fgamma(i+j+k+1,rcp2*gamma)
                         + ad[i] * this->gamma_inc.Fgamma(i+j+k,rcp2*gamma)) * v[v1][j] * v[v2][k];
             }

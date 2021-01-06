@@ -303,29 +303,44 @@ class TestDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(-2.0 * t2b, fd_02b, 4)
         np.testing.assert_almost_equal(t2a, fd_02a, 4)
 
-def calculate_fx_h2_finite_difference():
+    def testDerivH2(self):
+        """
+        Test Derivatives of dihydrogen
+        """
+
+        # build integrator object
+        integrator = PyQInt()
+
+        # build hydrogen molecule
+        mol = Molecule('H2')
+        mol.add_atom('H', -0.5, 0.0, 0.0)
+        mol.add_atom('H',  0.5, 0.0, 0.0)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        fx1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 0)
+        fx2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 0)
+
+        ans1 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 0)
+        ans2 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 0)
+
+        np.testing.assert_almost_equal(fx1, ans1, 4)
+        np.testing.assert_almost_equal(fx2, ans2, 4)
+
+
+def calculate_force_finite_difference(cgf1, cgf2, nucleus, charge, coord):
     # build integrator object
     integrator = PyQInt()
 
-    # build hydrogen molecule
-    mol = Molecule('H2')
-    mol.add_atom('H', -0.51, 0.0, 0.0)
-    mol.add_atom('H',  0.5, 0.0, 0.0)
-    cgfs, nuclei = mol.build_basis('sto3g')
-
-    gto = cgfs[1].gtos[0]
-    left = integrator.nuclear_gto(gto, gto, nuclei[0][0])
+    # distance
+    diff = 0.00001
 
     # build hydrogen molecule
-    mol = Molecule('H2')
-    mol.add_atom('H', -0.49, 0.0, 0.0)
-    mol.add_atom('H',  0.5, 0.0, 0.0)
-    cgfs, nuclei = mol.build_basis('sto3g')
+    nucleus[coord] -= diff / 2.0
+    left = integrator.nuclear(cgf1, cgf2, nucleus, charge)
+    nucleus[coord] += diff
+    right = integrator.nuclear(cgf1, cgf2, nucleus, charge)
 
-    gto = cgfs[1].gtos[0]
-    right = integrator.nuclear_gto(gto, gto, nuclei[0][0])
-
-    return (right - left) / (0.02)
+    return (right - left) / diff
 
 def calculate_fx_bf_finite_difference(_gto, nucleus):
     """

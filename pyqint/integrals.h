@@ -143,6 +143,11 @@ public:
      */
     double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge) const;
 
+
+    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) const {
+        return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
+    }
+
     /**
      * @fn nuclear
      * @brief Calculates nuclear integral of two CGF
@@ -156,8 +161,12 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) const {
-        return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
+    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus,
+        unsigned int charge, unsigned int coord) const;
+
+    inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz,
+        unsigned int charge, unsigned int coord) const {
+        return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, coord);
     }
 
     /**
