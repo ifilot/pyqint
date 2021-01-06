@@ -189,7 +189,7 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear_deriv(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
+    double nuclear_deriv_bf(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
 
     /**
      * @fn nuclear
@@ -205,8 +205,42 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear_deriv(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
-        return this->nuclear_deriv(gto1, gto2, vec3(rx, ry, rz), coord);
+    inline double nuclear_deriv_bf(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
+        return this->nuclear_deriv_bf(gto1, gto2, vec3(rx, ry, rz), coord);
+    }
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const GTO& gto1       Contracted Gaussian Function
+     * @param const GTO& gto2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param unsigned int coord    Cartesian direction to take derivative towards
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    inline double nuclear_deriv_op(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
+
+    /**
+     * @fn nuclear
+     * @brief Calculates nuclear integral of two CGF
+     *
+     * @param const GTO& gto1       Contracted Gaussian Function
+     * @param const GTO& gto2       Contracted Gaussian Function
+     * @param const vec3 nucleus    Position of the nucleus
+     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param unsigned int coord    Cartesian direction to take derivative towards
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    inline double nuclear_deriv_op(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
+        return this->nuclear_deriv_op(gto1, gto2, vec3(rx, ry, rz), coord);
     }
 
     /**
@@ -329,9 +363,9 @@ private:
      *
      * @return double value of the nuclear integral derived towards nuclear coordinate
      */
-    double nuclear_deriv(const vec3& a, int l1, int m1, int n1, double alpha1,
-                         const vec3& b, int l2, int m2, int n2,
-                         double alpha2, const vec3& c, unsigned int coord) const;
+    double nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, double alpha1,
+                            const vec3& b, int l2, int m2, int n2,
+                            double alpha2, const vec3& c, unsigned int coord) const;
 
     /**
      * @fn nuclear

@@ -290,24 +290,42 @@ double Integrator::nuclear(const GTO& gto1, const GTO& gto2, const vec3 &nucleus
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2, const vec3 &nucleus, unsigned int coord) const {
+double Integrator::nuclear_deriv_bf(const GTO& gto1, const GTO& gto2, const vec3 &nucleus, unsigned int coord) const {
     std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
     if(gto_ang[coord] != 0) {
+        gto_ang[coord] += 1; // calculate l+1 term
+        double term_plus = nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
+                                   gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
+        gto_ang[coord] -= 2; // calculate l-1 term
+        double term_min = nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
+                                  gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
+        gto_ang[coord] += 1; // recover l
+
+        return -2.0 * gto1.get_alpha() * term_plus + gto_ang[coord] * term_min;
+    } else { // s-type GTO
         gto_ang[coord] += 1;
         double term1 = nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
                                gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        gto_ang[coord] -= 2;
-        double term2 = nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
-                               gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        gto_ang[coord] += 2;
-        return std::sqrt((2.0 * gto_ang[coord] + 1.0) * gto1.get_alpha()) * term1 +
-               (2.0 * gto_ang[coord]) * std::sqrt(gto1.get_alpha() / (2.0 * gto_ang[coord] - 1.0)) * term2;
-    } else {
-        gto_ang[coord] += 1;
-        double term1 = nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
-                               gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        return std::sqrt(gto1.get_alpha()) * term1;
+        return -2.0 * gto1.get_alpha() * term1;
     }
+}
+
+/**
+ * @fn nuclear
+ * @brief Calculates nuclear integral of two CGF
+ *
+ * @param const GTO& gto1       Contracted Gaussian Function
+ * @param const GTO& gto2       Contracted Gaussian Function
+ * @param unsigned int charge   charge of the nucleus in a.u.
+ *
+ * Calculates the value of < gto1 | V | gto2 >
+ *
+ * @return double value of the nuclear integral
+ */
+double Integrator::nuclear_deriv_op(const GTO& gto1, const GTO& gto2, const vec3 &nucleus, unsigned int coord) const {
+    return nuclear_deriv_op(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                            gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                            nucleus, coord);
 }
 
 /**
@@ -493,9 +511,9 @@ double Integrator::nuclear(const vec3& a, int l1, int m1, int n1, double alpha1,
     return -2.0 * pi / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
 }
 
-double Integrator::nuclear_deriv(const vec3& a, int l1, int m1, int n1, double alpha1,
-                                 const vec3& b, int l2, int m2, int n2,
-                                 double alpha2, const vec3& c, unsigned int coord) const {
+double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, double alpha1,
+                                    const vec3& b, int l2, int m2, int n2,
+                                    double alpha2, const vec3& c, unsigned int coord) const {
 
     static const double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
 
@@ -513,13 +531,13 @@ double Integrator::nuclear_deriv(const vec3& a, int l1, int m1, int n1, double a
     }
     std::vector<double> ay;
     if(coord == 1) {
-        ay = A_array_deriv(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
+        ay = A_array_deriv(m1+1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
     } else {
         ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
     }
     std::vector<double> az;
     if(coord == 2) {
-        az = A_array_deriv(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
+        az = A_array_deriv(n1+1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
     } else {
         az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
     }
@@ -559,7 +577,7 @@ std::vector<double> Integrator::A_array_deriv(const int l1, const int l2, const 
 
     for(int i=0; i<imax; i++) {
         for(int r=0; r<=i/2; r++) {
-            for(int u=1; u<=(i-2*r)/2+1; u++) {
+            for(int u=0; u<=(i-2*r)/2; u++) {
                 int iI = i - 2 * r - u;
                 arrA[iI] += A_term(i, r, u, l1, l2, pa, pb, cp, g);
             }
@@ -571,8 +589,8 @@ std::vector<double> Integrator::A_array_deriv(const int l1, const int l2, const 
 
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
-                    std::pow(-1,u) * boost::math::factorial<double>(i)*std::pow(cpx,i-2*r-2*u)*
-                    std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
+            std::pow(-1,u) * boost::math::factorial<double>(i)*std::pow(cpx,i-2*r-2*u)*
+            std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
 }
 
 double Integrator::repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,

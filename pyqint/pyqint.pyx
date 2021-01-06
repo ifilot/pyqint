@@ -126,7 +126,7 @@ cdef class PyQInt:
 
         return self.integrator.nuclear(c_gto1, c_gto2, rc[0], rc[1], rc[2])
 
-    def nuclear_gto_deriv(self, gto1, gto2, rc, coord):
+    def nuclear_gto_deriv_bf(self, gto1, gto2, rc, coord):
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -134,7 +134,17 @@ cdef class PyQInt:
         c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
         c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
 
-        return self.integrator.nuclear_deriv(c_gto1, c_gto2, rc[0], rc[1], rc[2], coord)
+        return self.integrator.nuclear_deriv_bf(c_gto1, c_gto2, rc[0], rc[1], rc[2], coord)
+
+    def nuclear_gto_deriv_op(self, gto1, gto2, rc, coord):
+
+        cdef GTO c_gto1
+        cdef GTO c_gto2
+
+        c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
+        c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
+
+        return self.integrator.nuclear_deriv_op(c_gto1, c_gto2, rc[0], rc[1], rc[2], coord)
 
     def nuclear(self, cgf1, cgf2, rc, zc):
 

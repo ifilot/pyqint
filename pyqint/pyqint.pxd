@@ -50,7 +50,8 @@ cdef extern from "integrals.h":
         double kinetic(CGF, CGF) except +
 
         double nuclear(GTO, GTO, double, double, double) except +
-        double nuclear_deriv(GTO, GTO, double, double, double, int) except +
+        double nuclear_deriv_bf(GTO, GTO, double, double, double, int) except +
+        double nuclear_deriv_op(GTO, GTO, double, double, double, int) except +
         double nuclear(CGF, CGF, double, double, double, int) except +
 
         double repulsion(GTO, GTO, GTO, GTO) except +
