@@ -8,7 +8,7 @@ from . import PyQInt
 
 class HF:
     """
-    Routines to perform Hartree-Fock calculations
+    Routines to perform a restricted Hartree-Fock calculations
     """
 
     def rhf(mol, basis, verbose=False):
@@ -82,7 +82,8 @@ class HF:
             if niter > 1:
                 ediff = np.abs(energy - energies[-1])
                 if ediff < 1e-5:
-                    print("Stopping SCF cycle, convergence reached.")
+                    if verbose:
+                        print("Stopping SCF cycle, convergence reached.")
                     break
 
             # store energy for next iteration

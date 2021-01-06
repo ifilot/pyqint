@@ -5,7 +5,7 @@ import numpy as np
 import multiprocessing
 import os
 
-class TestCGF(unittest.TestCase):
+class TestHF(unittest.TestCase):
 
     def testHartreeFockWater(self):
         """
