@@ -9,7 +9,7 @@ class TestCGF(unittest.TestCase):
 
     def testHartreeFockWater(self):
         """
-        Test Hartree-Fock calculation on water
+        Test Hartree-Fock calculation on water using STO-3G basis set
         """
         mol = Molecule()
         mol.add_atom('O', 0.0, 0.0, 0.0)
@@ -17,11 +17,11 @@ class TestCGF(unittest.TestCase):
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
 
         energy = perform_hf(mol)
-        np.testing.assert_almost_equal(energy, -74.099410, 4)
+        np.testing.assert_almost_equal(energy, -73.21447132, 4)
 
 def perform_hf(mol):
     # build cgfs, nuclei and calculate nr of electrons
-    cgfs, nuclei = mol.build_basis('p321')
+    cgfs, nuclei = mol.build_basis('sto3g')
     nelec = int(np.sum([at[1] for at in nuclei]))
 
     # build integrals
