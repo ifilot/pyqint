@@ -531,13 +531,13 @@ double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, doubl
     }
     std::vector<double> ay;
     if(coord == 1) {
-        ay = A_array_deriv(m1+1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
+        ay = A_array_deriv(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
     } else {
         ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
     }
     std::vector<double> az;
     if(coord == 2) {
-        az = A_array_deriv(n1+1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
+        az = A_array_deriv(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
     } else {
         az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
     }

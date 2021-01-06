@@ -175,6 +175,37 @@ class TestDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(-2 * t1, fx_fd_01, 4)
         np.testing.assert_almost_equal(-2 * t2, fx_fd_02, 4)
 
+    def testDerivOpt_s1(self):
+        """
+        Test Derivative of the nuclear attraction operator in x-direction
+        """
+
+        # construct integrator object
+        integrator = PyQInt()
+
+        # build gtos
+        nucleus = np.array([-0.5, 0.0, 0.0])
+        gto1 = gto(0.154329,  nucleus, 3.425251, 1, 0, 0)
+        gto2 = gto(0.154329, -nucleus, 3.425251, 1, 0, 0)
+
+        t1a = integrator.nuclear_gto_deriv_op(gto1, gto1, nucleus, 0)
+        t1b = integrator.nuclear_gto_deriv_bf(gto1, gto1, nucleus, 0)
+
+        t2a = integrator.nuclear_gto_deriv_op(gto2, gto2, nucleus, 0)
+        t2b = integrator.nuclear_gto_deriv_bf(gto2, gto2, nucleus, 0)
+
+        # also calculate this integral using finite difference
+        fd_01 = calculate_fx_op_finite_difference(gto1, nucleus)
+        fd_02a = calculate_fx_op_finite_difference(gto2, nucleus)
+        fd_02b = calculate_fx_bf_finite_difference(gto2, nucleus)
+
+        # testing
+        np.testing.assert_almost_equal(t1a, 0.0, 4)
+        np.testing.assert_almost_equal(t1b, 0.0, 4)
+
+        np.testing.assert_almost_equal(-2.0 * t2b, fd_02b, 4)
+        np.testing.assert_almost_equal(t2a, fd_02a, 4)
+
 def calculate_fx_h2_finite_difference():
     # build integrator object
     integrator = PyQInt()
@@ -222,6 +253,18 @@ def calculate_fy_bf_finite_difference(_gto, nucleus):
 
     left = integrator.nuclear_gto(gto1, gto1, nucleus)
     right = integrator.nuclear_gto(gto2, gto2, nucleus)
+
+    return (right - left) / diff
+
+def calculate_fx_op_finite_difference(_gto, nucleus):
+    # build integrator object
+    integrator = PyQInt()
+
+    diff = 0.00001
+    nucleus[0] -= diff / 2.0
+    left = integrator.nuclear_gto(_gto, _gto, nucleus)
+    nucleus[0] += diff
+    right = integrator.nuclear_gto(_gto, _gto, nucleus)
 
     return (right - left) / diff
 
