@@ -174,7 +174,7 @@ double Integrator::overlap_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& n
     bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
     bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
 
-    if(cgf1_nuc && cgf2_nuc) { // early exit
+    if(cgf1_nuc == cgf2_nuc) { // early exit
         return 0.0;
     }
 
@@ -287,7 +287,7 @@ double Integrator::kinetic_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& n
     bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
     bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
 
-    if(cgf1_nuc && cgf2_nuc) { // early exit
+    if(cgf1_nuc == cgf2_nuc) { // early exit
         return 0.0;
     }
 
@@ -542,7 +542,58 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
             for(unsigned int k=0; k < cgf3.size(); k++) {
                 for(unsigned int l=0; l < cgf4.size(); l++) {
                     double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
-                    sum += pre * repulsion(cgf1.get_gto(i),cgf2.get_gto(j),cgf3.get_gto(k),cgf4.get_gto(l));
+                    sum += pre * repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
+                }
+            }
+        }
+    }
+
+    return sum;
+}
+
+/**
+ * @brief Calculates derivative of the two-electron repulsion integral of four CGF
+ *
+ * @param const CGF& cgf1       Contracted Gaussian Function
+ * @param const CGF& cgf2       Contracted Gaussian Function
+ * @param const CGF& cgf3       Contracted Gaussian Function
+ * @param const CGF& cgf4       Contracted Gaussian Function
+ * @param const vec3& nucleus   Nucleus coordinates
+ * @param unsigned int coord    Derivative direction
+ *
+ * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
+ *
+ * @return double value of the repulsion integral
+ */
+double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4,
+    const vec3& nucleus, unsigned int coord) const {
+    double sum = 0;
+
+    // check if cgf originates from nucleus
+    bool cgf1_nuc = true;//(cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf2_nuc = true;//(cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf3_nuc = true;//(cgf3.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf4_nuc = true;//(cgf4.get_r() - nucleus).squaredNorm() < 0.0001;
+
+    // early exit
+    // if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
+    //     return 0.0;
+    // }
+
+    for(unsigned int i=0; i< cgf1.size(); i++) {
+        for(unsigned int j=0; j< cgf2.size(); j++) {
+            for(unsigned int k=0; k < cgf3.size(); k++) {
+                for(unsigned int l=0; l < cgf4.size(); l++) {
+
+                    double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
+
+                    // take the derivative towards the basis functions
+                    double t1 = cgf1_nuc ? this->repulsion_deriv(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
+                    double t2 = cgf2_nuc ? this->repulsion_deriv(cgf2.get_gto(j), cgf1.get_gto(i), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
+                    double t3 = cgf3_nuc ? this->repulsion_deriv(cgf3.get_gto(k), cgf4.get_gto(l), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
+                    double t4 = cgf4_nuc ? this->repulsion_deriv(cgf4.get_gto(l), cgf3.get_gto(k), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
+
+                    sum += pre * (t1 + t2 + t3 + t4);
                 }
             }
         }
@@ -569,6 +620,46 @@ double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, 
                      gto2.get_position(), gto2.get_norm(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
                      gto3.get_position(), gto3.get_norm(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
                      gto4.get_position(), gto4.get_norm(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+}
+
+/**
+ * @brief Calculates overlap integral of two GTO
+ *
+ * @param const GTO& gto1       Gaussian Type Orbital
+ * @param const GTO& gto2       Gaussian Type Orbital
+ * @param const GTO& gto3       Gaussian Type Orbital
+ * @param const GTO& gto4       Gaussian Type Orbital
+ * @param unsigned int coord    Derivative direction
+ *
+ * Calculates the value of < d/dx gto1 | gto2 | gto3 | gto4 >
+ *
+ * @return double value of the overlap integral
+ */
+double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const {
+    std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
+
+    if(gto_ang[coord] != 0) {
+
+        gto_ang[coord] += 1; // calculate l+1 term
+        GTO gto1_new1(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
+                      gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
+        double term_plus = this->repulsion(gto1_new1, gto2, gto3, gto4);
+
+        gto_ang[coord] -= 2; // calculate l-1 term
+        GTO gto1_new2(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
+                      gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
+        double term_min = this->repulsion(gto1_new2, gto2, gto3, gto4);
+
+        gto_ang[coord] += 1; // recover l
+
+        return 2.0 * gto1.get_alpha() * term_plus - gto_ang[coord] * term_min;
+    } else { // s-type GTO
+        gto_ang[coord] += 1;
+        GTO gto1_new(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
+                     gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
+        double term = this->repulsion(gto1_new, gto2, gto3, gto4);
+        return 2.0 * gto1.get_alpha() * term;
+    }
 }
 
 /**
@@ -804,9 +895,9 @@ double Integrator::A_term(const int i, const int r, const int u, const int l1, c
 }
 
 double Integrator::repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,
-                         const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
-                         const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
-                         const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const {
+                             const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
+                             const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
+                             const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const {
 
     static const double pi = 3.14159265359;
     double rab2 = (a-b).squaredNorm();

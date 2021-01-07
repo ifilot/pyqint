@@ -255,7 +255,50 @@ cdef class PyQInt:
         for gto in cgf4.gtos:
             c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
 
-        return self.integrator.repulsion(c_cgf1, c_cgf2, c_cgf3, c_cgf4,)
+        return self.integrator.repulsion(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
+
+    def repulsion_deriv(self, cgf1, cgf2, cgf3, cgf4, nuc, coord):
+
+        cdef CGF c_cgf1
+        cdef CGF c_cgf2
+        cdef CGF c_cgf3
+        cdef CGF c_cgf4
+
+        # build cgf1
+        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
+        for gto in cgf1.gtos:
+            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # build cgf2
+        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
+        for gto in cgf2.gtos:
+            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # build cgf3
+        c_cgf3 = CGF(cgf3.p[0], cgf3.p[1], cgf3.p[2])
+        for gto in cgf3.gtos:
+            c_cgf3.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # build cgf4
+        c_cgf4 = CGF(cgf4.p[0], cgf4.p[1], cgf4.p[2])
+        for gto in cgf4.gtos:
+            c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        return self.integrator.repulsion_deriv(c_cgf1, c_cgf2, c_cgf3, c_cgf4, nuc[0], nuc[1], nuc[2], coord)
+
+    def repulsion_gto_deriv(self, gto1, gto2, gto3, gto4, coord):
+
+        cdef GTO c_gto1
+        cdef GTO c_gto2
+        cdef GTO c_gto3
+        cdef GTO c_gto4
+
+        c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
+        c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
+        c_gto3 = GTO(gto3.c, gto3.p[0], gto3.p[1], gto3.p[2], gto3.alpha, gto3.l, gto3.m, gto3.n)
+        c_gto4 = GTO(gto4.c, gto4.p[0], gto4.p[1], gto4.p[2], gto4.alpha, gto4.l, gto4.m, gto4.n)
+
+        return self.integrator.repulsion_deriv(c_gto1, c_gto2, c_gto3, c_gto4, coord)
 
     def repulsion_contracted(self, cgfs):
         return self.repulsion(cgfs[0], cgfs[1], cgfs[2], cgfs[3])

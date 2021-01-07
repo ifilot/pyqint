@@ -59,6 +59,8 @@ cdef extern from "integrals.h":
 
         double repulsion(GTO, GTO, GTO, GTO) except +
         double repulsion(CGF, CGF, CGF, CGF) except +
+        double repulsion_deriv(CGF, CGF, CGF, CGF, double, double, double, int) except +
+        double repulsion_deriv(GTO, GTO, GTO, GTO, int) except +
 
         int teindex(int, int, int, int) except +
 

@@ -351,6 +351,43 @@ public:
      */
     double repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const;
 
+    /**
+     * @brief Calculates derivative of the two-electron repulsion integral of four CGF
+     *
+     * @param const CGF& cgf1       Contracted Gaussian Function
+     * @param const CGF& cgf2       Contracted Gaussian Function
+     * @param const CGF& cgf3       Contracted Gaussian Function
+     * @param const CGF& cgf4       Contracted Gaussian Function
+     * @param const vec3& nucleus   Nucleus coordinates
+     * @param unsigned int coord    Derivative direction
+     *
+     * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
+     *
+     * @return double value of the repulsion integral
+     */
+    double repulsion_deriv(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4,
+        const vec3& nucleus, unsigned int coord) const;
+
+    inline double repulsion_deriv(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4,
+        double cx, double cy, double cz, unsigned int coord) const {
+        return this->repulsion_deriv(cgf1, cgf2, cgf3, cgf4, vec3(cx, cy, cz), coord);
+    }
+
+    /**
+     * @brief Calculates overlap integral of two GTO
+     *
+     * @param const GTO& gto1       Gaussian Type Orbital
+     * @param const GTO& gto2       Gaussian Type Orbital
+     * @param const GTO& gto3       Gaussian Type Orbital
+     * @param const GTO& gto4       Gaussian Type Orbital
+     * @param unsigned int coord    Derivative direction
+     *
+     * Calculates the value of < d/dx gto1 | gto2 | gto3 | gto4 >
+     *
+     * @return double value of the overlap integral
+     */
+    double repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const;
+
     const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
 
 private:
