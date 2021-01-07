@@ -5,7 +5,7 @@ import numpy as np
 import multiprocessing
 import os
 
-class TestDeriv(unittest.TestCase):
+class TestNuclearDeriv(unittest.TestCase):
 
     def testDerivBF_s1(self):
         """

@@ -45,6 +45,7 @@ cdef extern from "integrals.h":
         Integrator() except +
         double overlap(GTO, GTO) except +
         double overlap(CGF, CGF) except +
+        double overlap_deriv(CGF, CGF, double, double, double, int) except +
 
         double kinetic(GTO, GTO) except +
         double kinetic(CGF, CGF) except +

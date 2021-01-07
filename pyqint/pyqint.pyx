@@ -89,6 +89,23 @@ cdef class PyQInt:
 
         return self.integrator.overlap(c_cgf1, c_cgf2)
 
+    def overlap_deriv(self, cgf1, cgf2, nuc, coord):
+
+        cdef CGF c_cgf1
+        cdef CGF c_cgf2
+
+        # build cgf1
+        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
+        for gto in cgf1.gtos:
+            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # build cgf2
+        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
+        for gto in cgf2.gtos:
+            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        return self.integrator.overlap_deriv(c_cgf1, c_cgf2, nuc[0], nuc[1], nuc[2], coord)
+
     def kinetic_gto(self, gto1, gto2):
 
         cdef GTO c_gto1
