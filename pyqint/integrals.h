@@ -114,7 +114,7 @@ public:
 
     // expanded interface for Cython
     inline double overlap_deriv(const CGF& cgf1, const CGF& cgf2, double cx, double cy, double cz, unsigned int coord) const {
-        return overlap_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
+        return this->overlap_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
     }
 
     /**
@@ -154,6 +154,38 @@ public:
      * @return double value of the kinetic integral
      */
     double kinetic(const GTO& gto1, const GTO& gto2) const;
+
+    /**
+     * @brief Calculates derivative of overlap integral of two CGF
+     *
+     * @param const CGF& cgf1       Contracted Gaussian Function
+     * @param const CGF& cgf2       Contracted Gaussian Function
+     * @param const vec3& nucleus   Nucleus coordinates
+     * @param unsigned int coord    Derivative direction
+     *
+     * Calculates the value of d/dcx < cgf1 | -1/2 nabla^2 | cgf2 >
+     *
+     * @return double value of the nuclear integral
+     */
+    double kinetic_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& nucleus, unsigned int coord) const;
+
+    // expanded interface for Cython
+    inline double kinetic_deriv(const CGF& cgf1, const CGF& cgf2, double cx, double cy, double cz, unsigned int coord) const {
+        return this->kinetic_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
+    }
+
+    /**
+     * @brief Calculates derivative of kinetic integral of two GTO
+     *
+     * @param const GTO& gto1       Gaussian Type Orbital
+     * @param const GTO& gto2       Gaussian Type Orbital
+     * @param unsigned int coord    Derivative direction
+     *
+     * Calculates the value of < d/dx gto1 |-1/2 nabla^2 | gto2 >
+     *
+     * @return double value of the overlap integral
+     */
+    double kinetic_deriv(const GTO& gto1, const GTO& gto2, unsigned int coord) const;
 
     /**
      * @brief Calculates nuclear integral of two CGF

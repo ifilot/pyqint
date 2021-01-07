@@ -269,6 +269,99 @@ double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) const {
 }
 
 /**
+ * @brief Calculates derivative of overlap integral of two CGF
+ *
+ * @param const CGF& cgf1       Contracted Gaussian Function
+ * @param const CGF& cgf2       Contracted Gaussian Function
+ * @param const vec3& nucleus   Nucleus coordinates
+ * @param unsigned int coord    Derivative direction
+ *
+ * Calculates the value of d/dcx < cgf1 | -1/2 nabla^2 | cgf2 >
+ *
+ * @return double value of the nuclear integral
+ */
+double Integrator::kinetic_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& nucleus, unsigned int coord) const {
+    double sum = 0.0;
+
+    // check if cgf originates from nucleus
+    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+
+    if(cgf1_nuc && cgf2_nuc) { // early exit
+        return 0.0;
+    }
+
+    for(unsigned int k = 0; k < cgf1.size(); k++) {
+        for(unsigned int l = 0; l < cgf2.size(); l++) {
+
+            double t1 = cgf1_nuc ? this->kinetic_deriv(cgf1.get_gto(k), cgf2.get_gto(l), coord) : 0.0;
+            double t2 = cgf2_nuc ? this->kinetic_deriv(cgf2.get_gto(l), cgf1.get_gto(k), coord) : 0.0;
+
+            sum += cgf1.get_norm_gto(k) *
+                   cgf2.get_norm_gto(l) *
+                   cgf1.get_coefficient_gto(k) *
+                   cgf2.get_coefficient_gto(l) *
+                   (t1 + t2);
+        }
+    }
+
+    return sum;
+}
+
+/**
+ * @brief Calculates derivative of kinetic integral of two GTO
+ *
+ * @param const GTO& gto1       Gaussian Type Orbital
+ * @param const GTO& gto2       Gaussian Type Orbital
+ * @param unsigned int coord    Derivative direction
+ *
+ * Calculates the value of < d/dx gto1 |-1/2 nabla^2 | gto2 >
+ *
+ * @return double value of the overlap integral
+ */
+double Integrator::kinetic_deriv(const GTO& gto1, const GTO& gto2, unsigned int coord) const {
+    std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
+    if(gto_ang[coord] != 0) {
+        gto_ang[coord] += 1; // calculate l+1 term
+        double term_plus = this->kinetic(GTO(gto1.get_coefficient(),
+                                             gto1.get_position()[0],
+                                             gto1.get_position()[1],
+                                             gto1.get_position()[2],
+                                             gto1.get_alpha(),
+                                             gto_ang[0],
+                                             gto_ang[1],
+                                             gto_ang[2]),
+                                         gto2);
+
+        gto_ang[coord] -= 2; // calculate l-1 term
+        double term_min = this->kinetic(GTO(gto1.get_coefficient(),
+                                             gto1.get_position()[0],
+                                             gto1.get_position()[1],
+                                             gto1.get_position()[2],
+                                             gto1.get_alpha(),
+                                             gto_ang[0],
+                                             gto_ang[1],
+                                             gto_ang[2]),
+                                         gto2);
+        gto_ang[coord] += 1; // recover l
+
+        return 2.0 * gto1.get_alpha() * term_plus - gto_ang[coord] * term_min;
+    } else { // s-type GTO
+        gto_ang[coord] += 1;
+        double term1 = this->kinetic(GTO(gto1.get_coefficient(),
+                                             gto1.get_position()[0],
+                                             gto1.get_position()[1],
+                                             gto1.get_position()[2],
+                                             gto1.get_alpha(),
+                                             gto_ang[0],
+                                             gto_ang[1],
+                                             gto_ang[2]),
+                                         gto2);
+        return 2.0 * gto1.get_alpha() * term1;
+    }
+}
+
+/**
  * @brief Calculates kinetic integral of two GTO
  *
  * @param const GTO& gto1   Gaussian Type Orbital
