@@ -349,13 +349,13 @@ double Integrator::kinetic_deriv(const GTO& gto1, const GTO& gto2, unsigned int 
     } else { // s-type GTO
         gto_ang[coord] += 1;
         double term1 = this->kinetic(GTO(gto1.get_coefficient(),
-                                             gto1.get_position()[0],
-                                             gto1.get_position()[1],
-                                             gto1.get_position()[2],
-                                             gto1.get_alpha(),
-                                             gto_ang[0],
-                                             gto_ang[1],
-                                             gto_ang[2]),
+                                         gto1.get_position()[0],
+                                         gto1.get_position()[1],
+                                         gto1.get_position()[2],
+                                         gto1.get_alpha(),
+                                         gto_ang[0],
+                                         gto_ang[1],
+                                         gto_ang[2]),
                                          gto2);
         return 2.0 * gto1.get_alpha() * term1;
     }
@@ -570,15 +570,15 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
     double sum = 0;
 
     // check if cgf originates from nucleus
-    bool cgf1_nuc = true;//(cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf2_nuc = true;//(cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf3_nuc = true;//(cgf3.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf4_nuc = true;//(cgf4.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf3_nuc = (cgf3.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf4_nuc = (cgf4.get_r() - nucleus).squaredNorm() < 0.0001;
 
     // early exit
-    // if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
-    //     return 0.0;
-    // }
+    if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
+        return 0.0;
+    }
 
     for(unsigned int i=0; i< cgf1.size(); i++) {
         for(unsigned int j=0; j< cgf2.size(); j++) {

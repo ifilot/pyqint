@@ -141,6 +141,19 @@ def calculate_deriv_gto(gto1, gto2, gto3, gto4, coord):
 
     gto1_new1 = gto(gto1.c, gto1.p - 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
     gto1_new2 = gto(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
+    gto1_new3 = gto(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l+1, gto1.m, gto1.n)
+
+    print(gto1_new1)
+    print(gto1_new2)
+    print(gto2)
+    print(gto3)
+    print(gto4)
+
+    print(integrator.repulsion_gto(gto1_new1, gto2, gto3, gto4))
+    print(integrator.repulsion_gto(gto1_new2, gto2, gto3, gto4))
+    print(integrator.repulsion_gto(gto1_new3, gto2, gto3, gto4))
+    print(integrator.repulsion_gto(gto1, gto2, gto3, gto4))
+    print(gto1.c * 2.0 * gto1.alpha * integrator.repulsion_gto(gto1_new3, gto2, gto3, gto4))
 
     # build hydrogen molecule
     left = integrator.repulsion_gto(gto1_new1, gto2, gto3, gto4)
