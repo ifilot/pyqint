@@ -330,7 +330,7 @@ class TestNuclearDeriv(unittest.TestCase):
         # basis functions spawn from this atom
         self.assertTrue(np.abs(fx1) < 1e-8)
 
-        ## assert that the nuclear gradient has a meaningful number
+        # assert that the nuclear gradient has a meaningful number
         self.assertTrue(np.abs(fx2) > 1e-1)
 
         fx3 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], 0)

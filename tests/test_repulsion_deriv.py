@@ -7,7 +7,7 @@ class TestRepulsionDeriv(unittest.TestCase):
 
     def testDerivH2O(self):
         """
-        Test Derivatives of dihydrogen
+        Test Derivatives of water
         """
 
         # build integrator object

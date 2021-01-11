@@ -429,8 +429,7 @@ double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus,
-    unsigned int charge, unsigned int coord) const {
+double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge, unsigned int coord) const {
     double sum = 0.0;
 
     // check if cgf originates from nucleus
