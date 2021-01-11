@@ -75,22 +75,22 @@ class TestRepulsionDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(fx2, ans2, 4)
         np.testing.assert_almost_equal(fx2, 0.0, 4)
 
-        # # assert that the cross-terms will change
-        # fx3 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[0][0], 0)
-        # fx4 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[1][0], 0)
-        # fx5 = integrator.repulsion_deriv(cgfs[1], cgfs[0], cgfs[1], cgfs[0], nuclei[0][0], 0)
-        # fx6 = integrator.repulsion_deriv(cgfs[1], cgfs[0], cgfs[1], cgfs[0], nuclei[1][0], 0)
+        # assert that the cross-terms will change
+        fx3 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[0][0], 0)
+        fx4 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[1][0], 0)
+        fx5 = integrator.repulsion_deriv(cgfs[1], cgfs[0], cgfs[1], cgfs[0], nuclei[0][0], 0)
+        fx6 = integrator.repulsion_deriv(cgfs[1], cgfs[0], cgfs[1], cgfs[0], nuclei[1][0], 0)
 
-        # # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
-        # ans3 = calculate_force_finite_difference(mol, 0, 0, 0, 1, 1, 0)
-        # ans4 = calculate_force_finite_difference(mol, 1, 0, 0, 1, 1, 0)
-        # ans5 = calculate_force_finite_difference(mol, 0, 1, 0, 1, 0, 0)
-        # ans6 = calculate_force_finite_difference(mol, 1, 1, 0, 1, 0, 0)
+        # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
+        ans3 = calculate_force_finite_difference(mol, 0, 0, 0, 1, 1, 0)
+        ans4 = calculate_force_finite_difference(mol, 1, 0, 0, 1, 1, 0)
+        ans5 = calculate_force_finite_difference(mol, 0, 1, 0, 1, 0, 0)
+        ans6 = calculate_force_finite_difference(mol, 1, 1, 0, 1, 0, 0)
 
-        # np.testing.assert_almost_equal(fx3, ans3, 4)
-        # np.testing.assert_almost_equal(fx4, ans4, 4)
-        # np.testing.assert_almost_equal(fx5, ans5, 4)
-        # np.testing.assert_almost_equal(fx6, ans6, 4)
+        np.testing.assert_almost_equal(fx3, ans3, 4)
+        np.testing.assert_almost_equal(fx4, ans4, 4)
+        np.testing.assert_almost_equal(fx5, ans5, 4)
+        np.testing.assert_almost_equal(fx6, ans6, 4)
 
     def testDerivRepulsionGTO(self):
         # construct integrator object
@@ -104,6 +104,7 @@ class TestRepulsionDeriv(unittest.TestCase):
 
         # perform integration
         rep1 = integrator.repulsion_gto_deriv(gto1, gto2, gto3, gto4, 0)
+        rep2 = integrator.repulsion_gto_deriv(gto2, gto1, gto3, gto4, 0)
 
         # perform finite difference
         ans1 = calculate_deriv_gto(gto1, gto2, gto3, gto4, 0)
@@ -141,19 +142,6 @@ def calculate_deriv_gto(gto1, gto2, gto3, gto4, coord):
 
     gto1_new1 = gto(gto1.c, gto1.p - 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
     gto1_new2 = gto(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
-    gto1_new3 = gto(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l+1, gto1.m, gto1.n)
-
-    print(gto1_new1)
-    print(gto1_new2)
-    print(gto2)
-    print(gto3)
-    print(gto4)
-
-    print(integrator.repulsion_gto(gto1_new1, gto2, gto3, gto4))
-    print(integrator.repulsion_gto(gto1_new2, gto2, gto3, gto4))
-    print(integrator.repulsion_gto(gto1_new3, gto2, gto3, gto4))
-    print(integrator.repulsion_gto(gto1, gto2, gto3, gto4))
-    print(gto1.c * 2.0 * gto1.alpha * integrator.repulsion_gto(gto1_new3, gto2, gto3, gto4))
 
     # build hydrogen molecule
     left = integrator.repulsion_gto(gto1_new1, gto2, gto3, gto4)

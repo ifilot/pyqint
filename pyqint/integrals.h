@@ -480,10 +480,10 @@ private:
      *
      * @return double value of the nuclear integral
      */
-    double repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,
-                     const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
-                     const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
-                     const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const;
+    double repulsion(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                     const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                     const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                     const vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @brief Calculates one dimensional overlap integral

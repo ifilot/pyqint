@@ -20,7 +20,7 @@ class TestRepulsion(unittest.TestCase):
         gto2 = gto(0.535328, [0.0, 0.0, 0.0], 0.623914, 0, 0, 0)
         gto3 = gto(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         repulsion = integrator.repulsion_gto(gto1, gto1, gto1, gto1)
-        result = 2.0883402824401855
+        result = 0.20141123130697272
         np.testing.assert_almost_equal(repulsion, result, 4)
 
     def test_cgf_repulsion(self):

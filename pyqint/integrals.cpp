@@ -541,8 +541,13 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
         for(unsigned int j=0; j< cgf2.size(); j++) {
             for(unsigned int k=0; k < cgf3.size(); k++) {
                 for(unsigned int l=0; l < cgf4.size(); l++) {
+                    const double n1 = cgf1.get_norm_gto(i);
+                    const double n2 = cgf2.get_norm_gto(j);
+                    const double n3 = cgf3.get_norm_gto(k);
+                    const double n4 = cgf4.get_norm_gto(l);
+
                     double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
-                    sum += pre * repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
+                    sum += n1 * n2 * n3 * n4 * pre * repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
                 }
             }
         }
@@ -585,7 +590,14 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
             for(unsigned int k=0; k < cgf3.size(); k++) {
                 for(unsigned int l=0; l < cgf4.size(); l++) {
 
+                    // calculate product of coefficients
                     double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
+
+                    // get normalization factors
+                    const double n1 = cgf1.get_norm_gto(i);
+                    const double n2 = cgf2.get_norm_gto(j);
+                    const double n3 = cgf3.get_norm_gto(k);
+                    const double n4 = cgf4.get_norm_gto(l);
 
                     // take the derivative towards the basis functions
                     double t1 = cgf1_nuc ? this->repulsion_deriv(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
@@ -593,7 +605,7 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
                     double t3 = cgf3_nuc ? this->repulsion_deriv(cgf3.get_gto(k), cgf4.get_gto(l), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
                     double t4 = cgf4_nuc ? this->repulsion_deriv(cgf4.get_gto(l), cgf3.get_gto(k), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
 
-                    sum += pre * (t1 + t2 + t3 + t4);
+                    sum += pre * n1 * n2 * n3 * n4 * (t1 + t2 + t3 + t4);
                 }
             }
         }
@@ -616,10 +628,12 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
  */
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
-    return repulsion(gto1.get_position(), gto1.get_norm(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                     gto2.get_position(), gto2.get_norm(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                     gto3.get_position(), gto3.get_norm(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                     gto4.get_position(), gto4.get_norm(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+    double rep = repulsion(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                           gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                           gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
+                           gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+
+    return rep;
 }
 
 /**
@@ -894,10 +908,10 @@ double Integrator::A_term(const int i, const int r, const int u, const int l1, c
             std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
 }
 
-double Integrator::repulsion(const vec3 &a, const double norma, const int la, const int ma, const int na, const double alphaa,
-                             const vec3 &b, const double normb, const int lb, const int mb, const int nb, const double alphab,
-                             const vec3 &c, const double normc, const int lc, const int mc, const int nc, const double alphac,
-                             const vec3 &d, const double normd, const int ld, const int md, const int nd, const double alphad) const {
+double Integrator::repulsion(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                             const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                             const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                             const vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
     static const double pi = 3.14159265359;
     double rab2 = (a-b).squaredNorm();
@@ -926,8 +940,8 @@ double Integrator::repulsion(const vec3 &a, const double norma, const int la, co
     }
 
     return 2.0 * std::pow(pi,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
-        std::exp(-alphaa*alphab*rab2/gamma1)*
-        std::exp(-alphac*alphad*rcd2/gamma2)*sum*norma*normb*normc*normd;
+                 std::exp(-alphaa*alphab*rab2/gamma1)*
+                 std::exp(-alphac*alphad*rcd2/gamma2)*sum;
 }
 
 std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,const int l4,
