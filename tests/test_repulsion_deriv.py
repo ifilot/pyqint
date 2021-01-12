@@ -39,22 +39,41 @@ class TestRepulsionDeriv(unittest.TestCase):
         fx5 = integrator.repulsion_deriv(cgfs[5], cgfs[3], cgfs[5], cgfs[3], nuclei[0][0], 0)
         fx6 = integrator.repulsion_deriv(cgfs[3], cgfs[5], cgfs[3], cgfs[5], nuclei[1][0], 0)
 
-        # assert that these are non-trivial tests
-        self.assertFalse(fx3 == 0.0)
-        self.assertFalse(fx4 == 0.0)
-        self.assertFalse(fx5 == 0.0)
-        self.assertFalse(fx6 == 0.0)
-
         # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
         ans3 = calculate_force_finite_difference(mol, 0, 3, 3, 5, 5, 0)
         ans4 = calculate_force_finite_difference(mol, 1, 3, 3, 5, 5, 0)
         ans5 = calculate_force_finite_difference(mol, 0, 5, 3, 5, 3, 0)
         ans6 = calculate_force_finite_difference(mol, 1, 3, 5, 3, 5, 0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 4)
-        np.testing.assert_almost_equal(fx4, ans4, 4)
-        np.testing.assert_almost_equal(fx5, ans5, 4)
-        np.testing.assert_almost_equal(fx6, ans6, 4)
+        # assert that these are non-trivial tests
+        self.assertFalse(ans3 == 0.0)
+        self.assertFalse(ans4 == 0.0)
+        self.assertFalse(ans5 == 0.0)
+        self.assertFalse(ans6 == 0.0)
+
+        np.testing.assert_almost_equal(fx3, ans3, 10)
+        np.testing.assert_almost_equal(fx4, ans4, 10)
+        np.testing.assert_almost_equal(fx5, ans5, 10)
+        np.testing.assert_almost_equal(fx6, ans6, 10)
+
+        # assert that the cross-terms will change
+        fx7 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[0][0], 0)
+        fx8 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[1][0], 1)
+        fx9 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[2][0], 1)
+
+        # get answers
+        ans7 = calculate_force_finite_difference(mol, 0, 2, 3, 5, 6, 0)
+        ans8 = calculate_force_finite_difference(mol, 1, 2, 3, 5, 6, 1)
+        ans9 = calculate_force_finite_difference(mol, 2, 2, 3, 5, 6, 1)
+
+        # assert that these are non-trivial tests
+        self.assertFalse(ans7 == 0.0)
+        self.assertFalse(ans8 == 0.0)
+        self.assertFalse(ans9 == 0.0)
+
+        np.testing.assert_almost_equal(fx7, ans7, 10)
+        np.testing.assert_almost_equal(fx8, ans8, 10)
+        np.testing.assert_almost_equal(fx9, ans9, 10)
 
     def testDerivH2(self):
         """

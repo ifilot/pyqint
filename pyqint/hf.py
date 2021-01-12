@@ -106,6 +106,7 @@ class HF:
             "overlap": S,
             "kinetic": T,
             "nuclear": V,
+            "ecore": np.sum(P * (T + V)),
             "teint": teint,
             "forces": self.rhf_forces(mol, basis, C, P, e) if calc_forces else None
         }
@@ -121,6 +122,28 @@ class HF:
 
         return forces
 
+    def rhf_force_core(self, mol, basis, nucid, direction):
+        # build cgfs, nuclei and calculate nr of electrons
+        cgfs, nuclei = mol.build_basis(basis)
+
+        # build integrator object
+        integrator = PyQInt()
+
+        # build overlap and kinetic derivatives
+        T = np.zeros((len(cgfs), len(cgfs)))
+        for i in range(0, len(cgfs)):
+            for j in range(0, len(cgfs)):
+                T[i,j] = integrator.kinetic_deriv(cgfs[i], cgfs[j], nuclei[nucid][0], direction)
+
+        # build nuclear derivatives
+        V = np.zeros((len(cgfs), len(cgfs)))
+        for i in range(0, len(cgfs)):
+            for j in range(0, len(cgfs)):
+                for k in range(0, len(nuclei)):
+                    V[i,j] += integrator.nuclear_deriv(cgfs[i], cgfs[j], nuclei[k][0], nuclei[k][1], nuclei[nucid][0], direction)
+
+        return T + V
+
     def rhf_force_nuc_dir(self, mol, basis, C, P, e, nucleus, direction):
         # build cgfs, nuclei and calculate nr of electrons
         cgfs, nuclei = mol.build_basis(basis)
@@ -132,11 +155,9 @@ class HF:
 
         # build overlap and kinetic derivatives
         S = np.zeros((len(cgfs), len(cgfs)))
-        T = np.zeros((len(cgfs), len(cgfs)))
         for i in range(0, len(cgfs)):
             for j in range(i, len(cgfs)):
                 S[i,j] = S[j,i] = integrator.overlap_deriv(cgfs[i], cgfs[j], nuclei[nucleus][0], direction)
-                T[i,j] = T[j,i] = integrator.kinetic_deriv(cgfs[i], cgfs[j], nuclei[nucleus][0], direction)
 
         # build Q matrix
         Q = np.zeros(S.shape)
@@ -144,14 +165,6 @@ class HF:
             for j in range(S.shape[0]):
                 for k in range(0,int(nelec/2)):
                     Q[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
-
-        # build nuclear derivatives
-        V = np.zeros((len(cgfs), len(cgfs)))
-        for i in range(0, len(cgfs)):
-            for j in range(i, len(cgfs)):
-                for k in range(0, len(nuclei)):
-                    V[i,j] += integrator.nuclear_deriv(cgfs[i], cgfs[j], nuclei[k][0], nuclei[k][1], nuclei[nucleus][0], direction)
-                V[j,i] = V[i,j]
 
         # build two-electron derivatives
         N = len(cgfs)
@@ -170,13 +183,13 @@ class HF:
                                 teint[idx] = integrator.repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], nuclei[nucleus][0], direction)
 
         # build H-core derivatives
-        Hcore = T + V
+        Hcore = self.rhf_force_core(mol, basis, nucleus, direction)
 
         # calculate electronic derivate
         deriv = 0.0
         for i in range(0, len(cgfs)):
             for j in range(0, len(cgfs)):
-                deriv += P[i,j] * Hcore[i,j]
+                deriv += P[j,i] * Hcore[i,j]
                 for k in range(0, len(cgfs)):
                     for l in range(0, len(cgfs)):
                         idx_rep = integrator.teindex(i,j,k,l)
