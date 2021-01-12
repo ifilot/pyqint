@@ -351,6 +351,25 @@ class TestNuclearDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(fy1, ans5, 4)
         np.testing.assert_almost_equal(fy2, ans6, 4)
 
+    def testNuclearRepulsionDerivatives(self):
+        """
+        Test Hartree-Fock calculation on water using STO-3G basis set
+        """
+        mol = Molecule()
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.7570, 0.5860, 0.0)
+        mol.add_atom('H', -0.7570, 0.5860, 0.0)
+
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        forces_fd = calculate_deriv_nuclear_repulsion_finite_difference(mol)
+
+        forces = np.zeros(forces_fd.shape)
+        for i in range(0, len(mol.atoms)): # loop over nuclei
+            for j in range(0, 3): # loop over directions
+                forces[i,j] = deriv_nuclear_repulsion(nuclei, i, j)
+
+        np.testing.assert_almost_equal(forces, forces_fd, 4)
 
 def calculate_force_finite_difference(cgf1, cgf2, nucleus, charge, coord):
     # build integrator object
@@ -432,6 +451,46 @@ def calculate_fy_op_finite_difference(_gto, nucleus):
     right = integrator.nuclear_gto(_gto, _gto, nucleus)
 
     return (right - left) / diff
+
+def energy_nuclear_repulsion(nuclei):
+    energy = 0.0
+    for i in range(0, len(nuclei)):
+        for j in range(i+1, len(nuclei)):
+            r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
+            energy += nuclei[i][1] * nuclei[j][1] / r
+    return energy
+
+def deriv_nuclear_repulsion(nuclei, nucid, coord):
+    Vnn = 0.0
+    pc = nuclei[nucid][0]
+    for i in range(0, len(nuclei)):
+        if nucid != i:
+            pi = nuclei[i][0]
+            Vnn += nuclei[nucid][1] * nuclei[i][1] * (pi[coord] - pc[coord]) / np.linalg.norm(pi - pc)**3
+
+    return Vnn
+
+def calculate_deriv_nuclear_repulsion_finite_difference(mol):
+    forces = np.zeros((3,3))
+
+    sz = 0.0001
+
+    for i in range(0, len(mol.atoms)): # loop over nuclei
+        for j in range(0, 3): # loop over directions
+            mol1 = deepcopy(mol)
+            mol1.atoms[i][1][j] -= sz / 2
+            mol2 = deepcopy(mol)
+            mol2.atoms[i][1][j] += sz / 2
+
+            cgfs, nuclei1= mol1.build_basis('sto3g')
+            cgfs, nuclei2 = mol2.build_basis('sto3g')
+
+            energy1 = energy_nuclear_repulsion(nuclei1)
+            energy2 = energy_nuclear_repulsion(nuclei2)
+
+            forces[i,j] = (energy2 - energy1) / sz
+
+    return forces
 
 if __name__ == '__main__':
     unittest.main()

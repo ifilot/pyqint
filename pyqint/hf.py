@@ -139,12 +139,11 @@ class HF:
                 T[i,j] = T[j,i] = integrator.kinetic_deriv(cgfs[i], cgfs[j], nuclei[nucleus][0], direction)
 
         # build Q matrix
-        Q = np.zeros((len(cgfs), len(cgfs)))
-        for i in range(0, len(cgfs)):
-            for j in range(i, len(cgfs)):
-                for k in range(0, int(nelec/2)):
+        Q = np.zeros(S.shape)
+        for i in range(S.shape[0]):
+            for j in range(S.shape[0]):
+                for k in range(0,int(nelec/2)):
                     Q[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
-                Q[j,i] = Q[i,j]
 
         # build nuclear derivatives
         V = np.zeros((len(cgfs), len(cgfs)))

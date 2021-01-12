@@ -33,7 +33,7 @@ def perform_hf(mol):
 def calculate_forces_finite_difference(mol):
     forces = np.zeros((3,3))
 
-    sz = 0.000001
+    sz = 0.0001
 
     for i in range(0, len(mol.atoms)): # loop over nuclei
         for j in range(0, 3): # loop over directions
