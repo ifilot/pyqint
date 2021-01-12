@@ -218,13 +218,13 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus,
-        unsigned int charge, unsigned int coord) const;
+    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge,
+                         const vec3& nucderiv, unsigned int coord) const;
 
     // expanded notation for Cython interface
-    inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz,
-        unsigned int charge, unsigned int coord) const {
-        return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, coord);
+    inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge,
+                                double dx, double dy, double dz, unsigned int coord) const {
+        return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, vec3(dx, dy, dz), coord);
     }
 
     /**

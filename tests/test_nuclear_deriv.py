@@ -317,8 +317,8 @@ class TestNuclearDeriv(unittest.TestCase):
         mol.add_atom('H',  0.5, 0.0, 0.0)
         cgfs, nuclei = mol.build_basis('sto3g')
 
-        fx1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 0)
-        fx2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 0)
+        fx1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], nuclei[0][0], 0)
+        fx2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], nuclei[0][0], 0)
 
         ans1 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 0)
         ans2 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 0)
@@ -333,8 +333,8 @@ class TestNuclearDeriv(unittest.TestCase):
         # assert that the nuclear gradient has a meaningful number
         self.assertTrue(np.abs(fx2) > 1e-1)
 
-        fx3 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], 0)
-        fx4 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[1][0], nuclei[1][1], 0)
+        fx3 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], nuclei[1][0], 0)
+        fx4 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[1][0], nuclei[1][1], nuclei[1][0], 0)
 
         ans3 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[1][0], nuclei[1][1], 0)
         ans4 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[1][0], nuclei[1][1], 0)
@@ -342,8 +342,8 @@ class TestNuclearDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(fx3, ans3, 4)
         np.testing.assert_almost_equal(fx4, ans4, 4)
 
-        fy1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 1)
-        fy2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 1)
+        fy1 = integrator.nuclear_deriv(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], nuclei[0][0], 1)
+        fy2 = integrator.nuclear_deriv(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], nuclei[0][0], 1)
 
         ans5 = calculate_force_finite_difference(cgfs[0], cgfs[0], nuclei[0][0], nuclei[0][1], 1)
         ans6 = calculate_force_finite_difference(cgfs[1], cgfs[1], nuclei[0][0], nuclei[0][1], 1)

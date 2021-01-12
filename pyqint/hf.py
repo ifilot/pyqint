@@ -151,7 +151,7 @@ class HF:
         for i in range(0, len(cgfs)):
             for j in range(i, len(cgfs)):
                 for k in range(0, len(nuclei)):
-                    V[i,j] += integrator.nuclear_deriv(cgfs[i], cgfs[j], nuclei[k][0], nuclei[k][1], direction)
+                    V[i,j] += integrator.nuclear_deriv(cgfs[i], cgfs[j], nuclei[k][0], nuclei[k][1], nuclei[nucleus][0], direction)
                 V[j,i] = V[i,j]
 
         # build two-electron derivatives

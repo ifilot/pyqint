@@ -429,22 +429,24 @@ double Integrator::nuclear(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge, unsigned int coord) const {
+double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge,
+                                 const vec3& nucderiv, unsigned int coord) const {
     double sum = 0.0;
 
     // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool n1 = (cgf1.get_r() - nucderiv).squaredNorm() < 0.0001;
+    bool n2 = (cgf2.get_r() - nucderiv).squaredNorm() < 0.0001;
+    bool n3 = (nucleus - nucderiv).squaredNorm() < 0.0001;
 
     for(unsigned int k = 0; k < cgf1.size(); k++) {
         for(unsigned int l = 0; l < cgf2.size(); l++) {
 
             // take the derivative towards the basis functions
-            double t1 = cgf1_nuc ? this->nuclear_deriv_bf(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord) : 0.0;
-            double t2 = cgf2_nuc ? this->nuclear_deriv_bf(cgf2.get_gto(l), cgf1.get_gto(k), nucleus, coord) : 0.0;
+            double t1 = n1 ? this->nuclear_deriv_bf(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord) : 0.0;
+            double t2 = n2 ? this->nuclear_deriv_bf(cgf2.get_gto(l), cgf1.get_gto(k), nucleus, coord) : 0.0;
 
             // take the derivative of the operator towards the coordinate
-            double t3 = this->nuclear_deriv_op(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord);
+            double t3 = n3 ? this->nuclear_deriv_op(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord) : 0.0;
 
             sum += cgf1.get_norm_gto(k) *
                    cgf2.get_norm_gto(l) *

@@ -197,7 +197,7 @@ cdef class PyQInt:
 
         return self.integrator.nuclear(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc)
 
-    def nuclear_deriv(self, cgf1, cgf2, rc, zc, coord):
+    def nuclear_deriv(self, cgf1, cgf2, rc, zc, rd, coord):
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -212,7 +212,7 @@ cdef class PyQInt:
         for gto in cgf2.gtos:
             c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
 
-        return self.integrator.nuclear_deriv(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc, coord)
+        return self.integrator.nuclear_deriv(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc, rd[0], rd[1], rd[2], coord)
 
     def repulsion_gto(self, gto1, gto2, gto3, gto4):
 
