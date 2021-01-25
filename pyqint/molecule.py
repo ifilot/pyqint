@@ -2,6 +2,7 @@
 
 import json
 import os
+import numpy as np
 from .cgf import cgf
 
 class Molecule:
@@ -16,7 +17,7 @@ class Molecule:
     def __str__(self):
         res = "Molecule: %s\n" % self.name
         for atom in self.atoms:
-            res += " %s (%f,%f,%f)\n" % (atom[0], atom[1], atom[2], atom[3])
+            res += " %s (%f,%f,%f)\n" % (atom[0], atom[1][0], atom[1][1], atom[1][2])
 
         return res
 
@@ -24,9 +25,9 @@ class Molecule:
         ang2bohr = 1.88973
 
         if unit == "bohr":
-            self.atoms.append([atom, x, y, z])
+            self.atoms.append([atom, np.array([x, y, z])])
         elif unit == "angstrom":
-            self.atoms.append([atom, x*ang2bohr, y*ang2bohr, z*ang2bohr])
+            self.atoms.append([atom, np.array([x*ang2bohr, y*ang2bohr, z*ang2bohr])])
         else:
             raise RuntimeError("Invalid unit encountered: %s" % unit)
 
@@ -46,44 +47,44 @@ class Molecule:
 
             # store information about the nuclei
             self.charges[aidx] = cgfs_template['atomic_number']
-            self.nuclei.append([[atom[1], atom[2], atom[3]], cgfs_template['atomic_number']])
+            self.nuclei.append([atom[1], cgfs_template['atomic_number']])
 
             for cgf_t in cgfs_template['cgfs']:
                 # s-orbitals
                 if cgf_t['type'] == 'S':
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 0)
 
                 # p-orbitals
                 if cgf_t['type'] == 'P':
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 0)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 0)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 1)
 
                 # d-orbitals
                 if cgf_t['type'] == 'D':
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 2, 0, 0)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 2, 0)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 2)
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 1, 0)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 1)
-                    self.cgfs.append(cgf([atom[1], atom[2], atom[3]]))
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
 

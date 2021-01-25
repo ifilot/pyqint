@@ -266,6 +266,15 @@ public:
         NUM_GTO
     };
 
+    /**
+     * @brief      Get the vector position
+     *
+     * @return     Position
+     */
+    inline const vec3& get_r() const {
+        return r;
+    }
+
     /*
      * @fn size
      * @brief Returns the length of the contraction

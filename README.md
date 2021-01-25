@@ -17,6 +17,7 @@ __Table of Contents__
     - [Construction of Contracted Gaussian Functions](#construction-of-contracted-gaussian-functions)
     - [Quick evaluation of integrals](#parallel-evaluation-of-integrals)
     - [Plotting molecular orbitals](#plotting-molecular-orbitals)
+    - [Performing Hartree-Fock calculations](#performing-hartree-fock-calculations)
 
 ## Purpose
 
@@ -261,4 +262,104 @@ res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
 plt.imshow(res, origin='lower', extent=[-2,2,-2,2], cmap='PiYG')
 plt.colorbar()
 plt.title('1b$_{2}$ Molecular orbital of H$_{2}$O')
+```
+
+### Performing Hartree-Fock calculations
+
+```python
+from pyqint import PyQInt, Molecule, HF
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+def main():
+    # calculate sto-3g coefficients for h2o
+    cgfs, coeff = calculate_co()
+
+    # visualize orbitals
+    fig, ax = plt.subplots(2,3, figsize=(18,10))
+    for i in range(0,2):
+        for j in range(0,3):
+            dens = plot_wavefunction(cgfs, coeff[:,i*3+j])
+            limit = max(abs(np.min(dens)), abs(np.max(dens)) )
+            im = ax[i,j].imshow(dens, origin='lower', interpolation='bilinear',
+              extent=[-2,2,-2,2], cmap='PiYG', vmin=-limit, vmax=limit)
+            ax[i,j].set_xlabel('Distance a.u.')
+            ax[i,j].set_ylabel('Distance a.u.')
+            divider = make_axes_locatable(ax[i,j])
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            fig.colorbar(im, cax=cax, orientation='vertical')
+
+def calculate_co():
+    mol = Molecule()
+    mol.add_atom('C', 0.0, -0.5, 0.0)
+    mol.add_atom('O', 0.0, 0.5, 0.0)
+
+    result = HF().rhf(mol, 'sto3g')
+
+    return result['cgfs'], result['orbc']
+
+def plot_wavefunction(cgfs, coeff):
+    # build integrator
+    integrator = PyQInt()
+
+    # build grid
+    x = np.linspace(-2, 2, 100)
+    y = np.linspace(-2, 2, 100)
+    xx, yy = np.meshgrid(x,y)
+    zz = np.zeros(len(x) * len(y))
+    grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
+    res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
+
+    return res
+
+if __name__ == '__main__':
+    main()
+```
+
+### Constructing isosurfaces
+
+By installing the [PyTessel](https://github.com/ifilot/pytessel) package, you can construct an isosurface from a wave function scalar field.
+
+```python
+from pyqint import PyQInt, Molecule, HF
+import numpy as np
+from pytessel import PyTessel
+
+def main():
+    # calculate sto-3g coefficients for h2o
+    cgfs, coeff = calculate_co()
+
+    # build isosurface of the fifth MO
+    # isovalue = 0.1
+    # store result as .ply file
+    build_isosurface('co_04.ply', cgfs, coeff[:,4], 0.1)
+
+def build_isosurface(filename, cgfs, coeff, isovalue):
+    # generate some data
+    sz = 100
+    x = np.linspace(-5, 5, sz)
+    y = np.linspace(-5, 5, sz)
+    z = np.linspace(-5, 5, sz)
+    grid = np.vstack(np.meshgrid(x, y, z)).reshape(3,-1).T
+
+    integrator = PyQInt()
+    scalarfield = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((sz, sz, sz))
+    unitcell = np.diag(np.ones(3) * 10.0)
+
+    pytessel = PyTessel()
+    vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), 0.1)
+    pytessel.write_ply(filename, vertices, normals, indices)
+
+def calculate_co():
+    mol = Molecule()
+    mol.add_atom('C', 0.0, -0.5, 0.0)
+    mol.add_atom('O', 0.0, 0.5, 0.0)
+
+    result = HF().rhf(mol, 'sto3g')
+
+    return result['cgfs'], result['orbc']
+
+if __name__ == '__main__':
+    main()
 ```

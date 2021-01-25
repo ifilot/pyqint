@@ -25,6 +25,7 @@ cdef extern from "cgf.h":
         GTO() except +
         GTO(double, double, double, double, double, int, int, int) except +
         double get_amp(double, double, double) except +
+        double get_norm() except+
 
     cdef cppclass CGF:
         CGF() except +
@@ -44,15 +45,22 @@ cdef extern from "integrals.h":
         Integrator() except +
         double overlap(GTO, GTO) except +
         double overlap(CGF, CGF) except +
+        double overlap_deriv(CGF, CGF, double, double, double, int) except +
 
         double kinetic(GTO, GTO) except +
         double kinetic(CGF, CGF) except +
+        double kinetic_deriv(CGF, CGF, double, double, double, int) except +
 
         double nuclear(GTO, GTO, double, double, double) except +
+        double nuclear_deriv_bf(GTO, GTO, double, double, double, int) except +
+        double nuclear_deriv_op(GTO, GTO, double, double, double, int) except +
         double nuclear(CGF, CGF, double, double, double, int) except +
+        double nuclear_deriv(CGF, CGF, double, double, double, int, double, double, double, int) except +
 
         double repulsion(GTO, GTO, GTO, GTO) except +
         double repulsion(CGF, CGF, CGF, CGF) except +
+        double repulsion_deriv(CGF, CGF, CGF, CGF, double, double, double, int) except +
+        double repulsion_deriv(GTO, GTO, GTO, GTO, int) except +
 
         int teindex(int, int, int, int) except +
 

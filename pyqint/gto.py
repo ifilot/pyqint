@@ -43,3 +43,6 @@ class gto:
 
     def get_amp(self, x, y, z):
         return self.gto.get_amp(x, y, z)
+
+    def get_norm():
+        return self.gto.get_norm()
