@@ -8,6 +8,7 @@ from nose.tools import nottest
 
 class TestHFDeriv(unittest.TestCase):
 
+    @nottest
     def testHartreeFockForcesCore(self):
         """
         Test Hartree-Fock calculation on water using STO-3G basis set
