@@ -340,7 +340,7 @@ def build_isosurface(filename, cgfs, coeff, isovalue):
     sz = 100
     integrator = PyQInt()
     grid = integrator.build_rectgrid3d(-5, 5, sz)
-    scalarfield = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((sz, sz, sz))
+    scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (sz, sz, sz), order='F')
     unitcell = np.diag(np.ones(3) * 10.0)
 
     pytessel = PyTessel()
