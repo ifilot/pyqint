@@ -338,12 +338,8 @@ def main():
 def build_isosurface(filename, cgfs, coeff, isovalue):
     # generate some data
     sz = 100
-    x = np.linspace(-5, 5, sz)
-    y = np.linspace(-5, 5, sz)
-    z = np.linspace(-5, 5, sz)
-    grid = np.vstack(np.meshgrid(x, y, z)).reshape(3,-1).T
-
     integrator = PyQInt()
+    grid = integrator.build_rectgrid3d(-5, 5, sz)
     scalarfield = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((sz, sz, sz))
     unitcell = np.diag(np.ones(3) * 10.0)
 
