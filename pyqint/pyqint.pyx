@@ -377,6 +377,15 @@ cdef class PyQInt:
 
         return S, T, V, teint
 
+    def build_rectgrid3d(self, xmin, xmax, sz):
+        """
+        Build rectangular grid with z the slowest moving index
+        and x the fastest moving index
+        """
+        x = np.linspace(xmin, xmax, sz)
+        grid = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
+        return grid
+
     def plot_wavefunction(self, grid, coeff, cgfs):
         cdef vector[CGF] c_cgfs
 
