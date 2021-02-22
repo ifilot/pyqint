@@ -382,7 +382,7 @@ cdef class PyQInt:
         Build rectangular grid with z the slowest moving index
         and x the fastest moving index
         """
-        x = np.linspace(xmin, xmax, sz)
+        x = np.linspace(xmin, xmax, sz, endpoint=False)
         grid = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
         return grid
 
