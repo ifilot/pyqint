@@ -36,7 +36,7 @@ def build_abo(filename, mol, vertices_p, normals_p, indices_p, vertices_n, norma
     # loop over atoms
     for idx,pos in zip(mol.charges, mol.atoms):
         f.write(idx.to_bytes(1, byteorder='little'))
-        f.write(np.array(pos[1], dtype=np.float32).tobytes())
+        f.write((np.array(pos[1], dtype=np.float32) * 0.529177).tobytes())
 
     # set colors
     color_pos = np.array([201, 2, 65, 0xF0]) / 255.0

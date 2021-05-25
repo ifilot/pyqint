@@ -6,7 +6,7 @@ import os
 # specify paths on Windows to find compiler and libraries
 if os.name == 'nt':
     # set path to cl executable
-    msvc_ver = "14.28.29333"
+    msvc_ver = "14.28.29910"
     winkit_ver = "10.0.18362.0"
     os.environ['PATH'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
     os.environ['PATH'] += r";C:\Program Files (x86)\Windows Kits\10\bin\%s\x64" % winkit_ver
@@ -49,7 +49,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.8.0.2",
+    version="0.8.0.4",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
