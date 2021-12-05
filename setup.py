@@ -2,6 +2,7 @@ import subprocess
 from setuptools import Extension, setup
 from Cython.Build import cythonize
 import os
+import sys
 
 # specify paths on Windows to find compiler and libraries
 if os.name == 'nt':
@@ -25,14 +26,18 @@ if os.name == 'nt':
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
 
-if os.name == "posix":
+if os.name == 'posix' and sys.platform != 'darwin':
     os.environ['CFLAGS'] = '-I/usr/include/eigen3'
-
-if os.name == 'posix':
     extra_compile_args = ["-Wno-date-time", "-fopenmp", "-fPIC"]
     extra_link_args = ["-fopenmp"]
 elif os.name == 'nt':
     extra_compile_args = ["/openmp"]
+    extra_link_args = []
+elif sys.platform == 'darwin':
+    os.environ['CC'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/gcc-11"
+    os.environ['CXX'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/c++-11"
+    os.environ['CFLAGS'] = '-I/usr/local/Cellar/boost/1.76.0/include -I/usr/local/Cellar/eigen/3.4.0_1/include/eigen3'
+    extra_compile_args = ["-Wno-date-time", "-fPIC"]
     extra_link_args = []
 
 ext_modules = [

@@ -1023,9 +1023,15 @@ void Integrator::init() {
     this->compile_time = std::string(__TIME__);
 
     #ifdef __GNUC__
-        this->openmp_version = map.at(_OPENMP);
-        this->compiler_version = __VERSION__;
-        this->compiler_type = "GNU/GCC";
+        #ifndef _OPENMP
+            this->openmp_version = "NONE";
+            this->compiler_version = "N/A";
+            this->compiler_type = "GNU/GCC";
+	#else
+            this->openmp_version = map.at(_OPENMP);
+            this->compiler_version = __VERSION__;
+            this->compiler_type = "GNU/GCC";
+        #endif
     # else
         this->openmp_version = "unknown";
         this->compiler_version = "unknown";
