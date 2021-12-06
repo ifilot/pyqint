@@ -35,10 +35,10 @@ elif os.name == 'nt':
     extra_compile_args = ["/openmp"]
     extra_link_args = []
 elif sys.platform == 'darwin':
-    os.environ['CC'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/gcc-11"
-    os.environ['CXX'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/c++-11"
+    #os.environ['CC'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/gcc-11"
+    #os.environ['CXX'] = "/usr/local/Cellar/gcc/11.2.0_3/bin/c++-11"
     os.environ['CFLAGS'] = '-I/usr/local/Cellar/boost/1.76.0/include -I/usr/local/Cellar/eigen/3.4.0_1/include/eigen3'
-    extra_compile_args = ["-Wno-date-time", "-fPIC"]
+    extra_compile_args = ["-Wno-date-time", "-fPIC", "-std=c++11"]
     extra_link_args = []
 
 ext_modules = [
