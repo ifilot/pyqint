@@ -281,7 +281,7 @@ public:
      *
      * @return unsigned int length
      */
-    inline const unsigned int size() const {
+    inline size_t size() const {
         return this->gtos.size();
     }
 

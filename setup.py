@@ -26,6 +26,7 @@ if os.name == 'nt':
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
 
+# specify compilation instructions for other platforms
 if os.name == 'posix' and sys.platform != 'darwin':
     os.environ['CFLAGS'] = '-I/usr/include/eigen3'
     extra_compile_args = ["-Wno-date-time", "-fopenmp", "-fPIC"]
@@ -54,7 +55,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.8.0.5",
+    version="0.8.0.6",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",

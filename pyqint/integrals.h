@@ -388,7 +388,7 @@ public:
      */
     double repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const;
 
-    const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
+    size_t teindex(size_t i, size_t j, size_t k, size_t l) const;
 
 private:
     /*
