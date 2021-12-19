@@ -99,6 +99,7 @@ class HF:
         # build solution dictionary
         sol = {
             "energy": energies[-1],
+            "nuclei" : nuclei,
             "cgfs": cgfs,
             "energies": energies,
             "orbe": e,
