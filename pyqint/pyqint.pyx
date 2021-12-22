@@ -54,13 +54,16 @@ cdef class PyQInt:
 
         compile_info = {
             "compiler_version" : compiler_version.decode('utf8'),
-            "compile_date" : compile_date.decode('utf8'),
-            "compile_time" : compile_time.decode('utf8'),
-            "openmp_version" : openmp_version.decode('utf8'),
-            "compiler_type" : compiler_type.decode('utf8'),
+            "compile_date" :     compile_date.decode('utf8'),
+            "compile_time" :     compile_time.decode('utf8'),
+            "openmp_version" :   openmp_version.decode('utf8'),
+            "compiler_type" :    compiler_type.decode('utf8'),
         }
 
         return compile_info
+
+    def get_num_threads(self):
+        return self.integrator.get_num_threads()
 
     def overlap_gto(self, gto1, gto2):
 
@@ -337,12 +340,9 @@ cdef class PyQInt:
                             if teint[idx] < 0:
                                 jobs[idx] = cgfs[i],cgfs[j],cgfs[k],cgfs[l]
 
-        if verbose: # show a progress bar
-            with Pool(npar) as p:
-                teint = list(tqdm.tqdm(p.imap(func=self.repulsion_contracted, iterable=jobs), total=len(jobs)))
-        else:       # do not show a progress bar
-            with Pool(npar) as p:
-                teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs))
+
+        with Pool(npar) as p:
+            teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs, chunksize=npar))
 
         return S, T, V, teint
 

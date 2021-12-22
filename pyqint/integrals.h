@@ -46,6 +46,20 @@ public:
      */
     Integrator();
 
+    inline int get_num_threads() const {
+        #ifdef _OPENMP
+            int numthreads = 1;
+            #pragma omp parallel
+            {
+                #pragma omp single
+                numthreads = omp_get_num_threads();
+            }
+            return numthreads;
+        #else
+            return -1;
+        #endif
+    }
+
     inline const char* get_compiler_version() const {
         return this->compiler_version.c_str();
     }

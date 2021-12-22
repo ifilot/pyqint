@@ -5,6 +5,7 @@ import os
 from .cgf import cgf
 import numpy as np
 from . import PyQInt
+import time
 
 class HF:
     """
@@ -16,13 +17,20 @@ class HF:
         Performs a Hartree-Fock type calculation
         """
 
+        # create empty dictionary for time tracking statistics
+        time_stats = {}
+
         # build cgfs, nuclei and calculate nr of electrons
         cgfs, nuclei = mol.build_basis(basis)
         nelec = int(np.sum([at[1] for at in nuclei]))
 
         # build integrals
         integrator = PyQInt()
-        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
+        print("Building integrals OpenMP")
+        start = time.time()
+        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        end = time.time()
+        time_stats['integral_evaluation'] = end - start
 
         # diagonalize S
         s, U = np.linalg.eigh(S)
@@ -34,6 +42,7 @@ class HF:
         P = np.zeros(S.shape)
 
         # start iterative procedure
+        start = time.time()
         energies = []
         for niter in range(0,100):
 
@@ -96,6 +105,10 @@ class HF:
                     for k in range(0,int(nelec/2)):
                         P[i,j] += 2.0 * C[i,k] * C[j,k]
 
+        # store time for self-converging iterations
+        end = time.time()
+        time_stats['self_convergence'] = end - start
+
         # build solution dictionary
         sol = {
             "energy": energies[-1],
@@ -108,6 +121,7 @@ class HF:
             "overlap": S,
             "kinetic": T,
             "nuclear": V,
+            "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "teint": teint,
             "forces": self.rhf_forces(mol, basis, C, P, e) if calc_forces else None
