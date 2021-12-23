@@ -7,14 +7,22 @@ import numpy as np
 from . import PyQInt
 import time
 
+# couple of hardcoded variables for the DIIS algorithm
+SUBSPACE_LENGTH = 8
+SUBSPACE_START = 1
+
 class HF:
     """
     Routines to perform a restricted Hartree-Fock calculations
     """
-
-    def rhf(self, mol, basis, calc_forces=False, verbose=False):
+    def rhf(self, mol, basis, calc_forces=False, itermax=100, verbose=False):
         """
         Performs a Hartree-Fock type calculation
+
+        mol:            molecule
+        basis:          basis set
+        calc_forces:    whether first derivatives need to be calculed
+        verbose:        whether verbose output is given
         """
 
         # create empty dictionary for time tracking statistics
@@ -26,7 +34,6 @@ class HF:
 
         # build integrals
         integrator = PyQInt()
-        print("Building integrals OpenMP")
         start = time.time()
         S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
         end = time.time()
@@ -41,10 +48,33 @@ class HF:
         # create empty P matrix as initial guess
         P = np.zeros(S.shape)
 
-        # start iterative procedure
+        # keep track of time
         start = time.time()
+
+        # build containers to store per-iteration data
         energies = []
-        for niter in range(0,100):
+        time_stats['iterations'] = []
+        fmats_diis = []
+        pmat_diis = []
+        evs_diis = []
+
+        # start iterations
+        for niter in range(0,itermax):
+            # keep track of iterations
+            iterstart = time.time()
+
+            if niter > SUBSPACE_START:
+                diis_coeff = self.calculate_diis_coefficients(evs_diis)
+
+                F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
+                Fprime = X.transpose().dot(F).dot(X)
+                e, Cprime = np.linalg.eigh(Fprime)
+                C = X.dot(Cprime)
+                P = np.zeros(S.shape)
+                for i in range(S.shape[0]):
+                    for j in range(S.shape[0]):
+                        for k in range(0,int(nelec/2)):
+                            P[i,j] += 2.0 * C[i,k] * C[j,k]
 
             # calculate G
             G = np.zeros(S.shape)
@@ -91,6 +121,11 @@ class HF:
             if niter > 1:
                 ediff = np.abs(energy - energies[-1])
                 if ediff < 1e-5:
+                    # store iteration time
+                    iterend = time.time()
+                    time_stats['iterations'].append(iterend - iterstart)
+
+                    # terminate self-convergence cycle
                     if verbose:
                         print("Stopping SCF cycle, convergence reached.")
                     break
@@ -98,12 +133,34 @@ class HF:
             # store energy for next iteration
             energies.append(energy)
 
-            # calculate a new P
-            P = np.zeros(S.shape)
-            for i in range(S.shape[0]):
-                for j in range(S.shape[0]):
-                    for k in range(0,int(nelec/2)):
-                        P[i,j] += 2.0 * C[i,k] * C[j,k]
+            # for the first few iterations, build a new density
+            # matrix from the coefficients, else, resort to the DIIS
+            # algorithm
+            if niter <= SUBSPACE_START:
+                P = np.zeros(S.shape)
+                for i in range(S.shape[0]):
+                    for j in range(S.shape[0]):
+                        for k in range(0,int(nelec/2)):
+                            P[i,j] += 2.0 * C[i,k] * C[j,k]
+
+            # calculate DIIS coefficients
+            e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
+            enorm = np.linalg.norm(e)                           # store error vector norm
+            fmats_diis.append(F)                                # add Fock matrix to list
+            pmat_diis.append(P)                                 # add density matrix to list
+            evs_diis.append(e)
+
+            # prune size of the old Fock, density and error vector lists
+            # only SUBSPACE_LENGTH iterations are used to guess the new
+            # solution
+            if len(fmats_diis) > SUBSPACE_LENGTH:
+                fmats_diis = fmats_diis[-SUBSPACE_LENGTH:]
+                pmat_diis = pmat_diis[-SUBSPACE_LENGTH:]
+                evs_diis = evs_diis[-SUBSPACE_LENGTH:]
+
+            # store iteration time
+            iterend = time.time()
+            time_stats['iterations'].append(iterend - iterstart)
 
         # store time for self-converging iterations
         end = time.time()
@@ -128,6 +185,39 @@ class HF:
         }
 
         return sol
+
+    def calculate_diis_coefficients(self, evs_diis):
+        """
+        Calculate the DIIS coefficients
+        """
+        B = np.zeros((len(evs_diis)+1, len(evs_diis)+1))
+        B[-1,:] = -1
+        B[:,-1] = -1
+        B[-1,-1]=  0
+
+        rhs = np.zeros((len(evs_diis)+1, 1))
+        rhs[-1,-1] = -1
+
+        for i in range(len(evs_diis)):
+            for j in range(i+1):
+                B[i,j] = np.dot(evs_diis[i].transpose(), evs_diis[j])
+                B[j,i] = B[i,j]
+
+        *diis_coeff, _ = np.linalg.solve(B,rhs)
+
+        return diis_coeff
+
+    def extrapolate_fock_from_diis_coefficients(self, fmats_diis, diis_coeff):
+        """
+        Extrapolate the Fock matrix from the DIIS coefficients
+        """
+        norbs = fmats_diis[-1].shape[0]
+        fguess = np.zeros((norbs,norbs))
+
+        for i in range(len(fmats_diis)):
+            fguess += fmats_diis[i]*diis_coeff[i]
+
+        return fguess
 
     # def rhf_forces(self, mol, basis, C, P, e):
     #     forces = np.zeros((len(mol.atoms), 3))
