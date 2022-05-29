@@ -107,9 +107,9 @@ vec3 GTO::get_grad(const vec3& r) const {
         gz += std::pow(r[2] - this->position[2], this->n-1) * ez;
     }
 
-    return vec3(this->c * gx * fy * fz,
-                this->c * fx * gy * fz,
-                this->c * fx * fy * gz);
+    return vec3(this->norm * gx * fy * fz,
+                this->norm * fx * gy * fz,
+                this->norm * fx * fy * gz);
 }
 
 /*
@@ -189,14 +189,14 @@ const double CGF::get_amp(const vec3& r) const {
  *
  * @return gradient
  */
-vec3 CGF::get_grad(const vec3& r) const {
+std::vector<double> CGF::get_grad(const vec3& r) const {
     vec3 sum = vec3(0,0,0);
 
     for(const auto& gto : this->gtos) {
         sum += gto.get_coefficient() * gto.get_grad(r);
     }
 
-    return sum;
+    return std::vector<double>({sum[0], sum[1], sum[2]});
 }
 
 /*

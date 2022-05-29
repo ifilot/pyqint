@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.9.0.0"
+  version: "0.9.1.0"
 
 source:
   path: .
@@ -9,6 +9,7 @@ requirements:
   build:
     - numpy
     - tqdm
+    - python {{ python }}
 
   host:
     - pip

@@ -32,6 +32,7 @@ cdef extern from "cgf.h":
         CGF(double, double, double) except +
         void add_gto(double, double, int, int, int) except +
         double get_amp(double, double, double) except +
+        vector[double] get_grad(double, double, double) except +
 
 # Plotter class
 cdef extern from "plotter.h":

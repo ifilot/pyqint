@@ -344,14 +344,26 @@ public:
     }
 
     /*
-     * @fn get_amp
+     * @fn get_grad
      * @brief Gets the gradient of the CGF
      *
      * @param vec3 r    coordinates
      *
      * @return gradient
      */
-    vec3 get_grad(const vec3& r) const;
+    std::vector<double> get_grad(const vec3& r) const;
+
+    /*
+     * @fn get_grad
+     * @brief Gets the gradient of the CGF
+     *
+     * @param vec3 r    coordinates
+     *
+     * @return gradient
+     */
+    inline std::vector<double> get_grad(double x, double y, double z) const {
+        return this->get_grad(vec3(x,y,z));
+    }
 
     /*
      * @fn add_GTO

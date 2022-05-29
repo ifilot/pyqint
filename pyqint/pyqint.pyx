@@ -29,6 +29,12 @@ cdef class PyCGF:
     def get_amp(self, r):
         return self.cgf.get_amp(r[0], r[1], r[2])
 
+    def get_grad(self, x, y, z):
+        return self.cgf.get_grad(x, y, z)
+
+    def get_grad(self, r):
+        return self.cgf.get_grad(r[0], r[1], r[2])
+
 cdef class PyQInt:
     cdef Integrator *integrator
     integrator_uint = 0
