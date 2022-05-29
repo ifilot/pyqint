@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.9.1.0"
+  version: "0.9.1.1"
 
 source:
   path: .

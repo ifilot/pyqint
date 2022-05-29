@@ -4,13 +4,30 @@ from Cython.Build import cythonize
 import os
 import sys
 
+def find_windows_versions():
+    """
+    Autofind the msvc and winkit versions
+    """
+    root = os.path.join('C:', os.sep,'Program Files (x86)', 'Microsoft Visual Studio', '2019', 'Community', 'VC', 'Tools', 'MSVC')
+    for file in os.listdir(root):
+        if os.path.isdir(os.path.join(root, file)):
+            msvcver = file
+        
+    root = os.path.join('C:', os.sep,'Program Files (x86)', 'Windows Kits', '10', 'Include')
+    for file in os.listdir(root):
+        if os.path.isdir(os.path.join(root, file)):
+            winkitver = file
+
+    return msvcver, winkitver
+
 # specify paths on Windows to find compiler and libraries
 if os.name == 'nt':
     # set path to cl executable
     #msvc_ver = "14.29.30133"
     #winkit_ver = "10.0.19041.0"
-    msvc_ver = "14.28.29333"
-    winkit_ver = "10.0.18362.0"
+    # msvc_ver = "14.28.29333"
+    # winkit_ver = "10.0.18362.0"
+    msvc_ver, winkit_ver = find_windows_versions()
     os.environ['PATH'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
     os.environ['PATH'] += r";C:\Program Files (x86)\Windows Kits\10\bin\%s\x64" % winkit_ver
 
@@ -57,7 +74,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.9.1.0",
+    version="0.9.1.1",
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
