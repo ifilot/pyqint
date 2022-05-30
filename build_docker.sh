@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # clean any earlier distributions
-sudo rm -rvf build/*
-sudo rm -vf dist/*.whl wheelhouse/*.whl
-sudo rm -rvf *.egg-info
+rm -rvf build/*
+rm -vf dist/*.whl wheelhouse/*.whl
+rm -rvf *.egg-info
+
+ROOT='//d//PROGRAMMING//PYTHON//pyqint'
 
 # run compilation inside Docker
-docker run -i -t -v `pwd`:/io -w /io pyqint2010 ./docker_setup.sh
+winpty docker run -i -t -v $ROOT://io -w //io pyqint2010 .//docker_setup.sh
 
 # test compilation
-docker run -i -t -v `pwd`:/io -w /io pyqint2010 ./docker_test.sh
+winpty docker run -i -t -v $ROOT://io -w //io pyqint2010 .//docker_test.sh

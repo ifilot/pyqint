@@ -29,3 +29,33 @@ Compile the package via Anaconda build
 ```bash
 conda build .
 ```
+
+## Compiling for Linux on Windows using Docker
+
+For the Windows terminal, I use Git Bash as readily available in
+Git for Windows. Furthermore, make sure that Docker is installed.
+Construct the build environment by building the Docker image
+```
+docker build . -t pyqint2010
+```
+
+Next, run the `docker_setup.sh` script
+
+```
+./docker_setup.sh
+```
+
+### Uploading to PyPi
+
+This will place wheels in the `dist` folder. To upload these wheels
+to PyPi, make sure you have `twine` installed using
+
+```
+pip install twine
+```
+
+To upload, run
+
+```
+python -m twine upload dist/*
+```
