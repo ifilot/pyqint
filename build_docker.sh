@@ -5,6 +5,7 @@ rm -rvf build/*
 rm -vf dist/*.whl wheelhouse/*.whl
 rm -rvf *.egg-info
 
+# set path to root
 ROOT='//d//PROGRAMMING//PYTHON//pyqint'
 
 # run compilation inside Docker

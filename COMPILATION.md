@@ -39,7 +39,8 @@ Construct the build environment by building the Docker image
 docker build . -t pyqint2010
 ```
 
-Next, run the `docker_setup.sh` script
+Modify the `docker_setup.sh` file and set the `ROOT` variable to the root
+folder of this repository. Next, run the `docker_setup.sh` script
 
 ```
 ./docker_setup.sh
@@ -57,5 +58,5 @@ pip install twine
 To upload, run
 
 ```
-python -m twine upload dist/*
+python -m twine upload wheelhouse/*
 ```
