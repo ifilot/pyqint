@@ -7,9 +7,7 @@ rm -rvf *.egg-info
 
 # set path to root
 ROOT='//d//PROGRAMMING//PYTHON//pyqint'
+IMAGE='pyqint-pypi'
 
 # run compilation inside Docker
-winpty docker run -i -t -v $ROOT://io -w //io pyqint2010 .//docker_setup.sh
-
-# test compilation
-winpty docker run -i -t -v $ROOT://io -w //io pyqint2010 .//docker_test.sh
+winpty docker run -i -t -v $ROOT://io -w //io $IMAGE .//docker_run_pypi.sh

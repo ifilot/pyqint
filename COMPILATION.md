@@ -30,20 +30,39 @@ Compile the package via Anaconda build
 conda build .
 ```
 
-## Compiling for Linux on Windows using Docker
+## Compilation for Linux/Anaconda on Windows using Docker
 
 For the Windows terminal, I use Git Bash as readily available in
 Git for Windows. Furthermore, make sure that Docker is installed.
 Construct the build environment by building the Docker image
 ```
-docker build . -t pyqint2010
+docker build . -t pyqint-anaconda -f Dockerfile-linux-anaconda
 ```
 
-Modify the `docker_setup.sh` file and set the `ROOT` variable to the root
+Modify the `build_docker_linux_anaconda.sh` file and set the `ROOT` variable to the root
 folder of this repository. Next, run the `docker_setup.sh` script
 
 ```
-./docker_setup.sh
+./build_docker_linux_anaconda.sh
+```
+
+After compilation, you will automatically be prompted whether to upload
+the freshly generated packages.
+
+## Compiling for Linux/PyPi on Windows using Docker
+
+For the Windows terminal, I use Git Bash as readily available in
+Git for Windows. Furthermore, make sure that Docker is installed.
+Construct the build environment by building the Docker image
+```
+docker build . -t pyqint-pypi -f Dockerfile-linux-pypi
+```
+
+Modify the `build_docker_linux_pypi.sh` file and set the `ROOT` variable to the root
+folder of this repository. Next, run the `docker_setup.sh` script
+
+```
+./build_docker_linux_pypi.sh
 ```
 
 ### Uploading to PyPi
