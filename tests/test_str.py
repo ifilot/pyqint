@@ -1,4 +1,5 @@
 import unittest
+from nose.tools import nottest
 from pyqint import PyQInt, Molecule
 import numpy as np
 import multiprocessing
@@ -31,6 +32,7 @@ class TestString(unittest.TestCase):
         ans += " H (0.000000,0.000000,1.400000)\n"
         self.assertEqual(str(mol), ans)
 
+    @nottest
     def test_compiler_info(self):
         """
         Test automatic integral evaluation for hydrogen molecule

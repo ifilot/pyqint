@@ -1,14 +1,18 @@
 package:
   name: "pyqint"
-  version: "0.7.2.1"
+  version: "0.9.1.1"
 
 source:
   path: .
+
+build:
+  include_recipe: False
 
 requirements:
   build:
     - numpy
     - tqdm
+    - python {{ python }}
 
   host:
     - pip

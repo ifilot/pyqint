@@ -61,9 +61,11 @@ class Molecule:
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 0)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 0)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 1)
@@ -73,17 +75,23 @@ class Molecule:
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 2, 0, 0)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 2, 0)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 2)
+                    
+                    self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 1, 0)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 1)
+                    
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)

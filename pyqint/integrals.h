@@ -46,6 +46,20 @@ public:
      */
     Integrator();
 
+    inline int get_num_threads() const {
+        #ifdef _OPENMP
+            int numthreads = 1;
+            #pragma omp parallel
+            {
+                #pragma omp single
+                numthreads = omp_get_num_threads();
+            }
+            return numthreads;
+        #else
+            return -1;
+        #endif
+    }
+
     inline const char* get_compiler_version() const {
         return this->compiler_version.c_str();
     }
@@ -388,7 +402,7 @@ public:
      */
     double repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const;
 
-    const unsigned int teindex(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const;
+    size_t teindex(size_t i, size_t j, size_t k, size_t l) const;
 
 private:
     /*

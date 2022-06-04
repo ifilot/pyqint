@@ -12,11 +12,20 @@ function repair_wheel {
 }
 
 # Compile wheels
-for PYBIN in /opt/python/cp3*/bin; do
+for PYBIN in /opt/python/cp3[7,8,9]*/bin; do
     "${PYBIN}/python" /io/setup.py bdist_wheel
 done
 
 # Bundle external shared libraries into the wheels
 for whl in dist/*.whl; do
     repair_wheel "$whl"
+done
+
+set -e -u -x
+
+# Install packages and test
+for PYBIN in /opt/python/cp3[7,8,9]*/bin; do
+    "${PYBIN}/python" -m pip install numpy nose
+    "${PYBIN}/pip" install pyqint --no-index -f /io/wheelhouse
+    (cd "$HOME"; "${PYBIN}/nosetests" --verbose /io/tests/*.py)
 done

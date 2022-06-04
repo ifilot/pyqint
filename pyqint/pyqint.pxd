@@ -32,6 +32,7 @@ cdef extern from "cgf.h":
         CGF(double, double, double) except +
         void add_gto(double, double, int, int, int) except +
         double get_amp(double, double, double) except +
+        vector[double] get_grad(double, double, double) except +
 
 # Plotter class
 cdef extern from "plotter.h":
@@ -43,6 +44,9 @@ cdef extern from "plotter.h":
 cdef extern from "integrals.h":
     cdef cppclass Integrator:
         Integrator() except +
+
+        int get_num_threads() except +
+
         double overlap(GTO, GTO) except +
         double overlap(CGF, CGF) except +
         double overlap_deriv(CGF, CGF, double, double, double, int) except +
@@ -64,10 +68,10 @@ cdef extern from "integrals.h":
 
         int teindex(int, int, int, int) except +
 
-        vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except+
+        vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
 
-        string get_compiler_version() except+
-        string get_openmp_version() except+
-        string get_compile_date() except+
-        string get_compile_time() except+
-        string get_compiler_type() except+
+        string get_compiler_version() except +
+        string get_openmp_version() except +
+        string get_compile_date() except +
+        string get_compile_time() except +
+        string get_compiler_type() except +

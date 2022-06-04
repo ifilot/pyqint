@@ -344,7 +344,7 @@ def build_isosurface(filename, cgfs, coeff, isovalue):
     unitcell = np.diag(np.ones(3) * 10.0)
 
     pytessel = PyTessel()
-    vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), 0.1)
+    vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
     pytessel.write_ply(filename, vertices, normals, indices)
 
 def calculate_co():

@@ -16,12 +16,18 @@ class TestHF(unittest.TestCase):
         mol.add_atom('H', 0.7570, 0.5860, 0.0)
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
 
-        energy = perform_hf(mol)
-        np.testing.assert_almost_equal(energy, -73.21447132, 4)
+        results = perform_hf(mol)
+
+        # check that energy matches
+        np.testing.assert_almost_equal(results['energy'], -73.21447132, 4)
+
+        # verify that time statistics are being recorded
+        self.assertTrue(results['time_stats']['integral_evaluation'] > 0)
+        self.assertTrue(results['time_stats']['self_convergence'] > 0)
 
 def perform_hf(mol):
-    sol = HF().rhf(mol, 'sto3g')
-    return sol['energy']
+    results = HF().rhf(mol, 'sto3g')
+    return results
 
 if __name__ == '__main__':
     unittest.main()
