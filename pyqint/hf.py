@@ -175,6 +175,8 @@ class HF:
             "orbe": e,
             "orbc": C,
             "density": P,
+            "fock": F,
+            "transform": X,
             "overlap": S,
             "kinetic": T,
             "nuclear": V,
