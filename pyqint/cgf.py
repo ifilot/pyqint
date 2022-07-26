@@ -48,26 +48,26 @@ class cgf:
         self.gtos.append(gto(c, self.p, alpha, l, m, n))
         self.cgf.add_gto(c, alpha, l, m, n)
 
-    def get_amp(self, x, y, z):
+    def get_amp_f(self, x, y, z):
         """
         Get the amplitude of the wave function at position r
         """
-        return self.cgf.get_amp(x, y, z)
+        return self.cgf.get_amp_f(x, y, z)
 
     def get_amp(self, r):
         """
         Get the amplitude of the wave function at position r
         """
-        return self.cgf.get_amp(r[0], r[1], r[2])
+        return self.cgf.get_amp_f(r[0], r[1], r[2])
 
-    def get_grad(self, x, y, z):
+    def get_grad_f(self, x, y, z):
         """
         Get the gradient (3-vector) of the wave function at position r
         """
-        return self.cgf.get_grad(x, y, z)
+        return self.cgf.get_grad_f(x, y, z)
 
     def get_grad(self, r):
         """
         Get the gradient (3-vector) of the wave function at position r
         """
-        return self.cgf.get_grad(r[0], r[1], r[2])
+        return self.cgf.get_grad_f(r[0], r[1], r[2])

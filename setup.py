@@ -1,8 +1,24 @@
-import subprocess
 from setuptools import Extension, setup
 from Cython.Build import cythonize
 import os
 import sys
+import re
+
+PKG = "pyqint"
+VERSIONFILE = os.path.join(os.path.dirname(__file__), PKG, "_version.py")
+verstr = "unknown"
+try:
+    verstrline = open(VERSIONFILE, "rt").read()
+except EnvironmentError:
+    pass # Okay, there is no version file.
+else:
+    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        verstr = mo.group(1)
+    else:
+        print(r"Unable to find version in %s" % (VERSIONFILE,))
+        raise RuntimeError(r"If %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 def find_windows_versions():
     """
@@ -74,7 +90,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.9.2.0",
+    version=verstr,
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
