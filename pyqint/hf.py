@@ -15,7 +15,8 @@ class HF:
     """
     Routines to perform a restricted Hartree-Fock calculations
     """
-    def rhf(self, mol, basis, calc_forces=False, itermax=100, verbose=False):
+    def rhf(self, mol, basis, calc_forces=False, itermax=100, verbose=False,
+            sort_atoms=False):
         """
         Performs a Hartree-Fock type calculation
 
@@ -23,13 +24,14 @@ class HF:
         basis:          basis set
         calc_forces:    whether first derivatives need to be calculed
         verbose:        whether verbose output is given
+        sort_atoms:     whether to sort the atoms when building the basis
         """
 
         # create empty dictionary for time tracking statistics
         time_stats = {}
 
         # build cgfs, nuclei and calculate nr of electrons
-        cgfs, nuclei = mol.build_basis(basis)
+        cgfs, nuclei = mol.build_basis(basis, sort_atoms=sort_atoms)
         nelec = int(np.sum([at[1] for at in nuclei]))
 
         # build integrals
