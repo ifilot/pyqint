@@ -9,7 +9,7 @@ import time
 
 # couple of hardcoded variables for the DIIS algorithm
 SUBSPACE_LENGTH = 8
-SUBSPACE_START = 1
+SUBSPACE_START = 2
 
 class HF:
     """
@@ -120,7 +120,7 @@ class HF:
             # than threshold
             if niter > 1:
                 ediff = np.abs(energy - energies[-1])
-                if ediff < 1e-5:
+                if ediff < 1e-7: # convergence criterion needs to be at least 1e-7!
                     # store iteration time
                     iterend = time.time()
                     time_stats['iterations'].append(iterend - iterstart)
