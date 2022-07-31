@@ -33,15 +33,11 @@ class Molecule:
 
         self.charges.append(0)
 
-    def build_basis(self, name, sort_atoms=False):
+    def build_basis(self, name):
         basis_filename = os.path.join(os.path.dirname(__file__), 'basis', '%s.json' % name)
         f = open(basis_filename, 'r')
         basis = json.load(f)
         f.close()
-
-        # reorder atoms to give stabler results
-        if sort_atoms:
-            self.atoms.sort(key = lambda x: basis[x[0]]['atomic_number'], reverse=True)
         
         self.cgfs = []
         self.nuclei = []
