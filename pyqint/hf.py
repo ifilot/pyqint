@@ -8,14 +8,14 @@ from . import PyQInt
 import time
 
 # couple of hardcoded variables for the DIIS algorithm
-SUBSPACE_LENGTH = 8
-SUBSPACE_START = 2
+SUBSPACE_LENGTH = 4
+SUBSPACE_START = 1
 
 class HF:
     """
     Routines to perform a restricted Hartree-Fock calculations
     """
-    def rhf(self, mol, basis, calc_forces=False, itermax=100, verbose=False):
+    def rhf(self, mol, basis, calc_forces=False, itermax=100, use_diis=True, verbose=False):
         """
         Performs a Hartree-Fock type calculation
 
@@ -63,7 +63,7 @@ class HF:
             # keep track of iterations
             iterstart = time.time()
 
-            if niter > SUBSPACE_START:
+            if niter > SUBSPACE_START and use_diis:
                 diis_coeff = self.calculate_diis_coefficients(evs_diis)
 
                 F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
@@ -111,32 +111,14 @@ class HF:
                     r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
                     energy += nuclei[i][1] * nuclei[j][1] / r
 
-            # print info for this iteration
-            if verbose:
-                print("Iteration: %i Energy: %f" % (niter, energy))
-
-            # calculate energy difference between this and the previous
-            # iteration; terminate the loop when energy difference is less
-            # than threshold
-            if niter > 1:
-                ediff = np.abs(energy - energies[-1])
-                if ediff < 1e-7: # convergence criterion needs to be at least 1e-7!
-                    # store iteration time
-                    iterend = time.time()
-                    time_stats['iterations'].append(iterend - iterstart)
-
-                    # terminate self-convergence cycle
-                    if verbose:
-                        print("Stopping SCF cycle, convergence reached.")
-                    break
-
             # store energy for next iteration
             energies.append(energy)
 
             # for the first few iterations, build a new density
             # matrix from the coefficients, else, resort to the DIIS
             # algorithm
-            if niter <= SUBSPACE_START:
+            if niter <= SUBSPACE_START or not use_diis:
+                Pold = P.copy()
                 P = np.zeros(S.shape)
                 for i in range(S.shape[0]):
                     for j in range(S.shape[0]):
@@ -161,6 +143,26 @@ class HF:
             # store iteration time
             iterend = time.time()
             time_stats['iterations'].append(iterend - iterstart)
+
+            # print info for this iteration
+            if verbose:
+                print("Iteration: %i Energy: %f Time: %f" % (niter, energy, time_stats['iterations'][-1]))
+
+            # calculate energy difference between this and the previous
+            # iteration; terminate the loop when energy difference is less
+            # than threshold
+            if niter > 1:
+                ediff = np.abs(energies[-2] - energies[-1])
+                
+                if ediff < 1e-7: # convergence criterion needs to be at least 1e-7!
+                    # store iteration time
+                    iterend = time.time()
+                    time_stats['iterations'].append(iterend - iterstart)
+
+                    # terminate self-convergence cycle
+                    if verbose:
+                        print("Stopping SCF cycle, convergence reached.")
+                    break
 
         # store time for self-converging iterations
         end = time.time()
@@ -220,6 +222,3 @@ class HF:
             fguess += fmats_diis[i]*diis_coeff[i]
 
         return fguess
-
-    # def check_symmetric(self, a, rtol=1e-05, atol=1e-08):
-    #     return np.allclose(a, a.T, rtol=rtol, atol=atol)
