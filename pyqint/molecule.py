@@ -34,7 +34,7 @@ class Molecule:
         self.charges.append(0)
 
     def build_basis(self, name):
-        basis_filename = os.path.join(os.path.dirname(__file__), 'basis', '%s.json' % name)
+        basis_filename = os.path.join(os.path.dirname(__file__), 'basissets', '%s.json' % name)
         f = open(basis_filename, 'r')
         basis = json.load(f)
         f.close()

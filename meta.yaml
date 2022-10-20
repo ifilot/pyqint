@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.9.4.1"
+  version: "0.9.5.0"
 
 source:
   path: .
@@ -10,7 +10,7 @@ build:
 
 requirements:
   build:
-    - numpy >=1.21
+    - numpy >=1.17
     - python {{ python }}
 
   host:
@@ -18,15 +18,15 @@ requirements:
     - python
     - setuptools
     - cython
-    - numpy >=1.21
+    - numpy >=1.17
 
   run:
     - python
-    - numpy >=1.21
+    - numpy >=1.17
 
 test:
   requires:
-    - numpy >=1.21
+    - numpy >=1.17
     - setuptools
     - nose >=1.3.7
   source_files:
