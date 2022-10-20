@@ -1,14 +1,30 @@
-import subprocess
 from setuptools import Extension, setup
 from Cython.Build import cythonize
 import os
 import sys
+import re
+
+PKG = "pyqint"
+VERSIONFILE = os.path.join(os.path.dirname(__file__), PKG, "_version.py")
+verstr = "unknown"
+try:
+    verstrline = open(VERSIONFILE, "rt").read()
+except EnvironmentError:
+    pass # Okay, there is no version file.
+else:
+    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        verstr = mo.group(1)
+    else:
+        print(r"Unable to find version in %s" % (VERSIONFILE,))
+        raise RuntimeError(r"If %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 def find_windows_versions():
     """
     Autofind the msvc and winkit versions
     """
-    root = os.path.join('C:', os.sep,'Program Files (x86)', 'Microsoft Visual Studio', '2019', 'Community', 'VC', 'Tools', 'MSVC')
+    root = os.path.join('C:', os.sep,'Program Files', 'Microsoft Visual Studio', '2022', 'Community', 'VC', 'Tools', 'MSVC')
     for file in os.listdir(root):
         if os.path.isdir(os.path.join(root, file)):
             msvcver = file
@@ -22,22 +38,17 @@ def find_windows_versions():
 
 # specify paths on Windows to find compiler and libraries
 if os.name == 'nt':
-    # set path to cl executable
-    #msvc_ver = "14.29.30133"
-    #winkit_ver = "10.0.19041.0"
-    # msvc_ver = "14.28.29333"
-    # winkit_ver = "10.0.18362.0"
     msvc_ver, winkit_ver = find_windows_versions()
-    os.environ['PATH'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
+    os.environ['PATH'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
     os.environ['PATH'] += r";C:\Program Files (x86)\Windows Kits\10\bin\%s\x64" % winkit_ver
 
     # set path to include folders
     os.environ['INCLUDE'] += r";C:\Program Files (x86)\Windows Kits\10\Include\%s\ucrt" % winkit_ver
     os.environ['INCLUDE'] += r";C:\Program Files (x86)\Windows Kits\10\Include\%s\shared" % winkit_ver
-    os.environ['INCLUDE'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\include" % msvc_ver
+    os.environ['INCLUDE'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\include" % msvc_ver
 
     # some references to libraries
-    os.environ['LIB'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\lib\x64" % msvc_ver
+    os.environ['LIB'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\lib\x64" % msvc_ver
     os.environ['LIB'] += r";C:\Program Files (x86)\Windows Kits\10\Lib\%s\um\x64" % winkit_ver
     os.environ['LIB'] += r";C:\Program Files (x86)\Windows Kits\10\Lib\%s\ucrt\x64" % winkit_ver
 
@@ -74,7 +85,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='pyqint',
-    version="0.9.1.1",
+    version=verstr,
     author="Ivo Filot",
     author_email="ivo@ivofilot.nl",
     description="Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations",
@@ -84,11 +95,7 @@ setup(
     ext_modules=cythonize(ext_modules[0],
                           language_level = "3",
                           build_dir="build"),
-    packages=['pyqint'],
-    package_data={'pyqint': ['basis/sto3g.json',
-                             'basis/sto6g.json',
-                             'basis/p321.json',
-                             'basis/p631.json']},
+    packages=['pyqint', 'pyqint.basissets'],
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",

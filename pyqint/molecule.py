@@ -29,18 +29,18 @@ class Molecule:
         elif unit == "angstrom":
             self.atoms.append([atom, np.array([x*ang2bohr, y*ang2bohr, z*ang2bohr])])
         else:
-            raise RuntimeError("Invalid unit encountered: %s" % unit)
+            raise RuntimeError("Invalid unit encountered: %s. Accepted units are 'bohr' and 'angstrom'." % unit)
 
         self.charges.append(0)
 
     def build_basis(self, name):
-        self.cgfs = []
-        self.nuclei = []
-
-        basis_filename = os.path.join(os.path.dirname(__file__), 'basis', '%s.json' % name)
+        basis_filename = os.path.join(os.path.dirname(__file__), 'basissets', '%s.json' % name)
         f = open(basis_filename, 'r')
         basis = json.load(f)
         f.close()
+        
+        self.cgfs = []
+        self.nuclei = []
 
         for aidx, atom in enumerate(self.atoms):
             cgfs_template = basis[atom[0]]

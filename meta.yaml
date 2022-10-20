@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.9.1.1"
+  version: "0.9.5.0"
 
 source:
   path: .
@@ -10,8 +10,7 @@ build:
 
 requirements:
   build:
-    - numpy
-    - tqdm
+    - numpy >=1.17
     - python {{ python }}
 
   host:
@@ -19,25 +18,20 @@ requirements:
     - python
     - setuptools
     - cython
-    - numpy
-    - tqdm
+    - numpy >=1.17
 
   run:
     - python
-    - numpy
-    - tqdm
+    - numpy >=1.17
 
 test:
   requires:
-    - numpy
+    - numpy >=1.17
     - setuptools
-    - tqdm
-    - nose
+    - nose >=1.3.7
   source_files:
     - tests/*.py
     - tests/results/*.npy
-  commands:
-    - nosetests tests
 
 about:
   home: https://github.com/ifilot/pyqint

@@ -10,4 +10,4 @@ ROOT='//d//PROGRAMMING//PYTHON//pyqint'
 IMAGE='pyqint-pypi'
 
 # run compilation inside Docker
-winpty docker run -i -t -v $ROOT://io -w //io $IMAGE .//docker_run_pypi.sh
+winpty docker run -i -t -v $ROOT://io -w //io $IMAGE .//docker//docker_run_pypi.sh

@@ -34,7 +34,13 @@ private:
 public:
     Plotter();
 
-    std::vector<double> plot_wavefunction(const std::vector<double>& grid, const std::vector<double>& coeff, const std::vector<CGF>& cgfs) const;
+    std::vector<double> plot_wavefunction(const std::vector<double>& grid, 
+                                          const std::vector<double>& coeff, 
+                                          const std::vector<CGF>& cgfs) const;
+
+    std::vector<double> plot_gradient(const std::vector<double>& grid, 
+                                      const std::vector<double>& coeff, 
+                                      const std::vector<CGF>& cgfs) const;
 
 private:
 };

@@ -5,6 +5,16 @@
 Install Microsoft Visual Studio Community Edition and modify the version
 numbers and directory paths as provided in `setup.py`.
 
+Create a clean environment using
+```
+conda create --name conda_build python=3.9 numpy conda-build
+```
+
+and activate the environment with
+```
+conda activate conda_build
+```
+
 Start the compilation with
 ```
 conda build .

@@ -2,7 +2,6 @@
 
 from .pyqint cimport Integrator, GTO, CGF
 from multiprocessing import Pool
-import tqdm
 import numpy as np
 
 cdef class PyGTO:
@@ -23,13 +22,13 @@ cdef class PyCGF:
     def add_gto(self, c, alpha, l, m, n):
         self.cgf.add_gto(c, alpha, l, m, n)
 
-    def get_amp(self, x, y, z):
+    def get_amp_f(self, x, y, z):
         return self.cgf.get_amp(x, y, z)
 
     def get_amp(self, r):
         return self.cgf.get_amp(r[0], r[1], r[2])
 
-    def get_grad(self, x, y, z):
+    def get_grad_f(self, x, y, z):
         return self.cgf.get_grad(x, y, z)
 
     def get_grad(self, r):
@@ -393,6 +392,9 @@ cdef class PyQInt:
         return grid
 
     def plot_wavefunction(self, grid, coeff, cgfs):
+        """
+        Build wavefunction on grid
+        """
         cdef vector[CGF] c_cgfs
 
         # build CGFS objects
@@ -412,3 +414,27 @@ cdef class PyQInt:
         res = plotter.plot_wavefunction(c_grid, c_coeff, c_cgfs)
 
         return np.array(res)
+    
+    def plot_gradient(self, grid, coeff, cgfs):
+        """
+        Build gradient on grid
+        """
+        cdef vector[CGF] c_cgfs
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # make list of doubles
+        cdef vector[double] c_grid = grid.flatten()
+
+        # make list of coefficients
+        cdef vector[double] c_coeff = coeff
+
+        # build plotter and plot grid
+        cdef Plotter plotter = Plotter()
+        res = plotter.plot_gradient(c_grid, c_coeff, c_cgfs)
+
+        return np.array(res).reshape(-1,3)

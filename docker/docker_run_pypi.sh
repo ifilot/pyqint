@@ -12,7 +12,7 @@ function repair_wheel {
 }
 
 # Compile wheels
-for PYBIN in /opt/python/cp3[7,8,9]*/bin; do
+for PYBIN in /opt/python/cp3[7,8,9,10]*/bin; do
     "${PYBIN}/python" /io/setup.py bdist_wheel
 done
 
@@ -23,7 +23,8 @@ done
 
 set -e -u -x
 
-# Install packages and test
+# Install packages and test; note that Python 3.10 is excluded here
+# because nosetest is not properly working
 for PYBIN in /opt/python/cp3[7,8,9]*/bin; do
     "${PYBIN}/python" -m pip install numpy nose
     "${PYBIN}/pip" install pyqint --no-index -f /io/wheelhouse
