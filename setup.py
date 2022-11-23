@@ -24,7 +24,7 @@ def find_windows_versions():
     """
     Autofind the msvc and winkit versions
     """
-    root = os.path.join('C:', os.sep,'Program Files', 'Microsoft Visual Studio', '2022', 'Community', 'VC', 'Tools', 'MSVC')
+    root = os.path.join('C:', os.sep,'Program Files (x86)', 'Microsoft Visual Studio', '2019', 'Community', 'VC', 'Tools', 'MSVC')
     for file in os.listdir(root):
         if os.path.isdir(os.path.join(root, file)):
             msvcver = file
@@ -39,16 +39,16 @@ def find_windows_versions():
 # specify paths on Windows to find compiler and libraries
 if os.name == 'nt':
     msvc_ver, winkit_ver = find_windows_versions()
-    os.environ['PATH'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
+    os.environ['PATH'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\bin\Hostx64\x64" % msvc_ver
     os.environ['PATH'] += r";C:\Program Files (x86)\Windows Kits\10\bin\%s\x64" % winkit_ver
 
     # set path to include folders
     os.environ['INCLUDE'] += r";C:\Program Files (x86)\Windows Kits\10\Include\%s\ucrt" % winkit_ver
     os.environ['INCLUDE'] += r";C:\Program Files (x86)\Windows Kits\10\Include\%s\shared" % winkit_ver
-    os.environ['INCLUDE'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\include" % msvc_ver
+    os.environ['INCLUDE'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\include" % msvc_ver
 
     # some references to libraries
-    os.environ['LIB'] += r";C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\%s\lib\x64" % msvc_ver
+    os.environ['LIB'] += r";C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\%s\lib\x64" % msvc_ver
     os.environ['LIB'] += r";C:\Program Files (x86)\Windows Kits\10\Lib\%s\um\x64" % winkit_ver
     os.environ['LIB'] += r";C:\Program Files (x86)\Windows Kits\10\Lib\%s\ucrt\x64" % winkit_ver
 

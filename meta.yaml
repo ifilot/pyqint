@@ -5,12 +5,9 @@ package:
 source:
   path: .
 
-build:
-  include_recipe: False
-
 requirements:
   build:
-    - numpy >=1.17
+    - numpy
     - python {{ python }}
 
   host:
@@ -18,17 +15,17 @@ requirements:
     - python
     - setuptools
     - cython
-    - numpy >=1.17
+    - numpy
 
   run:
     - python
-    - numpy >=1.17
+    - numpy
 
 test:
   requires:
-    - numpy >=1.17
+    - numpy
     - setuptools
-    - nose >=1.3.7
+    - nose
   source_files:
     - tests/*.py
     - tests/results/*.npy
