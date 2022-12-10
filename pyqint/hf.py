@@ -93,7 +93,7 @@ class HF:
             Fprime = X.transpose().dot(F).dot(X)
 
             # diagonalize F
-            e, Cprime = np.linalg.eigh(Fprime)
+            orbe, Cprime = np.linalg.eigh(Fprime)
 
             # back-transform
             C = X.dot(Cprime)
@@ -174,7 +174,7 @@ class HF:
             "nuclei" : nuclei,
             "cgfs": cgfs,
             "energies": energies,
-            "orbe": e,
+            "orbe": orbe,
             "orbc": C,
             "density": P,
             "fock": F,
@@ -182,6 +182,7 @@ class HF:
             "overlap": S,
             "kinetic": T,
             "nuclear": V,
+            'hcore': T+V,
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "teint": teint,
