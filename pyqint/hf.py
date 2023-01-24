@@ -15,7 +15,8 @@ class HF:
     """
     Routines to perform a restricted Hartree-Fock calculations
     """
-    def rhf(self, mol, basis, calc_forces=False, itermax=100, use_diis=True, verbose=False):
+    def rhf(self, mol, basis, calc_forces=False, itermax=100,
+            use_diis=True, verbose=False, tolerance=1e-7):
         """
         Performs a Hartree-Fock type calculation
 
@@ -154,7 +155,7 @@ class HF:
             if niter > 1:
                 ediff = np.abs(energies[-2] - energies[-1])
                 
-                if ediff < 1e-7: # convergence criterion needs to be at least 1e-7!
+                if ediff < tolerance: # convergence criterion needs to be at least 1e-7!
                     # store iteration time
                     iterend = time.time()
                     time_stats['iterations'].append(iterend - iterstart)
