@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.9.5.1"
+  version: "0.9.5.2"
 
 source:
   path: .
@@ -23,7 +23,7 @@ requirements:
 
 test:
   requires:
-    - numpy
+    - numpy >=1.17
     - setuptools
     - nose
   source_files:
