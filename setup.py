@@ -53,7 +53,9 @@ if os.name == 'nt':
     os.environ['LIB'] += r";C:\Program Files (x86)\Windows Kits\10\Lib\%s\ucrt\x64" % winkit_ver
 
     # also specify some custom paths for libraries
+    os.environ['INCLUDE'] += r";C:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
+    os.environ['INCLUDE'] += r";C:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
     os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
 
 # specify compilation instructions for other platforms
