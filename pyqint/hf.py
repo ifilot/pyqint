@@ -154,7 +154,7 @@ class HF:
             # than threshold
             if niter > 1:
                 ediff = np.abs(energies[-2] - energies[-1])
-                
+
                 if ediff < tolerance: # convergence criterion needs to be at least 1e-7!
                     # store iteration time
                     iterend = time.time()

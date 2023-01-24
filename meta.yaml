@@ -23,7 +23,7 @@ requirements:
 
 test:
   requires:
-    - numpy
+    - numpy >=1.17
     - setuptools
     - nose
   source_files:
