@@ -187,7 +187,7 @@ class HF:
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "teint": teint,
-            "forces": self.rhf_forces(mol, basis, C, P, e) if calc_forces else None
+            "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
 
         return sol
@@ -224,3 +224,82 @@ class HF:
             fguess += fmats_diis[i]*diis_coeff[i]
 
         return fguess
+
+    def rhf_forces(self, mol, basis, C, P, e):
+        """
+        Calculate derivatives of nuclear coordinates to obtain forces.
+        
+        Parameters:
+        mol:    Molecule object to be evaluated
+        basis:  string identifier of the basis
+        C:      matrix of orbital coefficients
+        P:      density matrix
+        e:      orbital energies
+
+        Returns array of forces with shape [Natoms, 3]
+        """
+        # intialization
+        integrator = PyQInt()
+        cgfs, nuclei = mol.build_basis(basis)
+        forces = np.zeros(shape = [len(mol.atoms), 3])
+        n = len(cgfs)
+    
+        # calculate energy weighted density matrix:
+        # It might be preferrable to recalculate P as well
+        ew_density = np.zeros(shape = [n, n])
+        for i in range(n):
+            for j in range(n):
+                for k in range(0, len(e)//2):
+                    ew_density[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
+
+        # Loop over all cartesian direction for every nucleus
+        # This could be made more efficient by incorporating symmetry
+        for n_nuc, deriv_nucleus in enumerate(nuclei):            
+            for deriv_direction in range(3): 
+                
+                overlap = np.zeros(shape=[n, n])
+                kinetic = np.zeros(shape=[n, n])
+                nuclear = np.zeros(shape=[n, n])
+                repulsion = np.zeros(shape=[n, n, n, n])
+
+                # Loop over every permutation of cgfs in the basis
+                for i, cgf_1 in enumerate(cgfs):
+                    for j, cgf_2 in enumerate(cgfs):
+
+                        # derivative of overlap matrix
+                        overlap[i, j] += integrator.overlap_deriv(cgf_1, cgf_2, deriv_nucleus[0], deriv_direction)
+
+                        # derivative of kinetic matrix
+                        kinetic[i, j] += integrator.kinetic_deriv(cgf_1, cgf_2, deriv_nucleus[0], deriv_direction)
+                        
+                        # derivative nuclear electron attraction
+                        for nucleus in mol.nuclei:
+                            nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
+
+                        # derivative of electron-electron repulsions
+                        for k, cgf_3 in enumerate(cgfs):
+                            for l, cgf_4 in enumerate(cgfs):
+                                repulsion[i, j, k, l] += integrator.repulsion_deriv(cgf_1, cgf_2, cgf_3, cgf_4, deriv_nucleus[0], deriv_direction)
+                        
+                # derivate nucleus-nucleus repulsion
+                term_nn = 0
+                for nucleus in nuclei:
+                    if np.linalg.norm(nucleus[0] - deriv_nucleus[0]) > 0.0001:
+                        term_nn += deriv_nucleus[1] * nucleus[1] * (nucleus[0][deriv_direction] - deriv_nucleus[0][deriv_direction]) / (np.linalg.norm(nucleus[0]- deriv_nucleus[0])**3)
+
+                hcore = kinetic + nuclear
+                term_hcore = np.sum(np.multiply(P, hcore))
+
+                term_repulsion = 0
+                for i in range(n):
+                    for j in range(n):
+                        for k in range(n):
+                            for l in range(n):
+                                term_repulsion += 1/2 * P[i, j] * P[k, l]*(repulsion[i, j, k, l] - 1/2*repulsion[i, k, j, l]) 
+                
+                term_overlap = - np.sum(np.multiply(ew_density, overlap))
+           
+                # F = - d/dR E
+                forces[n_nuc, deriv_direction] -= term_hcore + term_repulsion + term_overlap + term_nn 
+
+        return forces
