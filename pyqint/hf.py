@@ -275,7 +275,11 @@ class HF:
                         
                         # derivative nuclear electron attraction
                         for nucleus in mol.nuclei:
-                            nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
+                            
+                            # nuclear_deriv_op returns wrong values if both cgfs and nucleus is on deriv_nucleus
+                            # the following if statment eliminates that term using translational symmetry 
+                            if not (np.linalg.norm(cgf_1.p - deriv_nucleus[0]) < 0.0001 and  np.linalg.norm(cgf_2.p - deriv_nucleus[0]) < 0.0001 and np.linalg.norm(nucleus[0] - deriv_nucleus[0]) < 0.0001):
+                                nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
 
                         # derivative of electron-electron repulsions
                         for k, cgf_3 in enumerate(cgfs):
