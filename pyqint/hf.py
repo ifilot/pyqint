@@ -241,6 +241,7 @@ class HF:
         # intialization
         integrator = PyQInt()
         cgfs, nuclei = mol.build_basis(basis)
+        n_elec = np.sum([nucleus[1] for nucleus in nuclei])
         forces = np.zeros(shape = [len(mol.atoms), 3])
         n = len(cgfs)
     
@@ -249,7 +250,7 @@ class HF:
         ew_density = np.zeros(shape = [n, n])
         for i in range(n):
             for j in range(n):
-                for k in range(0, len(e)//2):
+                for k in range(0, n_elec//2):
                     ew_density[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
 
         # Loop over all cartesian direction for every nucleus
