@@ -241,6 +241,7 @@ class HF:
         # intialization
         integrator = PyQInt()
         cgfs, nuclei = mol.build_basis(basis)
+        n_elec = np.sum([nucleus[1] for nucleus in nuclei])
         forces = np.zeros(shape = [len(mol.atoms), 3])
         n = len(cgfs)
     
@@ -249,7 +250,7 @@ class HF:
         ew_density = np.zeros(shape = [n, n])
         for i in range(n):
             for j in range(n):
-                for k in range(0, len(e)//2):
+                for k in range(0, n_elec//2):
                     ew_density[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
 
         # Loop over all cartesian direction for every nucleus
@@ -274,7 +275,11 @@ class HF:
                         
                         # derivative nuclear electron attraction
                         for nucleus in mol.nuclei:
-                            nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
+                            
+                            # nuclear_deriv_op returns wrong values if both cgfs and nucleus is on deriv_nucleus
+                            # the following if statment eliminates that term using translational symmetry 
+                            if not (np.linalg.norm(cgf_1.p - deriv_nucleus[0]) < 0.0001 and  np.linalg.norm(cgf_2.p - deriv_nucleus[0]) < 0.0001 and np.linalg.norm(nucleus[0] - deriv_nucleus[0]) < 0.0001):
+                                nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
 
                         # derivative of electron-electron repulsions
                         for k, cgf_3 in enumerate(cgfs):

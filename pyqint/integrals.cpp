@@ -497,12 +497,12 @@ double Integrator::nuclear_deriv_bf(const GTO& gto1, const GTO& gto2, const vec3
                                         gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
         gto_ang[coord] += 1; // recover l
 
-        return -2.0 * gto1.get_alpha() * term_plus + gto_ang[coord] * term_min;
+        return 2.0 * gto1.get_alpha() * term_plus - gto_ang[coord] * term_min;
     } else { // s-type GTO
         gto_ang[coord] += 1;
         double term1 = this->nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
                                      gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        return -2.0 * gto1.get_alpha() * term1;
+        return 2.0 * gto1.get_alpha() * term1;
     }
 }
 
