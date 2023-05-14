@@ -1,7 +1,9 @@
 # PyQInt
 
+[![C/C++ CI](https://github.com/ifilot/pyqint/actions/workflows/build.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build.yml)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
 [![PyPI](https://img.shields.io/pypi/v/pyqint?style=flat-square)](https://pypi.org/project/pyqint/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 __Table of Contents__
 
