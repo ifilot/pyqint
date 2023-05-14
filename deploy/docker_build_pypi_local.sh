@@ -7,13 +7,13 @@ function repair_wheel {
     if ! auditwheel show "$wheel"; then
         echo "Skipping non-platform wheel $wheel"
     else
-        auditwheel repair "$wheel" -w ./wheelhouse/
+        auditwheel repair "$wheel" -w /io/wheelhouse/
     fi
 }
 
 # Compile wheels
 for PYBIN in /opt/python/cp3{7,8,9,10,11}-*/bin; do
-    "${PYBIN}/python" setup.py bdist_wheel
+    "${PYBIN}/python" /io/setup.py bdist_wheel
 done
 
 # Bundle external shared libraries into the wheels

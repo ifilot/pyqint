@@ -67,7 +67,8 @@ else:
     # if msvc_ver and winkit_ver are set to None, this means we are working on Gitlab Actions
     # which requires the paths to be set differently; note that the glm-0.9.9.8.zip file has
     # a different root path than the glm-0.9.9.8.tar.gz file.
-    os.environ['INCLUDE'] += r";" + os.environ['GITHUB_WORKSPACE'] + r"\glm"
+    os.environ['INCLUDE'] += r";" + os.environ['GITHUB_WORKSPACE'] + r"\vendor\eigen-3.4.0"
+    os.environ['INCLUDE'] += r";" + os.environ['GITHUB_WORKSPACE'] + r"\vendor\boost_1_82_0"
 
     # re-order paths to ensure that the MSVC toolchain is in front; this needs to be done
     # because the Git bin folder precedes the MSVC bin folder, resulting in the wrong link.exe
@@ -80,10 +81,6 @@ else:
         else:
             newpaths.append(path)
     os.environ['PATH'] = ";".join(newpaths)
-
-    # also specify some custom paths for libraries
-    # os.environ['INCLUDE'] += r";C:\PROGRAMMING\LIBS\boost-1.74.0-win-x64\include"   # boost library
-    # os.environ['INCLUDE'] += r";D:\PROGRAMMING\LIBS\eigen-3.3.9"                    # eigen3 linear algebra library
 
 # specify compilation instructions for other platforms
 if os.name == 'posix' and sys.platform != 'darwin':
