@@ -1,0 +1,121 @@
+name: build
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
+
+    steps:
+    - name: Install dependencies
+      run: |
+        yum -y install eigen3-devel libgomp boost-devel
+        yum -y install mlocate
+        yum -y install gcc
+        ls -alh /opt/python/cp*
+        /opt/python/cp37-cp37m/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp38-cp38/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp39-cp39/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp310-cp310/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp311-cp311/bin/python -m pip install numpy tqdm cython pytest
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Build
+      run: ./deploy/docker_setup_github.sh
+    - name: Test
+      run: ./deploy/docker_test_github.sh
+    - name: Archive wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels
+        path: wheelhouse/pyqint-*.whl
+
+  # pypi-publish:
+  #   name: Upload release to PyPI
+  #   if: github.ref == 'refs/heads/master'
+  #   needs: build-linux
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/p/pytessel
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #   - name: Retrieve packages
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: wheels
+  #       path: wheelhouse
+  #   - name: Publish package distributions to PyPI
+  #     uses: pypa/gh-action-pypi-publish@release/v1
+  #     with:
+  #       packages-dir: wheelhouse/
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set-up miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: test
+          environment-file: environment.yml
+          python-version: 3.8
+          auto-activate-base: false
+      - name: Install dependencies
+        run: |
+          choco install --verbose boost-msvc-14.3
+          choco install --verbose eigen
+      - name: Set-up MSVC toolchain
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Build
+        shell: bash -l {0}
+        run: |
+          echo $PATH
+          conda build . --no-include-recipe
+      - name: Archive packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: anaconda-packages
+          path: C:\Miniconda\envs\test\conda-bld\win-64\pyqint-*.tar.bz2
+
+  # anaconda-publish:
+  #   name: Upload release to Anaconda
+  #   if: github.ref == 'refs/heads/master'
+  #   needs: build-windows
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: anaconda
+  #     url: https://anaconda.org/ifilot/pytessel
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
+  #     - name: Set-up miniconda
+  #       uses: conda-incubator/setup-miniconda@v2
+  #       with:
+  #         activate-environment: test
+  #         environment-file: environment.yml
+  #         python-version: 3.8
+  #         auto-activate-base: false
+  #     - name: Retrieve packages
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: anaconda-packages
+  #         path: packages
+  #     - name: publish-to-conda
+  #       shell: bash -l {0}
+  #       env:
+  #         INPUT_ANACONDATOKEN: ${{ secrets.ANACONDA_TOKEN }}
+  #       run: |
+  #         export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+  #         anaconda upload packages/*.tar.bz2
+
