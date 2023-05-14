@@ -1,0 +1,6 @@
+name: pyqint
+dependencies:
+  - numpy
+  - conda-build
+  - conda-verify
+  - anaconda-client

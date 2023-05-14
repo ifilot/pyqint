@@ -1,0 +1,137 @@
+name: build
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
+
+    steps:
+    - name: Install dependencies
+      run: |
+        yum -y install eigen3-devel libgomp boost-devel mlocate gcc
+        /opt/python/cp37-cp37m/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp38-cp38/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp39-cp39/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp310-cp310/bin/python -m pip install numpy tqdm cython pytest
+        /opt/python/cp311-cp311/bin/python -m pip install numpy tqdm cython pytest
+    - name: Checkout repo
+      uses: actions/checkout@v3
+    - name: Build
+      run: ./deploy/docker_setup_github.sh
+    - name: Test
+      run: ./deploy/docker_test_github.sh
+    - name: Archive wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels
+        path: wheelhouse/pyqint-*.whl
+
+  pypi-publish:
+    name: Upload release to PyPI
+    if: github.ref == 'refs/heads/master'
+    needs: build-linux
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pyqint
+    permissions:
+      id-token: write
+    steps:
+    - name: Retrieve packages
+      uses: actions/download-artifact@v3
+      with:
+        name: wheels
+        path: wheelhouse
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        packages-dir: wheelhouse/
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set-up miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: test
+          environment-file: environment.yml
+          python-version: 3.8
+          auto-activate-base: false
+      - name: Download GLM
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip"
+      - name: Unzip GLM
+        shell: bash -l {0}
+        run: |
+          7z x eigen-3.4.0.zip
+      - name: Download Boost
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.zip"
+      - name: Unzip Boost
+        shell: bash -l {0}
+        run: |
+          7z x boost_1_82_0.zip
+      - name: Placing dependencies
+        shell: bash -l {0}
+        run: |
+          rm -v boost_1_82_0.zip eigen-3.4.0.zip
+          mkdir vendor
+          mv eigen-3.4.0 vendor/
+          mv boost_1_82_0 vendor/
+      - name: Set-up MSVC toolchain
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Build
+        shell: bash -l {0}
+        run: |
+          echo $PATH
+          conda build . --no-include-recipe
+      - name: Archive packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: anaconda-packages
+          path: C:\Miniconda\envs\test\conda-bld\win-64\pyqint-*.tar.bz2
+
+  anaconda-publish:
+    name: Upload release to Anaconda
+    if: github.ref == 'refs/heads/master'
+    needs: build-windows
+    runs-on: ubuntu-latest
+    environment:
+      name: anaconda
+      url: https://anaconda.org/ifilot/pyqint
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set-up miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: test
+          environment-file: environment.yml
+          python-version: 3.8
+          auto-activate-base: false
+      - name: Retrieve packages
+        uses: actions/download-artifact@v3
+        with:
+          name: anaconda-packages
+          path: packages
+      - name: publish-to-conda
+        shell: bash -l {0}
+        env:
+          INPUT_ANACONDATOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+          anaconda upload packages/*.tar.bz2
+
