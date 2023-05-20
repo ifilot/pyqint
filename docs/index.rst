@@ -8,7 +8,10 @@ PyQInt: a Python package for Gaussian integrals
 .. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: https://www.gnu.org/licenses/gpl-3.0
 
-:program:`PyQInt` is a Python package for evaluating Gaussian Type Integrals using an optimized compiled back-end and an easy to use Python-based front-end.
+:program:`PyQInt` is a Python package for calculating one- and two-electron integrals as
+encountered in electronic structure calculations. Since integral evaluation can
+be quite computationally intensive, they are programmed in C++ and connected to
+Python using Cython.
 
 :program:`PyQInt` has been developed at the Eindhoven University of Technology,
 Netherlands. :program:`PyQInt` and its development are hosted on `github
@@ -21,6 +24,7 @@ requests are ideally submitted via the `github issue tracker
    :caption: Contents:
 
    installation
+   user_interface
    community_guidelines
 
 Indices and tables
