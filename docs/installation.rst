@@ -2,78 +2,64 @@
 .. index:: Installation
 
 Installation
-************
+============
 
-:program:`EDP` is developed for Linux operating systems. In order to compile
-:program:`EDP` on your system, you need to ensure the following libraries are
-available to you:
+.. tip::
+    For Windows users with relatively little experience with Python, we warmly
+    recommend to use the `Anaconda distribution <https://www.anaconda.com/products/distribution>`_.
+    Anaconda is an all-in-one package containing the Python compiler,
+    an integrated desktop environment (Spyder) and plenty of useful Python
+    packages such as numpy and matplotlib.
 
-* `Eigen3 <https://eigen.tuxfamily.org>`_ (matrix algebra)
-* `Cairo graphics <https://www.cairographics.org/>`_ (visualization)
-* `Boost <https://www.boost.org/>`_ (common routines)
-* `TCLAP <https://tclap.sourceforge.net/>`_ (command line instruction library)
-* `CPPUnit <https://sourceforge.net/projects/cppunit/>`_ (unit testing)
+:program:`PyQInt` is distributed via both Anaconda package as well as PyPI. For
+Windows, it is recommended to install :program:`PyQInt` via Anaconda, while
+for Linux, we recommend to use PyPI.
 
-On Debian-based operating systems, one can run the following::
+Windows / Anaconda
+------------------
 
-    sudo apt install libeigen3-dev build-essential libcairo2-dev \
-    libboost-all-dev libtclap-dev libcppunit-dev cmake
+To install :program:`PyQInt` under Windows, open an Anaconda Prompt window
+and run::
+
+    conda install -c ifilot pyqint
 
 .. note::
-   If you are running Windows and would like to use :program:`EDP`, one option
-   is to use `Debian for Windows Subsystem for Linux (WSL) <https://apps.microsoft.com/store/detail/debian/9MSVKQC78PK6>`_.
-   The compilation instructions below can be readily used.
+    Sometimes Anaconda is unable to resolve the package dependencies. This can
+    be caused by a broken environment. An easy solution is to create a new
+    environment. See the "Troubleshooting" section at the end of this page
+    for more information.
 
-Compilation
-===========
+Linux / PyPI
+------------
 
-Compilation of :program:`EDP` is fairly straightforward and a typical procedure
-looks as follows::
+To install :program:`PyQInt` systemwide, run::
 
-    git clone https://github.com/ifilot/edp.git
-    cd edp
-    mkdir build && cd build
-    cmake ../src
-    make -j9
+    sudo pip install pyqint
 
-To install :program:`EDP`, you can in addition run::
+or to install :program:`PyQInt` only for the current user, run::
 
-    sudo make install
+    pip install pyqint
 
-which will place a copy of the ``edp`` executable in ``/usr/local/bin/edp``.
+Troubleshooting
+---------------
 
-Testing
-=======
+The Anaconda packaging system can sometimes be quite finicky and sometimes
+packages conflict with each other. A way to work around this issue is to create
+a separate environment and only use that environment for the electronic
+resources associated with this project.
 
-To test :program:`EDP`, one can run the following after compilation::
+To create the new environment (called eoesc-env), run::
 
-    make test
+    conda create -n eoesc-env python=3.9
 
-For verbose testing, run::
+Next, open the environment with::
 
-    CTEST_OUTPUT_ON_FAILURE=TRUE make test
+    conda activate eoesc-env
 
-Typical output should look as follows::
+and install the required packages::
 
-    Running tests...
-    Test project /mnt/d/PROGRAMMING/CPP/edp/build
-        Start 1: DatasetSetup
-    1/4 Test #1: DatasetSetup .....................   Passed    4.62 sec
-        Start 3: TestProjection
-    2/4 Test #3: TestProjection ...................   Passed    2.32 sec
-        Start 4: TestScalarField
-    3/4 Test #4: TestScalarField ..................   Passed    0.29 sec
-        Start 2: DatasetCleanup
-    4/4 Test #2: DatasetCleanup ...................   Passed    0.00 sec
+    conda install -c ifilot pyqint pylebedev pydft pytessel
 
-    100% tests passed, 0 tests failed out of 4
+Finally, you can install the IDE Spyder using::
 
-    Total Test time (real) =   7.29 sec
-
-EasyBuild Installation
-======================
-
-For HPC infrastructure, there is also the option to install `EDP` using
-`EasyBuild <https://easybuild.io/>`_. Make a copy of `EDP-2.0.1.eb` and run::
-
-    eb EDP-2.0.1.eb
+    conda install spyder matplotlib scipy pandas openpyxl
