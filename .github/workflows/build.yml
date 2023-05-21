@@ -143,28 +143,25 @@ jobs:
 #-------------------------------------------------------------------------------
 # Anaconda / Linux
 #-------------------------------------------------------------------------------
-    build-anaconda-linux:
-        runs-on: ubuntu-latest
+  build-anaconda-linux:
+      runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout repo
-            uses: actions/checkout@v3
-          - name: Install dependencies
-            run: apt update && apt install -y build-essential libeigen3-dev libboost-all-dev
-          - name: Set-up miniconda
-            uses: conda-incubator/setup-miniconda@v2
-            with:
-              activate-environment: test
-              environment-file: environment.yml
-              python-version: 3.8
-              auto-activate-base: false
-          - name: Build
-            shell: bash -l {0}
-            run: |
-              echo $PATH
-              conda build . --no-include-recipe
-          # - name: Archive packages
-          #   uses: actions/upload-artifact@v3
-          #   with:
-          #     name: anaconda-packages
-          #     path: C:\Miniconda\envs\test\conda-bld\linux\pyqint-*.tar.bz2
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Install dependencies
+          run: apt update && apt install -y build-essential libeigen3-dev libboost-all-dev
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Build
+          run: conda build . --no-include-recipe
+        # - name: Archive packages
+        #   uses: actions/upload-artifact@v3
+        #   with:
+        #     name: anaconda-packages
+        #     path: C:\Miniconda\envs\test\conda-bld\linux\pyqint-*.tar.bz2
