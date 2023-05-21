@@ -32,7 +32,6 @@ PyQInt is a Python package for calculating one- and two-electron integrals as en
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/platforms.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/downloads.svg)](https://anaconda.org/ifilot/pyqint)
-[![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/installer/conda.svg)](https://conda.anaconda.org/ifilot)
 
 Open Anaconda prompt and type
 
