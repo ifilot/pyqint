@@ -209,7 +209,7 @@ jobs:
         - name: Checkout repo
           uses: actions/checkout@v3
         - name: Install dependencies
-          run: | 
+          run: |
             brew install eigen
             brew install boost
         - name: Set-up miniconda
