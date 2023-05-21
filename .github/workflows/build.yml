@@ -110,7 +110,7 @@ jobs:
           path: C:\Miniconda\envs\test\conda-bld\win-64\pyqint-*.tar.bz2
 
   publish-anaconda-windows:
-    name: Upload release to Anaconda
+    name: Publish Anaconda / Windows
     if: github.ref == 'refs/heads/master'
     needs: build-anaconda-windows
     runs-on: ubuntu-latest
@@ -162,8 +162,39 @@ jobs:
           run: |
             conda install conda-build
             conda build . --no-include-recipe
-        # - name: Archive packages
-        #   uses: actions/upload-artifact@v3
-        #   with:
-        #     name: anaconda-packages
-        #     path: C:\Miniconda\envs\test\conda-bld\linux\pyqint-*.tar.bz2
+        - name: Archive packages
+          uses: actions/upload-artifact@v3
+          with:
+            name: anaconda-packages
+            path: /usr/share/miniconda/conda-bld/linux-64/pyqint-*.tar.bz2
+
+  publish-anaconda-linux:
+      name: Publish Anaconda / Linux
+      if: github.ref == 'refs/heads/master'
+      needs: build-anaconda-linux
+      runs-on: ubuntu-latest
+      environment:
+        name: anaconda
+        url: https://anaconda.org/ifilot/pyqint
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Retrieve packages
+          uses: actions/download-artifact@v3
+          with:
+            name: anaconda-packages
+            path: packages
+        - name: publish-to-conda
+          shell: bash -l {0}
+          env:
+            INPUT_ANACONDATOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          run: |
+            export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+            anaconda upload packages/*.tar.bz2
