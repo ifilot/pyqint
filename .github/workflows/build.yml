@@ -211,7 +211,7 @@ jobs:
         - name: Install dependencies
           run: | 
             brew install eigen
-            bew install boost
+            brew install boost
         - name: Set-up miniconda
           uses: conda-incubator/setup-miniconda@v2
           with:
