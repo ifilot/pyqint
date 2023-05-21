@@ -160,8 +160,8 @@ jobs:
             auto-activate-base: false
         - name: Build
           run: |
-          conda install conda-build
-          conda build . --no-include-recipe
+            conda install conda-build
+            conda build . --no-include-recipe
         # - name: Archive packages
         #   uses: actions/upload-artifact@v3
         #   with:
