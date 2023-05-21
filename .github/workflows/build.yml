@@ -38,7 +38,7 @@ jobs:
   publish-pypi-linux:
     name: Upload release to PyPI
     if: github.ref == 'refs/heads/master'
-    needs: build-pypi-linux
+    needs: build-linux
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -112,7 +112,7 @@ jobs:
   publish-anaconda-windows:
     name: Upload release to Anaconda
     if: github.ref == 'refs/heads/master'
-    needs: build-anaconda-windows
+    needs: build-windows
     runs-on: ubuntu-latest
     environment:
       name: anaconda
@@ -150,7 +150,7 @@ jobs:
         - name: Checkout repo
           uses: actions/checkout@v3
         - name: Install dependencies
-          run: sudo apt update && sudo apt install -y build-essential libeigen3-dev libboost-all-dev
+          run: sudo apt-get update && sudo apt-get install -y build-essential libeigen3-dev libboost-all-dev
         - name: Set-up miniconda
           uses: conda-incubator/setup-miniconda@v2
           with:
@@ -159,7 +159,9 @@ jobs:
             python-version: 3.8
             auto-activate-base: false
         - name: Build
-          run: conda build . --no-include-recipe
+          run: |
+          conda install conda-build
+          conda build . --no-include-recipe
         # - name: Archive packages
         #   uses: actions/upload-artifact@v3
         #   with:
