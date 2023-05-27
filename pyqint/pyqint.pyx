@@ -78,7 +78,7 @@ cdef class PyQInt:
         c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
         c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
 
-        return self.integrator.overlap(c_gto1, c_gto2)
+        return self.integrator.overlap_gto(c_gto1, c_gto2)
 
     def overlap(self, cgf1, cgf2):
 
@@ -96,6 +96,33 @@ cdef class PyQInt:
             c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
 
         return self.integrator.overlap(c_cgf1, c_cgf2)
+
+    def dipole_gto(self, gto1, gto2, cc, cref = 0.0):
+
+        cdef GTO c_gto1
+        cdef GTO c_gto2
+
+        c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
+        c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
+
+        return self.integrator.dipole_gto(c_gto1, c_gto2, cc, cref)
+
+    def dipole(self, cgf1, cgf2, cc, cref = 0.0):
+
+        cdef CGF c_cgf1
+        cdef CGF c_cgf2
+
+        # build cgf1
+        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
+        for gto in cgf1.gtos:
+            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # build cgf2
+        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
+        for gto in cgf2.gtos:
+            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        return self.integrator.dipole(c_cgf1, c_cgf2, cc, cref)
 
     def overlap_deriv(self, cgf1, cgf2, nuc, coord):
 
@@ -122,7 +149,7 @@ cdef class PyQInt:
         c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
         c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
 
-        return self.integrator.kinetic(c_gto1, c_gto2)
+        return self.integrator.kinetic_gto(c_gto1, c_gto2)
 
     def kinetic(self, cgf1, cgf2):
 
@@ -166,7 +193,7 @@ cdef class PyQInt:
         c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
         c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
 
-        return self.integrator.nuclear(c_gto1, c_gto2, rc[0], rc[1], rc[2])
+        return self.integrator.nuclear_gto(c_gto1, c_gto2, rc[0], rc[1], rc[2])
 
     def nuclear_gto_deriv_bf(self, gto1, gto2, rc, coord):
 
