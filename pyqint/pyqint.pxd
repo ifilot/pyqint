@@ -48,25 +48,42 @@ cdef extern from "integrals.h":
 
         int get_num_threads() except +
 
-        double overlap(GTO, GTO) except +
+        # overlap integrals
+        double overlap_gto(GTO, GTO) except +
         double overlap(CGF, CGF) except +
+
+        # overlap integral geometric derivatives
         double overlap_deriv(CGF, CGF, double, double, double, int) except +
 
-        double kinetic(GTO, GTO) except +
+        # dipole integrals
+        double dipole(CGF, CGF, int, double) except +
+        double dipole_gto(GTO, GTO, int, double) except +
+
+        # kinetic integrals
+        double kinetic_gto(GTO, GTO) except +
         double kinetic(CGF, CGF) except +
+
+        # kinetic integral geometric derivatives
         double kinetic_deriv(CGF, CGF, double, double, double, int) except +
 
-        double nuclear(GTO, GTO, double, double, double) except +
+        # nuclear integrals
+        double nuclear(CGF, CGF, double, double, double, int) except +
+        double nuclear_gto(GTO, GTO, double, double, double) except +
+
+        # nuclear integral geometric derivatives
+        double nuclear_deriv(CGF, CGF, double, double, double, int, double, double, double, int) except +
         double nuclear_deriv_bf(GTO, GTO, double, double, double, int) except +
         double nuclear_deriv_op(GTO, GTO, double, double, double, int) except +
-        double nuclear(CGF, CGF, double, double, double, int) except +
-        double nuclear_deriv(CGF, CGF, double, double, double, int, double, double, double, int) except +
 
-        double repulsion(GTO, GTO, GTO, GTO) except +
+        # two-electron integrals
         double repulsion(CGF, CGF, CGF, CGF) except +
+        double repulsion(GTO, GTO, GTO, GTO) except +
+
+        # two-electron integral derivatives
         double repulsion_deriv(CGF, CGF, CGF, CGF, double, double, double, int) except +
         double repulsion_deriv(GTO, GTO, GTO, GTO, int) except +
 
+        # two-electron indexing
         int teindex(int, int, int, int) except +
 
         vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +

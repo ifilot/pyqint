@@ -24,6 +24,7 @@
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -60,22 +61,47 @@ public:
         #endif
     }
 
+    /**
+     * @brief      Gets the compiler version.
+     *
+     * @return     The compiler version.
+     */
     inline const char* get_compiler_version() const {
         return this->compiler_version.c_str();
     }
 
+    /**
+     * @brief      Gets the compile time.
+     *
+     * @return     The compile time.
+     */
     inline const char* get_compile_time() const {
         return this->compile_time.c_str();
     }
 
+    /**
+     * @brief      Gets the compile date.
+     *
+     * @return     The compile date.
+     */
     inline const char* get_compile_date() const {
         return this->compile_date.c_str();
     }
 
+    /**
+     * @brief      Gets the openmp version.
+     *
+     * @return     The openmp version.
+     */
     inline const char* get_openmp_version() const {
         return this->openmp_version.c_str();
     }
 
+    /**
+     * @brief      Gets the compiler type.
+     *
+     * @return     The compiler type.
+     */
     inline const char* get_compiler_type() const {
         return this->compiler_type.c_str();
     }
@@ -89,134 +115,250 @@ public:
                                       const std::vector<double>& py,
                                       const std::vector<double>& pz) const;
 
+    /**************************************************************************
+     * OVERLAP INTEGRALS
+     **************************************************************************/
+
     /**
-     * @brief Calculates overlap integral of two CGF
+     * @brief      Calculates overlap integral of two CGF
      *
-     * @param const CGF& cgf1   Contracted Gaussian Function
-     * @param const CGF& cgf2   Contracted Gaussian Function
-     *********************
+     * @param[in]  cgf1  Contracted Gaussian Functional 1
+     * @param[in]  cgf2  Contracted Gaussian Functional 2
+     *
      * Calculates the value of < cgf1 | cgf2 >
      *
-     * @return double value of the overlap integral
+     * @return     double value of the overlap integral
      */
     double overlap(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
-     * @brief Calculates overlap integral of two GTO
+     * @brief      Calculates overlap integral of two GTO
      *
-     * @param const GTO& gto1   Gaussian Type Orbital
-     * @param const GTO& gto2   Gaussian Type Orbital
+     * @param[in]  gto1  Gaussian Type Orbital 1
+     * @param[in]  gto2  Gaussian Type Orbital 2
      *
      * Calculates the value of < gto1 | gto2 >
      *
-     * @return double value of the overlap integral
+     * @return     double value of the overlap integral
      */
-    double overlap(const GTO& gto1, const GTO& gto2) const;
+    double overlap_gto(const GTO& gto1, const GTO& gto2) const;
 
     /**
-     * @brief Calculates derivative of overlap integral of two CGF
+     * @brief      Calculates the geometric derivative of overlap integral of
+     *             two CGF
      *
-     * @param const CGF& cgf1       Contracted Gaussian Function
-     * @param const CGF& cgf2       Contracted Gaussian Function
-     * @param unsigned int coord    Derivative direction
+     * @param[in]  cgf1     Gaussian Contracted Functional 1
+     * @param[in]  cgf2     Gaussian Contracted Functional 2
+     * @param[in]  nucleus  Nucleus position
+     * @param[in]  coord    Cartesian direction
      *
      * Calculates the value of d/dx < cgf1 | cgf2 >
      *
-     * @return double value of the nuclear integral
+     * @return     double value of the nuclear integral
      */
-    double overlap_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& nucleus, unsigned int coord) const;
+    double overlap_deriv(const CGF& cgf1,
+                         const CGF& cgf2,
+                         const vec3& nucleus,
+                         unsigned int coord) const;
+
+    /**
+     * @brief      Calculates the geometric derivative of overlap integral of
+     *             two GTOs
+     *
+     * @param[in]  gto1   Gaussian Type Orbital 1
+     * @param[in]  gto2   Gaussian Type Orbital 2
+     * @param[in]  coord  Cartesian direction
+     * @param[in]  nucleus  Nucleus position
+     *
+     * Calculates the value of d/dx < gto1 | gto2 >
+     *
+     * @return     double value of the nuclear integral
+     */
+    double overlap_deriv_gto(const GTO& gto1,
+                             const GTO& gto2,
+                             unsigned int coord) const;
+
+/**************************************************************************
+ * DIPOLE INTEGRALS
+ **************************************************************************/
+
+    /**
+     * @brief      Calculates dipole integral of two CGF
+     *
+     * @param[in]  cgf1  Contracted Gaussian Function
+     * @param[in]  cgf2  Contracted Gaussian Function
+     * @param[in]  cc    Cartesian direction
+     * @param[in]  ref   Reference position
+     *
+     * Calculates the value of < cgf1 | (cc - ref) | cgf2 >
+     *
+     * @return     value of the dipole integral
+     */
+    double dipole(const CGF& cgf1,
+                  const CGF& cgf2,
+                  unsigned int cc,
+                  double ref = 0.0) const;
+    /**
+     * @brief      Calculates dipole integral of two GTO
+     *
+     * @param[in]  gto1   Gaussian Type Orbital
+     * @param[in]  gto2   Gaussian Type Orbital
+     * @param      cc     Cartesian direction
+     * @param[in]  ref    The reference
+     *
+     * Calculates the value of < gto1 | (cc - ref) | gto2 >
+     *
+     * @return     value of the dipole integral
+     */
+    double dipole_gto(const GTO& gto1,
+                      const GTO& gto2,
+                      unsigned int cc,
+                      double ref = 0.0) const;
 
     // expanded interface for Cython
     inline double overlap_deriv(const CGF& cgf1, const CGF& cgf2, double cx, double cy, double cz, unsigned int coord) const {
         return this->overlap_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
     }
 
-    /**
-     * @brief Calculates derivative of the overlap
-     * integral (of the first BF) towards coordinate
-     *
-     * @param const GTO& gto1       Gaussian Type Orbital
-     * @param const GTO& gto2       Gaussian Type Orbital
-     * @param unsigned int coord    Derivative direction
-     *
-     * Calculates the value of < d/d1x gto1 | gto2 >
-     *
-     * @return double value of the overlap integral
-     */
-    double overlap_deriv(const GTO& gto1, const GTO& gto2, unsigned int coord) const;
+/**************************************************************************
+ * KINETIC INTEGRALS
+ **************************************************************************/
 
     /**
-     * @brief Calculates kinetic integral of two CGF
+     * @brief      Calculates kinetic integral of two CGF
      *
-     * @param const CGF& cgf1   Contracted Gaussian Function
-     * @param const CGF& cgf2   Contracted Gaussian Function
+     * @param[in]  cgf1  Contracted Gaussian Functional 1
+     * @param[in]  cgf2  Contracted Gaussian Functional 2
      *
      * Calculates the value of < cgf1 | T | cgf2 >
      *
-     * @return double value of the kinetic integral
+     * @return     double value of the kinetic integral
      */
     double kinetic(const CGF& cgf1, const CGF& cgf2) const;
 
     /**
-     * @brief Calculates kinetic integral of two GTO
+     * @brief      Calculates kinetic integral of two GTO
      *
-     * @param const GTO& gto1   Gaussian Type Orbital
-     * @param const GTO& gto2   Gaussian Type Orbital
+     * @param[in]  gto1  Gaussian Type Orbital 1
+     * @param[in]  gto2  Gaussian Type Orbital 2
      *
-     * Calculates the value of < gto1 | H | gto2 >
+     * Calculates the value of < gto1 | T | gto2 >
      *
-     * @return double value of the kinetic integral
+     * @return     double value of the kinetic integral
      */
-    double kinetic(const GTO& gto1, const GTO& gto2) const;
+    double kinetic_gto(const GTO& gto1, const GTO& gto2) const;
 
     /**
-     * @brief Calculates derivative of overlap integral of two CGF
+     * @brief      Calculates derivative of kinetic integral of two CGF
      *
-     * @param const CGF& cgf1       Contracted Gaussian Function
-     * @param const CGF& cgf2       Contracted Gaussian Function
-     * @param const vec3& nucleus   Nucleus coordinates
-     * @param unsigned int coord    Derivative direction
+     * @param[in]  cgf1     Contracted Gaussian Functional 1
+     * @param[in]  cgf2     Contracted Gaussian Functional 2
+     * @param[in]  nucleus  nucleus position
+     * @param[in]  coord    derivative coordinate
      *
      * Calculates the value of d/dcx < cgf1 | -1/2 nabla^2 | cgf2 >
      *
-     * @return double value of the nuclear integral
+     * @return     double value of the kinetic integral
      */
-    double kinetic_deriv(const CGF& cgf1, const CGF& cgf2, const vec3& nucleus, unsigned int coord) const;
+    double kinetic_deriv(const CGF& cgf1,
+                         const CGF& cgf2,
+                         const vec3& nucleus,
+                         unsigned int coord) const;
 
-    // expanded interface for Cython
-    inline double kinetic_deriv(const CGF& cgf1, const CGF& cgf2, double cx, double cy, double cz, unsigned int coord) const {
+
+    /**
+     * @brief      Calculate kinetic derivative
+     *
+     * Expanded interface for Cython
+     *
+     * @param[in]  cgf1   The cgf 1
+     * @param[in]  cgf2   The cgf 2
+     * @param[in]  cx     nucleus position x
+     * @param[in]  cy     nucleus position y
+     * @param[in]  cz     nucleus position z
+     * @param[in]  coord  The coordinate
+     *
+     * @return     double value of the kinetic integral
+     */
+    inline double kinetic_deriv(const CGF& cgf1,
+                                const CGF& cgf2,
+                                double cx, double cy, double cz,
+                                unsigned int coord) const {
         return this->kinetic_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
     }
 
     /**
-     * @brief Calculates derivative of kinetic integral of two GTO
+     * @brief      Calculates derivative of kinetic integral of two GTOs
      *
-     * @param const GTO& gto1       Gaussian Type Orbital
-     * @param const GTO& gto2       Gaussian Type Orbital
-     * @param unsigned int coord    Derivative direction
+     * @param[in]  gto1   The gto 1
+     * @param[in]  gto2   The gto 2
+     * @param      unsigned  int coord    Derivative direction
      *
      * Calculates the value of < d/dx gto1 |-1/2 nabla^2 | gto2 >
      *
-     * @return double value of the overlap integral
+     * @return     double value of the derivative of the kinetic integral
      */
-    double kinetic_deriv(const GTO& gto1, const GTO& gto2, unsigned int coord) const;
+    double kinetic_deriv_gto(const GTO& gto1,
+                             const GTO& gto2,
+                             unsigned int coord) const;
+
+/**************************************************************************
+ * NUCLEAR INTEGRALS
+ **************************************************************************/
 
     /**
-     * @brief Calculates nuclear integral of two CGF
+     * @brief      Calculates nuclear integral of two CGF
      *
-     * @param const CGF& cgf1       Contracted Gaussian Function
-     * @param const CGF& cgf2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param[in]  cgf1     Contracted Gaussian Functional 1
+     * @param[in]  cgf2     Contracted Gaussian Functional 2
+     * @param[in]  nucleus  nucleus position
+     * @param[in]  charge   charge of the nucleus
      *
      * Calculates the value of < cgf1 | V | cgf2 >
      *
-     * @return double value of the nuclear integral
+     * @return     double value of the nuclear integral
      */
-    double nuclear(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge) const;
+    double nuclear(const CGF &cgf1,
+                   const CGF &cgf2,
+                   const vec3& nucleus,
+                   unsigned int charge) const;
 
-    // expanded notation for Cython interface
-    inline double nuclear(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge) const {
+    /**
+     * @brief      Calculates nuclear integral of two GTOs
+     *
+     * @param[in]  gto1     Gaussian Type Orbital 1
+     * @param[in]  gto2     Gaussian Type Orbital 2
+     * @param[in]  nucleus  nucleus position
+     *
+     * Calculates the value of < gto1 | V | gto2 >
+     *
+     * @return     double value of the nuclear integral
+     */
+    double nuclear_gto(const GTO &gto1,
+                       const GTO &gto2,
+                       const vec3& nucleus) const;
+
+
+    /**
+     * @brief      Calculates nuclear integral of two CGF
+     *
+     * @param[in]  cgf1    Contracted Gaussian Functional 1
+     * @param[in]  cgf2    Contracted Gaussian Functional 2
+     * @param[in]  cx      nuclear coordinate x
+     * @param[in]  cy      nuclear coordinate y
+     * @param[in]  cz      nuclear coordinate z
+     * @param[in]  charge  charge of the nucleus
+     *
+     * Calculates the value of < cgf1 | V | cgf2 >
+     *
+     * Expanded notation for Cython interface
+     *
+     * @return     double value of the nuclear integral
+     */
+    inline double nuclear(const CGF &cgf1,
+                          const CGF &cgf2,
+                          double cx, double cy, double cz,
+                          unsigned int charge) const {
         return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
     }
 
@@ -240,20 +382,6 @@ public:
                                 double dx, double dy, double dz, unsigned int coord) const {
         return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, vec3(dx, dy, dz), coord);
     }
-
-    /**
-     * @brief Calculates nuclear integral of two CGF
-     *
-     * @param const GTO& gto1       Contracted Gaussian Function
-     * @param const GTO& gto2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
-     *
-     * Calculates the value of < gto1 | V | gto2 >
-     *
-     * @return double value of the nuclear integral
-     */
-    double nuclear(const GTO &gto1, const GTO &gto2, const vec3& nucleus) const;
 
     /**
      * @brief Calculates derivative towards one of the basis functions in the
@@ -333,9 +461,13 @@ public:
      *
      * @return double value of the nuclear integral
      */
-    inline double nuclear(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) const {
-        return this->nuclear(gto1, gto2, vec3(cx, cy, cz));
+    inline double nuclear_gto(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) const {
+        return this->nuclear_gto(gto1, gto2, vec3(cx, cy, cz));
     }
+
+/**************************************************************************
+ * TWO-ELECTRON INTEGRALS
+ **************************************************************************/
 
     /**
      * @brief Calculates two-electron repulsion integral of four CGF
@@ -429,6 +561,26 @@ private:
      */
     double overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
                    double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const;
+
+    /**
+     * @brief Performs overlap integral evaluation
+     *
+     * @param double alpha1     Gaussian exponent of the first GTO
+     * @param unsigned int l1   Power of x component of the polynomial of the first GTO
+     * @param unsigned int m1   Power of y component of the polynomial of the first GTO
+     * @param unsigned int n1   Power of z component of the polynomial of the first GTO
+     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param double alpha2     Gaussian exponent of the second GTO
+     * @param unsigned int l2   Power of x component of the polynomial of the second GTO
+     * @param unsigned int m2   Power of y component of the polynomial of the second GTO
+     * @param unsigned int n2   Power of z component of the polynomial of the second GTO
+     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     *
+     * @return double value of the overlap integral
+     */
+    double dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
+                  double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b,
+                  unsigned int cc, double cref = 0.0) const;
 
     /**
      * @brief Performs nuclear integral evaluation
