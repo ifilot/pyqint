@@ -33,7 +33,6 @@ PyQInt is a Python package for calculating one- and two-electron integrals as en
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/platforms.svg)](https://anaconda.org/ifilot/pyqint)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/downloads.svg)](https://anaconda.org/ifilot/pyqint)
-[![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/installer/conda.svg)](https://conda.anaconda.org/ifilot)
 
 Open Anaconda prompt and type
 
@@ -84,6 +83,36 @@ S[1,1] = integrator.overlap(cgf2, cgf2)
 
 # output result
 print(S)
+```
+
+### Dipole integrals
+```python
+from pyqint import PyQInt, cgf, gto, Molecule
+import numpy as np
+
+# construct integrator object
+integrator = PyQInt()
+
+# build a water molecule
+mol = Molecule("H2O")
+mol.add_atom('O',  0.00000, -0.07579, 0.0000, unit='angstrom')
+mol.add_atom('H',  0.86681,  0.60144, 0.0000, unit='angstrom')
+mol.add_atom('H', -0.86681,  0.60144, 0.0000, unit='angstrom')
+
+cgfs, nuclei = mol.build_basis('sto3g')
+
+# construct empty tensor
+N = len(cgfs)
+
+# loop over CGFS and cartesian directions
+D = np.zeros((3,N,N))
+for k in range(0,3):
+    for j in range(0,N):
+        for i in range(0,N):
+            D[k,j,i] = integrator.dipole(cgfs[i], cgfs[j], k)
+
+# output result
+print(D)
 ```
 
 ### Kinetic integrals

@@ -7,7 +7,10 @@ on:
     branches: [ "master", "develop" ]
 
 jobs:
-  build-linux:
+#-------------------------------------------------------------------------------
+# PyPI / Linux
+#-------------------------------------------------------------------------------
+  build-pypi-linux:
     runs-on: ubuntu-latest
     container: quay.io/pypa/manylinux2014_x86_64
 
@@ -29,13 +32,13 @@ jobs:
     - name: Archive wheels
       uses: actions/upload-artifact@v3
       with:
-        name: wheels
+        name: pypi-linux-wheels
         path: wheelhouse/pyqint-*.whl
 
-  pypi-publish:
+  publish-pypi-linux:
     name: Upload release to PyPI
     if: github.ref == 'refs/heads/master'
-    needs: build-linux
+    needs: build-pypi-linux
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -46,14 +49,16 @@ jobs:
     - name: Retrieve packages
       uses: actions/download-artifact@v3
       with:
-        name: wheels
+        name: pypi-linux-wheels
         path: wheelhouse
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: wheelhouse/
-
-  build-windows:
+#-------------------------------------------------------------------------------
+# Anaconda / Windows
+#-------------------------------------------------------------------------------
+  build-anaconda-windows:
     runs-on: windows-latest
 
     steps:
@@ -101,13 +106,13 @@ jobs:
       - name: Archive packages
         uses: actions/upload-artifact@v3
         with:
-          name: anaconda-packages
+          name: anaconda-windows-packages
           path: C:\Miniconda\envs\test\conda-bld\win-64\pyqint-*.tar.bz2
 
-  anaconda-publish:
-    name: Upload release to Anaconda
+  publish-anaconda-windows:
+    name: Publish Anaconda / Windows
     if: github.ref == 'refs/heads/master'
-    needs: build-windows
+    needs: build-anaconda-windows
     runs-on: ubuntu-latest
     environment:
       name: anaconda
@@ -125,7 +130,7 @@ jobs:
       - name: Retrieve packages
         uses: actions/download-artifact@v3
         with:
-          name: anaconda-packages
+          name: anaconda-windows-packages
           path: packages
       - name: publish-to-conda
         shell: bash -l {0}
@@ -135,3 +140,122 @@ jobs:
           export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
           anaconda upload packages/*.tar.bz2
 
+#-------------------------------------------------------------------------------
+# Anaconda / Linux
+#-------------------------------------------------------------------------------
+  build-anaconda-linux:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Install dependencies
+          run: sudo apt-get update && sudo apt-get install -y build-essential libeigen3-dev libboost-all-dev
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Build
+          run: |
+            conda install conda-build
+            conda build . --no-include-recipe
+        - name: Archive packages
+          uses: actions/upload-artifact@v3
+          with:
+            name: anaconda-linux-packages
+            path: /usr/share/miniconda/conda-bld/linux-64/pyqint-*.tar.bz2
+
+  publish-anaconda-linux:
+      name: Publish Anaconda / Linux
+      if: github.ref == 'refs/heads/master'
+      needs: build-anaconda-linux
+      runs-on: ubuntu-latest
+      environment:
+        name: anaconda
+        url: https://anaconda.org/ifilot/pyqint
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Retrieve packages
+          uses: actions/download-artifact@v3
+          with:
+            name: anaconda-linux-packages
+            path: packages
+        - name: publish-to-conda
+          shell: bash -l {0}
+          env:
+            INPUT_ANACONDATOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          run: |
+            export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+            anaconda upload packages/*.tar.bz2
+
+#-------------------------------------------------------------------------------
+# Anaconda / Linux
+#-------------------------------------------------------------------------------
+  build-anaconda-macos:
+      runs-on: macos-latest
+
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Install dependencies
+          run: |
+            brew install eigen
+            brew install boost
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Build
+          run: |
+            conda install conda-build
+            conda build . --no-include-recipe
+        - name: Archive packages
+          uses: actions/upload-artifact@v3
+          with:
+            name: anaconda-macos-packages
+            path: /usr/local/miniconda/conda-bld/osx-64/pyqint-*.tar.bz2
+
+  publish-anaconda-macos:
+      name: Publish Anaconda / MacOS
+      if: github.ref == 'refs/heads/master'
+      needs: build-anaconda-macos
+      runs-on: ubuntu-latest
+      environment:
+        name: anaconda
+        url: https://anaconda.org/ifilot/pyqint
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Set-up miniconda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            activate-environment: test
+            environment-file: environment.yml
+            python-version: 3.8
+            auto-activate-base: false
+        - name: Retrieve packages
+          uses: actions/download-artifact@v3
+          with:
+            name: anaconda-macos-packages
+            path: packages
+        - name: publish-to-conda
+          shell: bash -l {0}
+          env:
+            INPUT_ANACONDATOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          run: |
+            export ANACONDA_API_TOKEN=$INPUT_ANACONDATOKEN
+            anaconda upload packages/*.tar.bz2

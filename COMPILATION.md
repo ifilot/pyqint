@@ -89,3 +89,21 @@ To upload, run
 ```
 python -m twine upload wheelhouse/*
 ```
+
+## Compilation and testing under Linux Debian
+
+Compile locally
+```
+python3 setup.py build
+```
+
+and install it locally
+```
+pip install -e .
+```
+
+and finally test it
+
+```
+nosetests tests/*
+```
