@@ -4,15 +4,95 @@
 User Interface
 ##############
 
+.. contents:: Table of Contents
+    :depth: 3
+
+Basis functions
+===============
+
+Gaussian type orbitals (GTO)
+----------------------------
+
+:program:`PyQInt` uses cartesian Gaussian type orbitals as given by
+
+.. math::
+
+    \Phi(\alpha,l,m,n,\vec{R}) = N (x - X)^{l} (y - Y)^{m} (z - Z)^{n} \exp \left(- \alpha |\vec{r} - \vec{R}|^{2} \right)
+
+wherein :math:`\alpha` is the exponent, :math:`\vec{R} = \left(X,Y,Z\right)` the
+position of the orbital, :math:`(l,m,n)` the orders of the pre-exponential
+polynomial, and :math:`N` a normalization constant such that
+
+.. math::
+
+    \left< \Phi | \Phi \right> = 1
+
+.. note::
+    The normalization constant is automatically calculated by `PyQInt` and does not have
+    to be supplied by the user.
+
+GTOs are a fundamental building block of CGF (see below) and typically a user would
+not directly work with them. Nevertheless, GTO objects can be constructed as follows::
+
+    from pyqint import PyQInt, cgf, gto
+
+    alpha = 0.5
+    l,m,n = 0,0,0
+    p = (0,0,0)
+    G = gto(1.0, p, alpha, l, m, n)
+
+.. note::
+    If you work with individual GTOs, the first parameter to construct the GTO
+    should have a value of 1.0. This first parameter corresponds to the linear
+    expansion coefficient used in the formulation of Contracted Gaussian Functions
+    (see below).
+
+Contracted Gaussian Functions (CGF)
+-----------------------------------
+
+Several GTOs can be combined to produce a so-called Contracted Gaussian Functional which
+is esentially a linear combination of GTOs as given by
+
+.. math::
+
+    \phi = \sum_{i} c_{i} \Phi_{i}(\alpha,l,m,n,\vec{R})
+
+To build a CGF, we first have to produce the CGF object and then
+add GTOs to it::
+
+    from pyqint import PyQInt, cgf
+
+    # build cgf for hydrogen separated by 1.4 a.u.
+    cgf1 = cgf([0.0, 0.0, 0.0])
+
+    cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
+    cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
+    cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
+
 Integral evaluation
 ===================
+
+Electronic structure calculations require the construction of molecular
+integrals. Here, an overview is given of the integrals involved and how these
+can be evaluated using :program:`PyQInt`.
 
 Overlap integrals
 -----------------
 
+Overlap integrals effectively probe the overlap between two CGFs and are given by
+
+.. math::
+
+    S_{ij} = \left< \phi_{i} | \phi_{j} \right>
+
+CGFs should be normalized and as such, their self-overlap should be equal to
+1. In the code snippet below, the overlap matrix :math:`\mathbf{S}` is
+calculated for a basis set composed of the two :math:`1s` atomic orbitals on H which
+are separated by a distance of 1.4 Bohr.
+
 .. code-block:: python
 
-    from pyqint import PyQInt, cgf, gto
+    from pyqint import PyQInt, cgf
     import numpy as np
     from copy import deepcopy
 
@@ -38,6 +118,11 @@ Overlap integrals
 
     # output result
     print(S)
+
+The result of this script is::
+
+    [[1.00000011 0.6593185 ]
+    [0.6593185  1.00000011]]
 
 Kinetic integrals
 -----------------
@@ -194,8 +279,72 @@ threads to be spawned can be set.
 
     print(S, T, V, teint)
 
+Electronic structure calculations
+=================================
+
+.. code-block:: python
+
+    from pyqint import PyQInt, Molecule, HF
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+    def main():
+        # calculate sto-3g coefficients for h2o
+        cgfs, coeff = calculate_co()
+
+        # visualize orbitals
+        fig, ax = plt.subplots(2,3, figsize=(18,10))
+        for i in range(0,2):
+            for j in range(0,3):
+                dens = plot_wavefunction(cgfs, coeff[:,i*3+j])
+                limit = max(abs(np.min(dens)), abs(np.max(dens)) )
+                im = ax[i,j].imshow(dens, origin='lower', interpolation='bilinear',
+                  extent=[-2,2,-2,2], cmap='PiYG', vmin=-limit, vmax=limit)
+                ax[i,j].set_xlabel('Distance a.u.')
+                ax[i,j].set_ylabel('Distance a.u.')
+                divider = make_axes_locatable(ax[i,j])
+                cax = divider.append_axes('right', size='5%', pad=0.05)
+                fig.colorbar(im, cax=cax, orientation='vertical')
+
+    def calculate_co():
+        mol = Molecule()
+        mol.add_atom('C', 0.0, -0.5, 0.0)
+        mol.add_atom('O', 0.0, 0.5, 0.0)
+
+        result = HF().rhf(mol, 'sto3g')
+
+        return result['cgfs'], result['orbc']
+
+    def plot_wavefunction(cgfs, coeff):
+        # build integrator
+        integrator = PyQInt()
+
+        # build grid
+        x = np.linspace(-2, 2, 100)
+        y = np.linspace(-2, 2, 100)
+        xx, yy = np.meshgrid(x,y)
+        zz = np.zeros(len(x) * len(y))
+        grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
+        res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
+
+        return res
+
+    if __name__ == '__main__':
+        main()
+
+
 Orbital visualization
 =====================
+
+Since orbitals are essentially three-dimensional scalar fields, there are two
+useful procedures to visualize them. The scalar field can either be projected
+onto a plane, creating so-called contour plots. Alternatively, a specific
+value (i.e. the isovalue) of the scalar field can be chosen and all points in
+space that have this value can be tied together creating a so-called isosurface.
+
+Contour plots can be easily created using `matplotlib <https://matplotlib.org/>`_.
+For the creation of isosurfaces, we use `PyTessel <https://pytessel.imc-tue.nl.>`_.
 
 Contour plots
 -------------
@@ -275,60 +424,6 @@ Constructing isosurfaces
         result = HF().rhf(mol, 'sto3g')
 
         return result['cgfs'], result['orbc']
-
-    if __name__ == '__main__':
-        main()
-
-Electronic structure calculations
-=================================
-
-.. code-block:: python
-
-    from pyqint import PyQInt, Molecule, HF
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-    def main():
-        # calculate sto-3g coefficients for h2o
-        cgfs, coeff = calculate_co()
-
-        # visualize orbitals
-        fig, ax = plt.subplots(2,3, figsize=(18,10))
-        for i in range(0,2):
-            for j in range(0,3):
-                dens = plot_wavefunction(cgfs, coeff[:,i*3+j])
-                limit = max(abs(np.min(dens)), abs(np.max(dens)) )
-                im = ax[i,j].imshow(dens, origin='lower', interpolation='bilinear',
-                  extent=[-2,2,-2,2], cmap='PiYG', vmin=-limit, vmax=limit)
-                ax[i,j].set_xlabel('Distance a.u.')
-                ax[i,j].set_ylabel('Distance a.u.')
-                divider = make_axes_locatable(ax[i,j])
-                cax = divider.append_axes('right', size='5%', pad=0.05)
-                fig.colorbar(im, cax=cax, orientation='vertical')
-
-    def calculate_co():
-        mol = Molecule()
-        mol.add_atom('C', 0.0, -0.5, 0.0)
-        mol.add_atom('O', 0.0, 0.5, 0.0)
-
-        result = HF().rhf(mol, 'sto3g')
-
-        return result['cgfs'], result['orbc']
-
-    def plot_wavefunction(cgfs, coeff):
-        # build integrator
-        integrator = PyQInt()
-
-        # build grid
-        x = np.linspace(-2, 2, 100)
-        y = np.linspace(-2, 2, 100)
-        xx, yy = np.meshgrid(x,y)
-        zz = np.zeros(len(x) * len(y))
-        grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
-        res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
-
-        return res
 
     if __name__ == '__main__':
         main()
