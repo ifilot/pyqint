@@ -122,10 +122,21 @@ are separated by a distance of 1.4 Bohr.
 The result of this script is::
 
     [[1.00000011 0.6593185 ]
-    [0.6593185  1.00000011]]
+     [0.6593185  1.00000011]]
 
 Kinetic integrals
 -----------------
+
+Kinetic integrals determine the kinetic energy of a given orbital and are given
+by
+
+.. math::
+
+    T_{ij} = \left< \phi_{i} \left| -\frac{1}{2} \nabla^{2} \right| \phi_{j} \right>
+
+In the code snippet below, the kinetic energy matrix :math:`\mathbf{T}` is
+calculated for a basis set composed of the two :math:`1s` atomic orbitals on H which
+are separated by a distance of 1.4 Bohr.
 
 .. code-block:: python
 
@@ -156,8 +167,26 @@ Kinetic integrals
     # output result
     print(T)
 
+The result of the above script is::
+
+    [[0.76003161 0.23645446]
+     [0.23645446 0.76003161]]
+
 Nuclear attraction integrals
 ----------------------------
+
+Nuclear attraction integrals determine the attraction between a given nucleus
+and the atomic orbital and are given by
+
+.. math::
+
+    V_{ij} = \left< \phi_{i} \left| -\frac{Z_{c}}{r_{i,c}} \right| \phi_{j} \right>
+
+In the code snippet below, the nuclear attraction energy matrices :math:`\mathbf{V}_{1}`
+and :math:`\mathbf{V}_{2}` are calculated for a basis set composed of the
+two :math:`1s` atomic orbitals on H which are separated by a distance of 1.4 Bohr.
+Due to the symmetry of the system, the nuclear attraction matrices for each of
+the nuclei are the same.
 
 .. code-block:: python
 
@@ -191,10 +220,38 @@ Nuclear attraction integrals
     V2[1,1] = integrator.nuclear(cgf2, cgf2, cgf2.p, 1)
 
     # print result
-    print(V1,V2)
+    print(V1)
+    print(V2)
+
+The result of the above script is::
+
+    [[-1.22661358 -0.59741732]
+     [-0.59741732 -0.6538271 ]]
+    [[-0.6538271  -0.59741732]
+     [-0.59741732 -1.22661358]]
 
 Two-electron integrals
 ----------------------
+
+Two electron integrals capture electron-electron interactions, specifically
+electron-electron repulsion and electron exchange. They are defined as
+
+.. math::
+
+    (i,j,k,l) = \left< \phi_{i}(x_{1})\phi_{j}(x_{2}) \left| r_{12}^{-1} \right| \phi_{k}(x_{1})\phi_{l}(x_{2}) \right>
+
+The two-electron integrals are the most expensive terms to calculate in any
+electronic structure calculation due to their :math:`N^{4}` scaling where
+:math:`N` is the number of basis functions.
+
+.. note::
+    :program:`PyQInt` offers a `separate routine <#parallel-evaluation-of-integrals>`_
+    for the efficient evaluation of all the integrals including the two electron integrals.
+
+Although there are essentially :math:`N^{4}` different two-electron integrals,
+due to certain symmetries the number of unique two-electron integrals is smaller.
+In the script below, the six unique two-electron integrals for the H:sub:`2`
+system are calculated.
 
 .. code-block:: python
 
@@ -230,8 +287,23 @@ Two-electron integrals
     print(T1222)
     print(T2211)
 
-Construction of Contracted Gaussian Functions
----------------------------------------------
+The output of the above script is given by::
+
+    0.7746057639733748
+    0.5696758530951017
+    0.44410766568798127
+    0.29702859983423036
+    0.4441076656879813
+    0.5696758530951017
+
+Basis sets and molecules
+========================
+
+Building molecules
+------------------
+
+Molecules can be efficiently built from the `Molecule` class. For example,
+to build the H:sub:`2` molecule, one can run the script below.
 
 .. code-block:: python
 
@@ -242,13 +314,61 @@ Construction of Contracted Gaussian Functions
     integrator = PyQInt()
 
     # build hydrogen molecule
-    mol = Molecule()
+    mol = Molecule('H2')
+    mol.add_atom('H', 0.0, 0.0, 0.0)
+    mol.add_atom('H', 0.0, 0.0, 1.4)
+    print(mol)
+
+The output of the above script is::
+
+    Molecule: H2
+     H (0.000000,0.000000,0.000000)
+     H (0.000000,0.000000,1.400000)
+
+
+Constructing basis functions for a molecule
+-------------------------------------------
+
+To construct the basis functions for a given molecule, one first needs to
+construct the molecule after which the `build_basis` function can be used
+to construct a basis.
+
+The following basis sets are supported. For each basis set, the range of atoms
+that are supported are given:
+
+* `sto3g` (H-I)
+* `sto6g` (H-Kr)
+* `p321` (H-Cs)
+* `p631` (H-Zn)
+
+The example code below builds the basis functions for the H:sub:`2` molecule:
+
+.. code-block:: python
+
+    from pyqint import PyQInt, Molecule
+    import numpy as np
+
+    # construct integrator object
+    integrator = PyQInt()
+
+    # build hydrogen molecule
+    mol = Molecule('H2')
     mol.add_atom('H', 0.0, 0.0, 0.0)
     mol.add_atom('H', 0.0, 0.0, 1.4)
     cgfs, nuclei = mol.build_basis('sto3g')
 
-    print(cgfs, nuclei)
+    for cgf in cgfs:
+        print(cgfs)
 
+    for nucleus in nuclei:
+        print(nucleus)
+
+The output of the above script is::
+
+    [<pyqint.cgf.cgf object at 0x000001BDEDB37430>, <pyqint.cgf.cgf object at 0x000001BDEDB37F10>]
+    [<pyqint.cgf.cgf object at 0x000001BDEDB37430>, <pyqint.cgf.cgf object at 0x000001BDEDB37F10>]
+    [array([0., 0., 0.]), 1]
+    [array([0. , 0. , 1.4]), 1]
 
 Parallel evaluation of integrals
 --------------------------------
@@ -277,7 +397,20 @@ threads to be spawned can be set.
     ncpu = multiprocessing.cpu_count()
     S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
 
-    print(S, T, V, teint)
+    print(S)
+    print(T)
+    print(V)
+    print(teint)
+
+The output of the above script is given by::
+
+    [[1.00000011 0.6593185 ]
+     [0.6593185  1.00000011]]
+    [[0.76003161 0.23645446]
+     [0.23645446 0.76003161]]
+    [[-1.88044067 -1.19483464]
+     [-1.19483464 -1.88044067]]
+    [0.7746057639733748, 0.4441076656879813, 0.29702859983423036, 0.5696758530951017, 0.44410766568798105, 0.7746057639733748]
 
 Electronic structure calculations
 =================================
