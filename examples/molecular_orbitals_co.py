@@ -14,7 +14,7 @@ def main():
         
     fig, ax = plt.subplots(2, 5, dpi=144, figsize=(12,5))           
     for i,(chi,e) in enumerate(zip(coeff.transpose(), energies)):
-        res, x, y = build_isosurface(result['cgfs'], chi, sz=3, plane='xz')
+        res, x, y = build_contourplot(result['cgfs'], chi, sz=3, plane='xz')
         vmax = np.max(np.abs(res))
         vmin = -vmax
         ax[i//5,i%5].contourf(x, y, res, levels=15, cmap='PiYG',
@@ -53,7 +53,7 @@ def calculate_co(d):
     
     return result
 
-def build_isosurface(cgfs, coeff, sz=2, npts=50, plane='xy'):
+def build_contourplot(cgfs, coeff, sz=2, npts=50, plane='xy'):
     integrator = PyQInt()
     
     # build grid
