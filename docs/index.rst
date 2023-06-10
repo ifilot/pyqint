@@ -24,7 +24,29 @@ most notably the Hartree-Fock algorithm, is also readily available.
 such as producing contour plots for the molecular orbitals. Below, an example
 is shown for the molecular orbitals of the CO molecule.
 
-.. image:: _static/img/co.jpg
+.. figure:: _static/img/co.jpg
+
+    Canonical molecular orbitals of CO visualized using contour plots.
+
+:program:`PyQInt` not only supports calculation of the canonical molecular orbitals
+via the (restricted) Hartee-Fock procedure, but can also be used to construct
+the localized molecular orbitals which is relevant for showing the similarity
+between modern electronic structure methods and classical Lewis theory. In the
+image below, one can observe the **canonical** molecular orbitals for the CO molecule
+as well as the **localized** molecular orbitals.
+
+.. figure:: _static/img/co_isosurfaces.jpg
+
+    Canonical molecular orbitals of CO visualized using isosurfaces with an
+    isovalue of +/-0.1.
+
+.. figure:: _static/img/co_isosurfaces_foster_boys.jpg
+
+    Localized molecular orbitals of CO visualized using isosurfaces with an
+    isovalue of +/-0.1. Note that the localization procedure has only been
+    applied to the occupied molecular orbitals. Observe that the localized
+    orbitals contain a triple-degenerate state corresponding to the triple
+    bond and two lone pairs for C and O.
 
 :program:`PyQInt` has been developed at the Eindhoven University of Technology,
 Netherlands. :program:`PyQInt` and its development are hosted on `github

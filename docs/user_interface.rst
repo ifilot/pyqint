@@ -415,6 +415,13 @@ The output of the above script is given by::
 Electronic structure calculations
 =================================
 
+Hartree-Fock
+------------
+
+The Hartree-Fock procedure is readily available as a separate class in the
+:program:`PyQInt` package. It gives rich output allowing the user to investigate
+the Hartree-Fock coefficient optimization procedure in detail.
+
 .. code-block:: python
 
     from pyqint import PyQInt, Molecule, HF
@@ -466,6 +473,86 @@ Electronic structure calculations
     if __name__ == '__main__':
         main()
 
+.. figure:: _static/img/co.jpg
+
+    Canonical molecular orbitals of CO visualized using contour plots.
+
+Foster-Boys localization method
+-------------------------------
+
+The code below first performs a Hartree-Fock calculation on the CO molecule
+after which the localized molecular orbitals are calculated using the
+`Foster-Boys method <https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys>`_.
+The Foster-Boys localization procedure is present as a separate class in the
+:program:`PyQInt` package. It takes the output of a Hartree-Fock calculation
+as its input.
+
+.. note::
+    The code below uses the PyTessel package for constructing the isosurfaces.
+    PyTessel is an external package for easy construction of isosurfaces from
+    scalar fields. More information is given `in the corresponding section below <#constructing-isosurfaces>`_.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, PyQInt, FosterBoys
+    import pyqint
+    import numpy as np
+    from pytessel import PyTessel
+
+    def main():
+        res = calculate_co(1.145414)
+        resfb = FosterBoys(res).run()
+
+        for i in range(len(res['cgfs'])):
+            build_isosurface('MO_%03i' % (i+1),
+                             res['cgfs'],
+                             resfb['orbc'][:,i],
+                             0.1)
+
+    def calculate_co(d):
+        """
+        Full function for evaluation
+        """
+        mol = Molecule()
+        mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
+        mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
+
+        result = HF().rhf(mol, 'sto3g')
+
+        return result
+
+    def build_isosurface(filename, cgfs, coeff, isovalue, sz=5, npts=100):
+        # generate some data
+        isovalue = np.abs(isovalue)
+        integrator = PyQInt()
+        grid = integrator.build_rectgrid3d(-sz, sz, npts)
+        scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (npts, npts, npts))
+        unitcell = np.diag(np.ones(3) * 2 * sz)
+
+        pytessel = PyTessel()
+        vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
+        fname = filename + '_pos.ply'
+        pytessel.write_ply(fname, vertices, normals, indices)
+
+        vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), -isovalue)
+        fname = filename + '_neg.ply'
+        pytessel.write_ply(fname, vertices, normals, indices)
+
+    if __name__ == '__main__':
+        main()
+
+.. figure:: _static/img/co_isosurfaces.jpg
+
+    Canonical molecular orbitals of CO visualized using isosurfaces with an
+    isovalue of +/-0.1.
+
+.. figure:: _static/img/co_isosurfaces_foster_boys.jpg
+
+    Localized molecular orbitals of CO visualized using isosurfaces with an
+    isovalue of +/-0.1. Note that the localization procedure has only been
+    applied to the occupied molecular orbitals. Observe that the localized
+    orbitals contain a triple-degenerate state corresponding to the triple
+    bond and two lone pairs for C and O.
 
 Orbital visualization
 =====================
