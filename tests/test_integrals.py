@@ -25,18 +25,18 @@ class TestIntegrals(unittest.TestCase):
         S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
 
         # overlap integrals
-        S_result = np.matrix([[1.0, 0.65931845],
+        S_result = np.array([[1.0, 0.65931845],
                               [0.65931845, 1.0]])
 
         # kinetic integrals
-        T_result = np.matrix([[0.7600315809249878, 0.2364544570446014],
+        T_result = np.array([[0.7600315809249878, 0.2364544570446014],
                               [0.2364544570446014, 0.7600315809249878]])
 
         # nuclear attraction integrals
-        V1_result = np.matrix([[-1.2266135215759277, -0.5974172949790955],
-                               [-0.5974172949790955, -0.6538270711898804]])
-        V2_result = np.matrix([[-0.6538270711898804, -0.5974172949790955],
-                               [-0.5974172949790955, -1.2266135215759277]])
+        V1_result = np.array([[-1.2266135215759277, -0.5974172949790955],
+                              [-0.5974172949790955, -0.6538270711898804]])
+        V2_result = np.array([[-0.6538270711898804, -0.5974172949790955],
+                              [-0.5974172949790955, -1.2266135215759277]])
         V_result = V1_result + V2_result
 
         # two-electron integrals

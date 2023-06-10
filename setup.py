@@ -132,5 +132,5 @@ setup(
         "Operating System :: POSIX",
     ],
     python_requires='>=3.5',
-    install_requires=['numpy'],
+    install_requires=['numpy','scipy'],
 )

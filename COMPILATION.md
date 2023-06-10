@@ -105,5 +105,5 @@ pip install -e .
 and finally test it
 
 ```
-nosetests tests/*
+pytest tests/*
 ```

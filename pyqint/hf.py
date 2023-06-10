@@ -187,6 +187,7 @@ class HF:
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "teint": teint,
+            "nelec": nelec,
             "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
 

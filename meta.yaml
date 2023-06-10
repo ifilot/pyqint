@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.10.0.0"
+  version: "0.11.0.0"
 
 source:
   path: .
@@ -8,6 +8,7 @@ source:
 requirements:
   build:
     - numpy
+    - scipy
     - python {{ python }}
 
   host:
@@ -16,14 +17,17 @@ requirements:
     - setuptools
     - cython
     - numpy
+    - scipy
 
   run:
     - python
     - numpy
+    - scipy
 
 test:
   requires:
     - numpy
+    - scipy
     - setuptools
     - nose
   source_files:
