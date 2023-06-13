@@ -20,6 +20,7 @@ class FosterBoys:
         self.maxiter = 1000
         self.occ = [1 if i < self.nelec//2 else 0 for i in range(0, len(self.cgfs))]
         self.rngseed = seed
+        self.rng = np.random.default_rng(seed=self.rngseed)
         
         # construct dipole tensor
         self.dipol = self.__build_dipole_tensor(self.cgfs)
@@ -134,17 +135,14 @@ class FosterBoys:
         Construct unitary transformation matrix via a series of two-dimensional
         unitary transformations among the occupied molecular orbitals
         """
-        # pre-seed the rng
-        rng = np.random.default_rng(seed=self.rngseed)
-
         for i in range(0,nops):
             Cnew = C.copy()
 
             # randomly pick two numbers among the occupied orbitals
-            n = rng.choice(range(nelec//2), size=2, replace=False)
+            n = self.rng.choice(range(nelec//2), size=2, replace=False)
             
             # and mix them by a random angle
-            gamma = rng.uniform() * 2.0 * np.pi
+            gamma = self.rng.uniform() * 2.0 * np.pi
             
             for j in range(0,len(C)):
                 Cnew[j,n[0]] = np.cos(gamma) * C[j,n[0]] + np.sin(gamma) * C[j,n[1]]
