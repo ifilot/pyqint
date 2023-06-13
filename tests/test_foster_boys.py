@@ -17,7 +17,7 @@ class TestFosterBoys(unittest.TestCase):
         res = HF().rhf(mol, 'sto3g')
 
         # note that a seed is given here for reproducibility purposes
-        res_fb = FosterBoys(res, seed=0).run()
+        res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
 
         orbe_ref = np.array([
             -20.30750217,
@@ -54,7 +54,7 @@ class TestFosterBoys(unittest.TestCase):
         res = HF().rhf(mol, 'sto3g')
 
         # note that a seed is given here for reproducibility purposes
-        res_fb = FosterBoys(res, seed=0).run()
+        res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
 
         orbe_ref = np.array([
             -11.050113,
