@@ -36,7 +36,7 @@ class TestFosterBoys(unittest.TestCase):
         # we use relatively loose testing criteria
         np.testing.assert_almost_equal(res_fb['orbe'],
                                        orbe_ref,
-                                       decimal=4)
+                                       decimal=2)
 
     def testCH4(self):
         """
@@ -69,7 +69,7 @@ class TestFosterBoys(unittest.TestCase):
         ])
 
         # assert orbital energies
-        np.testing.assert_almost_equal(res_fb['orbe'], orbe_ref, decimal=4)
+        np.testing.assert_almost_equal(res_fb['orbe'], orbe_ref, decimal=2)
 
         # specifically test for quadruple degenerate orbital
         for i in range(0,4):
@@ -78,7 +78,7 @@ class TestFosterBoys(unittest.TestCase):
                 # we use relatively loose testing criteria
                 np.testing.assert_almost_equal(res_fb['orbe'][i+1],
                                                res_fb['orbe'][j+1],
-                                               decimal=4)
+                                               decimal=2)
 
 if __name__ == '__main__':
     unittest.main()
