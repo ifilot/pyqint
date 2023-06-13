@@ -15,7 +15,9 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
         res = HF().rhf(mol, 'sto3g')
-        res_fb = FosterBoys(res).run()
+
+        # note that a seed is given here for reproducibility purposes
+        res_fb = FosterBoys(res, seed=0).run()
 
         orbe_ref = np.array([
             -20.30750217,
@@ -50,7 +52,9 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
         res = HF().rhf(mol, 'sto3g')
-        res_fb = FosterBoys(res).run()
+
+        # note that a seed is given here for reproducibility purposes
+        res_fb = FosterBoys(res, seed=0).run()
 
         orbe_ref = np.array([
             -11.050113,
