@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.11.0.0"
+  version: "0.12.0.0"
 
 source:
   path: .
@@ -33,6 +33,8 @@ test:
   source_files:
     - tests/*.py
     - tests/results/*.npy
+  commands:
+    - nosetests tests
 
 about:
   home: https://github.com/ifilot/pyqint

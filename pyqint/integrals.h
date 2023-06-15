@@ -23,8 +23,8 @@
 
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <unordered_map>
 
