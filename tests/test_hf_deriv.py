@@ -8,8 +8,25 @@ from nose.tools import nottest
 
 class TestHFDeriv(unittest.TestCase):
 
-    @nottest
-    def testHartreeFockForcesCore(self):
+    def test_hartree_fock_forces_h2(self):
+        """
+        Test Hartree-Fock calculation on H2 using STO-3G basis set
+        """
+        for i in range(0,5):
+            mol = Molecule()
+            mol.add_atom('H', 0.0000, 0.0000, 0.30 + i * 0.05, unit='angstrom')
+            mol.add_atom('H', 0.0000, 0.0000, -0.30 - i * 0.05, unit='angstrom')
+
+            # calculate forces using analytical derivatives
+            solver = HF()
+            res = solver.rhf(mol, 'sto3g', calc_forces=True)
+
+            # calculate forces using finite difference
+            forces = calculate_forces_finite_difference(mol)
+
+            np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+
+    def test_hartree_fock_forces_h2o(self):
         """
         Test Hartree-Fock calculation on water using STO-3G basis set
         """
@@ -17,49 +34,70 @@ class TestHFDeriv(unittest.TestCase):
         mol.add_atom('O', 0.0, 0.0, 0.0)
         mol.add_atom('H', 0.7570, 0.5860, 0.0)
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
-        basis = 'sto3g'
 
         # calculate forces using analytical derivatives
         solver = HF()
-        res = solver.rhf(mol, basis, calc_forces=False)
-
-        # calculate forces via routines
-        forces = np.zeros((len(mol.atoms), 3))
-        for i in range(0, len(mol.atoms)): # loop over nuclei
-            for j in range(0, 3): # loop over directions
-                forces[i,j] = np.sum(res['density'] * solver.rhf_force_core(mol, basis, i, j))
+        res = solver.rhf(mol, 'sto3g', calc_forces=True)
 
         # calculate forces using finite difference
-        forces_ans = calculate_forces_core_finite_difference(mol)
+        forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(forces, forces_ans)
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
 
-    # def testHartreeFockForces(self):
-    #     """
-    #     Test Hartree-Fock calculation on water using STO-3G basis set
-    #     """
-    #     mol = Molecule()
-    #     mol.add_atom('O', 0.0, 0.0, 0.0)
-    #     mol.add_atom('H', 0.7570, 0.5860, 0.0)
-    #     mol.add_atom('H', -0.7570, 0.5860, 0.0)
+    def test_hartree_fock_forces_ch4(self):
+        """
+        Test Hartree-Fock calculation on CH4 using STO-3G basis set
 
-    #     # calculate forces using analytical derivatives
-    #     solver = HF()
-    #     res = solver.rhf(mol, 'sto3g', calc_forces=True)
+        Note that the CH4 molecule is slightly perturbed
+        """
+        mol = Molecule()
+        mol.add_atom('C', 0.0,  0.0, 0.0, unit='angstrom')
+        mol.add_atom('H', 0.1,  0.05, 1.0830098121, unit='angstrom')
+        mol.add_atom('H', 0.0,  -1.0210714424, -0.3610032723, unit='angstrom')
+        mol.add_atom('H', -0.8842738057,  0.5105357237, -0.3610032748, unit='angstrom')
+        mol.add_atom('H', 0.8842738117,  0.5105357203, -0.3610032651, unit='angstrom')
 
-    #     # calculate forces using finite difference
-    #     forces = calculate_forces_finite_difference(mol)
+        # calculate forces using analytical derivatives
+        solver = HF()
+        res = solver.rhf(mol, 'sto3g', calc_forces=True)
 
-    #     np.testing.assert_almost_equal(res['forces'], forces)
+        # calculate forces using finite difference
+        forces = calculate_forces_finite_difference(mol)
+
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+
+    def test_hartree_fock_forces_co2(self):
+        """
+        Test Hartree-Fock calculation on CH4 using STO-3G basis set
+
+        Note that the CO2 molecule is slightly perturbed
+        """
+        mol = Molecule()
+        mol.add_atom('C', 0.0,  0.0, 0.0, unit='angstrom')
+        mol.add_atom('O', 0.0,  0.0, 1.2879700928, unit='angstrom')
+        mol.add_atom('O', 0.0,  0.0, -1.2879700928, unit='angstrom')
+
+        # calculate forces using analytical derivatives
+        solver = HF()
+        res = solver.rhf(mol, 'sto3g', calc_forces=True)
+
+        # calculate forces using finite difference
+        forces = calculate_forces_finite_difference(mol)
+
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
 
 def perform_hf(mol):
     sol = HF().rhf(mol, 'sto3g')
     return sol
 
 def calculate_forces_finite_difference(mol):
-    forces = np.zeros((3,3))
+    """
+    Calculates the forces on each of the atoms using a finite difference
+    approach.
+    """
+    forces = np.zeros((len(mol.atoms),3))
 
-    sz = 0.0001
+    sz = 1e-4
 
     for i in range(0, len(mol.atoms)): # loop over nuclei
         for j in range(0, 3): # loop over directions
@@ -70,25 +108,6 @@ def calculate_forces_finite_difference(mol):
 
             energy1 = perform_hf(mol1)['energy']
             energy2 = perform_hf(mol2)['energy']
-
-            forces[i,j] = (energy2 - energy1) / sz
-
-    return forces
-
-def calculate_forces_core_finite_difference(mol):
-    forces = np.zeros((3,3))
-
-    sz = 0.0001
-
-    for i in range(0, len(mol.atoms)): # loop over nuclei
-        for j in range(0, 3): # loop over directions
-            mol1 = deepcopy(mol)
-            mol1.atoms[i][1][j] -= sz / 2
-            mol2 = deepcopy(mol)
-            mol2.atoms[i][1][j] += sz / 2
-
-            energy1 = perform_hf(mol1)['ecore']
-            energy2 = perform_hf(mol2)['ecore']
 
             forces[i,j] = (energy2 - energy1) / sz
 
