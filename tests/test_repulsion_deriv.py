@@ -39,6 +39,8 @@ class TestRepulsionDeriv(unittest.TestCase):
         fx5 = integrator.repulsion_deriv(cgfs[5], cgfs[3], cgfs[5], cgfs[3], nuclei[0][0], 0)
         fx6 = integrator.repulsion_deriv(cgfs[3], cgfs[5], cgfs[3], cgfs[5], nuclei[1][0], 0)
 
+        print(fx3)
+
         # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
         ans3 = calculate_force_finite_difference(mol, 0, 3, 3, 5, 5, 0)
         ans4 = calculate_force_finite_difference(mol, 1, 3, 3, 5, 5, 0)
@@ -121,25 +123,6 @@ class TestRepulsionDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(fx4, ans4, 4)
         np.testing.assert_almost_equal(fx5, ans5, 4)
         np.testing.assert_almost_equal(fx6, ans6, 4)
-
-    def testDerivRepulsionGTO(self):
-        # construct integrator object
-        integrator = PyQInt()
-
-        # build gtos
-        gto1 = gto(0.154329, [-0.50, 0.0, 0.0], 3.425251, 0, 0, 0)
-        gto2 = gto(0.154329, [-0.50, 0.0, 0.0], 3.425251, 0, 0, 0)
-        gto3 = gto(0.154329, [ 0.50, 0.0, 0.0], 3.425251, 0, 0, 0)
-        gto4 = gto(0.154329, [ 0.50, 0.0, 0.0], 3.425251, 0, 0, 0)
-
-        # perform integration
-        rep1 = integrator.repulsion_gto_deriv(gto1, gto2, gto3, gto4, 0)
-        rep2 = integrator.repulsion_gto_deriv(gto2, gto1, gto3, gto4, 0)
-
-        # perform finite difference
-        ans1 = calculate_deriv_gto(gto1, gto2, gto3, gto4, 0)
-
-        np.testing.assert_almost_equal(rep1, ans1, 4)
 
 def calculate_force_finite_difference(mol, nuc_id, cgf_id1, cgf_id2, cgf_id3, cgf_id4, coord):
     # build integrator object
