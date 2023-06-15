@@ -33,6 +33,7 @@ test:
   source_files:
     - tests/*.py
     - tests/results/*.npy
+    - tests/results/*.txt
   commands:
     - nosetests tests
 
