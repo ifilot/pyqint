@@ -14,8 +14,8 @@ class TestHFDeriv(unittest.TestCase):
         """
         for i in range(0,5):
             mol = Molecule()
-            mol.add_atom('H', 0.0000, 0.0000, 0.30 + i * 0.05, unit='angstrom')
-            mol.add_atom('H', 0.0000, 0.0000, -0.30 - i * 0.05, unit='angstrom')
+            mol.add_atom('H', 0.0000, 0.0000, 0.30 + i * 0.50, unit='angstrom')
+            mol.add_atom('H', 0.0000, 0.0000, -0.30 - i * 0.50, unit='angstrom')
 
             # calculate forces using analytical derivatives
             solver = HF()
@@ -31,7 +31,7 @@ class TestHFDeriv(unittest.TestCase):
         Test Hartree-Fock calculation on water using STO-3G basis set
         """
         mol = Molecule()
-        mol.add_atom('O', 0.0, 0.0, 0.0)
+        mol.add_atom('O', 0.0, 0.1, 0.0)
         mol.add_atom('H', 0.7570, 0.5860, 0.0)
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
 
@@ -51,8 +51,8 @@ class TestHFDeriv(unittest.TestCase):
         Note that the CH4 molecule is slightly perturbed
         """
         mol = Molecule()
-        mol.add_atom('C', 0.0,  0.0, 0.0, unit='angstrom')
-        mol.add_atom('H', 0.1,  0.05, 1.0830098121, unit='angstrom')
+        mol.add_atom('C', 0.0,  0.1, 0.0, unit='angstrom')
+        mol.add_atom('H', 0.1,  0.15, 1.0830098121, unit='angstrom')
         mol.add_atom('H', 0.0,  -1.0210714424, -0.3610032723, unit='angstrom')
         mol.add_atom('H', -0.8842738057,  0.5105357237, -0.3610032748, unit='angstrom')
         mol.add_atom('H', 0.8842738117,  0.5105357203, -0.3610032651, unit='angstrom')

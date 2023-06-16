@@ -65,7 +65,12 @@ class HF:
             iterstart = time.time()
 
             if niter > SUBSPACE_START and use_diis:
-                diis_coeff = self.calculate_diis_coefficients(evs_diis)
+                try:
+                    diis_coeff = self.calculate_diis_coefficients(evs_diis)
+                except np.linalg.LinAlgError:
+                    # stop diis procedure and revert to linear stepping
+                    use_diis = False
+                    continue
 
                 F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
                 Fprime = X.transpose().dot(F).dot(X)
