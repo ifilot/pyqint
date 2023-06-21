@@ -17,7 +17,7 @@ class TestMoleculeBuilder(unittest.TestCase):
         mol = MoleculeBuilder().from_name('ch4')
 
         np.testing.assert_almost_equal(mol.atoms[0][1], 
-                                       np.array([0,0,0]))
+                                       np.array([0.0,0.0,0.0], dtype=np.float64))
         np.testing.assert_almost_equal(mol.atoms[1][1], 
                                        np.array([0.6327670,0.6327670,0.6327670]) * 1.8897259886)
         np.testing.assert_equal(mol.atoms[0][0], 'C')
