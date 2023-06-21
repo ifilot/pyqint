@@ -22,7 +22,7 @@ class Molecule:
         return res
 
     def add_atom(self, atom, x, y, z, unit='bohr'):
-        ang2bohr = 1.88973
+        ang2bohr = 1.8897259886
 
         if unit == "bohr":
             self.atoms.append([atom, np.array([x, y, z])])
