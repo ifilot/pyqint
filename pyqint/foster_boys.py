@@ -87,9 +87,12 @@ class FosterBoys:
         for i in range(N):
             for j in range(i+1, N):
                 
+                # optimize local pair of MOs on the interval -(pi,pi)
                 res = scipy.optimize.minimize(self.__evaluate_orbital_centroids, 
-                                              np.pi/4, 
-                                              args=(C, i, j))
+                                              0.0,
+                                              args=(C, i, j),
+                                              bounds=[(-np.pi, np.pi)],
+                                              tol=1e-12)
                 
                 alpha = res.x[0]
                 Cnew = C.copy()
