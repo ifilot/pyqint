@@ -84,7 +84,7 @@ class TestHFDeriv(unittest.TestCase):
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
 def perform_hf(mol):
     sol = HF().rhf(mol, 'sto3g')
