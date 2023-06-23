@@ -17,7 +17,7 @@ class HF:
     """
     def rhf(self, mol, basis, calc_forces=False, itermax=100,
             use_diis=True, verbose=False, tolerance=1e-7,
-            initialize=None):
+            orbc_init=None):
         """
         Performs a Hartree-Fock type calculation
 
@@ -50,10 +50,10 @@ class HF:
         X = U.dot(np.diag(1.0/np.sqrt(s)))
 
         # create empty P matrix as initial guess
-        if not initialize:
+        if orbc_init is None:
             P = np.zeros(S.shape)
         else:
-            P = np.einsum('ik,jk,k->ij', C, C, occ)
+            P = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ)
 
         # keep track of time
         start = time.time()
