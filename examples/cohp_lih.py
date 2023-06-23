@@ -21,8 +21,8 @@ def main():
     
     cohp = np.zeros(len(coeff))
     for k in range(0, len(coeff)):
-        for i in range(0,len(coeff)//2): # loop over orbitals on Li
-            for j in range(len(coeff)//2,len(coeff)): # loop over orbitals on H
+        for i in range(0,len(coeff)-1): # loop over orbitals on Li
+            for j in range(len(coeff)-1,len(coeff)): # loop over orbitals on H
                 cohp[k] += 2.0 * H[i,j] * coeff[i,k] * coeff[j,k]
                 
     for i,(chi,e) in enumerate(zip(cohp, energies)):
