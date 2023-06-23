@@ -15,6 +15,10 @@ class GeometryOptimization:
     def run(self):
         """
         Perform geometry optimization
+
+        Currently, a very simple steepest descent algorithm is implemented, but
+        this should of course be improved using something like conjugate
+        gradient
         """
         # perform initial HF calculation
         res = HF().rhf(self.mol, self.basis, calc_forces=True, verbose=self.verbose)
@@ -33,7 +37,5 @@ class GeometryOptimization:
                            orbc_init=res['orbc'])
             forces = res['forces']
             nriter += 1
-            # print(forces)
-            # print(self.mol)
 
         return res
