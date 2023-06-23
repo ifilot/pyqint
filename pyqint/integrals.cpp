@@ -56,7 +56,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
             S(i,j) = S(j,i) = this->overlap(cgfs[i], cgfs[j]);
             T(i,j) = T(j,i) = this->kinetic(cgfs[i], cgfs[j]);
             for(unsigned int k=0; k<charges.size(); k++) {
-                // there is a race condition here!!
+                // this is to avoid the race condition
                 Vn[k](i,j) = Vn[k](j,i) = this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
             }
         }
@@ -125,6 +125,122 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     results.insert(results.end(), tedouble.begin(), tedouble.end());
 
     return results;
+}
+
+/**
+ * @brief      Evaluate the geometric derivates for all cgfs in buffer
+ */
+std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
+                                                               const std::vector<int>& charges,
+                                                               const std::vector<double>& px,
+                                                               const std::vector<double>& py,
+                                                               const std::vector<double>& pz) const {
+    std::vector<double> results;
+
+    size_t sz = cgfs.size();
+
+    // Construct 2x2 matrices to hold values for the overlap,
+    // kinetic and two nuclear integral values, respectively.
+    auto S = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+    auto T = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+    auto V = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+
+    // calculate the integral values using the integrator class
+    for(unsigned int n=0; n<charges.size(); n++) { // loop over nuclei
+        for(unsigned int k=0; k<3; k++) { // loop over directions
+
+            // build container for summation over nuclei
+            std::vector<Eigen::MatrixXd> Vn(charges.size(), Eigen::MatrixXd::Zero(sz, sz));
+
+            #pragma omp parallel for schedule(dynamic)
+            for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
+                for(int j=0; j<(int)sz; j++) {
+                    S[n*3+k](i,j) = this->overlap_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
+                    T[n*3+k](i,j) = this->kinetic_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
+
+
+                    for(unsigned int l=0; l<charges.size(); l++) {
+                        Vn[l](i,j) = this->nuclear_deriv(cgfs[i], cgfs[j],
+                                                         vec3(px[l], py[l], pz[l]),
+                                                         charges[l],
+                                                         vec3(px[n], py[n], pz[n]),
+                                                         k);
+                    }
+                }
+            }
+
+            // combine all nuclear attraction integrals
+            for(unsigned int i=0; i<sz; i++) {
+                for(unsigned int j=0; j<sz; j++) {
+                    for(unsigned int l=0; l<charges.size(); l++) {
+                        V[n*3+k](i,j) += Vn[l](i,j);
+                    }
+                }
+            }
+        }
+    }
+
+    // // calculate all two-electron integrals
+    const unsigned int max_teints = this->teindex(sz-1,sz-1,sz-1,sz-1) + 1;
+    std::vector<double> tedouble(max_teints * charges.size() * 3, -1.0);
+
+    // it is more efficient to first 'unroll' the fourfold nested loop
+    // into a single vector of jobs to execute
+    std::vector<std::array<size_t, 7>> jobs;
+    for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
+        for(size_t d=0; d<3; d++) { // directions
+            for(size_t i=0; i<sz; i++) {
+                for(size_t j=0; j<sz; j++) {
+                    size_t ij = i*(i+1)/2 + j;
+                    for(size_t k=0; k<sz; k++) {
+                        for(size_t l=0; l<sz; l++) {
+                            size_t kl = k * (k+1)/2 + l;
+                            if(ij <= kl) {
+                                size_t idx = this->teindex(i,j,k,l) * (l*3 + d);
+
+                                if(idx >= tedouble.size()) {
+                                    throw std::runtime_error("Process tried to access illegal array position");
+                                }
+
+                                if(tedouble[idx] < 0.0) {
+                                    tedouble[idx] = 1.0;
+                                    jobs.push_back({idx, i, j, k, l, n, d});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // // evaluate jobs
+    #pragma omp parallel for schedule(dynamic)
+    for(int s=0; s<(int)jobs.size(); s++) {  // have to use signed int for MSVC OpenMP here
+        const size_t idx = jobs[s][0];
+        const size_t i = jobs[s][1];
+        const size_t j = jobs[s][2];
+        const size_t k = jobs[s][3];
+        const size_t l = jobs[s][4];
+        const size_t n = jobs[s][5];
+        const size_t d = jobs[s][6];
+        tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], vec3(px[n], py[n], pz[n]), d);
+    }
+
+    // // package everything into results vector, will be unpacked in
+    // // connected Python class
+    // std::vector<double> Svec(S.data(), S.data()+sz*sz);
+    // results.insert(results.end(), Svec.begin(), Svec.end());
+
+    // std::vector<double> Tvec(T.data(), T.data() + sz*sz);
+    // results.insert(results.end(), Tvec.begin(), Tvec.end());
+
+    // std::vector<double> Vvec(V.data(), V.data() + sz*sz);
+    // results.insert(results.end(), Vvec.begin(), Vvec.end());
+
+    // results.insert(results.end(), tedouble.begin(), tedouble.end());
+
+    // return results;
 }
 
 /**************************************************************************

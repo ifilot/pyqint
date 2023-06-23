@@ -24,7 +24,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap_sto3g.npy'))
@@ -59,7 +59,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap_sto6g.npy'))
@@ -94,7 +94,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap_p321.npy'))
@@ -129,7 +129,7 @@ class TestIntegralsOpenMP(unittest.TestCase):
 
         # evaluate all integrals
         ncpu = multiprocessing.cpu_count()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
 
         # load results from npy files
         S_result = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_overlap_p631.npy'))

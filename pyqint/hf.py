@@ -38,7 +38,7 @@ class HF:
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 

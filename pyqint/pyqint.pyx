@@ -358,7 +358,7 @@ cdef class PyQInt:
 
         return S, T, V, teint
 
-    def build_integrals_openmp(self, cgfs, nuclei):
+    def build_integrals(self, cgfs, nuclei):
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
         cdef vector[double] px
@@ -388,6 +388,37 @@ cdef class PyQInt:
         teint = results[sz*sz*3:].reshape(ntei)
 
         return S, T, V, teint
+
+    # def build_geometric_derivatives(self, cgfs, nuclei):
+    #     cdef vector[CGF] c_cgfs
+    #     cdef vector[int] charges
+    #     cdef vector[double] px
+    #     cdef vector[double] py
+    #     cdef vector[double] pz
+
+    #     # build CGFS objects
+    #     for cgf in cgfs:
+    #         c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+    #         for gto in cgf.gtos:
+    #             c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+    #     # add nuclei to buffer
+    #     for nucleus in nuclei:
+    #         charges.push_back(nucleus[1])
+    #         px.push_back(nucleus[0][0])
+    #         py.push_back(nucleus[0][1])
+    #         pz.push_back(nucleus[0][2])
+
+    #     results = np.array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz))
+
+    #     sz = len(cgfs)
+    #     ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
+    #     S = results[0:sz*sz].reshape((sz,sz))
+    #     T = results[sz*sz:sz*sz*2].reshape((sz,sz))
+    #     V = results[sz*sz*2:sz*sz*3].reshape((sz,sz))
+    #     teint = results[sz*sz*3:].reshape(ntei)
+
+    #     return S, T, V, teint
 
     def build_rectgrid3d(self, xmin, xmax, sz):
         """

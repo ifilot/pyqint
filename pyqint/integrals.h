@@ -115,6 +115,15 @@ public:
                                       const std::vector<double>& py,
                                       const std::vector<double>& pz) const;
 
+    /**
+     * @brief      Evaluate all integrals for cgfs in buffer
+     */
+    std::vector<double> evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
+                                                       const std::vector<int>& charges,
+                                                       const std::vector<double>& px,
+                                                       const std::vector<double>& py,
+                                                       const std::vector<double>& pz) const;
+
     /**************************************************************************
      * OVERLAP INTEGRALS
      **************************************************************************/
