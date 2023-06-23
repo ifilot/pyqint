@@ -6,5 +6,6 @@ from .hf import HF
 from .foster_boys import FosterBoys
 from .cohp import COHP
 from .molecule_builder import MoleculeBuilder
+from .geometry_optimization import GeometryOptimization
 
 from ._version import __version__

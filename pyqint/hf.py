@@ -2,7 +2,6 @@
 
 import json
 import os
-from .cgf import cgf
 import numpy as np
 from . import PyQInt
 import time
@@ -284,7 +283,7 @@ class HF:
                         # derivative of electron-electron repulsions
                         for k,cgf3 in enumerate(cgfs):
                             for l,cgf4 in enumerate(cgfs):
-                                repulsion[i, j, k, l] += integrator.repulsion_deriv(cgf1, cgf2, cgf3, cgf4, deriv_nucleus[0], devdir)
+                                repulsion[i,j,k,l] += integrator.repulsion_deriv(cgf1, cgf2, cgf3, cgf4, deriv_nucleus[0], devdir)
                         
                 # derivate nucleus-nucleus repulsion
                 term_nn = 0
