@@ -135,8 +135,6 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
                                                                const std::vector<double>& px,
                                                                const std::vector<double>& py,
                                                                const std::vector<double>& pz) const {
-    std::vector<double> results;
-
     size_t sz = cgfs.size();
 
     // Construct 2x2 matrices to hold values for the overlap,
@@ -187,8 +185,8 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     // it is more efficient to first 'unroll' the fourfold nested loop
     // into a single vector of jobs to execute
     std::vector<std::array<size_t, 7>> jobs;
-    for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
-        for(size_t d=0; d<3; d++) { // directions
+    for(size_t n=0; n<charges.size(); n++) {        // nuclear derivatives
+        for(size_t d=0; d<3; d++) {                 // directions
             for(size_t i=0; i<sz; i++) {
                 for(size_t j=0; j<sz; j++) {
                     size_t ij = i*(i+1)/2 + j;
@@ -196,7 +194,7 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
                         for(size_t l=0; l<sz; l++) {
                             size_t kl = k * (k+1)/2 + l;
                             if(ij <= kl) {
-                                size_t idx = this->teindex(i,j,k,l) * (l*3 + d);
+                                size_t idx = this->teindex(i,j,k,l) + (n*3 + d) * max_teints;
 
                                 if(idx >= tedouble.size()) {
                                     throw std::runtime_error("Process tried to access illegal array position");
@@ -227,20 +225,24 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
         tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], vec3(px[n], py[n], pz[n]), d);
     }
 
-    // // package everything into results vector, will be unpacked in
-    // // connected Python class
-    // std::vector<double> Svec(S.data(), S.data()+sz*sz);
-    // results.insert(results.end(), Svec.begin(), Svec.end());
+    // package everything into results vector, will be unpacked in
+    // connected Python class
+    std::vector<double> results(charges.size() * 3 * sz * sz * 3 + tedouble.size());
+    for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
+        for(size_t d=0; d<3; d++) { // directions
+            size_t spos = (n * 3 + d) * sz * sz;
+            std::memcpy(&results[spos], S[n*3+d].data(), sz * sz * sizeof(double));
 
-    // std::vector<double> Tvec(T.data(), T.data() + sz*sz);
-    // results.insert(results.end(), Tvec.begin(), Tvec.end());
+            size_t tpos = spos + charges.size() * 3 * sz * sz;
+            std::memcpy(&results[tpos], T[n*3+d].data(), sz * sz * sizeof(double));
 
-    // std::vector<double> Vvec(V.data(), V.data() + sz*sz);
-    // results.insert(results.end(), Vvec.begin(), Vvec.end());
+            size_t vpos = tpos + charges.size() * 3 * sz * sz;
+            std::memcpy(&results[vpos], V[n*3+d].data(), sz * sz * sizeof(double));
+        }
+    }
+    std::memcpy(&results[charges.size() * 3 * sz * sz * 3], tedouble.data(), tedouble.size() * sizeof(double));
 
-    // results.insert(results.end(), tedouble.begin(), tedouble.end());
-
-    // return results;
+    return results;
 }
 
 /**************************************************************************

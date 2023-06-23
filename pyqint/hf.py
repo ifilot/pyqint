@@ -38,7 +38,7 @@ class HF:
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, teint = integrator.build_integrals(cgfs, nuclei)
+        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 
@@ -256,44 +256,23 @@ class HF:
         # calculate energy weighted density matrix
         ew_density = np.einsum('ik,jk,k,k->ij', C, C, occ, e)
 
+        # collect derivatives
+        S, T, V, teints = integrator.build_geometric_derivatives_openmp(cgfs, nuclei)
+
         # Loop over all cartesian direction for every nucleus
         # This could be made more efficient by incorporating symmetry
-        for n_nuc, deriv_nucleus in enumerate(nuclei):            
-            for devdir in range(3):
-                
-                overlap = np.zeros((N,N))
-                kinetic = np.zeros((N,N))
-                nuclear = np.zeros((N,N))
-                repulsion = np.zeros((N,N,N,N))
+        for n, deriv_nucleus in enumerate(nuclei):
+            for d in range(3):
 
-                # Loop over every permutation of cgfs in the basis
-                for i,cgf1 in enumerate(cgfs):
-                    for j,cgf2 in enumerate(cgfs):
-
-                        # derivative of overlap matrix
-                        overlap[i,j] += integrator.overlap_deriv(cgf1, cgf2, deriv_nucleus[0], devdir)
-
-                        # derivative of kinetic matrix
-                        kinetic[i,j] += integrator.kinetic_deriv(cgf1, cgf2, deriv_nucleus[0], devdir)
-                        
-                        # derivative nuclear electron attraction
-                        for nucleus in mol.nuclei:
-                            nuclear[i,j] += integrator.nuclear_deriv(cgf1, cgf2, nucleus[0], nucleus[1], deriv_nucleus[0], devdir)
-
-                        # derivative of electron-electron repulsions
-                        for k,cgf3 in enumerate(cgfs):
-                            for l,cgf4 in enumerate(cgfs):
-                                repulsion[i,j,k,l] += integrator.repulsion_deriv(cgf1, cgf2, cgf3, cgf4, deriv_nucleus[0], devdir)
-                        
                 # derivate nucleus-nucleus repulsion
                 term_nn = 0
                 for nucleus in nuclei:
                     if np.linalg.norm(nucleus[0] - deriv_nucleus[0]) > 0.0001:
                         term_nn += deriv_nucleus[1] * nucleus[1] * \
-                                   (nucleus[0][devdir] - deriv_nucleus[0][devdir]) / \
+                                   (nucleus[0][d] - deriv_nucleus[0][d]) / \
                                    (np.linalg.norm(nucleus[0]- deriv_nucleus[0])**3)
 
-                hcore = kinetic + nuclear
+                hcore = T[n,d] + V[n,d]
                 term_hcore = np.sum(np.multiply(P, hcore))
 
                 term_repulsion = 0
@@ -301,11 +280,14 @@ class HF:
                     for j in range(N):
                         for k in range(N):
                             for l in range(N):
-                                term_repulsion += 0.5 * P[i,j] * P[k,l] * (repulsion[i,j,k,l] - 0.5 * repulsion[i,k,j,l])
+                                idx1 = integrator.teindex(i,j,k,l)
+                                idx2 = integrator.teindex(i,k,j,l)
+
+                                term_repulsion += 0.5 * P[i,j] * P[k,l] * (teints[n,d,idx1] - 0.5 * teints[n,d,idx2])
                 
-                term_overlap = - np.sum(np.multiply(ew_density, overlap))
+                term_overlap = - np.sum(np.multiply(ew_density, S[n,d]))
            
                 # F = - d/dR E
-                forces[n_nuc, devdir] = term_hcore + term_repulsion + term_overlap + term_nn
+                forces[n,d] = term_hcore + term_repulsion + term_overlap + term_nn
 
         return forces
