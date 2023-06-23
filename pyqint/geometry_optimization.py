@@ -25,11 +25,11 @@ class GeometryOptimization:
         forces = res['forces']
 
         # steepest descent optimization parameter
-        eta = 0.5
+        eta = 0.9
 
         # start geometry optimization procedure
         nriter = 0
-        while np.max(np.linalg.norm(forces, axis=1) > 1e-4) and nriter < 100:
+        while np.max(np.linalg.norm(forces, axis=1) > 1e-8) and nriter < 100:
             for i,atom in enumerate(self.mol.atoms):
                 atom[1] -= eta * forces[i,:]
 
@@ -37,5 +37,7 @@ class GeometryOptimization:
                            orbc_init=res['orbc'])
             forces = res['forces']
             nriter += 1
+
+            # print(nriter, np.max(np.linalg.norm(forces, axis=1)))
 
         return res
