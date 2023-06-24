@@ -15,6 +15,9 @@ class GeometryOptimization:
         self.orbe = None
         self.verbose = verbose
         self.iter = 0
+        self.energies_history = []
+        self.forces_history = []
+        self.coordinates_history = []
 
     def run(self, mol, basis):
         """
@@ -23,14 +26,26 @@ class GeometryOptimization:
         x0 = self.__unpack(mol) # unpack coordinates from molecule class
         self.iter = 0
 
+        # reset arrays
+        self.energies_history = []
+        self.forces_history = []
+        self.coordinates_history = []
+
         if self.verbose:
             self.__print_break(newline=False)
             print("START GEOMETRY OPTIMIZATION")
             print("USING CONJUGATE GRADIENT PROCEDURE")
             self.__print_break(newline=True)
 
-        res = scipy.optimize.minimize(self.energy, x0, args=(mol, basis), method='CG',
-                                      jac=self.jacobian)
+        res_opt = scipy.optimize.minimize(self.energy, x0, args=(mol, basis), method='CG',
+                                          jac=self.jacobian)
+
+        res = {
+            'opt': res_opt,
+            'energies': self.energies_history,
+            'forces': self.forces_history,
+            'coordinates': self.coordinates_history
+        }
 
         return res
 
@@ -58,6 +73,11 @@ class GeometryOptimization:
         self.orbe = res['orbe']
         self.forces = res['forces']
         self.coord = x
+
+        # append history
+        self.forces_history.append(self.forces)
+        self.coordinates_history.append(self.coord.reshape(len(mol.atoms),3))
+        self.energies_history.append(res['energies'][-1])
 
         if self.verbose:
             self.__print_forces(mol, self.forces)
