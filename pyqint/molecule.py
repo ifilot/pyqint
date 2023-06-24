@@ -24,6 +24,10 @@ class Molecule:
     def add_atom(self, atom, x, y, z, unit='bohr'):
         ang2bohr = 1.8897259886
 
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
         if unit == "bohr":
             self.atoms.append([atom, np.array([x, y, z])])
         elif unit == "angstrom":
