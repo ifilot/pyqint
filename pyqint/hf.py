@@ -38,9 +38,16 @@ class HF:
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, teints = integrator.build_integrals_openmp(cgfs, nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
+
+        # calculate nuclear repulsion
+        nuc_rep = 0.0
+        for i in range(0, len(nuclei)):
+            for j in range(i+1, len(nuclei)):
+                r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
+                nuc_rep += nuclei[i][1] * nuclei[j][1] / r
 
         # diagonalize S
         s, U = np.linalg.eigh(S)
@@ -91,7 +98,7 @@ class HF:
                         for l in range(N):
                             idx_rep = integrator.teindex(i,j,l,k)
                             idx_exc = integrator.teindex(i,k,l,j)
-                            G[i,j] += P[k,l] * (teint[idx_rep] - 0.5 * teint[idx_exc])
+                            G[i,j] += P[k,l] * (teints[idx_rep] - 0.5 * teints[idx_exc])
 
             # build Fock matrix
             F = T + V + G
@@ -112,11 +119,8 @@ class HF:
                 for j in range(S.shape[0]):
                     energy += 0.5 * P[j,i] * M[i,j]
 
-            # calculate repulsion of the nuclei
-            for i in range(0, len(nuclei)):
-                for j in range(i+1, len(nuclei)):
-                    r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
-                    energy += nuclei[i][1] * nuclei[j][1] / r
+            # add nuclear repulsion
+            energy += nuc_rep
 
             # store energy for next iteration
             energies.append(energy)
@@ -175,6 +179,15 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
+        # build two-electron integral tensor
+        tetens = np.zeros((N,N,N,N))
+        for i in range(N):
+            for j in range(N):
+                for k in range(N):
+                    for l in range(N):
+                        idx = integrator.teindex(i,j,k,l)
+                        tetens[i,j,k,l] = teints[idx]
+
         # build solution dictionary
         sol = {
             "energy": energies[-1],
@@ -190,9 +203,15 @@ class HF:
             "kinetic": T,
             "nuclear": V,
             'hcore': T+V,
+            'tetens': tetens,
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
-            "teint": teint,
+            "ekin": np.einsum('ij,ji', T, P),
+            "enuc": np.einsum('ij,ji', V, P),
+            "erep": np.einsum('ijlk,ij,kl', tetens, P, P),
+            "ex": np.einsum('ijlk,ij,kl', tetens, P, P),
+            "enucrep": nuc_rep,
+            "teint": teints,
             "nelec": nelec,
             "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
