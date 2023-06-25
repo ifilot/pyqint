@@ -119,7 +119,7 @@ vec3 GTO::get_grad(const vec3& r) const {
  * @return void
  */
 void GTO::calculate_normalization_constant() {
-    static const double pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286;
+    static const double pi = boost::math::constants::pi<double>();
 
     double nom =   std::pow(2.0, 2.0 * (l + m + n) + 3.0 / 2.0) *
                    std::pow(alpha, (l + m + n) + 3.0 / 2.0);

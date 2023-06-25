@@ -195,26 +195,6 @@ cdef class PyQInt:
 
         return self.integrator.nuclear_gto(c_gto1, c_gto2, rc[0], rc[1], rc[2])
 
-    def nuclear_gto_deriv_bf(self, gto1, gto2, rc, coord):
-
-        cdef GTO c_gto1
-        cdef GTO c_gto2
-
-        c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
-        c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
-
-        return self.integrator.nuclear_deriv_bf(c_gto1, c_gto2, rc[0], rc[1], rc[2], coord)
-
-    def nuclear_gto_deriv_op(self, gto1, gto2, rc, coord):
-
-        cdef GTO c_gto1
-        cdef GTO c_gto2
-
-        c_gto1 = GTO(gto1.c, gto1.p[0], gto1.p[1], gto1.p[2], gto1.alpha, gto1.l, gto1.m, gto1.n)
-        c_gto2 = GTO(gto2.c, gto2.p[0], gto2.p[1], gto2.p[2], gto2.alpha, gto2.l, gto2.m, gto2.n)
-
-        return self.integrator.nuclear_deriv_op(c_gto1, c_gto2, rc[0], rc[1], rc[2], coord)
-
     def nuclear(self, cgf1, cgf2, rc, zc):
 
         cdef CGF c_cgf1
@@ -408,6 +388,40 @@ cdef class PyQInt:
         teint = results[sz*sz*3:].reshape(ntei)
 
         return S, T, V, teint
+
+    def build_geometric_derivatives_openmp(self, cgfs, nuclei):
+        cdef vector[CGF] c_cgfs
+        cdef vector[int] charges
+        cdef vector[double] px
+        cdef vector[double] py
+        cdef vector[double] pz
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # add nuclei to buffer
+        for nucleus in nuclei:
+            charges.push_back(nucleus[1])
+            px.push_back(nucleus[0][0])
+            py.push_back(nucleus[0][1])
+            pz.push_back(nucleus[0][2])
+
+        results = np.array(self.integrator.evaluate_geometric_derivatives(c_cgfs, charges, px, py, pz))
+
+        sz = len(cgfs)
+        ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
+
+        tsize = len(nuclei) * 3 * sz * sz
+        S = results[0:tsize].reshape((len(nuclei), 3, sz,sz))
+        T = results[tsize:2*tsize].reshape((len(nuclei), 3, sz,sz))
+        V = results[2*tsize:3*tsize].reshape((len(nuclei), 3, sz,sz))
+
+        teints = results[3*tsize:].reshape(len(nuclei), 3, ntei)
+
+        return S, T, V, teints
 
     def build_rectgrid3d(self, xmin, xmax, sz):
         """
