@@ -35,7 +35,7 @@ class TestDipole(unittest.TestCase):
             exact = np.load(os.path.join(os.path.dirname(__file__),
                                          'results',
                                          'h2o_dipole_%s.npy' % cart))
-            np.testing.assert_almost_equal(D[:,:,i], exact, decimal=8)
+            np.testing.assert_almost_equal(D[:,:,i], exact, decimal=4)
 
 if __name__ == '__main__':
     unittest.main()

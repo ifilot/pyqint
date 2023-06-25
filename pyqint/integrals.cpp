@@ -56,7 +56,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
             S(i,j) = S(j,i) = this->overlap(cgfs[i], cgfs[j]);
             T(i,j) = T(j,i) = this->kinetic(cgfs[i], cgfs[j]);
             for(unsigned int k=0; k<charges.size(); k++) {
-                // there is a race condition here!!
+                // this is to avoid the race condition
                 Vn[k](i,j) = Vn[k](j,i) = this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
             }
         }
@@ -123,6 +123,124 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     results.insert(results.end(), Vvec.begin(), Vvec.end());
 
     results.insert(results.end(), tedouble.begin(), tedouble.end());
+
+    return results;
+}
+
+/**
+ * @brief      Evaluate the geometric derivates for all cgfs in buffer
+ */
+std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
+                                                               const std::vector<int>& charges,
+                                                               const std::vector<double>& px,
+                                                               const std::vector<double>& py,
+                                                               const std::vector<double>& pz) const {
+    size_t sz = cgfs.size();
+
+    // Construct 2x2 matrices to hold values for the overlap,
+    // kinetic and two nuclear integral values, respectively.
+    auto S = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+    auto T = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+    auto V = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+
+    // calculate the integral values using the integrator class
+    for(unsigned int n=0; n<charges.size(); n++) { // loop over nuclei
+        for(unsigned int k=0; k<3; k++) { // loop over directions
+
+            // build container for summation over nuclei
+            std::vector<Eigen::MatrixXd> Vn(charges.size(), Eigen::MatrixXd::Zero(sz, sz));
+
+            #pragma omp parallel for schedule(dynamic)
+            for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
+                for(int j=0; j<(int)sz; j++) {
+                    S[n*3+k](i,j) = this->overlap_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
+                    T[n*3+k](i,j) = this->kinetic_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
+
+
+                    for(unsigned int l=0; l<charges.size(); l++) {
+                        Vn[l](i,j) = this->nuclear_deriv(cgfs[i], cgfs[j],
+                                                         vec3(px[l], py[l], pz[l]),
+                                                         charges[l],
+                                                         vec3(px[n], py[n], pz[n]),
+                                                         k);
+                    }
+                }
+            }
+
+            // combine all nuclear attraction integrals
+            for(unsigned int i=0; i<sz; i++) {
+                for(unsigned int j=0; j<sz; j++) {
+                    for(unsigned int l=0; l<charges.size(); l++) {
+                        V[n*3+k](i,j) += Vn[l](i,j);
+                    }
+                }
+            }
+        }
+    }
+
+    // // calculate all two-electron integrals
+    const unsigned int max_teints = this->teindex(sz-1,sz-1,sz-1,sz-1) + 1;
+    std::vector<double> tedouble(max_teints * charges.size() * 3, -1.0);
+
+    // it is more efficient to first 'unroll' the fourfold nested loop
+    // into a single vector of jobs to execute
+    std::vector<std::array<size_t, 7>> jobs;
+    for(size_t n=0; n<charges.size(); n++) {        // nuclear derivatives
+        for(size_t d=0; d<3; d++) {                 // directions
+            for(size_t i=0; i<sz; i++) {
+                for(size_t j=0; j<sz; j++) {
+                    size_t ij = i*(i+1)/2 + j;
+                    for(size_t k=0; k<sz; k++) {
+                        for(size_t l=0; l<sz; l++) {
+                            size_t kl = k * (k+1)/2 + l;
+                            if(ij <= kl) {
+                                size_t idx = this->teindex(i,j,k,l) + (n*3 + d) * max_teints;
+
+                                if(idx >= tedouble.size()) {
+                                    throw std::runtime_error("Process tried to access illegal array position");
+                                }
+
+                                if(tedouble[idx] < 0.0) {
+                                    tedouble[idx] = 1.0;
+                                    jobs.push_back({idx, i, j, k, l, n, d});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // // evaluate jobs
+    #pragma omp parallel for schedule(dynamic)
+    for(int s=0; s<(int)jobs.size(); s++) {  // have to use signed int for MSVC OpenMP here
+        const size_t idx = jobs[s][0];
+        const size_t i = jobs[s][1];
+        const size_t j = jobs[s][2];
+        const size_t k = jobs[s][3];
+        const size_t l = jobs[s][4];
+        const size_t n = jobs[s][5];
+        const size_t d = jobs[s][6];
+        tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], vec3(px[n], py[n], pz[n]), d);
+    }
+
+    // package everything into results vector, will be unpacked in
+    // connected Python class
+    std::vector<double> results(charges.size() * 3 * sz * sz * 3 + tedouble.size());
+    for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
+        for(size_t d=0; d<3; d++) { // directions
+            size_t spos = (n * 3 + d) * sz * sz;
+            std::memcpy(&results[spos], S[n*3+d].data(), sz * sz * sizeof(double));
+
+            size_t tpos = spos + charges.size() * 3 * sz * sz;
+            std::memcpy(&results[tpos], T[n*3+d].data(), sz * sz * sizeof(double));
+
+            size_t vpos = tpos + charges.size() * 3 * sz * sz;
+            std::memcpy(&results[vpos], V[n*3+d].data(), sz * sz * sizeof(double));
+        }
+    }
+    std::memcpy(&results[charges.size() * 3 * sz * sz * 3], tedouble.data(), tedouble.size() * sizeof(double));
 
     return results;
 }
@@ -549,84 +667,60 @@ double Integrator::nuclear_gto(const GTO& gto1,
  *
  * Calculates the value of < cgf1 | V | cgf2 >
  *
+ * In contrast to the other derivatives, this will be done using a finite
+ * difference procedure.
+ *
  * @return double value of the nuclear integral
  */
 double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge,
                                  const vec3& nucderiv, unsigned int coord) const {
-    double sum = 0.0;
 
     // check if cgf originates from nucleus
     bool n1 = (cgf1.get_r() - nucderiv).squaredNorm() < 0.0001;
     bool n2 = (cgf2.get_r() - nucderiv).squaredNorm() < 0.0001;
     bool n3 = (nucleus - nucderiv).squaredNorm() < 0.0001;
 
-    for(unsigned int k = 0; k < cgf1.size(); k++) {
-        for(unsigned int l = 0; l < cgf2.size(); l++) {
-
-            // take the derivative towards the basis functions
-            double t1 = n1 ? this->nuclear_deriv_bf(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord) : 0.0;
-            double t2 = n2 ? this->nuclear_deriv_bf(cgf2.get_gto(l), cgf1.get_gto(k), nucleus, coord) : 0.0;
-
-            // take the derivative of the operator towards the coordinate
-            double t3 = n3 ? this->nuclear_deriv_op(cgf1.get_gto(k), cgf2.get_gto(l), nucleus, coord) : 0.0;
-
-            sum += cgf1.get_norm_gto(k) *
-                   cgf2.get_norm_gto(l) *
-                   cgf1.get_coefficient_gto(k) *
-                   cgf2.get_coefficient_gto(l) *
-                   (t1 + t2 + t3);
-        }
+    if(n1 == n2 && n2 == n3) {
+        return 0.0;
     }
 
-    return sum * (double)charge;
-}
+    static const double delta = 1e-5;
 
-/**
- * @brief Calculates nuclear integral of two CGF
- *
- * @param const GTO& gto1       Contracted Gaussian Function
- * @param const GTO& gto2       Contracted Gaussian Function
- * @param unsigned int charge   charge of the nucleus in a.u.
- *
- * Calculates the value of < d/dc * gto1 | V | gto2 >
- *
- * @return double value of the nuclear integral
- */
-double Integrator::nuclear_deriv_bf(const GTO& gto1, const GTO& gto2, const vec3 &nucleus, unsigned int coord) const {
-    std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
-    if(gto_ang[coord] != 0) {
-        gto_ang[coord] += 1; // calculate l+1 term
-        double term_plus = this->nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
-                                         gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        gto_ang[coord] -= 2; // calculate l-1 term
-        double term_min = this->nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
-                                        gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        gto_ang[coord] += 1; // recover l
+    // create copies of objects
+    CGF cgf1m = cgf1;
+    CGF cgf1p = cgf1;
+    CGF cgf2m = cgf2;
+    CGF cgf2p = cgf2;
+    vec3 nucm = nucleus;
+    vec3 nucp = nucleus;
 
-        return 2.0 * gto1.get_alpha() * term_plus - gto_ang[coord] * term_min;
-    } else { // s-type GTO
-        gto_ang[coord] += 1;
-        double term1 = this->nuclear(gto1.get_position(), gto_ang[0], gto_ang[1], gto_ang[2], gto1.get_alpha(),
-                                     gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
-        return 2.0 * gto1.get_alpha() * term1;
+    if(n1) {
+        vec3 rm = cgf1.get_r();
+        rm[coord] -= delta;
+        cgf1m.set_position(rm);
+        vec3 rp = cgf1.get_r();
+        rp[coord] += delta;
+        cgf1p.set_position(rp);
     }
-}
 
-/**
- * @brief Calculates nuclear integral of two CGF
- *
- * @param const GTO& gto1       Contracted Gaussian Function
- * @param const GTO& gto2       Contracted Gaussian Function
- * @param unsigned int charge   charge of the nucleus in a.u.
- *
- * Calculates the value of < gto1 | V | gto2 >
- *
- * @return double value of the nuclear integral
- */
-double Integrator::nuclear_deriv_op(const GTO& gto1, const GTO& gto2, const vec3 &nucleus, unsigned int coord) const {
-    return nuclear_deriv_op(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                            gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                            nucleus, coord);
+    if(n2) {
+        vec3 rm = cgf2.get_r();
+        rm[coord] -= delta;
+        cgf2m.set_position(rm);
+        vec3 rp = cgf2.get_r();
+        rp[coord] += delta;
+        cgf2p.set_position(rp);
+    }
+
+    if(n3) {
+        nucm[coord] -= delta;
+        nucp[coord] += delta;
+    }
+
+    double vm = this->nuclear(cgf1m, cgf2m, nucm, charge);
+    double vp = this->nuclear(cgf1p, cgf2p, nucp, charge);
+
+    return (vp - vm) / (2.0 * delta);
 }
 
 /**************************************************************************
@@ -658,7 +752,7 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
                     const double n4 = cgf4.get_norm_gto(l);
 
                     double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
-                    sum += n1 * n2 * n3 * n4 * pre * repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
+                    sum += n1 * n2 * n3 * n4 * pre * this->repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
                 }
             }
         }
@@ -964,64 +1058,6 @@ double Integrator::nuclear(const vec3& a, int l1, int m1, int n1, double alpha1,
     return -2.0 * pi / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
 }
 
-double Integrator::nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, double alpha1,
-                                    const vec3& b, int l2, int m2, int n2,
-                                    double alpha2, const vec3& c, unsigned int coord) const {
-
-    static const double pi = boost::math::constants::pi<double>();
-
-    double gamma = alpha1 + alpha2;
-
-    vec3 p = gaussian_product_center(alpha1, a, alpha2, b);
-    double rab2 = (a-b).squaredNorm();
-    double rcp2 = (c-p).squaredNorm();
-    double rcpcoord = (c-p)[coord];
-
-    std::vector<double> ax = A_array(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
-    std::vector<double> ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
-    std::vector<double> az = A_array(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
-
-    // build array of doubles for the derivatives towards C[coord] appearing
-    // in each of the terms
-    std::vector<double> ad;
-    switch(coord) {
-        case 0: // x coordinate
-            ad = A_array_deriv(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
-        break;
-        case 1: // y coordinate
-            ad = A_array_deriv(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
-        break;
-        case 2: // z coordinate
-            ad = A_array_deriv(n1, n2, p[2]-a[2], p[2]-b[2], p[2]-c[2], gamma);
-        break;
-    }
-
-    double sum = 0.0;
-
-    // build arrays of all values; based on which coordinate derivative is requested,
-    // different indices are generated to ensure by which all different cases
-    // can be handled in one set of nested loops
-    const std::array<int, 3> itmax = {l1 + l2, m1 + m2, n1 + n2};
-    const std::array<std::vector<double>, 3> v = {ax, ay, az};
-    const unsigned int v0 = coord;
-    const unsigned int v1 = (coord+1)%3;
-    const unsigned int v2 = (coord+2)%3;
-
-    for(int i=0; i<=itmax[v0];i++) {
-        for(int j=0; j<=itmax[v1];j++) {
-            for(int k=0; k<=itmax[v2];k++) {
-
-                // apply product rule as both the terms as well as the incomplete gamma function
-                // have terms in C[coord]
-                sum += (v[v0][i] * -2.0 * gamma * rcpcoord * this->gamma_inc.Fgamma(i+j+k+1,rcp2*gamma)
-                        + ad[i] * this->gamma_inc.Fgamma(i+j+k,rcp2*gamma)) * v[v1][j] * v[v2][k];
-            }
-        }
-    }
-
-    return -2.0 * pi / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
-}
-
 std::vector<double> Integrator::A_array(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) const {
     int imax = l1 + l2 + 1;
     std::vector<double> arrA(imax, 0);
@@ -1031,29 +1067,6 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
             for(int u=0; u<=(i-2*r)/2; u++) {
                 int iI = i - 2 * r - u;
                 arrA[iI] += A_term(i, r, u, l1, l2, pa, pb, cp, g);
-            }
-        }
-    }
-
-    return arrA;
-}
-
-std::vector<double> Integrator::A_array_deriv(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) const {
-    int imax = l1 + l2 + 1;
-    std::vector<double> arrA(imax, 0);
-
-    for(int i=0; i<imax; i++) {
-        for(int r=0; r<=i/2; r++) {
-            for(int u=0; u<=(i-2*r)/2; u++) {
-                int iI = i - 2 * r - u;
-                int cppow = i-2*r-2*u; // power in the coefficient cp
-
-                double term = A_term(i, r, u, l1, l2, pa, pb, cp, g);
-
-                if(cppow != 0 && cp != 0.0) {
-                    term *= -1.0 * cppow / cp;
-                    arrA[iI] += term;
-                }
             }
         }
     }
@@ -1116,7 +1129,7 @@ std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,c
                 for(int r2=0; r2 < i2/2+1; r2++) {
                     for(int u=0; u<(i1+i2)/2-r1-r2+1; u++) {
                         int i = i1+i2-2*(r1+r2)-u;
-                        arrB[i] += B_term(i1,i2,r1,r2,u,l1,l2,l3,l4,
+                        arrB[i] += this->B_term(i1,i2,r1,r2,u,l1,l2,l3,l4,
                                                             p,a,b,q,c,d,g1,g2,delta);
                     }
                 }
