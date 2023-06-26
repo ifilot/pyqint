@@ -18,6 +18,7 @@ class GeometryOptimization:
         self.energies_history = []
         self.forces_history = []
         self.coordinates_history = []
+        self.coord = None
 
     def run(self, mol, basis):
         """
@@ -95,10 +96,17 @@ class GeometryOptimization:
         to see if the coordinates match. If so, the forces are simply returned.
         """
         # check if forces are already calculated
-        if np.max(x - self.coord) < 1e-5:
+        if self.coord is not None and np.max(x - self.coord) < 1e-5:
             return self.forces.flatten()
         else:
+            # no forces have yet been calculated, indicative that no energy run has
+            # yet been done
             res = HF().rhf(mol, basis, orbc_init=self.cinit, calc_forces=True)
+            self.cinit = res['orbc']
+            self.P = res['density']
+            self.orbe = res['orbe']
+            self.forces = res['forces']
+            self.coord = x
             return res['forces'].flatten()
 
     def __unpack(self, mol):
