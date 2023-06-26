@@ -38,7 +38,7 @@ class HF:
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, teints = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, tetensor = integrator.build_integrals_openmp(cgfs, nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 
@@ -96,9 +96,7 @@ class HF:
                 for j in range(N):
                     for k in range(N):
                         for l in range(N):
-                            idx_rep = integrator.teindex(i,j,l,k)
-                            idx_exc = integrator.teindex(i,k,l,j)
-                            G[i,j] += P[k,l] * (teints[idx_rep] - 0.5 * teints[idx_exc])
+                            G[i,j] += P[k,l] * (tetensor[i,j,l,k] - 0.5 * tetensor[i,k,l,j])
 
             # build Fock matrix
             F = T + V + G
@@ -115,9 +113,7 @@ class HF:
             # calculate energy E
             energy = 0.0
             M = T + V + F
-            for i in range(S.shape[0]):
-                for j in range(S.shape[0]):
-                    energy += 0.5 * P[j,i] * M[i,j]
+            energy = 0.5 * np.einsum('ij,ji', P, M)
 
             # add nuclear repulsion
             energy += nuc_rep
@@ -129,12 +125,7 @@ class HF:
             # matrix from the coefficients, else, resort to the DIIS
             # algorithm
             if niter <= SUBSPACE_START or not use_diis:
-                Pold = P.copy()
-                P = np.zeros(S.shape)
-                for i in range(S.shape[0]):
-                    for j in range(S.shape[0]):
-                        for k in range(0,int(nelec/2)):
-                            P[i,j] += 2.0 * C[i,k] * C[j,k]
+                P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
@@ -179,14 +170,8 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
-        # build two-electron integral tensor
-        tetens = np.zeros((N,N,N,N))
-        for i in range(N):
-            for j in range(N):
-                for k in range(N):
-                    for l in range(N):
-                        idx = integrator.teindex(i,j,k,l)
-                        tetens[i,j,k,l] = teints[idx]
+        # update density matrix
+        P = np.einsum('ik,jk,k->ij', C, C, occ)
 
         # build solution dictionary
         sol = {
@@ -203,15 +188,14 @@ class HF:
             "kinetic": T,
             "nuclear": V,
             'hcore': T+V,
-            'tetens': tetens,
+            'tetensor': tetensor,
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "ekin": np.einsum('ij,ji', T, P),
             "enuc": np.einsum('ij,ji', V, P),
-            "erep": np.einsum('ijlk,ij,kl', tetens, P, P),
-            "ex": np.einsum('ijlk,ij,kl', tetens, P, P),
+            "erep": 0.5 * np.einsum('ijlk,ij,kl', tetensor, P, P),
+            "ex": -0.25 * np.einsum('iklj,ij,kl', tetensor, P, P),
             "enucrep": nuc_rep,
-            "teint": teints,
             "nelec": nelec,
             "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
