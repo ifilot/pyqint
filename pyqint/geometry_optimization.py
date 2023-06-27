@@ -45,7 +45,8 @@ class GeometryOptimization:
             'opt': res_opt,
             'energies': self.energies_history,
             'forces': self.forces_history,
-            'coordinates': self.coordinates_history
+            'coordinates': self.coordinates_history,
+            'data': self.last_energy_run
         }
 
         return res
@@ -74,6 +75,7 @@ class GeometryOptimization:
         self.orbe = res['orbe']
         self.forces = res['forces']
         self.coord = x
+        self.last_energy_run = res
 
         # append history
         self.forces_history.append(self.forces)

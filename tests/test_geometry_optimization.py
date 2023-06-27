@@ -25,6 +25,15 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(len(res['energies']), len(res['coordinates']))
         self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
 
+        # test existence of data object
+        N = len(res['data']['cgfs'])
+        self.assertEqual(N,2)
+        self.assertEqual(res['energies'][-1], res['data']['energies'][-1])
+        self.assertEqual(res['data']['overlap'].shape, (N, N))
+        self.assertEqual(res['data']['kinetic'].shape, (N, N))
+        self.assertEqual(res['data']['nuclear'].shape, (N, N))
+        self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
+
     def test_optimization_h2_p321(self):
         """
         Optimize dihydrogen molecule and assess that the energy corresponds to
@@ -41,6 +50,15 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
         self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+
+        # test existence of data object
+        N = len(res['data']['cgfs'])
+        self.assertEqual(N,4)
+        self.assertEqual(res['energies'][-1], res['data']['energies'][-1])
+        self.assertEqual(res['data']['overlap'].shape, (N, N))
+        self.assertEqual(res['data']['kinetic'].shape, (N, N))
+        self.assertEqual(res['data']['nuclear'].shape, (N, N))
+        self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
     def test_optimization_ch4(self):
         """
@@ -63,6 +81,15 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(len(res['energies']), len(res['coordinates']))
         self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
 
+        # test existence of data object
+        N = len(res['data']['cgfs'])
+        self.assertEqual(N,9)
+        self.assertEqual(res['energies'][-1], res['data']['energies'][-1])
+        self.assertEqual(res['data']['overlap'].shape, (N, N))
+        self.assertEqual(res['data']['kinetic'].shape, (N, N))
+        self.assertEqual(res['data']['nuclear'].shape, (N, N))
+        self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
+
     def test_optimization_h2o(self):
         """
         Optimize the water molecule and assess that the energy corresponds to
@@ -80,6 +107,15 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
         self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+
+        # test existence of data object
+        N = len(res['data']['cgfs'])
+        self.assertEqual(N,7)
+        self.assertEqual(res['energies'][-1], res['data']['energies'][-1])
+        self.assertEqual(res['data']['overlap'].shape, (N, N))
+        self.assertEqual(res['data']['kinetic'].shape, (N, N))
+        self.assertEqual(res['data']['nuclear'].shape, (N, N))
+        self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
     def test_optimization_c2h4(self):
         """
@@ -101,6 +137,15 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
         self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+
+        # test existence of data object
+        N = len(res['data']['cgfs'])
+        self.assertEqual(N,14)
+        self.assertEqual(res['energies'][-1], res['data']['energies'][-1])
+        self.assertEqual(res['data']['overlap'].shape, (N, N))
+        self.assertEqual(res['data']['kinetic'].shape, (N, N))
+        self.assertEqual(res['data']['nuclear'].shape, (N, N))
+        self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
 if __name__ == '__main__':
     unittest.main()
