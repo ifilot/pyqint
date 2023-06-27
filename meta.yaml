@@ -34,6 +34,7 @@ test:
     - tests/*.py
     - tests/results/*.npy
     - tests/results/*.txt
+    - tests/results/*.xyz
   commands:
     - nosetests tests
 
