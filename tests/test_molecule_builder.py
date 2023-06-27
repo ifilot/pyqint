@@ -27,7 +27,7 @@ class TestMoleculeBuilder(unittest.TestCase):
         """
         Build a molecule from file
         """
-        fname = os.path.join(os.path.dirname(__file__), '..', 'pyqint', 'molecules', 'ch4.xyz')
+        fname = os.path.join(os.path.dirname(__file__), 'results', 'ch4.xyz')
         mol = MoleculeBuilder().from_file(fname)
 
         np.testing.assert_almost_equal(mol.atoms[0][1], 
