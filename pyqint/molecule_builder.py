@@ -10,10 +10,16 @@ class MoleculeBuilder:
 
     def from_name(self, molname):
         """
-        Build molecule from file and return it
+        Build molecule from molname
         """
         fname = os.path.join(os.path.dirname(__file__), 'molecules', molname.lower() + '.xyz')
-        with open(fname, 'r') as f:
+        return self.from_file(fname)
+       
+    def from_file(self, path, molname=None):
+        """
+        Build molecule from file and return it
+        """
+        with open(path, 'r') as f:
             lines = f.readlines()
             
             nratoms = int(lines[0].strip())
