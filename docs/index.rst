@@ -35,15 +35,15 @@ between modern electronic structure methods and classical Lewis theory. In the
 image below, one can observe the **canonical** molecular orbitals for the CO molecule
 as well as the **localized** molecular orbitals.
 
-.. figure:: _static/img/co_isosurfaces.jpg
+.. figure:: _static/img/co_canonical_isosurfaces.jpg
 
     Canonical molecular orbitals of CO visualized using isosurfaces with an
-    isovalue of +/-0.1.
+    isovalue of +/-0.03.
 
-.. figure:: _static/img/co_isosurfaces_foster_boys.jpg
+.. figure:: _static/img/co_fosterboys_isosurfaces.jpg
 
     Localized molecular orbitals of CO visualized using isosurfaces with an
-    isovalue of +/-0.1. Note that the localization procedure has only been
+    isovalue of +/-0.03. Note that the localization procedure has only been
     applied to the occupied molecular orbitals. Observe that the localized
     orbitals contain a triple-degenerate state corresponding to the triple
     bond and two lone pairs for C and O.
@@ -55,7 +55,7 @@ requests are ideally submitted via the `github issue tracker
 <https://github.com/ifilot/pyqint/issues>`_.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    installation

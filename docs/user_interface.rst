@@ -541,15 +541,15 @@ as its input.
     if __name__ == '__main__':
         main()
 
-.. figure:: _static/img/co_isosurfaces.jpg
+.. figure:: _static/img/co_canonical_isosurfaces.jpg
 
     Canonical molecular orbitals of CO visualized using isosurfaces with an
-    isovalue of +/-0.1.
+    isovalue of +/-0.03.
 
-.. figure:: _static/img/co_isosurfaces_foster_boys.jpg
+.. figure:: _static/img/co_fosterboys_isosurfaces.jpg
 
     Localized molecular orbitals of CO visualized using isosurfaces with an
-    isovalue of +/-0.1. Note that the localization procedure has only been
+    isovalue of +/-0.03. Note that the localization procedure has only been
     applied to the occupied molecular orbitals. Observe that the localized
     orbitals contain a triple-degenerate state corresponding to the triple
     bond and two lone pairs for C and O.
