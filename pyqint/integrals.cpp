@@ -111,18 +111,34 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
         tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
     }
 
+    // reorganize everyting into a tensor object
+    std::vector<double> tetensor(std::pow(sz,4));
+    for(size_t i=0; i<sz; i++) {
+        for(size_t j=0; j<sz; j++) {
+            for(size_t k=0; k<sz; k++) {
+                for(size_t l=0; l<sz; l++) {
+                    const size_t idx = this->teindex(i,j,k,l);
+                    tetensor[i*sz*sz*sz + j*sz*sz + k*sz + l] = tedouble[idx];
+                }
+            }
+        }
+    }
+
     // package everything into results vector, will be unpacked in
     // connected Python class
     std::vector<double> Svec(S.data(), S.data()+sz*sz);
     results.insert(results.end(), Svec.begin(), Svec.end());
 
+    // kinetic integrals
     std::vector<double> Tvec(T.data(), T.data() + sz*sz);
     results.insert(results.end(), Tvec.begin(), Tvec.end());
 
+    // nuclear integrals
     std::vector<double> Vvec(V.data(), V.data() + sz*sz);
     results.insert(results.end(), Vvec.begin(), Vvec.end());
 
-    results.insert(results.end(), tedouble.begin(), tedouble.end());
+    // two electron in tegrals
+    results.insert(results.end(), tetensor.begin(), tetensor.end());
 
     return results;
 }

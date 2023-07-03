@@ -321,43 +321,6 @@ cdef class PyQInt:
     def teindex(self, i, j, k, l):
         return self.integrator.teindex(i, j, k, l)
 
-    def build_integrals(self, cgfs, nuclei, npar=4, verbose=False):
-        # number of cgfs
-        N = len(cgfs)
-
-        # build empty matrices
-        S = np.zeros((N,N))
-        T = np.zeros((N,N))
-        V = np.zeros((N,N))
-        teint = np.multiply(np.ones(self.teindex(N,N,N,N)), -1.0)
-
-        for i, cgf1 in enumerate(cgfs):
-            for j, cgf2 in enumerate(cgfs):
-                S[i,j] = self.overlap(cgf1, cgf2)
-                T[i,j] = self.kinetic(cgf1, cgf2)
-
-                for nucleus in nuclei:
-                    V[i,j] += self.nuclear(cgf1, cgf2, nucleus[0], nucleus[1])
-
-        # build pool of jobs
-        jobs = [None] * (self.teindex(N-1,N-1,N-1,N-1)+1)
-        for i, cgf1 in enumerate(cgfs):
-            for j, cgf2 in enumerate(cgfs):
-                ij = i*(i+1)/2 + j
-                for k, cgf3 in enumerate(cgfs):
-                    for l, cgf4 in enumerate(cgfs):
-                        kl = k * (k+1)/2 + l
-                        if ij <= kl:
-                            idx = self.integrator.teindex(i,j,k,l)
-                            if teint[idx] < 0:
-                                jobs[idx] = cgfs[i],cgfs[j],cgfs[k],cgfs[l]
-
-
-        with Pool(npar) as p:
-            teint = list(p.imap(func=self.repulsion_contracted, iterable=jobs, chunksize=npar))
-
-        return S, T, V, teint
-
     def build_integrals_openmp(self, cgfs, nuclei):
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
@@ -381,13 +344,12 @@ cdef class PyQInt:
         results = np.array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz))
 
         sz = len(cgfs)
-        ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
         S = results[0:sz*sz].reshape((sz,sz))
         T = results[sz*sz:sz*sz*2].reshape((sz,sz))
         V = results[sz*sz*2:sz*sz*3].reshape((sz,sz))
-        teint = results[sz*sz*3:].reshape(ntei)
+        tetensor = results[sz*sz*3:].reshape((sz,sz,sz,sz))
 
-        return S, T, V, teint
+        return S, T, V, tetensor
 
     def build_geometric_derivatives_openmp(self, cgfs, nuclei):
         cdef vector[CGF] c_cgfs
