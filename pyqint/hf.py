@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-import os
 import numpy as np
 from . import PyQInt
 import time
@@ -129,7 +127,7 @@ class HF:
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            enorm = np.linalg.norm(e)                           # store error vector norm
+            #enorm = np.linalg.norm(e)                           # store error vector norm
             fmats_diis.append(F)                                # add Fock matrix to list
             pmat_diis.append(P)                                 # add density matrix to list
             evs_diis.append(e)

@@ -1,50 +1,69 @@
-from pyqint import Molecule, HF, PyQInt, FosterBoys
-import pyqint
+from pyqint import Molecule, PyQInt, FosterBoys, GeometryOptimization
 import numpy as np
-from pytessel import PyTessel
+import matplotlib.pyplot as plt
 
 #
 # Plot the isosurfaces for the CO molecule
 #
 
 def main():   
-    res = calculate_co(1.145414)
+    res = optimize_co()
     resfb = FosterBoys(res).run()
+    energies = resfb['orbe']
+    coeff = resfb['orbc']
+    cgfs = res['cgfs']
 
-    for i in range(len(res['cgfs'])):
-        build_isosurface('MO_%03i' % (i+1), 
-                         res['cgfs'],
-                         resfb['orbc'][:,i],
-                         0.1)
+    fig, ax = plt.subplots(2, 5, dpi=144, figsize=(12,5))           
+    for i,(chi,e) in enumerate(zip(coeff.transpose(), energies)):
+        res, x, y = build_contourplot(cgfs, chi, sz=3, plane='xz')
+        vmax = np.max(np.abs(res))
+        vmin = -vmax
+        ax[i//5,i%5].contourf(x, y, res, levels=15, cmap='PiYG',
+                              vmin=vmin, vmax=vmax)
+        ax[i//5,i%5].contour(x, y, res, levels=15, colors='black',
+                             vmin=vmin, vmax=vmax)
+        ax[i//5,i%5].set_xlabel('x [Bohr]')
+        ax[i//5,i%5].set_ylabel('z [Bohr]')
+        ax[i//5,i%5].set_title('Energy = %.4f Ht' % e)
+        ax[i//5,i%5].grid(linestyle='--', color='black', alpha=0.5)
+        
+    plt.tight_layout()
+    plt.savefig('co_fb.jpg')
 
-def calculate_co(d):
+def optimize_co():
     """
-    Full function for evaluation
+    Optimization function for scipy.optimize.minimize
     """
     mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
-
-    result = HF().rhf(mol, 'sto3g')
-
-    return result
-
-def build_isosurface(filename, cgfs, coeff, isovalue, sz=5, npts=100):
-    # generate some data
-    isovalue = np.abs(isovalue)
-    integrator = PyQInt()
-    grid = integrator.build_rectgrid3d(-sz, sz, npts)
-    scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (npts, npts, npts))
-    unitcell = np.diag(np.ones(3) * 2 * sz)
-
-    pytessel = PyTessel()
-    vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
-    fname = filename + '_pos.ply'
-    pytessel.write_ply(fname, vertices, normals, indices)
+    mol.add_atom('C', 0.0, 0.0, -0.6, unit='angstrom')
+    mol.add_atom('O', 0.0, 0.0,  0.6, unit='angstrom')
     
-    vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), -isovalue)
-    fname = filename + '_neg.ply'
-    pytessel.write_ply(fname, vertices, normals, indices)
+    res = GeometryOptimization().run(mol, 'sto3g')
+    
+    return res['data']
+
+def build_contourplot(cgfs, coeff, sz=2, npts=50, plane='xy'):
+    integrator = PyQInt()
+    
+    # build grid
+    x = np.linspace(-sz, sz, 50)
+    y = np.linspace(-sz, sz, 50)
+    xx, yy = np.meshgrid(x,y)
+    zz = np.zeros(len(x) * len(y))
+    
+    if plane == 'xy':
+        points = [xx.flatten(), yy.flatten(), zz]
+    elif plane == 'xz':
+        points = [xx.flatten(), zz, yy.flatten()]
+    elif plane == 'yz':
+        points = [zz, xx.flatten(), yy.flatten()]
+    else:
+        raise Exception('Unknown plane: %s' % plane)
+    
+    grid = np.vstack(points).reshape(3,-1).T
+    res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
+    
+    return res, x, y
 
 if __name__ == '__main__':
     main()

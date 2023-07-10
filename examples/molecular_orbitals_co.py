@@ -1,4 +1,4 @@
-from pyqint import Molecule, HF, PyQInt
+from pyqint import Molecule, HF, PyQInt, GeometryOptimization
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def main():
     # calculate sto-3g coefficients for co
-    result = calculate_co(1.145414)
+    result = optimize_co()
     energies = result['orbe']
     coeff = result['orbc']
         
@@ -29,29 +29,17 @@ def main():
     plt.tight_layout()
     plt.savefig('co.jpg')
 
-def optimize_co(d):
+def optimize_co():
     """
     Optimization function for scipy.optimize.minimize
     """
     mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -d[0]/2, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  d[0]/2, unit='angstrom')
+    mol.add_atom('C', 0.0, 0.0, -0.6, unit='angstrom')
+    mol.add_atom('O', 0.0, 0.0,  0.6, unit='angstrom')
     
-    result = HF().rhf(mol, 'sto3g')
+    res = GeometryOptimization().run(mol, 'sto3g')
     
-    return result['energy']
-
-def calculate_co(d):
-    """
-    Full function for evaluation
-    """
-    mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
-    
-    result = HF().rhf(mol, 'sto3g')
-    
-    return result
+    return res['data']
 
 def build_contourplot(cgfs, coeff, sz=2, npts=50, plane='xy'):
     integrator = PyQInt()
