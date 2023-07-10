@@ -23,6 +23,7 @@ class TestMoleculeBuilder(unittest.TestCase):
                                        np.array([0.6327670,0.6327670,0.6327670]) * 1.8897259886)
         np.testing.assert_equal(mol.atoms[0][0], 'C')
         
+        mol.build_basis('sto3g')
         np.testing.assert_equal(mol.get_nelec(), 10)
         
     def test_load_molecule_from_file(self):
@@ -38,6 +39,7 @@ class TestMoleculeBuilder(unittest.TestCase):
                                        np.array([0.6327670,0.6327670,0.6327670]) * 1.8897259886)
         np.testing.assert_equal(mol.atoms[0][0], 'C')
         
+        mol.build_basis('sto3g')
         np.testing.assert_equal(mol.get_nelec(), 10)
 
 if __name__ == '__main__':

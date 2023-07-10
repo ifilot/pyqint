@@ -27,6 +27,8 @@ class Molecule:
         """
         Get the number of electrons
         """
+        if self.nelec == None:
+            raise Exception('You need to use build_basis() before using this function.')
         return self.nelec - self.charge
 
     def set_charge(self, charge):
@@ -114,6 +116,6 @@ class Molecule:
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
 
-        self.elec = np.sum(self.charges)
+        self.nelec = np.sum(self.charges)
 
         return self.cgfs, self.nuclei
