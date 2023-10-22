@@ -1,13 +1,18 @@
 import os
 import tempfile
 from pyqint import PyQInt
-from pytessel import PyTessel
 import numpy as np
 import json
 import subprocess
 import tqdm
 from mendeleev import element
 import shutil
+
+# try to import PyTessel but do not throw an error if it cannot be loaded
+try:
+    from pytessel import PyTessel
+except ModuleNotFoundError:
+    print('Cannot find PyTessel: this module will not work')
 
 class BlenderRender:
     """
