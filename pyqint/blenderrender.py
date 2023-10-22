@@ -4,15 +4,18 @@ from pyqint import PyQInt
 import numpy as np
 import json
 import subprocess
-import tqdm
-from mendeleev import element
 import shutil
 
 # try to import PyTessel but do not throw an error if it cannot be loaded
 try:
     from pytessel import PyTessel
 except ModuleNotFoundError:
-    print('Cannot find PyTessel: this module will not work')
+    print('Cannot find PyTessel')
+
+try:
+    from mendeleev import element
+except ModuleNotFoundError:
+    print('Cannot find mendeleev')
 
 class BlenderRender:
     """
@@ -37,7 +40,7 @@ class BlenderRender:
         xyzfile = os.path.join(tempdir, 'mol.xyz')
         self.__store_xyz(molecule, xyzfile)
 
-        for idx in tqdm.tqdm(mo_indices):
+        for idx in mo_indices:
             # build isosurfaces
             plyfile = os.path.join(tempdir, 'MO_%04i' % (idx+1))
             plypos, plyneg = self.__build_isosurface(plyfile, cgfs, orbc[:,idx], isovalue, sz, npts)
