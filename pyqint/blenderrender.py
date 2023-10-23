@@ -5,6 +5,7 @@ import numpy as np
 import json
 import subprocess
 import shutil
+import tqdm
 
 # try to import PyTessel but do not throw an error if it cannot be loaded
 try:
