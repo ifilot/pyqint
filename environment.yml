@@ -6,4 +6,3 @@ dependencies:
   - conda-verify
   - anaconda-client
   - tqdm
-  - mendeleev	
