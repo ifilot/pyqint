@@ -13,6 +13,8 @@ class Molecule:
         self.atoms = []
         self.charges = []
         self.name = _name
+        self.charge = 0
+        self.nelec = None
 
     def __str__(self):
         res = "Molecule: %s\n" % self.name
@@ -20,6 +22,20 @@ class Molecule:
             res += " %s (%f,%f,%f)\n" % (atom[0], atom[1][0], atom[1][1], atom[1][2])
 
         return res
+
+    def get_nelec(self):
+        """
+        Get the number of electrons
+        """
+        if self.nelec == None:
+            raise Exception('You need to use build_basis() before using this function.')
+        return self.nelec - self.charge
+
+    def set_charge(self, charge):
+        """
+        Set the charge of the molecule
+        """
+        self.charge = charge
 
     def add_atom(self, atom, x, y, z, unit='bohr'):
         ang2bohr = 1.8897259886
@@ -99,5 +115,7 @@ class Molecule:
                     self.cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
+
+        self.nelec = np.sum(self.charges)
 
         return self.cgfs, self.nuclei

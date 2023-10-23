@@ -29,7 +29,7 @@ class HF:
 
         # build cgfs, nuclei and calculate nr of electrons
         cgfs, nuclei = mol.build_basis(basis)
-        nelec = int(np.sum([at[1] for at in nuclei]))
+        nelec = mol.get_nelec()
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(N)]
 
@@ -249,7 +249,7 @@ class HF:
         # intialization
         integrator = PyQInt()
         cgfs, nuclei = mol.build_basis(basis)
-        nelec = np.sum([nucleus[1] for nucleus in nuclei])
+        nelec = mol.get_nelec()
         forces = np.zeros((len(nuclei),3))
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(N)]
