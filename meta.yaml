@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.12.2.0"
+  version: "0.13.0.0"
 
 source:
   path: .
@@ -23,6 +23,7 @@ requirements:
     - python
     - numpy
     - scipy
+    - tqdm
 
 test:
   requires:
