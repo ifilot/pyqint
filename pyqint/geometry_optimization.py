@@ -127,6 +127,7 @@ class GeometryOptimization:
         """
 
         newmol = Molecule(mol.name)
+        newmol.charge = mol.charge
         coords = coords.reshape((len(mol.atoms), 3))
         for i,atom in enumerate(mol.atoms):
             newmol.add_atom(mol.atoms[i][0], coords[i][0], coords[i][1], coords[i][2])

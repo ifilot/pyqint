@@ -99,11 +99,11 @@ python3 setup.py build
 
 and install it locally
 ```
-pip install -e .
+pip3 install -e .
 ```
 
 and finally test it
 
 ```
-pytest tests/*
+pytest-3 tests/*
 ```

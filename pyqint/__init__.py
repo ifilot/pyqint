@@ -7,5 +7,6 @@ from .foster_boys import FosterBoys
 from .cohp import COHP
 from .molecule_builder import MoleculeBuilder
 from .geometry_optimization import GeometryOptimization
+from .blenderrender import BlenderRender
 
 from ._version import __version__

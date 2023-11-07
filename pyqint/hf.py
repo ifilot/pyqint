@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-import os
 import numpy as np
 from . import PyQInt
 import time
@@ -31,7 +29,7 @@ class HF:
 
         # build cgfs, nuclei and calculate nr of electrons
         cgfs, nuclei = mol.build_basis(basis)
-        nelec = int(np.sum([at[1] for at in nuclei]))
+        nelec = mol.get_nelec()
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(N)]
 
@@ -129,7 +127,7 @@ class HF:
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            enorm = np.linalg.norm(e)                           # store error vector norm
+            #enorm = np.linalg.norm(e)                           # store error vector norm
             fmats_diis.append(F)                                # add Fock matrix to list
             pmat_diis.append(P)                                 # add density matrix to list
             evs_diis.append(e)
@@ -251,7 +249,7 @@ class HF:
         # intialization
         integrator = PyQInt()
         cgfs, nuclei = mol.build_basis(basis)
-        nelec = np.sum([nucleus[1] for nucleus in nuclei])
+        nelec = mol.get_nelec()
         forces = np.zeros((len(nuclei),3))
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(N)]
