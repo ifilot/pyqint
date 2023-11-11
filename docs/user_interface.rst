@@ -950,6 +950,36 @@ as its input.
     orbitals contain a triple-degenerate state corresponding to the triple
     bond and two lone pairs for C and O.
 
+Foster-Boys output object
+-------------------------
+
+The output object of a Foster-Boys calculation is very similar to the one
+of a Hartree-Fock calculation. It is a dictionary that contains the following
+elements.
+
+.. list-table:: Description of the data contained in the result library
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`orbe`
+     - Orbital energies after the unitary transformation.
+   * - :code:`orbc`
+     - Orbital coefficient after the unitary transformation.
+   * - :code:`nriter`
+     - Number of iterations.
+   * - :code:`r2start`
+     - Initial sum of the squared dipole moment norm of the molecular orbitals.
+   * - :code:`r2final`
+     - Final sum of the squared dipole moment norm of the molecular orbitals.
+
+.. hint::
+
+    One can directly connect the output of a Foster-Boys calculation to a
+    COHP calculation. The details of the process are found in the
+    `cohp analysis of Foster-Boys localized orbitals section <#cohp-analysis-of-the-foster-boys-localized-orbitals>`_.
+
 Geometry optimization
 =====================
 
