@@ -250,7 +250,7 @@ electronic structure calculation due to their :math:`N^{4}` scaling where
 
 Although there are essentially :math:`N^{4}` different two-electron integrals,
 due to certain symmetries the number of unique two-electron integrals is smaller.
-In the script below, the six unique two-electron integrals for the H:sub:`2`
+In the script below, the six unique two-electron integrals for the H\ :sub:`2`
 system are calculated.
 
 .. code-block:: python
@@ -296,14 +296,126 @@ The output of the above script is given by::
     0.4441076656879813
     0.5696758530951017
 
+Dipole-moment integrals
+-----------------------
+
+Dipole-moment integrals are defined as
+
+.. math::
+
+    \mu_{x,i,j} = \left< \phi_{i}(x_{1}) \left| x \right| \phi_{j}(x_{1}) \right>
+
+.. math::
+    \mu_{y,i,j} = \left< \phi_{i}(x_{1}) \left| y \right| \phi_{j}(x_{1}) \right>
+
+.. math::
+    \mu_{z,i,j} = \left< \phi_{i}(x_{1}) \left| z \right| \phi_{j}(x_{1}) \right>
+
+and are evaluated with respect to the coordinate center of the system. Dipole moments
+are vector quantities, but in this implementation the dipoles are evaluated
+in the :math:`x`, :math:`y`, :math:`z` separately.
+
+In the script below, the dipole integrals are evaluated for the H\ :sub:`2`\ O
+molecule using a :code:`sto3g` basis set and in each cartesian direction. The result
+is collected in a three-dimensional array.
+
+.. code-block:: python
+
+    from pyqint import PyQInt, Molecule
+    import numpy as np
+
+    # construct integrator object
+    integrator = PyQInt()
+
+    # build water molecule
+    mol = Molecule("H2O")
+    mol.add_atom('O',  0.00000, -0.07579, 0.0000, unit='angstrom')
+    mol.add_atom('H',  0.86681,  0.60144, 0.0000, unit='angstrom')
+    mol.add_atom('H', -0.86681,  0.60144, 0.0000, unit='angstrom')
+    cgfs, nuclei = mol.build_basis('sto3g')
+
+    N = len(cgfs)
+    D = np.zeros((N,N,3))
+    for i in range(N):
+        for j in range(i,N):
+            for k in range(0,3): # loop over directions
+                D[i,j,k] = integrator.dipole(cgfs[i], cgfs[j], k)
+
+    print(D)
+
+The result of the above script is::
+
+    [[[ 0.00000000e+00 -1.43222417e-01  0.00000000e+00]
+      [ 0.00000000e+00 -3.39013356e-02  0.00000000e+00]
+      [ 5.07919476e-02  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  5.07919476e-02  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  5.07919476e-02]
+      [ 2.22964944e-03 -3.75854187e-03  0.00000000e+00]
+      [-2.22964944e-03 -3.75854187e-03  0.00000000e+00]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00 -1.43222278e-01  0.00000000e+00]
+      [ 6.41172506e-01  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  6.41172506e-01  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  6.41172506e-01]
+      [ 2.62741706e-01  1.49973767e-01  0.00000000e+00]
+      [-2.62741706e-01  1.49973767e-01  0.00000000e+00]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00 -1.43222278e-01  0.00000000e+00]
+      [-9.08620418e-18  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 4.37629746e-01  1.08953250e-01  0.00000000e+00]
+      [ 4.37629746e-01 -1.08953250e-01  0.00000000e+00]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00 -1.43222278e-01  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00 -9.08620418e-18]
+      [ 1.47399486e-01  3.34092154e-01  0.00000000e+00]
+      [-1.47399486e-01  3.34092154e-01  0.00000000e+00]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00 -1.43222278e-01  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  2.48968067e-01]
+      [ 0.00000000e+00  0.00000000e+00  2.48968067e-01]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 1.63803356e+00  1.13655692e+00  0.00000000e+00]
+      [-1.38777878e-17  2.06582174e-01  0.00000000e+00]]
+
+     [[ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [ 0.00000000e+00  0.00000000e+00  0.00000000e+00]
+      [-1.63803356e+00  1.13655692e+00  0.00000000e+00]]]
+
+.. note::
+    Each row in the above output corresponds to the dipole moment **vector**.
+    There are in total 7 blocks to be observed and each block contains 7
+    rows. Each block corresponds to a different basis function in the *bra*
+    and each row inside a block loops over the different basis functions in the
+    *ket*.
+
 Basis sets and molecules
 ========================
 
 Building molecules
 ------------------
 
-Molecules can be efficiently built from the `Molecule` class. For example,
-to build the H:sub:`2` molecule, one can run the script below.
+Molecules can be efficiently built from the :code:`Molecule` class. For example,
+to build the H\ :sub:`2` molecule, one can run the script below.
 
 .. code-block:: python
 
@@ -326,22 +438,80 @@ The output of the above script is::
      H (0.000000,0.000000,1.400000)
 
 
+Using the MoleculeBuilder class
+-------------------------------
+
+Next to constructing molecules from scratch, one can also use the
+:code:`MoleculeBuilder` class which contains a number of pre-generated molecules.
+
+The following molecules are available:
+
+* benzene
+* bf3
+* ch4
+* co
+* co2
+* ethylene
+* h2
+* h2o
+* he
+* lih
+* nh3
+
+To load any of these molecules, one uses the :code:`from_name` function
+as shown in the script below
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder
+
+    mol = MoleculeBuilder().from_name('ch4')
+    mol.name = 'CH4'
+
+    print(mol)
+
+The output of the above script shows the elements and the atom positions::
+
+    Molecule: CH4
+     C (0.000000,0.000000,0.000000)
+     H (1.195756,1.195756,1.195756)
+     H (-1.195756,-1.195756,1.195756)
+     H (-1.195756,1.195756,-1.195756)
+     H (1.195756,-1.195756,-1.195756)
+
+.. note::
+    Naming a molecule is completely optional and has no further implications
+    on any of the calculations. To name a molecule, populate the :code:`name`
+    member of the :code:`Molecule` class.
+
+Alternatively, one can load molecules from a :code:`.xyz` file via the
+:code:`from_file` routine.
+
+.. code-block:: python
+
+    mol = MoleculeBuilder().from_file('ch4.xyz')
+
+.. warning::
+    It is assumed that the positions inside the `.xyz` file are stored in
+    **angstroms**. Internally, :program:`PyQInt` uses Bohr distances and the
+    distances as reported in the :code:`.xyz` file are automatically converted.
+
 Constructing basis functions for a molecule
 -------------------------------------------
 
 To construct the basis functions for a given molecule, one first needs to
-construct the molecule after which the `build_basis` function can be used
+construct the molecule after which the :code:`build_basis` function can be used
 to construct a basis.
 
 The following basis sets are supported. For each basis set, the range of atoms
 that are supported are given:
 
-* `sto3g` (H-I)
-* `sto6g` (H-Kr)
-* `p321` (H-Cs)
-* `p631` (H-Zn)
+* :code:`sto3g` (H-I)
+* :code:`sto6g` (H-Kr)
+* :code:`p321` (H-Cs)
+* :code:`p631` (H-Zn)
 
-The example code below builds the basis functions for the H:sub:`2` molecule:
+The example code below builds the basis functions for the H\ :sub:`2` molecule:
 
 .. code-block:: python
 
@@ -430,7 +600,7 @@ the Hartree-Fock coefficient optimization procedure in detail.
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     def main():
-        # calculate sto-3g coefficients for h2o
+        # calculate sto3g coefficients for h2o
         cgfs, coeff = calculate_co()
 
         # visualize orbitals
@@ -477,8 +647,204 @@ the Hartree-Fock coefficient optimization procedure in detail.
 
     Canonical molecular orbitals of CO visualized using contour plots.
 
-Foster-Boys localization method
--------------------------------
+Result dictionary
+-----------------
+
+The result of a Hartree-Fock calculation is captured inside a dictionary
+object. This dictionary objects contains the following keys
+
+.. list-table:: Description of the data contained in the result library
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`energy`
+     - Final energy of the electronic structure calculation
+   * - :code:`nuclei`
+     - List of elements and their position in Bohr units
+   * - :code:`cgfs`
+     - List of contracted Gaussian functional objects
+   * - :code:`energies`
+     - List of energies during the self-convergence procedure
+   * - :code:`orbe`
+     - Orbital energies (converged) (array of N element)
+   * - :code:`orbc`
+     - Orbital coefficients (converted) (matrix of N x N elements)
+   * - :code:`density`
+     - Density matrix :math:`\mathbf{P}`
+   * - :code:`fock`
+     - Fock matrix :math:`\mathbf{F}`
+   * - :code:`transform`
+     - Unitary transformation matrix :math:`\mathbf{X}`
+   * - :code:`overlap`
+     - Overlap matrix :math:`\mathbf{S}`
+   * - :code:`kinetic`
+     - Kinetic energy matrix :math:`\mathbf{T}`
+   * - :code:`nuclear`
+     - Nuclear attraction matrix :math:`\mathbf{V}`
+   * - :code:`hcore`
+     - Core Hamiltonian matrix :math:`\mathbf{H_\textrm{core}}`
+   * - :code:`tetensor`
+     - Two-electron tensor object :math:`(i,j,k,l)`
+   * - :code:`time_stats`
+     - Time statistics object
+   * - :code:`ecore`
+     - Sum of kinetic and nuclear attraction energy
+   * - :code:`ekin`
+     - Total kinetic energy
+   * - :code:`enuc`
+     - Total nuclear attraction energy
+   * - :code:`erep`
+     - Total electron-electron repulsion energy
+   * - :code:`ex`
+     - Total exchange energy
+   * - :code:`enucrep`
+     - Electrostatic repulsion energy of the nuclei
+   * - :code:`nelec`
+     - Total number of electrons
+   * - :code:`forces`
+     - Forces on the atoms (if calculated, else :code:`None`)
+
+To provide an example how one can use the above data, let us consider the
+situation wherein the user wants to decompose the individual components of the
+total energy as given by
+
+.. math::
+
+    E_{\textrm{total}} = E_{\textrm{kin}} + E_{\textrm{nuc}} + E_{\textrm{e-e}} + E_{\textrm{ex}} + E_{\textrm{nuc,rep}}
+
+Via the script below, one can easily verify that the above equation holds and
+that the total energy is indeed the sum of the kinetic, nuclear attraction,
+electron-electron repulsion, exchange and nuclear repulsion energies within a
+Hartree-Fock calculation.
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder,HF
+
+    mol = MoleculeBuilder().from_name('ch4')
+    mol.name = 'CH4'
+
+    res = HF().rhf(mol, 'sto3g')
+    print()
+    print('Kinetic energy: ', res['ekin'])
+    print('Nuclear attraction energy: ', res['enuc'])
+    print('Electron-electron repulsion: ', res['erep'])
+    print('Exchange energy: ', res['ex'])
+    print('Repulsion between nuclei: ', res['enucrep'])
+    print()
+    print('Total energy: ', res['energy'])
+    print('Sum of the individual terms: ',
+          res['ekin'] + res['enuc'] + res['erep'] + res['ex'] + res['enucrep'])
+
+The output of the above script yields::
+
+    Kinetic energy:  39.42613774982387
+    Nuclear attraction energy:  -118.63789179775034
+    Electron-electron repulsion:  32.7324270326041
+    Exchange energy:  -6.609004673631048
+    Repulsion between nuclei:  13.362026647057352
+
+    Total energy:  -39.72630504189621
+    Sum of the individual terms:  -39.726305041896055
+
+Orbital visualization
+=====================
+
+Since orbitals are essentially three-dimensional scalar fields, there are two
+useful procedures to visualize them. The scalar field can either be projected
+onto a plane, creating so-called contour plots. Alternatively, a specific
+value (i.e. the isovalue) of the scalar field can be chosen and all points in
+space that have this value can be tied together creating a so-called isosurface.
+
+Contour plots can be easily created using `matplotlib <https://matplotlib.org/>`_.
+For the creation of isosurfaces, we use `PyTessel <https://pytessel.imc-tue.nl.>`_.
+
+Contour plots
+-------------
+
+.. code-block:: python
+
+    from pyqint import PyQInt, Molecule
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    # coefficients (calculated by Hartree-Fock using a sto3g basis set)
+    coeff = [8.37612e-17, -2.73592e-16,  -0.713011, -1.8627e-17, 9.53496e-17, -0.379323,  0.379323]
+
+    # construct integrator object
+    integrator = PyQInt()
+
+    # build water molecule
+    mol = Molecule('H2O')
+    mol.add_atom('O', 0.0, 0.0, 0.0)
+    mol.add_atom('H', 0.7570, 0.5860, 0.0)
+    mol.add_atom('H', -0.7570, 0.5860, 0.0)
+    cgfs, nuclei = mol.build_basis('sto3g')
+
+    # build grid
+    x = np.linspace(-2, 2, 50)
+    y = np.linspace(-2, 2, 50)
+    xx, yy = np.meshgrid(x,y)
+    zz = np.zeros(len(x) * len(y))
+    grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
+    res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
+
+    # plot wave function
+    plt.imshow(res, origin='lower', extent=[-2,2,-2,2], cmap='PiYG')
+    plt.colorbar()
+    plt.title('1b$_{2}$ Molecular orbital of H$_{2}$O')
+
+
+Constructing isosurfaces
+------------------------
+
+.. note::
+    Isosurface generation requires the :program:`PyTessel` package to be
+    installed. More information can be found `here <https://pytessel.imc-tue.nl>`_.
+
+.. code-block:: python
+
+    from pyqint import PyQInt, Molecule, HF
+    import numpy as np
+    from pytessel import PyTessel
+
+    def main():
+        # calculate sto3g coefficients for h2o
+        cgfs, coeff = calculate_co()
+
+        # build isosurface of the fifth MO
+        # isovalue = 0.1
+        # store result as .ply file
+        build_isosurface('co_04.ply', cgfs, coeff[:,4], 0.1)
+
+    def build_isosurface(filename, cgfs, coeff, isovalue):
+        # generate some data
+        sz = 100
+        integrator = PyQInt()
+        grid = integrator.build_rectgrid3d(-5, 5, sz)
+        scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (sz, sz, sz))
+        unitcell = np.diag(np.ones(3) * 10.0)
+
+        pytessel = PyTessel()
+        vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
+        pytessel.write_ply(filename, vertices, normals, indices)
+
+    def calculate_co():
+        mol = Molecule()
+        mol.add_atom('C', 0.0, -0.5, 0.0)
+        mol.add_atom('O', 0.0, 0.5, 0.0)
+
+        result = HF().rhf(mol, 'sto3g')
+
+        return result['cgfs'], result['orbc']
+
+    if __name__ == '__main__':
+        main()
+
+Orbital localization: Foster-Boys
+=================================
 
 The code below first performs a Hartree-Fock calculation on the CO molecule
 after which the localized molecular orbitals are calculated using the
@@ -554,96 +920,8 @@ as its input.
     orbitals contain a triple-degenerate state corresponding to the triple
     bond and two lone pairs for C and O.
 
-Orbital visualization
+Geometry optimization
 =====================
 
-Since orbitals are essentially three-dimensional scalar fields, there are two
-useful procedures to visualize them. The scalar field can either be projected
-onto a plane, creating so-called contour plots. Alternatively, a specific
-value (i.e. the isovalue) of the scalar field can be chosen and all points in
-space that have this value can be tied together creating a so-called isosurface.
-
-Contour plots can be easily created using `matplotlib <https://matplotlib.org/>`_.
-For the creation of isosurfaces, we use `PyTessel <https://pytessel.imc-tue.nl.>`_.
-
-Contour plots
--------------
-
-.. code-block:: python
-
-    from pyqint import PyQInt, Molecule
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    # coefficients (calculated by Hartree-Fock using a sto-3g basis set)
-    coeff = [8.37612e-17, -2.73592e-16,  -0.713011, -1.8627e-17, 9.53496e-17, -0.379323,  0.379323]
-
-    # construct integrator object
-    integrator = PyQInt()
-
-    # build water molecule
-    mol = Molecule('H2O')
-    mol.add_atom('O', 0.0, 0.0, 0.0)
-    mol.add_atom('H', 0.7570, 0.5860, 0.0)
-    mol.add_atom('H', -0.7570, 0.5860, 0.0)
-    cgfs, nuclei = mol.build_basis('sto3g')
-
-    # build grid
-    x = np.linspace(-2, 2, 50)
-    y = np.linspace(-2, 2, 50)
-    xx, yy = np.meshgrid(x,y)
-    zz = np.zeros(len(x) * len(y))
-    grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
-    res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
-
-    # plot wave function
-    plt.imshow(res, origin='lower', extent=[-2,2,-2,2], cmap='PiYG')
-    plt.colorbar()
-    plt.title('1b$_{2}$ Molecular orbital of H$_{2}$O')
-
-
-Constructing isosurfaces
-------------------------
-
-.. note::
-    Isosurface generation requires the :program:`PyTessel` package to be
-    installed. More information can be found `here <https://pytessel.imc-tue.nl>`_.
-
-.. code-block:: python
-
-    from pyqint import PyQInt, Molecule, HF
-    import numpy as np
-    from pytessel import PyTessel
-
-    def main():
-        # calculate sto-3g coefficients for h2o
-        cgfs, coeff = calculate_co()
-
-        # build isosurface of the fifth MO
-        # isovalue = 0.1
-        # store result as .ply file
-        build_isosurface('co_04.ply', cgfs, coeff[:,4], 0.1)
-
-    def build_isosurface(filename, cgfs, coeff, isovalue):
-        # generate some data
-        sz = 100
-        integrator = PyQInt()
-        grid = integrator.build_rectgrid3d(-5, 5, sz)
-        scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (sz, sz, sz))
-        unitcell = np.diag(np.ones(3) * 10.0)
-
-        pytessel = PyTessel()
-        vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
-        pytessel.write_ply(filename, vertices, normals, indices)
-
-    def calculate_co():
-        mol = Molecule()
-        mol.add_atom('C', 0.0, -0.5, 0.0)
-        mol.add_atom('O', 0.0, 0.5, 0.0)
-
-        result = HF().rhf(mol, 'sto3g')
-
-        return result['cgfs'], result['orbc']
-
-    if __name__ == '__main__':
-        main()
+Crystal Orbital Hamilton Population Analysis
+============================================
