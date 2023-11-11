@@ -1,5 +1,5 @@
-PyQInt: a Python package for Gaussian integrals
-===============================================
+PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations
+===========================================================================================================
 
 .. image:: https://img.shields.io/github/v/tag/ifilot/pyqint?label=version
    :alt: GitHub tag (latest SemVer)

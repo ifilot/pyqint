@@ -846,6 +846,36 @@ Constructing isosurfaces
 Orbital localization: Foster-Boys
 =================================
 
+Background of FB
+----------------
+
+The canonical orbitals of a Hartree-Fock calculation are defined such that these
+will diagonalize the Fock-matrix by which these molecular orbitals are eigenfunctions
+of the Fock-operator. Nevertheless, this set of solutions is not unique in the sense
+that multiple sets of molecular orbitals produce the same electron density and
+the same total electronic energy. One is allowed to perform an arbitrary
+unitary transformations on the set of **occupied** orbitals yielding a new
+set that is as good as a representation as the old set. Some of these representations
+are however more useful than others and one particular useful representation is
+the one that makes the orbitals as localized (compact and condensed) as possible.
+
+The degree of localization can be captured via relatively simple metric as given
+by
+
+.. math::
+
+    \mathcal{M} = \sum_{i \in \textrm{occ}} \left<\psi_{i} | \vec{r} | \psi_{i} \right>^{2}
+
+where :math:`\psi_{i}` is a molecular orbital and :math:`i` loops over the occupied
+molecular orbitals. One obtains (perhaps counter-intuitively) the most localized orbitals
+by **maximizing** the value of :code:`\mathcal{M}`.
+
+The process of mixing the molecular orbitals among themselves to the aim of maximizing
+is :code:`\mathcal{M}` is embedded in the :code:`FosterBoys` class.
+
+Procedure of FB
+---------------
+
 The code below first performs a Hartree-Fock calculation on the CO molecule
 after which the localized molecular orbitals are calculated using the
 `Foster-Boys method <https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys>`_.
@@ -856,7 +886,7 @@ as its input.
 .. note::
     The code below uses the PyTessel package for constructing the isosurfaces.
     PyTessel is an external package for easy construction of isosurfaces from
-    scalar fields. More information is given `in the corresponding section below <#constructing-isosurfaces>`_.
+    scalar fields. More information is given `in the corresponding section <#constructing-isosurfaces>`_.
 
 .. code-block:: python
 
@@ -1215,3 +1245,146 @@ to the same value, as expected for the highly symmetric CH\ :sub:`4` molecule.
 
 Crystal Orbital Hamilton Population Analysis
 ============================================
+
+Background of COHP
+------------------
+
+Within the scope of chemical bonding, we can classify molecular orbitals to be
+bonding, anti-bonding or non-bonding with respect to any pair of atoms. When
+working with localized basis functions, the process of capturing the bonding
+character of the molecular orbitals is relatively straightforward as we can
+assign the basis functions constituting the molecular orbitals to an atom.
+
+Within the framework of localized orbitals, the COHP coefficient of a given
+molecular orbital (:math:`\chi`) is therefore defined as
+
+.. math::
+
+    \chi_{} = \eta_{k} \sum_{i \in A} \sum_{j \in B} C_{ki} C_{kj} H_{ij}
+
+where :math:`C_{ki}` and :math:`C_{kj}` are elements of the coefficient matrix
+:math:`\mathbf{C}`, :math:`H_{ij}` an element of the Hamiltonian (Fock)
+matrix :math:`\mathbf{H}` and :math:`\eta_{k}` is the occupancy factor of
+molecular orbital :math:`k` which is always 2 within a restricted Hartree-Fock
+calculation.
+
+.. note ::
+
+    It is perfectly possible to apply the above equation for unoccupied (virtual)
+    orbitals, however the result should be interpreted from the perspective that
+    such orbitals are merely artifacts of the diagonalization process as these
+    orbitals do not correspond to any electron of the system.
+
+Procedure of COHP
+-----------------
+
+To perform a COHP calculation, one can direct the output of a Hartree-Fock
+calculation directly to the COHP class as demonstrated using the script below.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, COHP, FosterBoys
+
+    d = 1.145414
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
+    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
+
+    res = HF().rhf(mol, 'sto3g')
+    cohp = COHP(res).run(res['orbc'], 0, 1)
+
+    print('COHP values of canonical Hartree-Fock orbitals')
+    for i,(e,chi) in enumerate(zip(res['orbe'], cohp)):
+        print('%3i %12.4f %12.4f' % (i+1,e,chi))
+    print()
+
+The output of the above script is::
+
+    COHP values of canonical Hartree-Fock orbitals
+      1     -20.4156       0.0399
+      2     -11.0922       0.0104
+      3      -1.4453      -0.4365
+      4      -0.6968       0.2051
+      5      -0.5400      -0.2918
+      6      -0.5400      -0.2918
+      7      -0.4451       0.1098
+      8       0.3062       0.5029
+      9       0.3062       0.5029
+     10       1.0092       6.4828
+
+COHP analysis of the Foster-Boys localized orbitals
+---------------------------------------------------
+
+It can be quite interesting to perform the COHP analysis on the Foster-Boys
+localized orbitals. The procedure is remarkably simple as the output of a
+Foster-Boys localization is very similar to the output of a Hartree-Fock
+calculation and one can direct the output of the former to the COHP class
+in the same manner.
+
+In the script below, a Foster-Boys localization procedure is performed on the
+canonical Hartree-Fock orbitals of CO and on both results, a COHP analysis
+is performed, which can be readily compared.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, COHP, FosterBoys
+    import numpy as np
+
+    d = 1.145414
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
+    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
+
+    res = HF().rhf(mol, 'sto3g')
+    cohp = COHP(res).run(res['orbc'], 0, 1)
+
+    resfb = FosterBoys(res).run()
+    cohp_fb = COHP(res).run(resfb['orbc'], 0, 1)
+
+    print('COHP values of canonical Hartree-Fock orbitals')
+    for i,(e,chi) in enumerate(zip(res['orbe'], cohp)):
+        print('%3i %12.4f %12.4f' % (i+1,e,chi))
+    print()
+
+    print('COHP values after Foster-Boys localization')
+    for i,(e,chi) in enumerate(zip(resfb['orbe'], cohp_fb)):
+        print('%3i %12.4f %12.4f' % (i+1,e,chi))
+    print()
+
+    print('Sum of COHP coefficient canonical orbitals: ', np.sum(cohp[:7]))
+    print('Sum of COHP coefficient Foster-Boys orbitals: ', np.sum(cohp_fb[:7]))
+
+The output of the above script is::
+
+    COHP values of canonical Hartree-Fock orbitals
+      1     -20.4156       0.0399
+      2     -11.0922       0.0104
+      3      -1.4453      -0.4365
+      4      -0.6968       0.2051
+      5      -0.5400      -0.2918
+      6      -0.5400      -0.2918
+      7      -0.4451       0.1098
+      8       0.3062       0.5029
+      9       0.3062       0.5029
+     10       1.0092       6.4828
+
+    COHP values after Foster-Boys localization
+      1     -20.3075       0.0701
+      2     -11.0370       0.0450
+      3      -0.8309      -0.4092
+      4      -0.8309      -0.4092
+      5      -0.8309      -0.4092
+      6      -0.8137       0.2783
+      7      -0.5241       0.1792
+      8       0.3062       0.5029
+      9       0.3062       0.5029
+     10       1.0092       6.4828
+
+    Sum of COHP coefficient canonical orbitals:  -0.6549007057824876
+    Sum of COHP coefficient Foster-Boys orbitals:  -0.654900705782488
+
+The results as shown above clearly demonstrate that not only the total energy
+and the electron density is invariant under a unitary transformation of the
+occupied molecular orbitals, also the sum of the COHP coefficient is an
+invariant. In other words, the (overall) bonding characteristics of the molecule
+remain the same under a unitary transformation.
