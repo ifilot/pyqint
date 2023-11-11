@@ -923,5 +923,295 @@ as its input.
 Geometry optimization
 =====================
 
+Performing a geometry optimization
+----------------------------------
+
+:program:`PyQInt` is able to perform a geometry optimization of a molecule. It
+should however be noted that this functionality is rather limited and essentially
+makes use of existing routines available in `Scipy <https://scipy.org/>`_,
+specifically the :code:`scipy.optimize.minimize` routine using the
+`conjugate gradient <https://docs.scipy.org/doc/scipy/reference/optimize.minimize-cg.html>`_ method.
+
+To demonstrate the procedure, let us consider the CH\ :sub:`4` molecule in a
+non-converged geometry wherein the C-H bonds are longer than their optimal
+value and where the C molecule does not lie in the middle of the 4 hydrogen
+atoms.
+
+Geometry optimization is handled by the :code:`GeometryOptimization` class
+which takes a molecule and a basis set as input. The user can indicate whether
+they prefer verbose output or not. By default, geometry optimization is *silent*
+and does not yield any output.
+
+.. code-block:: python
+
+    from pyqint import GeometryOptimization, Molecule
+
+    mol = Molecule()
+    dist = 1.0
+    mol.add_atom('C', 0.1, 0.0, 0.1, unit='angstrom')
+    mol.add_atom('H', dist, dist, dist, unit='angstrom')
+    mol.add_atom('H', -dist, -dist, dist, unit='angstrom')
+    mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
+    mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
+
+    res = GeometryOptimization(verbose=True).run(mol, 'sto3g')
+
+The output of the above script (condensed) is::
+
+    ================================================================================
+    START GEOMETRY OPTIMIZATION
+    USING CONJUGATE GRADIENT PROCEDURE
+    ================================================================================
+
+    ================================================================================
+      START GEOMETRY OPTIMIZATION STEP 001
+    ================================================================================
+
+    -------------
+      POSITIONS
+    -------------
+       C   0.18897260   0.00000000   0.18897260
+       H   1.88972599   1.88972599   1.88972599
+       H  -1.88972599  -1.88972599   1.88972599
+       H  -1.88972599   1.88972599  -1.88972599
+       H   1.88972599  -1.88972599  -1.88972599
+
+    ------------
+      ENERGIES
+    ------------
+      Kinetic:                      39.25312907
+      Nuclear:                     -108.88176703
+      Electron-electron repulsion:  28.15079420
+      Exchange:                     -6.09926187
+      Nuclear repulsion:             8.45508042
+      TOTAL:                       -39.12202522
+
+    ----------
+      FORCES
+    ----------
+       C   3.1181e-02   4.3241e-04   3.1181e-02
+       H   8.2117e-02   9.6104e-02   8.2117e-02
+       H  -9.8833e-02  -8.6370e-02   7.3271e-02
+       H  -8.7735e-02   7.6203e-02  -8.7735e-02
+       H   7.3271e-02  -8.6370e-02  -9.8833e-02
+
+    ================================================================================
+      END GEOMETRY OPTIMIZATION STEP 001
+    ================================================================================
+
+    ================================================================================
+      START GEOMETRY OPTIMIZATION STEP 002
+    ================================================================================
+
+    -------------
+      POSITIONS
+    -------------
+       C   0.15779172  -0.00043241   0.15779172
+       H   1.80760940   1.79362217   1.80760940
+       H  -1.79089261  -1.80335642   1.81645509
+       H  -1.80199100   1.81352308  -1.80199100
+       H   1.81645509  -1.80335642  -1.79089261
+
+    ------------
+      ENERGIES
+    ------------
+      Kinetic:                      39.15431742
+      Nuclear:                     -109.64154344
+      Electron-electron repulsion:  28.55700060
+      Exchange:                     -6.14351258
+      Nuclear repulsion:             8.85933366
+      TOTAL:                       -39.21440434
+
+    ----------
+      FORCES
+    ----------
+       C   2.9218e-02   1.2969e-03   2.9218e-02
+       H   8.3762e-02   9.5182e-02   8.3762e-02
+       H  -9.9519e-02  -8.8931e-02   7.7954e-02
+       H  -9.1414e-02   8.1383e-02  -9.1414e-02
+       H   7.7954e-02  -8.8931e-02  -9.9519e-02
+
+    ================================================================================
+      END GEOMETRY OPTIMIZATION STEP 002
+    ================================================================================
+
+    ...
+
+    ================================================================================
+      START GEOMETRY OPTIMIZATION STEP 023
+    ================================================================================
+
+    -------------
+      POSITIONS
+    -------------
+       C   0.03778625  -0.00000429   0.03778625
+       H   1.21921718   1.18193814   1.21921718
+       H  -1.14362357  -1.18156895   1.21959236
+       H  -1.14399962   1.18120405  -1.14399962
+       H   1.21959236  -1.18156895  -1.14362357
+
+    ------------
+      ENERGIES
+    ------------
+      Kinetic:                      39.46557443
+      Nuclear:                     -118.95707554
+      Electron-electron repulsion:  32.86555691
+      Exchange:                     -6.62308238
+      Nuclear repulsion:            13.52216307
+      TOTAL:                       -39.72686352
+
+    ----------
+      FORCES
+    ----------
+       C  -6.5246e-06  -4.8303e-06  -6.5246e-06
+       H   2.1794e-06  -3.7479e-06   2.1795e-06
+       H   2.6888e-06   7.3055e-06  -5.7105e-07
+       H   2.2273e-06  -6.0329e-06   2.2273e-06
+       H  -5.7103e-07   7.3056e-06   2.6888e-06
+
+    ================================================================================
+      END GEOMETRY OPTIMIZATION STEP 023
+    ================================================================================
+
+Result dictionary of a geometry optimization
+--------------------------------------------
+
+The result of a Geometry Optimization calculation is captured inside a dictionary
+object. This dictionary objects contains the following keys
+
+.. list-table:: Description of the data contained in the result library
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`res_opt`
+     - :code:`OptimizeResult` object from the scipy routine. For more information, please consult the `documentation <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize>`_.
+   * - :code:`energies`
+     - List of the total electronic energy at each ionic step.
+   * - :code:`forces`
+     - List of the forces on all the atoms at each ionic step.
+   * - :code:`coordinates`
+     - Coordinates of the atoms at each ionic step.
+   * - :code:`data`
+     - Result dictionary of the Hartree-Fock calculation **last** ionic step.
+
+To demonstrate the use of the above data, consider the script as shown below.
+In this script, we generate a CH\ :sub:`4` in a (highly) perturbed configuration.
+The perturbed configuration is generated using a random number generator (RNG). For
+reproduction purposes, we have seeded this RNG such that the result as shown
+below can be easily reproduced. The result of the geometry optimization is
+captured in the :code:`res` variable which is a dictionary according to the
+above-mentioned specifications.
+
+To show how the contents of this dictionary can be used, we produce two plots
+which are explained below.
+
+.. code-block:: python
+
+    from pyqint import GeometryOptimization, Molecule
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    # seed the random number generator to yield reproducible result
+    np.random.seed(4)
+
+    # build a CH4 molecule where the atom positions are perturbed based on a
+    # random number generator
+    mol = Molecule()
+    dist = 1.0
+    mol.add_atom('C', 0.1, 0.0, 0.1, unit='angstrom')
+    mol.add_atom('H', dist + np.random.rand(),
+                      dist + np.random.rand(),
+                      dist + np.random.rand(),
+                      unit='angstrom')
+    mol.add_atom('H', -dist + np.random.rand(),
+                      -dist + np.random.rand(),
+                      dist + np.random.rand(),
+                      unit='angstrom')
+    mol.add_atom('H', -dist + np.random.rand(),
+                      dist + np.random.rand(),
+                      -dist + np.random.rand(),
+                      unit='angstrom')
+    mol.add_atom('H', dist + np.random.rand(),
+                      -dist + np.random.rand(),
+                      -dist + np.random.rand(),
+                      unit='angstrom')
+
+    # perform the geometry optimization
+    res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
+
+    # collect the RMS of the force
+    rms = np.zeros(len(res['coordinates']))
+    for i in range(len(res['coordinates'])):
+        forces = res['forces'][i]
+        rms[i] = np.sqrt(np.sum(np.linalg.norm(forces, axis=0) / float(len(forces))))
+
+    # plot electronic energy and RMS of the force
+    fig, ax1 = plt.subplots(dpi=144, figsize=(6,4))
+    ax1.plot(res['energies'], '-o', color='black')
+    ax2 = plt.twinx()
+    ax2.plot(rms, '-o', color='red')
+    ax2.set_ylabel('Root-mean-square force')
+    ax2.tick_params(axis='y', colors='red')
+    ax2.yaxis.label.set_color('red')
+    ax2.spines['right'].set_color('red')
+    ax1.grid(linestyle='--', color='black', alpha=0.5)
+    ax1.set_xlabel('Iteration [-]')
+    ax1.set_ylabel('Electronic energy [Ht]')
+    plt.tight_layout()
+    plt.show()
+
+    # show convergence of C-H bond distances for all bonds
+    # collect data
+    distances = np.zeros((4, len(res['coordinates'])))
+    for i in range(0,4):
+        for j in range(0, len(res['coordinates'])):
+            coord = res['coordinates'][j]
+            distances[i,j] = np.linalg.norm(coord[i+1] - coord[0])
+
+    # plot in a figure
+    plt.figure(dpi=144, figsize=(6,4))
+    for i in range(0,4):
+        plt.plot(distances[i,:], '-o', alpha=0.5, label='H$_{%i}$' % (i+1))
+    plt.grid(linestyle='--', color='black', alpha=0.5)
+    plt.xlabel('Iteration [-]')
+    plt.ylabel('C-H bond distance [Bohr]')
+    plt.legend(loc='right')
+    plt.tight_layout()
+    plt.show()
+
+The result of the above script are the following two images, showcasing the
+optimization procedure and an example application of the data in the result dictionary.
+The first figure shows the total electronic energy and the root-mean-square
+of the force as function of the iteration number. The convergence criterion
+is essentially such that these forces need to be smaller than a threshold
+value. From the figure, it is clear that the total electronic energy converges
+faster than the forces.
+
+.. figure:: _static/img/ch4_geomopt_energy_rms_force.png
+
+    Energy and root-mean-square of the forces as function of the iteration number.
+
+In the second figure, we can observe the C-H bond distance as function of the
+iteration number. Clearly, we start at a relatively unfavorable geometry where
+one of the H atoms is quite distanced from the central C atom. With increasing
+iteration, we can however readily see that all C-H bond distances converge
+to the same value, as expected for the highly symmetric CH\ :sub:`4` molecule.
+
+.. figure:: _static/img/ch4_geomopt_ch_bond.png
+
+    C-H bond distances as function of the iteration number.
+
+.. danger::
+    It is by no means guaranteed that a geometry optimization converges. Even
+    more important, when the geometry optimization has not converged, it is
+    also highly likely that the underlying electronic structure calculation
+    has not been properly converged as well. One should absolutely distrust
+    any result coming out of such a calculation.
+
+    **Always verify that a calculation is properly converged before using
+    its output.**
+
 Crystal Orbital Hamilton Population Analysis
 ============================================
