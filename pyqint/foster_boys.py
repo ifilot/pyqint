@@ -41,7 +41,7 @@ class FosterBoys:
             if res['r2final'] > bestr2:
                 bestres = res
 
-        return res
+        return bestres
 
     def __single_runner(self):
         """

@@ -594,6 +594,32 @@ private:
                      const vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
+     * @brief Performs nuclear integral evaluation including caching of Fgamma
+     *
+     * This function uses function-level caching of the Fgamma function; this implementation
+     * was suggested in https://github.com/ifilot/hfcxx/issues/8, but explicit unit testing
+     * actually shows not appreciable difference in speed.
+     *
+     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param unsigned int l1   Power of x component of the polynomial of the first GTO
+     * @param unsigned int m1   Power of y component of the polynomial of the first GTO
+     * @param unsigned int n1   Power of z component of the polynomial of the first GTO
+     * @param double alpha1     Gaussian exponent of the first GTO
+     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param unsigned int l2   Power of x component of the polynomial of the second GTO
+     * @param unsigned int m2   Power of y component of the polynomial of the second GTO
+     * @param unsigned int n2   Power of z component of the polynomial of the second GTO
+     * @param double alpha2     Gaussian exponent of the second GTO
+     * @param vec3 c
+     *
+     * @return double value of the nuclear integral
+     */
+    double repulsion_fgamma_cached(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                   const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                   const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                   const vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+
+    /**
      * @brief Calculates one dimensional overlap integral
      *
      * @param int l1        Power of 'x' component of the polynomial of the first GTO
