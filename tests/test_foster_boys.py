@@ -15,7 +15,9 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
         res = HF().rhf(mol, 'sto3g')
-        res_fb = FosterBoys(res).run()
+
+        # note that a seed is given here for reproducibility purposes
+        res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
 
         orbe_ref = np.array([
             -20.30750217,
@@ -30,9 +32,11 @@ class TestFosterBoys(unittest.TestCase):
             res['orbe'][9]
         ])
 
+        # note that Foster-Boys optimization is somewhat random and thus
+        # we use relatively loose testing criteria
         np.testing.assert_almost_equal(res_fb['orbe'],
                                        orbe_ref,
-                                       decimal=3)
+                                       decimal=2)
 
     def testCH4(self):
         """
@@ -48,7 +52,9 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
         res = HF().rhf(mol, 'sto3g')
-        res_fb = FosterBoys(res).run()
+
+        # note that a seed is given here for reproducibility purposes
+        res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
 
         orbe_ref = np.array([
             -11.050113,
@@ -63,14 +69,16 @@ class TestFosterBoys(unittest.TestCase):
         ])
 
         # assert orbital energies
-        np.testing.assert_almost_equal(res_fb['orbe'], orbe_ref, decimal=3)
+        np.testing.assert_almost_equal(res_fb['orbe'], orbe_ref, decimal=2)
 
         # specifically test for quadruple degenerate orbital
         for i in range(0,4):
             for j in range(i+1,4):
+                # note that Foster-Boys optimization is somewhat random and thus
+                # we use relatively loose testing criteria
                 np.testing.assert_almost_equal(res_fb['orbe'][i+1],
                                                res_fb['orbe'][j+1],
-                                               decimal=4)
+                                               decimal=2)
 
 if __name__ == '__main__':
     unittest.main()

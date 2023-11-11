@@ -23,8 +23,8 @@
 
 #include <boost/math/special_functions/binomial.hpp>
 #include <boost/math/special_functions/gamma.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -114,6 +114,15 @@ public:
                                       const std::vector<double>& px,
                                       const std::vector<double>& py,
                                       const std::vector<double>& pz) const;
+
+    /**
+     * @brief      Evaluate all integrals for cgfs in buffer
+     */
+    std::vector<double> evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
+                                                       const std::vector<int>& charges,
+                                                       const std::vector<double>& px,
+                                                       const std::vector<double>& py,
+                                                       const std::vector<double>& pz) const;
 
     /**************************************************************************
      * OVERLAP INTEGRALS
@@ -381,73 +390,6 @@ public:
     inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge,
                                 double dx, double dy, double dz, unsigned int coord) const {
         return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, vec3(dx, dy, dz), coord);
-    }
-
-    /**
-     * @brief Calculates derivative towards one of the basis functions in the
-     * nuclear integral of two GTOs
-     *
-     * @param const GTO& gto1       Contracted Gaussian Function
-     * @param const GTO& gto2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
-     * @param unsigned int coord    Cartesian direction to take derivative towards
-     *
-     * Calculates the value of < d/dx1 gto1 | V | gto2 >
-     *
-     * @return double value of the nuclear integral
-     */
-    double nuclear_deriv_bf(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
-
-    /**
-     * @brief Calculates derivative of the nuclear attraction operator
-     * in a nuclear attraction integral of two CGF
-     *
-     * @param const GTO& gto1       Contracted Gaussian Function
-     * @param const GTO& gto2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
-     * @param unsigned int coord    Cartesian direction to take derivative towards
-     *
-     * Calculates the value of < gto1 | d/dcx V | gto2 >
-     *
-     * @return double value of the nuclear integral
-     */
-    inline double nuclear_deriv_bf(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
-        return this->nuclear_deriv_bf(gto1, gto2, vec3(rx, ry, rz), coord);
-    }
-
-    /**
-     * @brief Calculates nuclear integral of two CGF
-     *
-     * @param const GTO& gto1       Contracted Gaussian Function
-     * @param const GTO& gto2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
-     * @param unsigned int coord    Cartesian direction to take derivative towards
-     *
-     * Calculates the value of < gto1 | V | gto2 >
-     *
-     * @return double value of the nuclear integral
-     */
-    inline double nuclear_deriv_op(const GTO &gto1, const GTO &gto2, const vec3& nucleus, unsigned int coord) const;
-
-    /**
-     * @brief Calculates derivative of the nuclear attraction operator
-     * in a nuclear attraction integral of two CGF
-     *
-     * @param const GTO& gto1       Contracted Gaussian Function
-     * @param const GTO& gto2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
-     * @param unsigned int coord    Cartesian direction to take derivative towards
-     *
-     * Calculates the value of < gto1 | d/dcx V | gto2 >
-     *
-     * @return double value of the nuclear integral
-     */
-    inline double nuclear_deriv_op(const GTO &gto1, const GTO &gto2, double rx, double ry, double rz, unsigned int coord) const {
-        return this->nuclear_deriv_op(gto1, gto2, vec3(rx, ry, rz), coord);
     }
 
     /**

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-import os
-from .cgf import cgf
 import numpy as np
 from . import PyQInt
 import time
@@ -16,7 +13,8 @@ class HF:
     Routines to perform a restricted Hartree-Fock calculations
     """
     def rhf(self, mol, basis, calc_forces=False, itermax=100,
-            use_diis=True, verbose=False, tolerance=1e-7):
+            use_diis=True, verbose=False, tolerance=1e-7,
+            orbc_init=None):
         """
         Performs a Hartree-Fock type calculation
 
@@ -31,14 +29,23 @@ class HF:
 
         # build cgfs, nuclei and calculate nr of electrons
         cgfs, nuclei = mol.build_basis(basis)
-        nelec = int(np.sum([at[1] for at in nuclei]))
+        nelec = mol.get_nelec()
+        N = len(cgfs)
+        occ = [2 if i < nelec//2 else 0 for i in range(N)]
 
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, tetensor = integrator.build_integrals_openmp(cgfs, nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
+
+        # calculate nuclear repulsion
+        nuc_rep = 0.0
+        for i in range(0, len(nuclei)):
+            for j in range(i+1, len(nuclei)):
+                r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
+                nuc_rep += nuclei[i][1] * nuclei[j][1] / r
 
         # diagonalize S
         s, U = np.linalg.eigh(S)
@@ -47,7 +54,10 @@ class HF:
         X = U.dot(np.diag(1.0/np.sqrt(s)))
 
         # create empty P matrix as initial guess
-        P = np.zeros(S.shape)
+        if orbc_init is None:
+            P = np.zeros(S.shape)
+        else:
+            P = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ)
 
         # keep track of time
         start = time.time()
@@ -65,27 +75,26 @@ class HF:
             iterstart = time.time()
 
             if niter > SUBSPACE_START and use_diis:
-                diis_coeff = self.calculate_diis_coefficients(evs_diis)
+                try:
+                    diis_coeff = self.calculate_diis_coefficients(evs_diis)
+                except np.linalg.LinAlgError:
+                    # stop diis procedure and revert to linear stepping
+                    use_diis = False
+                    continue
 
                 F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
                 Fprime = X.transpose().dot(F).dot(X)
                 e, Cprime = np.linalg.eigh(Fprime)
                 C = X.dot(Cprime)
-                P = np.zeros(S.shape)
-                for i in range(S.shape[0]):
-                    for j in range(S.shape[0]):
-                        for k in range(0,int(nelec/2)):
-                            P[i,j] += 2.0 * C[i,k] * C[j,k]
+                P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
-            G = np.zeros(S.shape)
-            for i in range(S.shape[0]):
-                for j in range(S.shape[0]):
-                    for k in range(S.shape[0]):
-                        for l in range(S.shape[0]):
-                            idx_rep = integrator.teindex(i,j,l,k)
-                            idx_exc = integrator.teindex(i,k,l,j)
-                            G[i,j] += P[k,l] * (teint[idx_rep] - 0.5 * teint[idx_exc])
+            G = np.zeros_like(S)
+            for i in range(N):
+                for j in range(N):
+                    for k in range(N):
+                        for l in range(N):
+                            G[i,j] += P[k,l] * (tetensor[i,j,l,k] - 0.5 * tetensor[i,k,l,j])
 
             # build Fock matrix
             F = T + V + G
@@ -102,15 +111,10 @@ class HF:
             # calculate energy E
             energy = 0.0
             M = T + V + F
-            for i in range(S.shape[0]):
-                for j in range(S.shape[0]):
-                    energy += 0.5 * P[j,i] * M[i,j]
+            energy = 0.5 * np.einsum('ij,ji', P, M)
 
-            # calculate repulsion of the nuclei
-            for i in range(0, len(nuclei)):
-                for j in range(i+1, len(nuclei)):
-                    r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
-                    energy += nuclei[i][1] * nuclei[j][1] / r
+            # add nuclear repulsion
+            energy += nuc_rep
 
             # store energy for next iteration
             energies.append(energy)
@@ -119,16 +123,11 @@ class HF:
             # matrix from the coefficients, else, resort to the DIIS
             # algorithm
             if niter <= SUBSPACE_START or not use_diis:
-                Pold = P.copy()
-                P = np.zeros(S.shape)
-                for i in range(S.shape[0]):
-                    for j in range(S.shape[0]):
-                        for k in range(0,int(nelec/2)):
-                            P[i,j] += 2.0 * C[i,k] * C[j,k]
+                P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            enorm = np.linalg.norm(e)                           # store error vector norm
+            #enorm = np.linalg.norm(e)                           # store error vector norm
             fmats_diis.append(F)                                # add Fock matrix to list
             pmat_diis.append(P)                                 # add density matrix to list
             evs_diis.append(e)
@@ -169,6 +168,9 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
+        # update density matrix
+        P = np.einsum('ik,jk,k->ij', C, C, occ)
+
         # build solution dictionary
         sol = {
             "energy": energies[-1],
@@ -184,9 +186,14 @@ class HF:
             "kinetic": T,
             "nuclear": V,
             'hcore': T+V,
+            'tetensor': tetensor,
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
-            "teint": teint,
+            "ekin": np.einsum('ij,ji', T, P),
+            "enuc": np.einsum('ij,ji', V, P),
+            "erep": 0.5 * np.einsum('ijlk,ij,kl', tetensor, P, P),
+            "ex": -0.25 * np.einsum('iklj,ij,kl', tetensor, P, P),
+            "enucrep": nuc_rep,
             "nelec": nelec,
             "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
@@ -242,70 +249,46 @@ class HF:
         # intialization
         integrator = PyQInt()
         cgfs, nuclei = mol.build_basis(basis)
-        n_elec = np.sum([nucleus[1] for nucleus in nuclei])
-        forces = np.zeros(shape = [len(mol.atoms), 3])
-        n = len(cgfs)
+        nelec = mol.get_nelec()
+        forces = np.zeros((len(nuclei),3))
+        N = len(cgfs)
+        occ = [2 if i < nelec//2 else 0 for i in range(N)]
     
-        # calculate energy weighted density matrix:
-        # It might be preferrable to recalculate P as well
-        ew_density = np.zeros(shape = [n, n])
-        for i in range(n):
-            for j in range(n):
-                for k in range(0, n_elec//2):
-                    ew_density[i,j] += 2.0 * e[k] * C[i,k] * C[j,k]
+        # calculate energy weighted density matrix
+        ew_density = np.einsum('ik,jk,k,k->ij', C, C, occ, e)
+
+        # collect derivatives
+        S, T, V, teints = integrator.build_geometric_derivatives_openmp(cgfs, nuclei)
 
         # Loop over all cartesian direction for every nucleus
         # This could be made more efficient by incorporating symmetry
-        for n_nuc, deriv_nucleus in enumerate(nuclei):            
-            for deriv_direction in range(3): 
-                
-                overlap = np.zeros(shape=[n, n])
-                kinetic = np.zeros(shape=[n, n])
-                nuclear = np.zeros(shape=[n, n])
-                repulsion = np.zeros(shape=[n, n, n, n])
+        for n, deriv_nucleus in enumerate(nuclei):
+            for d in range(3):
 
-                # Loop over every permutation of cgfs in the basis
-                for i, cgf_1 in enumerate(cgfs):
-                    for j, cgf_2 in enumerate(cgfs):
-
-                        # derivative of overlap matrix
-                        overlap[i, j] += integrator.overlap_deriv(cgf_1, cgf_2, deriv_nucleus[0], deriv_direction)
-
-                        # derivative of kinetic matrix
-                        kinetic[i, j] += integrator.kinetic_deriv(cgf_1, cgf_2, deriv_nucleus[0], deriv_direction)
-                        
-                        # derivative nuclear electron attraction
-                        for nucleus in mol.nuclei:
-                            
-                            # nuclear_deriv_op returns wrong values if both cgfs and nucleus is on deriv_nucleus
-                            # the following if statment eliminates that term using translational symmetry 
-                            if not (np.linalg.norm(cgf_1.p - deriv_nucleus[0]) < 0.0001 and  np.linalg.norm(cgf_2.p - deriv_nucleus[0]) < 0.0001 and np.linalg.norm(nucleus[0] - deriv_nucleus[0]) < 0.0001):
-                                nuclear[i, j] += integrator.nuclear_deriv(cgf_1, cgf_2, nucleus[0], nucleus[1], deriv_nucleus[0], deriv_direction)
-
-                        # derivative of electron-electron repulsions
-                        for k, cgf_3 in enumerate(cgfs):
-                            for l, cgf_4 in enumerate(cgfs):
-                                repulsion[i, j, k, l] += integrator.repulsion_deriv(cgf_1, cgf_2, cgf_3, cgf_4, deriv_nucleus[0], deriv_direction)
-                        
                 # derivate nucleus-nucleus repulsion
                 term_nn = 0
                 for nucleus in nuclei:
                     if np.linalg.norm(nucleus[0] - deriv_nucleus[0]) > 0.0001:
-                        term_nn += deriv_nucleus[1] * nucleus[1] * (nucleus[0][deriv_direction] - deriv_nucleus[0][deriv_direction]) / (np.linalg.norm(nucleus[0]- deriv_nucleus[0])**3)
+                        term_nn += deriv_nucleus[1] * nucleus[1] * \
+                                   (nucleus[0][d] - deriv_nucleus[0][d]) / \
+                                   (np.linalg.norm(nucleus[0]- deriv_nucleus[0])**3)
 
-                hcore = kinetic + nuclear
+                hcore = T[n,d] + V[n,d]
                 term_hcore = np.sum(np.multiply(P, hcore))
 
                 term_repulsion = 0
-                for i in range(n):
-                    for j in range(n):
-                        for k in range(n):
-                            for l in range(n):
-                                term_repulsion += 1/2 * P[i, j] * P[k, l]*(repulsion[i, j, k, l] - 1/2*repulsion[i, k, j, l]) 
+                for i in range(N):
+                    for j in range(N):
+                        for k in range(N):
+                            for l in range(N):
+                                idx1 = integrator.teindex(i,j,k,l)
+                                idx2 = integrator.teindex(i,k,j,l)
+
+                                term_repulsion += 0.5 * P[i,j] * P[k,l] * (teints[n,d,idx1] - 0.5 * teints[n,d,idx2])
                 
-                term_overlap = - np.sum(np.multiply(ew_density, overlap))
+                term_overlap = - np.sum(np.multiply(ew_density, S[n,d]))
            
                 # F = - d/dR E
-                forces[n_nuc, deriv_direction] -= term_hcore + term_repulsion + term_overlap + term_nn 
+                forces[n,d] = term_hcore + term_repulsion + term_overlap + term_nn
 
         return forces

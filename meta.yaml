@@ -1,6 +1,6 @@
 package:
   name: "pyqint"
-  version: "0.11.0.0"
+  version: "0.13.0.0"
 
 source:
   path: .
@@ -23,6 +23,7 @@ requirements:
     - python
     - numpy
     - scipy
+    - tqdm
 
 test:
   requires:
@@ -33,6 +34,10 @@ test:
   source_files:
     - tests/*.py
     - tests/results/*.npy
+    - tests/results/*.txt
+    - tests/results/*.xyz
+  commands:
+    - nosetests tests
 
 about:
   home: https://github.com/ifilot/pyqint

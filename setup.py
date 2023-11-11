@@ -124,7 +124,7 @@ setup(
     ext_modules=cythonize(ext_modules[0],
                           language_level = "3",
                           build_dir="build"),
-    packages=['pyqint', 'pyqint.basissets'],
+    packages=['pyqint', 'pyqint.basissets', 'pyqint.molecules'],
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
