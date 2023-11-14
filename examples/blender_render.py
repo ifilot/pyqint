@@ -15,9 +15,10 @@ import subprocess
 outpath = os.path.dirname(__file__)
 
 def main():
-    build_orbitals_co()
-    build_orbitals_ch4()
-    build_orbitals_ethylene()
+    # build_orbitals_co()
+    # build_orbitals_ch4()
+    # build_orbitals_ethylene()
+    build_orbitals_h2o()
 
 def build_orbitals_co():
     """
@@ -32,6 +33,18 @@ def build_orbitals_co():
     resfb = FosterBoys(res).run()
 
     build(molname, res, resfb, nrows=2)
+
+def build_orbitals_h2o():
+    """
+    Build a montage image of the canonical and localized molecular orbitals
+    of H2O
+    """
+    molname = 'H2O'
+    mol = MoleculeBuilder().from_name('h2o')
+    res = GeometryOptimization().run(mol, 'sto3g')['data']
+    resfb = FosterBoys(res).run()
+
+    build(molname, res, resfb, nrows=1)
 
 def build_orbitals_ch4():
     """
