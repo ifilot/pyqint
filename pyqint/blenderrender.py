@@ -40,7 +40,8 @@ class BlenderRender:
 
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
                                   mo_indices=None, sz=5, isovalue=0.03,
-                                  npts=100, negcol='E72F65', poscol='3F9EE7'):
+                                  prefix='MO', npts=100,
+                                  negcol='E72F65', poscol='3F9EE7'):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
 
@@ -54,12 +55,12 @@ class BlenderRender:
         for idx in pbar:
             # build isosurfaces
             pbar.set_description('Producing isosurfaces (#%i)' % (idx+1))
-            plyfile = os.path.join(tempdir, 'MO_%04i' % (idx+1))
+            plyfile = os.path.join(tempdir, '%s_%04i' % (prefix,idx+1))
             plypos, plyneg = self.__build_isosurface(plyfile, cgfs, orbc[:,idx], isovalue, sz, npts)
 
             # execute blender
             pbar.set_description('Producing molecular orbital (#%i)' % (idx+1))
-            outfile = os.path.join(outpath, 'MO_%04i.png' % (idx+1))
+            outfile = os.path.join(outpath, '%s_%04i.png' % (prefix,idx+1))
             logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir, negcol, poscol)
 
             self.log.append("### START LOG: MOLECULAR ORBITAL %i ###" % (idx+1))
