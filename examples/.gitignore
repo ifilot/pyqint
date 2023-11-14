@@ -1,3 +1,5 @@
 *.npy
 *.jpg
 *.ply
+*.png
+*.txt
