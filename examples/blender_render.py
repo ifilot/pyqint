@@ -15,8 +15,9 @@ import subprocess
 outpath = os.path.dirname(__file__)
 
 def main():
-    # build_orbitals_co()
+    build_orbitals_co()
     build_orbitals_ch4()
+    build_orbitals_ethylene()
 
 def build_orbitals_co():
     """
@@ -44,6 +45,18 @@ def build_orbitals_ch4():
 
     build(molname, res, resfb, nrows=3)
 
+def build_orbitals_ethylene():
+    """
+    Build a montage image of the canonical and localized molecular orbitals
+    of CH4
+    """
+    molname = 'ethylene'
+    mol = MoleculeBuilder().from_name('ethylene')
+    res = GeometryOptimization().run(mol, 'sto3g')['data']
+    resfb = FosterBoys(res).run()
+
+    build(molname, res, resfb, nrows=2)
+
 def build(molname, res, resfb, nrows=2):
     """
     Build isosurfaces, montage and print energies to a file
@@ -57,7 +70,7 @@ def build(molname, res, resfb, nrows=2):
     :param      nrows:    Number of rows in the montage
     :type       nrows:    int
     """
-    #build_isosurfaces(molname, res, resfb)
+    build_isosurfaces(molname, res, resfb)
     montage(molname, nrows)
     store_energies(os.path.join(os.path.dirname(__file__), 'MO_%s_energies.txt' % molname), res['orbe'], resfb['orbe'])
 
