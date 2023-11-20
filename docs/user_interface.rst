@@ -28,7 +28,8 @@ polynomial, and :math:`N` a normalization constant such that
     \left< \Phi | \Phi \right> = 1
 
 .. note::
-    The normalization constant is automatically calculated by `PyQInt` and does not have
+    The normalization constant is automatically calculated by `PyQInt` based
+    on the value of :math:`\alpha` and :math:`(l,m,n)` and does not have
     to be supplied by the user.
 
 GTOs are a fundamental building block of CGF (see below) and typically a user would
@@ -36,10 +37,11 @@ not directly work with them. Nevertheless, GTO objects can be constructed as fol
 
     from pyqint import PyQInt, cgf, gto
 
+    coeff = 1.0    # coefficients only have meaning for GTOs within a CGF
     alpha = 0.5
     l,m,n = 0,0,0
     p = (0,0,0)
-    G = gto(1.0, p, alpha, l, m, n)
+    G = gto(coeff, p, alpha, l, m, n)
 
 .. note::
     If you work with individual GTOs, the first parameter to construct the GTO
@@ -62,12 +64,15 @@ add GTOs to it::
 
     from pyqint import PyQInt, cgf
 
-    # build cgf for hydrogen separated by 1.4 a.u.
-    cgf1 = cgf([0.0, 0.0, 0.0])
+    cgf = cgf([0.0, 0.0, 0.0])
 
-    cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
-    cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
-    cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
+    cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
+    cgf.add_gto(0.535328, 0.623914, 0, 0, 0)
+    cgf.add_gto(0.444635, 0.168855, 0, 0, 0)
+
+.. note::
+    The first argument of the :code:`add_gto` function is the linear expansion coefficient
+    :math:`c_{i}` and the second argument is :math:`\alpha`.
 
 Integral evaluation
 ===================
@@ -99,14 +104,14 @@ are separated by a distance of 1.4 Bohr.
     # construct integrator object
     integrator = PyQInt()
 
-    # build cgf for hydrogen separated by 1.4 a.u.
+    # build CGF for a H atom located at the origin
     cgf1 = cgf([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
     cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
 
-    # create a copy of the CGF
+    # create a copy of the CGF located 1.4 a.u. separated from CGF1
     cgf2 = deepcopy(cgf1)
     cgf2.p[2] = 1.4
 
@@ -147,14 +152,14 @@ are separated by a distance of 1.4 Bohr.
     # construct integrator object
     integrator = PyQInt()
 
-    # build cgf for hydrogen separated by 1.4 a.u.
+    # build CGF for a H atom located at the origin
     cgf1 = cgf([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
     cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
 
-    # create a copy of the CGF
+    # create a copy of the CGF located 1.4 a.u. separated from CGF1
     cgf2 = deepcopy(cgf1)
     cgf2.p[2] = 1.4
 
@@ -197,14 +202,14 @@ the nuclei are the same.
     # construct integrator object
     integrator = PyQInt()
 
-    # build cgf for hydrogen separated by 1.4 a.u.
+    # build CGF for a H atom located at the origin
     cgf1 = cgf([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
     cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
 
-    # create a copy of the CGF
+    # create a copy of the CGF located 1.4 a.u. separated from CGF1
     cgf2 = deepcopy(cgf1)
     cgf2.p[2] = 1.4
 
@@ -262,14 +267,14 @@ system are calculated.
     # construct integrator object
     integrator = PyQInt()
 
-    # build cgf for hydrogen separated by 1.4 a.u.
+    # build CGF for a H atom located at the origin
     cgf1 = cgf([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
     cgf1.add_gto(0.444635, 0.168855, 0, 0, 0)
 
-    # create a copy of the CGF
+    # create a copy of the CGF located 1.4 a.u. separated from CGF1
     cgf2 = deepcopy(cgf1)
     cgf2.p[2] = 1.4
 
