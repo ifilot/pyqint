@@ -50,7 +50,7 @@ resources associated with this project.
 
 To create the new environment (called eoesc-env), run::
 
-    conda create -n eoesc-env python=3.9
+    conda create -n eoesc-env python=3.11
 
 Next, open the environment with::
 
@@ -58,7 +58,7 @@ Next, open the environment with::
 
 and install the required packages::
 
-    conda install -c ifilot pyqint pylebedev pydft pytessel
+    conda install -c ifilot pyqint pytessel
 
 Finally, you can install the IDE Spyder using::
 
