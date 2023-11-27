@@ -849,10 +849,10 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
  */
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
-    double rep = repulsion(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                           gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                           gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                           gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+    double rep = this->repulsion(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                                 gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                                 gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
+                                 gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
 
     return rep;
 }
@@ -1096,6 +1096,23 @@ double Integrator::A_term(const int i, const int r, const int u, const int l1, c
             std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
 }
 
+/**
+ * @brief Performs nuclear integral evaluation
+ *
+ * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param unsigned int l1   Power of x component of the polynomial of the first GTO
+ * @param unsigned int m1   Power of y component of the polynomial of the first GTO
+ * @param unsigned int n1   Power of z component of the polynomial of the first GTO
+ * @param double alpha1     Gaussian exponent of the first GTO
+ * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param unsigned int l2   Power of x component of the polynomial of the second GTO
+ * @param unsigned int m2   Power of y component of the polynomial of the second GTO
+ * @param unsigned int n2   Power of z component of the polynomial of the second GTO
+ * @param double alpha2     Gaussian exponent of the second GTO
+ * @param vec3 c
+ *
+ * @return double value of the nuclear integral
+ */
 double Integrator::repulsion(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
                              const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
                              const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
@@ -1123,6 +1140,70 @@ double Integrator::repulsion(const vec3 &a, const int la, const int ma, const in
         for(int j=0; j<=(ma+mb+mc+md); j++) {
             for(int k=0; k<=(na+nb+nc+nd); k++) {
                 sum += bx[i]*by[j]*bz[k]*this->gamma_inc.Fgamma(i+j+k,0.25*rpq2/delta);
+            }
+        }
+    }
+
+    return 2.0 * std::pow(pi,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
+                 std::exp(-alphaa*alphab*rab2/gamma1)*
+                 std::exp(-alphac*alphad*rcd2/gamma2)*sum;
+}
+
+/**
+ * @brief Performs nuclear integral evaluation
+ *
+ * This function uses function-level caching of the Fgamma function
+ *
+ * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param unsigned int l1   Power of x component of the polynomial of the first GTO
+ * @param unsigned int m1   Power of y component of the polynomial of the first GTO
+ * @param unsigned int n1   Power of z component of the polynomial of the first GTO
+ * @param double alpha1     Gaussian exponent of the first GTO
+ * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param unsigned int l2   Power of x component of the polynomial of the second GTO
+ * @param unsigned int m2   Power of y component of the polynomial of the second GTO
+ * @param unsigned int n2   Power of z component of the polynomial of the second GTO
+ * @param double alpha2     Gaussian exponent of the second GTO
+ * @param vec3 c
+ *
+ * @return double value of the nuclear integral
+ */
+double Integrator::repulsion_fgamma_cached(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                           const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                           const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                           const vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
+
+    static const double pi = boost::math::constants::pi<double>();
+    double rab2 = (a-b).squaredNorm();
+    double rcd2 = (c-d).squaredNorm();
+
+    vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    vec3 q = gaussian_product_center(alphac, c, alphad, d);
+
+    double rpq2 = (p-q).squaredNorm();
+
+    double gamma1 = alphaa + alphab;
+    double gamma2 = alphac + alphad;
+    double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
+
+    std::vector<double> bx = B_array(la, lb, lc, ld, p[0], a[0], b[0], q[0], c[0], d[0], gamma1, gamma2, delta);
+    std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
+    std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
+
+    // pre-calculate Fgamma values and cache them inside a vector
+    const unsigned int imax = la+lb+lc+ld;
+    const unsigned int jmax = ma+mb+mc+md;
+    const unsigned int kmax = na+nb+nc+nd;
+    std::vector<double> Fgamma_lookup(imax + jmax + kmax + 1, 0.0);
+    for(unsigned int i=0; i<Fgamma_lookup.size(); i++) {
+        Fgamma_lookup[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
+    }
+
+    double sum = 0.0;
+    for(int i=0; i<=(la+lb+lc+ld); i++) {
+        for(int j=0; j<=(ma+mb+mc+md); j++) {
+            for(int k=0; k<=(na+nb+nc+nd); k++) {
+                sum += bx[i]*by[j]*bz[k]*Fgamma_lookup[i+j+k];
             }
         }
     }

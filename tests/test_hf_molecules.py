@@ -159,7 +159,6 @@ class TestHFMolecules(unittest.TestCase):
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -55.7998313, 5)
 
-    @nottest
     def testC6H6(self):
         """
         Test Hartree-Fock calculation for Ethylene

@@ -5,18 +5,23 @@ import numpy as np
 import json
 import subprocess
 import shutil
-import tqdm
+from sys import platform
 
 # try to import PyTessel but do not throw an error if it cannot be loaded
 try:
     from pytessel import PyTessel
 except ModuleNotFoundError:
-    print('Cannot find PyTessel')
+    print('Cannot find module PyTessel')
 
 try:
     from mendeleev import element
 except ModuleNotFoundError:
-    print('Cannot find mendeleev')
+    print('Cannot find module mendeleev')
+
+try:
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    print('Cannot find module tqdm')
 
 class BlenderRender:
     """
@@ -24,6 +29,10 @@ class BlenderRender:
     """
     def __init__(self):
         self.executable = self.__find_blender()
+        self.log = []
+        print('******************************************************')
+        print('WARNING: Blender rendering is an EXPERIMENTAL FEATURE.')
+        print('******************************************************')
         if self.executable is None:
             raise Exception('Cannot find Blender executable')
         else:
@@ -31,7 +40,8 @@ class BlenderRender:
 
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
                                   mo_indices=None, sz=5, isovalue=0.03,
-                                  npts=100):
+                                  prefix='MO', npts=100,
+                                  negcol='E72F65', poscol='3F9EE7'):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
 
@@ -41,16 +51,30 @@ class BlenderRender:
         xyzfile = os.path.join(tempdir, 'mol.xyz')
         self.__store_xyz(molecule, xyzfile)
 
-        for idx in mo_indices:
+        pbar = tqdm(mo_indices)
+        for idx in pbar:
             # build isosurfaces
-            plyfile = os.path.join(tempdir, 'MO_%04i' % (idx+1))
+            pbar.set_description('Producing isosurfaces (#%i)' % (idx+1))
+            plyfile = os.path.join(tempdir, '%s_%04i' % (prefix,idx+1))
             plypos, plyneg = self.__build_isosurface(plyfile, cgfs, orbc[:,idx], isovalue, sz, npts)
 
             # execute blender
-            outfile = os.path.join(outpath, 'MO_%04i.png' % (idx+1))
-            self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir)
+            pbar.set_description('Producing molecular orbital (#%i)' % (idx+1))
+            outfile = os.path.join(outpath, '%s_%04i.png' % (prefix,idx+1))
+            logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir, negcol, poscol)
+
+            self.log.append("### START LOG: MOLECULAR ORBITAL %i ###" % (idx+1))
+            for line in logoutput.splitlines():
+                self.log.append(line.decode('utf-8'))
+            self.log.append("### END LOG: MOLECULAR ORBITAL %i ###" % (idx+1))
 
         shutil.rmtree(tempdir)
+
+        # store log in same path
+        with open(os.path.join(outpath, 'renderlog.txt'), 'w') as f:
+            for line in self.log:
+                f.write(line + '\n')
+            f.close()
 
     def get_executable(self):
         """
@@ -62,20 +86,33 @@ class BlenderRender:
         """
         Find the Blender executable
         """
-        searchpath = os.path.join('C:\\','Program Files','Blender Foundation')
-        name = 'blender.exe'
-        results = []
-        for root, dirs, files in os.walk(searchpath):
-            if name in files:
-                results.append(os.path.join(root, name))
+        if platform == "linux" or platform == "linux2":
+            ex = '/opt/blender-3.3.11-linux-x64/blender' # preferred version and path
+            if os.path.exists(ex):
+                return ex
 
-        for res in results:
-            if '3.3' in res:
-                return res
+            print('Cannot find proper Blender executable. For Linux, please install Blender LTS 3.3.11 in /opt/blender-3.3.11-linux-x64/.')
+            print('Blender can be obtained via: https://ftp.nluug.nl/pub/graphics/blender/release/Blender3.3/blender-3.3.11-linux-x64.tar.xz')
+            print('For more details on how to install Blender, please consult the instructions in the manual: https://pyqint.imc-tue.nl/')
+
+            return None
+        elif platform == 'win32':
+            searchpath = os.path.join('C:\\','Program Files','Blender Foundation')
+            name = 'blender.exe'
+            results = []
+            for root, dirs, files in os.walk(searchpath):
+                if name in files:
+                    results.append(os.path.join(root, name))
+
+            for res in results:
+                if '3.3' in res:
+                    return res
+        else:
+            raise Exception('Your platform is not supported for Blender')
 
         return None
 
-    def __run_blender(self, negfile, posfile, xyzfile, pngfile, cwd):
+    def __run_blender(self, negfile, posfile, xyzfile, pngfile, cwd, negcol, poscol):
         # set path to xyz file
         blendpysrc = os.path.join(os.path.dirname(__file__), 'blender', 'blender_render_molecule.py')
         blendpydst = os.path.join(cwd, 'blender_render_molecule.py')
@@ -83,8 +120,8 @@ class BlenderRender:
 
         manifest = {
             'mo_colors' : {
-                'neg': 'E72F65',
-                'pos': '3F9EE7',
+                'neg': negcol,
+                'pos': poscol,
             },
             'xyzfile' : xyzfile,
             'mo_name' : 'isosurface',
@@ -114,6 +151,8 @@ class BlenderRender:
             [self.executable, '-b', '-P', blendpydst],
             cwd=cwd
         )
+
+        return out
 
     def __store_xyz(self, mol, filename):
         """

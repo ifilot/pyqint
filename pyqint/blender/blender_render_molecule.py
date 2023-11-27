@@ -121,10 +121,13 @@ def set_environment(settings):
     Specify canvas size, remove default objects, reset positions of
     camera and light, define film and set background
     """
+    print('Set render engine to: CYCLES')
     bpy.context.scene.render.engine = 'CYCLES'
+    print('Set rendering device to GPU')
     bpy.context.scene.cycles.device = 'GPU'
     bpy.context.scene.render.resolution_x = settings['resolution']
     bpy.context.scene.render.resolution_y = settings['resolution']
+    print('Setting resolution to: ', settings['resolution'])
     bpy.context.scene.cycles.samples = 1024
     bpy.context.scene.cycles.tile_size = 2048
 

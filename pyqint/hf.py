@@ -195,6 +195,7 @@ class HF:
             "ex": -0.25 * np.einsum('iklj,ij,kl', tetensor, P, P),
             "enucrep": nuc_rep,
             "nelec": nelec,
+            "mol": mol,
             "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
         }
 

@@ -38,7 +38,7 @@
 
 #include "gamma.h"
 
-double GammaInc::Fgamma(const double m, double x) const {
+double GammaInc::Fgamma(double m, double x) const {
     double tiny = 0.00000001;
     x = std::max(std::abs(x),tiny);
     double val = gamm_inc(m+0.5,x);
@@ -58,7 +58,7 @@ double GammaInc::Fgamma(const double m, double x) const {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gamm_inc(const double a, const double x) const {
+double GammaInc::gamm_inc(double a, double x) const {
     double gammap = gammp(a,x);
     double gln = gammln(a);
     return exp(gln) * gammap;
@@ -76,7 +76,7 @@ double GammaInc::gamm_inc(const double a, const double x) const {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gammp(const double a, double x) const {
+double GammaInc::gammp(double a, double x) const {
     static const int ASWITCH = 100;
 
     if(x < 0.0 || a <= 0.0) {
@@ -104,7 +104,7 @@ double GammaInc::gammp(const double a, double x) const {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gser(const double a, const double x) const {
+double GammaInc::gser(double a, double x) const {
     double EPS = std::numeric_limits<double>::epsilon();
 
     double sum, del, ap;
@@ -122,10 +122,10 @@ double GammaInc::gser(const double a, const double x) const {
     }
 }
 
-double GammaInc::gammln(const double xx) const {
+double GammaInc::gammln(double xx) const {
     int j;
     double x, tmp, y, ser;
-    static const double cof[14]={57.1562356658629235,-59.5979603554754912,
+    static double cof[14]={57.1562356658629235,-59.5979603554754912,
         14.1360979747417471,-0.491913816097620199,.339946499848118887e-4,
         .465236289270485756e-4,-.983744753048795646e-4,.158088703224912494e-3,
         -.210264441724104883e-3,.217439618115212643e-3,-.164318106536763890e-3,
@@ -152,7 +152,7 @@ double GammaInc::gammln(const double xx) const {
  *
  * returns double value of the incomplete Gamma Function
  */
-double GammaInc::gcf(const double a, const double x) const {
+double GammaInc::gcf(double a, double x) const {
     double EPS = std::numeric_limits<double>::epsilon();
     double FPMIN = std::numeric_limits<double>::min() / EPS;
 

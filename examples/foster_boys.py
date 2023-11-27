@@ -40,6 +40,8 @@ def optimize_co():
     
     res = GeometryOptimization().run(mol, 'sto3g')
     
+    print(res['data']['nuclei'])
+    
     return res['data']
 
 def build_contourplot(cgfs, coeff, sz=2, npts=50, plane='xy'):
