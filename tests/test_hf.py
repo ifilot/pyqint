@@ -53,6 +53,36 @@ class TestHF(unittest.TestCase):
 
         en = -39.35007843284954
         np.testing.assert_almost_equal(results['energies'][-1], en, 4)
+        
+    def test_hartree_fock_ch4_symmetric(self):
+        """
+        Test Hartree-Fock calculation on CH4 using an STO-3g basis set and
+        symmetric orthogonalization
+        """
+        mol = Molecule()
+        dist = 1.78/2
+        mol.add_atom('C', 0.0, 0.0, 0.0, unit='angstrom')
+        mol.add_atom('H', dist, dist, dist, unit='angstrom')
+        mol.add_atom('H', -dist, -dist, dist, unit='angstrom')
+        mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
+        mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
+
+        results = HF().rhf(mol, 'sto3g', ortho='symmetric')
+
+        # check that orbital energies are correctly approximated
+        ans = np.array([-11.0707,
+                         -0.7392,
+                         -0.3752,
+                         -0.3752,
+                         -0.3752,
+                          0.2865,
+                          0.4092,
+                          0.4092,
+                          0.4092])
+        np.testing.assert_almost_equal(results['orbe'], ans, 4)
+
+        en = -39.35007843284954
+        np.testing.assert_almost_equal(results['energies'][-1], en, 4)
 
     def test_hartree_fock_restart(self):
         """

@@ -14,7 +14,7 @@ class HF:
     """
     def rhf(self, mol, basis, calc_forces=False, itermax=100,
             use_diis=True, verbose=False, tolerance=1e-7,
-            orbc_init=None):
+            orbc_init=None, ortho='canonical'):
         """
         Performs a Hartree-Fock type calculation
 
@@ -51,7 +51,14 @@ class HF:
         s, U = np.linalg.eigh(S)
 
         # construct transformation matrix X
-        X = U.dot(np.diag(1.0/np.sqrt(s)))
+        if ortho == 'canonical': # perform canonical orthogonalization
+            X = U @ np.diag(1.0/np.sqrt(s))
+        elif ortho == 'symmetric':
+            X = U @ np.diag(1.0/np.sqrt(s)) @ U.transpose()
+        else:
+            raise Exception("Invalid orthogonalization option selected: ", ortho)
+        
+        
 
         # create empty P matrix as initial guess
         if orbc_init is None:
@@ -83,9 +90,9 @@ class HF:
                     continue
 
                 F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
-                Fprime = X.transpose().dot(F).dot(X)
+                Fprime = X.transpose() @ F @ X
                 e, Cprime = np.linalg.eigh(Fprime)
-                C = X.dot(Cprime)
+                C = X @ Cprime
                 P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
@@ -100,13 +107,13 @@ class HF:
             F = T + V + G
 
             # transform Fock matrix
-            Fprime = X.transpose().dot(F).dot(X)
+            Fprime = X.transpose() @ F @ X
 
             # diagonalize F
             orbe, Cprime = np.linalg.eigh(Fprime)
 
             # back-transform
-            C = X.dot(Cprime)
+            C = X @ Cprime
 
             # calculate energy E
             energy = 0.0
