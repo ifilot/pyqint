@@ -154,16 +154,16 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     // Construct 2x2 matrices to hold values for the overlap,
     // kinetic and two nuclear integral values, respectively.
     const size_t datasz = charges.size() * 3 * sz * sz;
-    std::vector S(datasz, 0.0);
-    std::vector T(datasz, 0.0);
-    std::vector V(datasz, 0.0);
+    std::vector<double> S(datasz, 0.0);
+    std::vector<double> T(datasz, 0.0);
+    std::vector<double> V(datasz, 0.0);
 
     // calculate the integral values using the integrator class
     for(unsigned int n=0; n<charges.size(); n++) { // loop over nuclei
         for(unsigned int k=0; k<3; k++) { // loop over directions
 
             // build container for summation over nuclei
-            std::vector Vn(charges.size() * sz * sz, 0.0);
+            std::vector<double> Vn(charges.size() * sz * sz, 0.0);
 
             #pragma omp parallel for schedule(dynamic)
             for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here

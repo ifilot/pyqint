@@ -30,8 +30,6 @@
 #include "cgf.h"
 #include "factorials.h"
 
-typedef std::vector<std::vector<double>> MATDOUBLE;
-
 class Integrator {
 private:
     std::string compile_date;
