@@ -21,11 +21,6 @@
 
 #pragma once
 
-#include <boost/math/special_functions/binomial.hpp>
-#include <boost/math/special_functions/gamma.hpp>
-#include <string>
-#include <unordered_map>
-
 #include "cgf.h"
 
 class Plotter {

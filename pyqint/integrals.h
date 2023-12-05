@@ -21,10 +21,6 @@
 
 #pragma once
 
-#include <boost/math/special_functions/binomial.hpp>
-#include <boost/math/special_functions/gamma.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/lexical_cast.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -681,7 +677,11 @@ private:
 
     double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
     double B0(int i, int r, double q) const;
-    double fact_ratio2(const int a, const int b) const;
+    double fact_ratio2(unsigned int a, unsigned int b) const;
+
+    double factorial(unsigned int n) const;
+
+    double double_factorial(unsigned int n) const;
 
     void init();
 };

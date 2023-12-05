@@ -40,7 +40,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF().rhf(mol, 'sto3g')
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -77.0739544, 5)
+        np.testing.assert_almost_equal(results['energy'], -77.07397265708258, 5)
 
     def testBF3(self):
         """

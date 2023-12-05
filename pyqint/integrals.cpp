@@ -999,7 +999,7 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
 
     for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
         sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
-                     (i == 0 ? 1 : boost::math::double_factorial<double>(2 * i - 1) ) /
+                     (i == 0 ? 1 : this->double_factorial(2 * i - 1) ) /
                      std::pow(2 * gamma, i);
     }
 
@@ -1042,7 +1042,7 @@ double Integrator::binomial(int a, int b) const {
     if( (a < 0) | (b < 0) | (a-b < 0) ) {
         return 1.0;
     }
-    return boost::math::factorial<double>(a) / (boost::math::factorial<double>(b) * boost::math::factorial<double>(a-b));
+    return this->factorial(a) / (this->factorial(b) * this->factorial(a-b));
 }
 
 double Integrator::nuclear(const vec3& a, int l1, int m1, int n1, double alpha1,
@@ -1092,8 +1092,8 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
 
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
-            std::pow(-1,u) * boost::math::factorial<double>(i)*std::pow(cpx,i-2*r-2*u)*
-            std::pow(0.25/gamma,r+u)/boost::math::factorial<double>(r)/boost::math::factorial<double>(u)/boost::math::factorial<double>(i-2*r-2*u);
+            std::pow(-1,u) * this->factorial(i)*std::pow(cpx,i-2*r-2*u)*
+            std::pow(0.25/gamma,r+u)/this->factorial(r)/this->factorial(u)/this->factorial(i-2*r-2*u);
 }
 
 /**
@@ -1254,8 +1254,8 @@ double Integrator::B0(int i, int r, double g) const {
     return fact_ratio2(i,r) * pow(4*g,r-i);
 }
 
-double Integrator::fact_ratio2(const int a, const int b) const {
-    return boost::math::factorial<double>(a) / boost::math::factorial<double>(b) / boost::math::factorial<double>(a - 2*b);
+double Integrator::fact_ratio2(unsigned int a, unsigned int b) const {
+    return this->factorial(a) / this->factorial(b) / this->factorial(a - 2*b);
 }
 
 size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
@@ -1274,6 +1274,30 @@ size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     }
 
     return ij * (ij + 1) / 2 + kl;
+}
+
+double Integrator::factorial(unsigned int n) const {
+    static const double ans[] = {
+        1,1,2,6,24,120,720,5040,40320,362880,3628800,39916800,479001600,6227020800,87178291200,1307674368000
+    };
+ 
+    if(n > 15) {
+        return n * this->factorial(n-1);
+    } else {
+        return ans[n];
+    }
+}
+
+double Integrator::double_factorial(unsigned int n) const {
+    static const double ans[] = {
+        1,1,2,3,8,15,48,105,384,945,3840,10395,46080,135135,645120,2027025
+    };
+ 
+    if(n > 15) {
+        return n * this->double_factorial(n-2);
+    } else {
+        return ans[n];
+    }
 }
 
 void Integrator::init() {

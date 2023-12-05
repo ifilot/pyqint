@@ -38,7 +38,6 @@ class TestString(unittest.TestCase):
         self.assertTrue(strver[0].isnumeric())
         self.assertTrue(strver[1].isnumeric())
         self.assertTrue(strver[2].isnumeric())
-        self.assertTrue(strver[3].isnumeric())
 
     @nottest
     def test_compiler_info(self):

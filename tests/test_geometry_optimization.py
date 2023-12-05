@@ -45,7 +45,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', -0.9, 0.0, 0.0)
 
         res = GeometryOptimization(verbose=False).run(mol, 'p321')
-        np.testing.assert_almost_equal(res['opt'].fun, -1.1229598312004625, decimal=4)
+        np.testing.assert_almost_equal(res['opt'].fun, -1.1232790915, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
@@ -75,7 +75,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
         res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
-        np.testing.assert_almost_equal(res['opt'].fun, -39.7268635)
+        np.testing.assert_almost_equal(res['opt'].fun, -39.726905821)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
@@ -102,7 +102,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', 0.0,  0.8580158822, 0.5085242828, unit='angstrom')
 
         res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
-        np.testing.assert_almost_equal(res['opt'].fun, -74.96590013836217)
+        np.testing.assert_almost_equal(res['opt'].fun, -74.9658999323)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
@@ -132,7 +132,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H',  1.1288875372, -0.9156191261 ,0.1000000000, unit='angstrom')
 
         res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
-        np.testing.assert_almost_equal(res['opt'].fun, -77.0739544)
+        np.testing.assert_almost_equal(res['opt'].fun, -77.073956517)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))

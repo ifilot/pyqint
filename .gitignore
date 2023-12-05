@@ -148,3 +148,4 @@ wheelhouse/*
 test.py
 nose_debug
 anaconda-upload/*
+*.vscode

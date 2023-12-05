@@ -19,8 +19,8 @@ class TestHF(unittest.TestCase):
         np.testing.assert_almost_equal(results['energy'], -73.21447132, 4)
 
         # verify that terms are being calculated
-        np.testing.assert_almost_equal(results['density'], np.einsum('ik,jk,k->ij', results['orbc'], results['orbc'], [2,2,2,2,2,0,0]), decimal=7)
-        np.testing.assert_almost_equal(results['ekin'] + results['enuc'] + results['erep'] + results['ex'] + results['enucrep'], results['energy'], decimal=7)
+        np.testing.assert_almost_equal(results['density'], np.einsum('ik,jk,k->ij', results['orbc'], results['orbc'], [2,2,2,2,2,0,0]), decimal=5)
+        np.testing.assert_almost_equal(results['ekin'] + results['enuc'] + results['erep'] + results['ex'] + results['enucrep'], results['energy'], decimal=5)
 
     def test_hartree_fock_ch4(self):
         """

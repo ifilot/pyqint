@@ -24,6 +24,10 @@ class HF:
         verbose:        whether verbose output is given
         """
 
+        # crank up the tolerance when calculating forces
+        if calc_forces and tolerance > 1e-12:
+            tolerance = 1e-12
+
         # create empty dictionary for time tracking statistics
         time_stats = {}
 
