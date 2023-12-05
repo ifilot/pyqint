@@ -42,22 +42,20 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
     size_t sz = cgfs.size();
 
-    // Construct 2x2 matrices to hold values for the overlap,
-    // kinetic and two nuclear integral values, respectively.
-    Eigen::MatrixXd S = Eigen::MatrixXd::Zero(sz, sz);
-    Eigen::MatrixXd T = Eigen::MatrixXd::Zero(sz, sz);
-    Eigen::MatrixXd V = Eigen::MatrixXd::Zero(sz, sz);
-    std::vector<Eigen::MatrixXd> Vn(charges.size(), Eigen::MatrixXd::Zero(sz, sz));
+    std::vector<double> S(sz*sz, 0.0);
+    std::vector<double> T(sz*sz, 0.0);
+    std::vector<double> V(sz*sz, 0.0);
+    std::vector<double> Vn(charges.size() * sz * sz, 0.0);
 
     // calculate the integral values using the integrator class
     #pragma omp parallel for schedule(dynamic)
     for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
         for(unsigned int j=i; j<sz; j++) {
-            S(i,j) = S(j,i) = this->overlap(cgfs[i], cgfs[j]);
-            T(i,j) = T(j,i) = this->kinetic(cgfs[i], cgfs[j]);
+            S[i*sz+j] = S[j*sz+i] = this->overlap(cgfs[i], cgfs[j]);
+            T[i*sz+j] = T[j*sz+i] = this->kinetic(cgfs[i], cgfs[j]);
             for(unsigned int k=0; k<charges.size(); k++) {
                 // this is to avoid the race condition
-                Vn[k](i,j) = Vn[k](j,i) = this->nuclear(cgfs[i], cgfs[j], vec3(px[k], py[k], pz[k]), charges[k]);
+                Vn[k*sz*sz + i*sz+j] = Vn[k*sz*sz + j*sz+i] = this->nuclear(cgfs[i], cgfs[j], Vec3(px[k], py[k], pz[k]), charges[k]);
             }
         }
     }
@@ -66,7 +64,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     for(unsigned int i=0; i<sz; i++) {
         for(unsigned int j=0; j<sz; j++) {
             for(unsigned int k=0; k<charges.size(); k++) {
-                V(i,j) += Vn[k](i,j);
+                V[i*sz+j] += Vn[k*sz*sz + i*sz+j];
             }
         }
     }
@@ -155,29 +153,29 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
 
     // Construct 2x2 matrices to hold values for the overlap,
     // kinetic and two nuclear integral values, respectively.
-    auto S = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
-    auto T = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
-    auto V = std::vector<Eigen::MatrixXd>(charges.size() * 3, Eigen::MatrixXd::Zero(sz, sz));
+    std::vector S(charges.size() * 3 * sz * sz, 0.0);
+    std::vector T(charges.size() * 3 * sz * sz, 0.0);
+    std::vector V(charges.size() * 3 * sz * sz, 0.0);
 
     // calculate the integral values using the integrator class
     for(unsigned int n=0; n<charges.size(); n++) { // loop over nuclei
         for(unsigned int k=0; k<3; k++) { // loop over directions
 
             // build container for summation over nuclei
-            std::vector<Eigen::MatrixXd> Vn(charges.size(), Eigen::MatrixXd::Zero(sz, sz));
+            std::vector Vn(charges.size() * sz * sz, 0.0);
 
             #pragma omp parallel for schedule(dynamic)
             for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
                 for(int j=0; j<(int)sz; j++) {
-                    S[n*3+k](i,j) = this->overlap_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
-                    T[n*3+k](i,j) = this->kinetic_deriv(cgfs[i], cgfs[j], vec3(px[n], py[n], pz[n]), k);
+                    S[(n*3+k) * sz * sz + i * sz + j] = this->overlap_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
+                    T[(n*3+k) * sz * sz + i * sz + j] = this->kinetic_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
 
 
                     for(unsigned int l=0; l<charges.size(); l++) {
-                        Vn[l](i,j) = this->nuclear_deriv(cgfs[i], cgfs[j],
-                                                         vec3(px[l], py[l], pz[l]),
+                        Vn[l*sz*sz + i*sz + j] = this->nuclear_deriv(cgfs[i], cgfs[j],
+                                                         Vec3(px[l], py[l], pz[l]),
                                                          charges[l],
-                                                         vec3(px[n], py[n], pz[n]),
+                                                         Vec3(px[n], py[n], pz[n]),
                                                          k);
                     }
                 }
@@ -187,7 +185,7 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
             for(unsigned int i=0; i<sz; i++) {
                 for(unsigned int j=0; j<sz; j++) {
                     for(unsigned int l=0; l<charges.size(); l++) {
-                        V[n*3+k](i,j) += Vn[l](i,j);
+                        S[(n*3+k) * sz * sz + i * sz + j] += Vn[l*sz*sz + i*sz + j];
                     }
                 }
             }
@@ -238,7 +236,7 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
         const size_t l = jobs[s][4];
         const size_t n = jobs[s][5];
         const size_t d = jobs[s][6];
-        tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], vec3(px[n], py[n], pz[n]), d);
+        tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], Vec3(px[n], py[n], pz[n]), d);
     }
 
     // package everything into results vector, will be unpacked in
@@ -247,13 +245,13 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
         for(size_t d=0; d<3; d++) { // directions
             size_t spos = (n * 3 + d) * sz * sz;
-            std::memcpy(&results[spos], S[n*3+d].data(), sz * sz * sizeof(double));
+            std::memcpy(&results[spos], S.data(), S.size() * sizeof(double));
 
             size_t tpos = spos + charges.size() * 3 * sz * sz;
-            std::memcpy(&results[tpos], T[n*3+d].data(), sz * sz * sizeof(double));
+            std::memcpy(&results[tpos], T.data(), T.size() * sizeof(double));
 
             size_t vpos = tpos + charges.size() * 3 * sz * sz;
-            std::memcpy(&results[vpos], V[n*3+d].data(), sz * sz * sizeof(double));
+            std::memcpy(&results[vpos], V.data(), V.size() * sizeof(double));
         }
     }
     std::memcpy(&results[charges.size() * 3 * sz * sz * 3], tedouble.data(), tedouble.size() * sizeof(double));
@@ -323,13 +321,13 @@ double Integrator::overlap_gto(const GTO& gto1, const GTO& gto2) const {
  */
 double Integrator::overlap_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
-                                 const vec3& nucleus,
+                                 const Vec3& nucleus,
                                  unsigned int coord) const {
     double sum = 0.0;
 
     // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
+    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
 
     if(cgf1_nuc == cgf2_nuc) { // early exit
         return 0.0;
@@ -539,13 +537,13 @@ double Integrator::kinetic_gto(const GTO& gto1, const GTO& gto2) const {
  */
 double Integrator::kinetic_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
-                                 const vec3& nucleus,
+                                 const Vec3& nucleus,
                                  unsigned int coord) const {
     double sum = 0.0;
 
     // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
+    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
 
     if(cgf1_nuc == cgf2_nuc) { // early exit
         return 0.0;
@@ -639,7 +637,7 @@ double Integrator::kinetic_deriv_gto(const GTO& gto1, const GTO& gto2, unsigned 
  */
 double Integrator::nuclear(const CGF& cgf1,
                            const CGF& cgf2,
-                           const vec3 &nucleus,
+                           const Vec3 &nucleus,
                            unsigned int charge) const {
     double sum = 0.0;
 
@@ -669,7 +667,7 @@ double Integrator::nuclear(const CGF& cgf1,
  */
 double Integrator::nuclear_gto(const GTO& gto1,
                                const GTO& gto2,
-                               const vec3 &nucleus) const {
+                               const Vec3 &nucleus) const {
     return nuclear(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
                    gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(), nucleus);
 }
@@ -688,13 +686,13 @@ double Integrator::nuclear_gto(const GTO& gto1,
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &nucleus, unsigned int charge,
-                                 const vec3& nucderiv, unsigned int coord) const {
+double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3 &nucleus, unsigned int charge,
+                                 const Vec3& nucderiv, unsigned int coord) const {
 
     // check if cgf originates from nucleus
-    bool n1 = (cgf1.get_r() - nucderiv).squaredNorm() < 0.0001;
-    bool n2 = (cgf2.get_r() - nucderiv).squaredNorm() < 0.0001;
-    bool n3 = (nucleus - nucderiv).squaredNorm() < 0.0001;
+    bool n1 = (cgf1.get_r() - nucderiv).norm2() < 0.0001;
+    bool n2 = (cgf2.get_r() - nucderiv).norm2() < 0.0001;
+    bool n3 = (nucleus - nucderiv).norm2() < 0.0001;
 
     if(n1 == n2 && n2 == n3) {
         return 0.0;
@@ -707,23 +705,23 @@ double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const vec3 &n
     CGF cgf1p = cgf1;
     CGF cgf2m = cgf2;
     CGF cgf2p = cgf2;
-    vec3 nucm = nucleus;
-    vec3 nucp = nucleus;
+    Vec3 nucm = nucleus;
+    Vec3 nucp = nucleus;
 
     if(n1) {
-        vec3 rm = cgf1.get_r();
+        Vec3 rm = cgf1.get_r();
         rm[coord] -= delta;
         cgf1m.set_position(rm);
-        vec3 rp = cgf1.get_r();
+        Vec3 rp = cgf1.get_r();
         rp[coord] += delta;
         cgf1p.set_position(rp);
     }
 
     if(n2) {
-        vec3 rm = cgf2.get_r();
+        Vec3 rm = cgf2.get_r();
         rm[coord] -= delta;
         cgf2m.set_position(rm);
-        vec3 rp = cgf2.get_r();
+        Vec3 rp = cgf2.get_r();
         rp[coord] += delta;
         cgf2p.set_position(rp);
     }
@@ -784,7 +782,7 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
  * @param const CGF& cgf2       Contracted Gaussian Function
  * @param const CGF& cgf3       Contracted Gaussian Function
  * @param const CGF& cgf4       Contracted Gaussian Function
- * @param const vec3& nucleus   Nucleus coordinates
+ * @param const Vec3& nucleus   Nucleus coordinates
  * @param unsigned int coord    Derivative direction
  *
  * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
@@ -792,14 +790,14 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
  * @return double value of the repulsion integral
  */
 double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4,
-    const vec3& nucleus, unsigned int coord) const {
+    const Vec3& nucleus, unsigned int coord) const {
     double sum = 0;
 
     // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf3_nuc = (cgf3.get_r() - nucleus).squaredNorm() < 0.0001;
-    bool cgf4_nuc = (cgf4.get_r() - nucleus).squaredNorm() < 0.0001;
+    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
+    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
+    bool cgf3_nuc = (cgf3.get_r() - nucleus).norm2() < 0.0001;
+    bool cgf4_nuc = (cgf4.get_r() - nucleus).norm2() < 0.0001;
 
     // early exit
     if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
@@ -904,27 +902,25 @@ double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &
  * @param unsigned int l1   Power of x component of the polynomial of the first GTO
  * @param unsigned int m1   Power of y component of the polynomial of the first GTO
  * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param Vec3 a            Center of the Gaussian orbital of the first GTO
  * @param double alpha2     Gaussian exponent of the second GTO
  * @param unsigned int l2   Power of x component of the polynomial of the second GTO
  * @param unsigned int m2   Power of y component of the polynomial of the second GTO
  * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param Vec3 b            Center of the Gaussian orbital of the second GTO
  *
  * Calculates the value of < gto1 | gto2 >
  *
  * @return double value of the overlap integral
  */
-double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                           double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const {
+double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
+                           double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b) const {
 
-    static const double pi = boost::math::constants::pi<double>();
-
-    double rab2 = (a-b).squaredNorm();
+    double rab2 = (a-b).norm2();
     double gamma = alpha1 + alpha2;
-    vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
+    Vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
 
-    double pre = std::pow(pi / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
+    double pre = std::pow(M_PI / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
     double wx = this->overlap_1D(l1, l2, p[0]-a[0], p[0]-b[0], gamma);
     double wy = this->overlap_1D(m1, m2, p[1]-a[1], p[1]-b[1], gamma);
     double wz = this->overlap_1D(n1, n2, p[2]-a[2], p[2]-b[2], gamma);
@@ -939,31 +935,30 @@ double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsi
  * @param unsigned int l1   Power of x component of the polynomial of the first GTO
  * @param unsigned int m1   Power of y component of the polynomial of the first GTO
  * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param Vec3 a            Center of the Gaussian orbital of the first GTO
  * @param double alpha2     Gaussian exponent of the second GTO
  * @param unsigned int l2   Power of x component of the polynomial of the second GTO
  * @param unsigned int m2   Power of y component of the polynomial of the second GTO
  * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param Vec3 b            Center of the Gaussian orbital of the second GTO
  *
  * @return double value of the overlap integral
  */
-double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                          double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b,
+double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
+                          double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b,
                           unsigned int cc, double cref) const {
-    static const double pi = boost::math::constants::pi<double>();
 
-    double rab2 = (a-b).squaredNorm();
+    double rab2 = (a-b).norm2();
     double gamma = alpha1 + alpha2;
 
     // determine new product center
-    vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
+    Vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
 
     // determine correcting pre-factor
-    double pre = std::pow(pi / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
+    double pre = std::pow(M_PI / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
 
     // construct adjusted triple product
-    vec3 w;
+    Vec3 w;
     const std::array<unsigned int,3> o1({l1,m1,n1});
     const std::array<unsigned int,3> o2({l2,m2,n2});
 
@@ -972,7 +967,7 @@ double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsig
     }
 
     // create copy and adjust the "cc" value
-    vec3 wd = w;
+    Vec3 wd = w;
     wd[cc] = this->overlap_1D(o1[cc], o2[cc]+1,
                              p[cc]-a[cc],
                              p[cc]-b[cc], gamma);
@@ -999,7 +994,7 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
 
     for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
         sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
-                     (i == 0 ? 1 : this->double_factorial(2 * i - 1) ) /
+                     (i == 0 ? 1 : double_factorial(2 * i - 1) ) /
                      std::pow(2 * gamma, i);
     }
 
@@ -1011,14 +1006,14 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
  *
  * @param double alpha1     Gaussian exponent of the first GTO
  * @param double alpha2     Gaussian exponent of the second GTO
- * @param const vec3 a      Center of the first GTO
- * @param const vec3 b      Center of the second GTO
+ * @param const Vec3 a      Center of the first GTO
+ * @param const Vec3 b      Center of the second GTO
  *
  *
  * @return new gaussian product center
  */
-vec3 Integrator::gaussian_product_center(double alpha1, const vec3& a,
-                                         double alpha2, const vec3& b) const {
+Vec3 Integrator::gaussian_product_center(double alpha1, const Vec3& a,
+                                         double alpha2, const Vec3& b) const {
     return (alpha1 * a + alpha2 * b) / (alpha1 + alpha2);
 }
 
@@ -1042,20 +1037,19 @@ double Integrator::binomial(int a, int b) const {
     if( (a < 0) | (b < 0) | (a-b < 0) ) {
         return 1.0;
     }
-    return this->factorial(a) / (this->factorial(b) * this->factorial(a-b));
+    return factorial(a) / (factorial(b) * factorial(a-b));
 }
 
-double Integrator::nuclear(const vec3& a, int l1, int m1, int n1, double alpha1,
-                           const vec3& b, int l2, int m2, int n2,
-                           double alpha2, const vec3& c) const {
+double Integrator::nuclear(const Vec3& a, int l1, int m1, int n1, double alpha1,
+                           const Vec3& b, int l2, int m2, int n2,
+                           double alpha2, const Vec3& c) const {
 
-    static const double pi = boost::math::constants::pi<double>();
 
     double gamma = alpha1 + alpha2;
 
-    vec3 p = gaussian_product_center(alpha1, a, alpha2, b);
-    double rab2 = (a-b).squaredNorm();
-    double rcp2 = (c-p).squaredNorm();
+    Vec3 p = gaussian_product_center(alpha1, a, alpha2, b);
+    double rab2 = (a-b).norm2();
+    double rcp2 = (c-p).norm2();
 
     std::vector<double> ax = A_array(l1, l2, p[0]-a[0], p[0]-b[0], p[0]-c[0], gamma);
     std::vector<double> ay = A_array(m1, m2, p[1]-a[1], p[1]-b[1], p[1]-c[1], gamma);
@@ -1071,7 +1065,7 @@ double Integrator::nuclear(const vec3& a, int l1, int m1, int n1, double alpha1,
         }
     }
 
-    return -2.0 * pi / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
+    return -2.0 * M_PI / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
 }
 
 std::vector<double> Integrator::A_array(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) const {
@@ -1092,40 +1086,39 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
 
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
-            std::pow(-1,u) * this->factorial(i)*std::pow(cpx,i-2*r-2*u)*
-            std::pow(0.25/gamma,r+u)/this->factorial(r)/this->factorial(u)/this->factorial(i-2*r-2*u);
+            std::pow(-1,u) * factorial(i)*std::pow(cpx,i-2*r-2*u)*
+            std::pow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
 }
 
 /**
  * @brief Performs nuclear integral evaluation
  *
- * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param Vec3 a            Center of the Gaussian orbital of the first GTO
  * @param unsigned int l1   Power of x component of the polynomial of the first GTO
  * @param unsigned int m1   Power of y component of the polynomial of the first GTO
  * @param unsigned int n1   Power of z component of the polynomial of the first GTO
  * @param double alpha1     Gaussian exponent of the first GTO
- * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param Vec3 b            Center of the Gaussian orbital of the second GTO
  * @param unsigned int l2   Power of x component of the polynomial of the second GTO
  * @param unsigned int m2   Power of y component of the polynomial of the second GTO
  * @param unsigned int n2   Power of z component of the polynomial of the second GTO
  * @param double alpha2     Gaussian exponent of the second GTO
- * @param vec3 c
+ * @param Vec3 c
  *
  * @return double value of the nuclear integral
  */
-double Integrator::repulsion(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                             const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                             const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                             const vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
+double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                             const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                             const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                             const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
-    static const double pi = boost::math::constants::pi<double>();
-    double rab2 = (a-b).squaredNorm();
-    double rcd2 = (c-d).squaredNorm();
+    double rab2 = (a-b).norm2();
+    double rcd2 = (c-d).norm2();
 
-    vec3 p = gaussian_product_center(alphaa, a, alphab, b);
-    vec3 q = gaussian_product_center(alphac, c, alphad, d);
+    Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    Vec3 q = gaussian_product_center(alphac, c, alphad, d);
 
-    double rpq2 = (p-q).squaredNorm();
+    double rpq2 = (p-q).norm2();
 
     double gamma1 = alphaa + alphab;
     double gamma2 = alphac + alphad;
@@ -1144,7 +1137,7 @@ double Integrator::repulsion(const vec3 &a, const int la, const int ma, const in
         }
     }
 
-    return 2.0 * std::pow(pi,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
+    return 2.0 * std::pow(M_PI,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
                  std::exp(-alphaa*alphab*rab2/gamma1)*
                  std::exp(-alphac*alphad*rcd2/gamma2)*sum;
 }
@@ -1154,33 +1147,32 @@ double Integrator::repulsion(const vec3 &a, const int la, const int ma, const in
  *
  * This function uses function-level caching of the Fgamma function
  *
- * @param vec3 a            Center of the Gaussian orbital of the first GTO
+ * @param Vec3 a            Center of the Gaussian orbital of the first GTO
  * @param unsigned int l1   Power of x component of the polynomial of the first GTO
  * @param unsigned int m1   Power of y component of the polynomial of the first GTO
  * @param unsigned int n1   Power of z component of the polynomial of the first GTO
  * @param double alpha1     Gaussian exponent of the first GTO
- * @param vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param Vec3 b            Center of the Gaussian orbital of the second GTO
  * @param unsigned int l2   Power of x component of the polynomial of the second GTO
  * @param unsigned int m2   Power of y component of the polynomial of the second GTO
  * @param unsigned int n2   Power of z component of the polynomial of the second GTO
  * @param double alpha2     Gaussian exponent of the second GTO
- * @param vec3 c
+ * @param Vec3 c
  *
  * @return double value of the nuclear integral
  */
-double Integrator::repulsion_fgamma_cached(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                           const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                           const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                           const vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
+double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                           const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                           const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                           const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
-    static const double pi = boost::math::constants::pi<double>();
-    double rab2 = (a-b).squaredNorm();
-    double rcd2 = (c-d).squaredNorm();
+    double rab2 = (a-b).norm2();
+    double rcd2 = (c-d).norm2();
 
-    vec3 p = gaussian_product_center(alphaa, a, alphab, b);
-    vec3 q = gaussian_product_center(alphac, c, alphad, d);
+    Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    Vec3 q = gaussian_product_center(alphac, c, alphad, d);
 
-    double rpq2 = (p-q).squaredNorm();
+    double rpq2 = (p-q).norm2();
 
     double gamma1 = alphaa + alphab;
     double gamma2 = alphac + alphad;
@@ -1208,7 +1200,7 @@ double Integrator::repulsion_fgamma_cached(const vec3 &a, const int la, const in
         }
     }
 
-    return 2.0 * std::pow(pi,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
+    return 2.0 * std::pow(M_PI,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
                  std::exp(-alphaa*alphab*rab2/gamma1)*
                  std::exp(-alphac*alphad*rcd2/gamma2)*sum;
 }
@@ -1255,7 +1247,7 @@ double Integrator::B0(int i, int r, double g) const {
 }
 
 double Integrator::fact_ratio2(unsigned int a, unsigned int b) const {
-    return this->factorial(a) / this->factorial(b) / this->factorial(a - 2*b);
+    return factorial(a) / factorial(b) / factorial(a - 2*b);
 }
 
 size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
@@ -1274,30 +1266,6 @@ size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     }
 
     return ij * (ij + 1) / 2 + kl;
-}
-
-double Integrator::factorial(unsigned int n) const {
-    static const double ans[] = {
-        1,1,2,6,24,120,720,5040,40320,362880,3628800,39916800,479001600,6227020800,87178291200,1307674368000
-    };
- 
-    if(n > 15) {
-        return n * this->factorial(n-1);
-    } else {
-        return ans[n];
-    }
-}
-
-double Integrator::double_factorial(unsigned int n) const {
-    static const double ans[] = {
-        1,1,2,3,8,15,48,105,384,945,3840,10395,46080,135135,645120,2027025
-    };
- 
-    if(n > 15) {
-        return n * this->double_factorial(n-2);
-    } else {
-        return ans[n];
-    }
 }
 
 void Integrator::init() {

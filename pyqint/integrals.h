@@ -23,9 +23,14 @@
 
 #include <string>
 #include <unordered_map>
+#include <omp.h>
+#include <cstring>
 
 #include "gamma.h"
 #include "cgf.h"
+#include "factorials.h"
+
+typedef std::vector<std::vector<double>> MATDOUBLE;
 
 class Integrator {
 private:
@@ -163,7 +168,7 @@ public:
      */
     double overlap_deriv(const CGF& cgf1,
                          const CGF& cgf2,
-                         const vec3& nucleus,
+                         const Vec3& nucleus,
                          unsigned int coord) const;
 
     /**
@@ -222,7 +227,7 @@ public:
 
     // expanded interface for Cython
     inline double overlap_deriv(const CGF& cgf1, const CGF& cgf2, double cx, double cy, double cz, unsigned int coord) const {
-        return this->overlap_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
+        return this->overlap_deriv(cgf1, cgf2, Vec3(cx, cy, cz), coord);
     }
 
 /**************************************************************************
@@ -267,7 +272,7 @@ public:
      */
     double kinetic_deriv(const CGF& cgf1,
                          const CGF& cgf2,
-                         const vec3& nucleus,
+                         const Vec3& nucleus,
                          unsigned int coord) const;
 
 
@@ -289,7 +294,7 @@ public:
                                 const CGF& cgf2,
                                 double cx, double cy, double cz,
                                 unsigned int coord) const {
-        return this->kinetic_deriv(cgf1, cgf2, vec3(cx, cy, cz), coord);
+        return this->kinetic_deriv(cgf1, cgf2, Vec3(cx, cy, cz), coord);
     }
 
     /**
@@ -325,7 +330,7 @@ public:
      */
     double nuclear(const CGF &cgf1,
                    const CGF &cgf2,
-                   const vec3& nucleus,
+                   const Vec3& nucleus,
                    unsigned int charge) const;
 
     /**
@@ -341,7 +346,7 @@ public:
      */
     double nuclear_gto(const GTO &gto1,
                        const GTO &gto2,
-                       const vec3& nucleus) const;
+                       const Vec3& nucleus) const;
 
 
     /**
@@ -364,7 +369,7 @@ public:
                           const CGF &cgf2,
                           double cx, double cy, double cz,
                           unsigned int charge) const {
-        return this->nuclear(cgf1, cgf2, vec3(cx, cy, cz), charge);
+        return this->nuclear(cgf1, cgf2, Vec3(cx, cy, cz), charge);
     }
 
     /**
@@ -372,20 +377,20 @@ public:
      *
      * @param const CGF& cgf1       Contracted Gaussian Function
      * @param const CGF& cgf2       Contracted Gaussian Function
-     * @param const vec3 nucleus    Position of the nucleus
+     * @param const Vec3 nucleus    Position of the nucleus
      * @param unsigned int charge   charge of the nucleus in a.u.
      *
      * Calculates the value of < cgf1 | V | cgf2 >
      *
      * @return double value of the nuclear integral
      */
-    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const vec3& nucleus, unsigned int charge,
-                         const vec3& nucderiv, unsigned int coord) const;
+    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const Vec3& nucleus, unsigned int charge,
+                         const Vec3& nucderiv, unsigned int coord) const;
 
     // expanded notation for Cython interface
     inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge,
                                 double dx, double dy, double dz, unsigned int coord) const {
-        return this->nuclear_deriv(cgf1, cgf2, vec3(cx, cy, cz), charge, vec3(dx, dy, dz), coord);
+        return this->nuclear_deriv(cgf1, cgf2, Vec3(cx, cy, cz), charge, Vec3(dx, dy, dz), coord);
     }
 
     /**
@@ -400,7 +405,7 @@ public:
      * @return double value of the nuclear integral
      */
     inline double nuclear_gto(const GTO &gto1, const GTO &gto2, double cx, double cy, double cz) const {
-        return this->nuclear_gto(gto1, gto2, vec3(cx, cy, cz));
+        return this->nuclear_gto(gto1, gto2, Vec3(cx, cy, cz));
     }
 
 /**************************************************************************
@@ -442,7 +447,7 @@ public:
      * @param const CGF& cgf2       Contracted Gaussian Function
      * @param const CGF& cgf3       Contracted Gaussian Function
      * @param const CGF& cgf4       Contracted Gaussian Function
-     * @param const vec3& nucleus   Nucleus coordinates
+     * @param const Vec3& nucleus   Nucleus coordinates
      * @param unsigned int coord    Derivative direction
      *
      * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
@@ -450,11 +455,11 @@ public:
      * @return double value of the repulsion integral
      */
     double repulsion_deriv(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4,
-        const vec3& nucleus, unsigned int coord) const;
+        const Vec3& nucleus, unsigned int coord) const;
 
     inline double repulsion_deriv(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4,
         double cx, double cy, double cz, unsigned int coord) const {
-        return this->repulsion_deriv(cgf1, cgf2, cgf3, cgf4, vec3(cx, cy, cz), coord);
+        return this->repulsion_deriv(cgf1, cgf2, cgf3, cgf4, Vec3(cx, cy, cz), coord);
     }
 
     /**
@@ -488,17 +493,17 @@ private:
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param double alpha2     Gaussian exponent of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      *
      * @return double value of the overlap integral
      */
-    double overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b) const;
+    double overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
+                   double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b) const;
 
     /**
      * @brief Performs overlap integral evaluation
@@ -507,87 +512,87 @@ private:
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param double alpha2     Gaussian exponent of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      *
      * @return double value of the overlap integral
      */
-    double dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const vec3 &a,
-                  double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const vec3 &b,
+    double dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
+                  double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b,
                   unsigned int cc, double cref = 0.0) const;
 
     /**
      * @brief Performs nuclear integral evaluation
      *
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
      * @param double alpha1     Gaussian exponent of the first GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
      * @param double alpha2     Gaussian exponent of the second GTO
-     * @param vec3 c
+     * @param Vec3 c
      *
      * @return double value of the nuclear integral
      */
-    double nuclear(const vec3& a,
+    double nuclear(const Vec3& a,
                    int l1, int m1, int n1,
                    double alpha1,
-                   const vec3& b,
+                   const Vec3& b,
                    int l2, int m2, int n2,
                    double alpha2,
-                   const vec3& c) const;
+                   const Vec3& c) const;
 
     /**
      * @brief Performs nuclear integral evaluation
      *
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
      * @param double alpha1     Gaussian exponent of the first GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
      * @param double alpha2     Gaussian exponent of the second GTO
-     * @param vec3 c            Nuclear position
+     * @param Vec3 c            Nuclear position
      * @param coord             Cartesian direction to derive nuclear coordinate towards
      *
      * @return double value of the nuclear integral derived towards nuclear coordinate
      */
-    double nuclear_deriv_op(const vec3& a, int l1, int m1, int n1, double alpha1,
-                            const vec3& b, int l2, int m2, int n2,
-                            double alpha2, const vec3& c, unsigned int coord) const;
+    double nuclear_deriv_op(const Vec3& a, int l1, int m1, int n1, double alpha1,
+                            const Vec3& b, int l2, int m2, int n2,
+                            double alpha2, const Vec3& c, unsigned int coord) const;
 
     /**
      * @brief Performs nuclear integral evaluation
      *
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
      * @param double alpha1     Gaussian exponent of the first GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
      * @param double alpha2     Gaussian exponent of the second GTO
-     * @param vec3 c
+     * @param Vec3 c
      *
      * @return double value of the nuclear integral
      */
-    double repulsion(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                     const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                     const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                     const vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+    double repulsion(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                     const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                     const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                     const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @brief Performs nuclear integral evaluation including caching of Fgamma
@@ -596,24 +601,24 @@ private:
      * was suggested in https://github.com/ifilot/hfcxx/issues/8, but explicit unit testing
      * actually shows not appreciable difference in speed.
      *
-     * @param vec3 a            Center of the Gaussian orbital of the first GTO
+     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
      * @param unsigned int m1   Power of y component of the polynomial of the first GTO
      * @param unsigned int n1   Power of z component of the polynomial of the first GTO
      * @param double alpha1     Gaussian exponent of the first GTO
-     * @param vec3 b            Center of the Gaussian orbital of the second GTO
+     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
      * @param unsigned int l2   Power of x component of the polynomial of the second GTO
      * @param unsigned int m2   Power of y component of the polynomial of the second GTO
      * @param unsigned int n2   Power of z component of the polynomial of the second GTO
      * @param double alpha2     Gaussian exponent of the second GTO
-     * @param vec3 c
+     * @param Vec3 c
      *
      * @return double value of the nuclear integral
      */
-    double repulsion_fgamma_cached(const vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                   const vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                   const vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                   const vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+    double repulsion_fgamma_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                   const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                   const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                   const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @brief Calculates one dimensional overlap integral
@@ -639,14 +644,14 @@ private:
      *
      * @param double alpha1     Gaussian exponent of the first GTO
      * @param double alpha2     Gaussian exponent of the second GTO
-     * @param const vec3 a      Center of the first GTO
-     * @param const vec3 b      Center of the second GTO
+     * @param const Vec3 a      Center of the first GTO
+     * @param const Vec3 b      Center of the second GTO
      *
      *
      * @return new gaussian product center
      */
-    vec3 gaussian_product_center(double alpha1, const vec3 &a,
-                                 double alpha2, const vec3 &b) const;
+    Vec3 gaussian_product_center(double alpha1, const Vec3 &a,
+                                 double alpha2, const Vec3 &b) const;
 
     double binomial_prefactor(int s, int ia, int ib, double xpa, double xpb) const;
 
@@ -678,10 +683,6 @@ private:
     double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
     double B0(int i, int r, double q) const;
     double fact_ratio2(unsigned int a, unsigned int b) const;
-
-    double factorial(unsigned int n) const;
-
-    double double_factorial(unsigned int n) const;
 
     void init();
 };

@@ -22,10 +22,8 @@
 #pragma once
 
 #include <iostream>
-#include <Eigen/Dense>
-#include <boost/math/special_functions/factorials.hpp>
-
-typedef Eigen::Vector3d vec3;
+#include "factorials.h"
+#include "vec3.h"
 
 /*
  * Gaussian Type Orbital
@@ -42,7 +40,7 @@ private:
     double c;               // coefficient
     double alpha;           // alpha value in the exponent
     unsigned int l,m,n;     // powers of the polynomial
-    vec3 position;          // position vector (unit = Bohr)
+    Vec3 position;          // position vector (unit = Bohr)
     double norm;            // normalization constant
 
 public:
@@ -87,7 +85,7 @@ public:
      * returns double value of the incomplete Gamma Function
      */
     GTO(double _c,
-        const vec3& _position,
+        const Vec3& _position,
         double _alpha,
         unsigned int _l,
         unsigned int _m,
@@ -161,9 +159,9 @@ public:
      * @fn get_position
      * @brief Get the center of the Gaussian
      *
-     * @return const double vec3
+     * @return const double Vec3
      */
-    inline const vec3& get_position() const {
+    inline const Vec3& get_position() const {
         return this->position;
     }
 
@@ -171,33 +169,33 @@ public:
      * @fn get_amp
      * @brief Gets the amplitude of the GTO
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return const double amplitude
      */
-    const double get_amp(const vec3& r) const;
+    const double get_amp(const Vec3& r) const;
 
     /*
      * @fn get_amp
      * @brief Gets the amplitude of the GTO
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return const double amplitude
      */
     inline double get_amp(double x, double y, double z) const {
-        return this->get_amp(vec3(x,y,z));
+        return this->get_amp(Vec3(x,y,z));
     }
 
     /*
      * @fn get_gradient
      * @brief Gets the gradient of the GTO
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return gradient
      */
-    vec3 get_grad(const vec3& r) const;
+    Vec3 get_grad(const Vec3& r) const;
 
     /*
      * @fn set_position
@@ -205,7 +203,7 @@ public:
      *
      * @return void
      */
-    inline void set_position(const vec3& _position) {
+    inline void set_position(const Vec3& _position) {
         this->position = _position;
     }
 
@@ -223,7 +221,7 @@ private:
 class CGF { // Contracted Gaussian Function
 private:
     std::vector<GTO> gtos;  // vector holding all gtos
-    vec3 r;                 // position of the CGF
+    Vec3 r;                 // position of the CGF
 
 public:
     /*
@@ -248,7 +246,7 @@ public:
      *
      * @return CGF
      */
-    CGF(const vec3& _r);
+    CGF(const Vec3& _r);
 
     // type of GTOs to add
     enum{
@@ -271,7 +269,7 @@ public:
      *
      * @return     Position
      */
-    inline const vec3& get_r() const {
+    inline const Vec3& get_r() const {
         return r;
     }
 
@@ -325,44 +323,44 @@ public:
      * @fn get_amp
      * @brief Gets the amplitude of the CGF
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return const double amplitude
      */
-    const double get_amp(const vec3& r) const;
+    const double get_amp(const Vec3& r) const;
 
     /*
      * @fn get_amp
      * @brief Gets the amplitude of the GTO
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return const double amplitude
      */
     inline double get_amp(double x, double y, double z) const {
-        return this->get_amp(vec3(x,y,z));
+        return this->get_amp(Vec3(x,y,z));
     }
 
     /*
      * @fn get_grad
      * @brief Gets the gradient of the CGF
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return gradient
      */
-    std::vector<double> get_grad(const vec3& r) const;
+    std::vector<double> get_grad(const Vec3& r) const;
 
     /*
      * @fn get_grad
      * @brief Gets the gradient of the CGF
      *
-     * @param vec3 r    coordinates
+     * @param Vec3 r    coordinates
      *
      * @return gradient
      */
     inline std::vector<double> get_grad(double x, double y, double z) const {
-        return this->get_grad(vec3(x,y,z));
+        return this->get_grad(Vec3(x,y,z));
     }
 
     /*
@@ -405,5 +403,5 @@ public:
      *
      * @return void
      */
-    void set_position(const vec3 &pos);
+    void set_position(const Vec3 &pos);
 };

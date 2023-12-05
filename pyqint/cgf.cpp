@@ -22,7 +22,7 @@
 #include "cgf.h"
 
 GTO::GTO(double _c,
-         const vec3& _position,     // position (unit = Bohr)
+         const Vec3& _position,     // position (unit = Bohr)
          double _alpha,
          unsigned int _l,
          unsigned int _m,
@@ -51,7 +51,7 @@ GTO::GTO(double _c,
     l(_l),
     m(_m),
     n(_n),
-    position(vec3(_x,_y,_z)) {
+    position(Vec3(_x,_y,_z)) {
 
     // calculate the normalization constant
     this->calculate_normalization_constant();
@@ -61,12 +61,12 @@ GTO::GTO(double _c,
  * @fn get_amp
  * @brief Gets the amplitude of the GTO
  *
- * @param vec3 r    coordinates
+ * @param Vec3 r    coordinates
  *
  * @return const double amplitude
  */
-const double GTO::get_amp(const vec3& r) const {
-    double r2 = (r - this->position).squaredNorm();
+const double GTO::get_amp(const Vec3& r) const {
+    double r2 = (r - this->position).norm2();
 
     return this->norm *
            std::pow(r[0]-this->position[0], l) *
@@ -79,11 +79,11 @@ const double GTO::get_amp(const vec3& r) const {
  * @fn get_gradient
  * @brief Gets the gradient of the GTO
  *
- * @param vec3 r    coordinates
+ * @param Vec3 r    coordinates
  *
  * @return gradient
  */
-vec3 GTO::get_grad(const vec3& r) const {
+Vec3 GTO::get_grad(const Vec3& r) const {
     const double ex = std::exp(-this->alpha * std::pow(r[0]-this->position[0],2));
     const double fx = std::pow(r[0] - this->position[0], this->l) * ex;
 
@@ -107,7 +107,7 @@ vec3 GTO::get_grad(const vec3& r) const {
         gz += std::pow(r[2] - this->position[2], this->n-1) * ez;
     }
 
-    return vec3(this->norm * gx * fy * fz,
+    return Vec3(this->norm * gx * fy * fz,
                 this->norm * fx * gy * fz,
                 this->norm * fx * fy * gz);
 }
@@ -119,15 +119,13 @@ vec3 GTO::get_grad(const vec3& r) const {
  * @return void
  */
 void GTO::calculate_normalization_constant() {
-    static const double pi = boost::math::constants::pi<double>();
-
     double nom =   std::pow(2.0, 2.0 * (l + m + n) + 3.0 / 2.0) *
                    std::pow(alpha, (l + m + n) + 3.0 / 2.0);
 
-    double denom = (l < 1 ? 1 : boost::math::double_factorial<double>(2 * l - 1) )*
-                   (m < 1 ? 1 : boost::math::double_factorial<double>(2 * m - 1) )*
-                   (n < 1 ? 1 : boost::math::double_factorial<double>(2 * n - 1) )*
-                   std::pow(pi, 3.0 / 2.0);
+    double denom = (l < 1 ? 1 : double_factorial(2 * l - 1) )*
+                   (m < 1 ? 1 : double_factorial(2 * m - 1) )*
+                   (n < 1 ? 1 : double_factorial(2 * n - 1) )*
+                   std::pow(M_PI, 3.0 / 2.0);
 
     this->norm = std::sqrt(nom / denom);
 }
@@ -139,7 +137,7 @@ void GTO::calculate_normalization_constant() {
  * @return CGF
  */
 CGF::CGF():
-    r(vec3(0,0,0)) {
+    r(Vec3(0,0,0)) {
         // do nothing
 }
 
@@ -150,7 +148,7 @@ CGF::CGF():
  * @return CGF
  */
 CGF::CGF(double x, double y, double z) :
-    r(vec3(x,y,z)) {}
+    r(Vec3(x,y,z)) {}
 
 /*
  * @fn CGF
@@ -158,7 +156,7 @@ CGF::CGF(double x, double y, double z) :
  *
  * @return CGF
  */
-CGF::CGF(const vec3& _r):
+CGF::CGF(const Vec3& _r):
     r(_r) {
         // do nothing
 }
@@ -167,11 +165,11 @@ CGF::CGF(const vec3& _r):
  * @fn get_amp
  * @brief Gets the amplitude of the CGF
  *
- * @param vec3 r    coordinates
+ * @param Vec3 r    coordinates
  *
  * @return const double amplitude
  */
-const double CGF::get_amp(const vec3& r) const {
+const double CGF::get_amp(const Vec3& r) const {
     double sum = 0.0;
 
     for(const auto& gto : this->gtos) {
@@ -185,12 +183,12 @@ const double CGF::get_amp(const vec3& r) const {
  * @fn get_amp
  * @brief Gets the gradient of the CGF
  *
- * @param vec3 r    coordinates
+ * @param Vec3 r    coordinates
  *
  * @return gradient
  */
-std::vector<double> CGF::get_grad(const vec3& r) const {
-    vec3 sum = vec3(0,0,0);
+std::vector<double> CGF::get_grad(const Vec3& r) const {
+    Vec3 sum = Vec3(0,0,0);
 
     for(const auto& gto : this->gtos) {
         sum += gto.get_coefficient() * gto.get_grad(r);
@@ -206,7 +204,7 @@ std::vector<double> CGF::get_grad(const vec3& r) const {
  * @param unsigned int type     type of the orbital (see above for the list)
  * @param double alpha          alpha value
  * @param double c              coefficient
- * @param const vec3& vec3      position
+ * @param const Vec3& Vec3      position
  *
  * @return void
  */
@@ -286,7 +284,7 @@ void CGF::add_gto(double c,
  *
  * @return void
  */
-void CGF::set_position(const vec3 &pos) {
+void CGF::set_position(const Vec3 &pos) {
     this->r = pos;
 
     for(unsigned int i=0; i<this->gtos.size(); i++) {

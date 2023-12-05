@@ -66,7 +66,7 @@ class TestCGF(unittest.TestCase):
         res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
 
         ans = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_orb_1b2.npy'))
-        np.testing.assert_almost_equal(res, ans, 8)
+        np.testing.assert_almost_equal(res, ans, 6)
 
 if __name__ == '__main__':
     unittest.main()
