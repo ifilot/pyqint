@@ -26,9 +26,7 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator(){
-    this->init();
-}
+Integrator::Integrator(){}
 
 /**
  * @brief      Evaluate all integrals for cgfs in buffer
@@ -1268,40 +1266,4 @@ size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     }
 
     return ij * (ij + 1) / 2 + kl;
-}
-
-void Integrator::init() {
-    std::unordered_map<unsigned int, std::string> map{
-        {200505,"2.5"},
-        {200805,"3.0"},
-        {201107,"3.1"},
-        {201307,"4.0"},
-        {201511,"4.5"},
-        {201811,"5.0"},
-        {202011,"5.1"}
-    };
-
-    this->compile_date = std::string(__DATE__);
-    this->compile_time = std::string(__TIME__);
-
-    #ifdef __GNUC__
-        #ifndef _OPENMP
-            this->openmp_version = "NONE";
-            this->compiler_version = "N/A";
-            this->compiler_type = "GNU/GCC";
-	#else
-            this->openmp_version = map.at(_OPENMP);
-            this->compiler_version = __VERSION__;
-            this->compiler_type = "GNU/GCC";
-        #endif
-    # else
-        this->openmp_version = "unknown";
-        this->compiler_version = "unknown";
-    #endif
-
-    #ifdef _MSC_VER
-        this->openmp_version = boost::lexical_cast<std::string>(_OPENMP);
-        this->compiler_version = boost::lexical_cast<std::string>(_MSC_FULL_VER);
-        this->compiler_type = "MSVC";
-    #endif
 }
