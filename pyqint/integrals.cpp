@@ -149,13 +149,14 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
                                                                const std::vector<double>& px,
                                                                const std::vector<double>& py,
                                                                const std::vector<double>& pz) const {
-    size_t sz = cgfs.size();
+    const size_t sz = cgfs.size();
 
     // Construct 2x2 matrices to hold values for the overlap,
     // kinetic and two nuclear integral values, respectively.
-    std::vector S(charges.size() * 3 * sz * sz, 0.0);
-    std::vector T(charges.size() * 3 * sz * sz, 0.0);
-    std::vector V(charges.size() * 3 * sz * sz, 0.0);
+    const size_t datasz = charges.size() * 3 * sz * sz;
+    std::vector S(datasz, 0.0);
+    std::vector T(datasz, 0.0);
+    std::vector V(datasz, 0.0);
 
     // calculate the integral values using the integrator class
     for(unsigned int n=0; n<charges.size(); n++) { // loop over nuclei
@@ -167,8 +168,9 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
             #pragma omp parallel for schedule(dynamic)
             for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
                 for(int j=0; j<(int)sz; j++) {
-                    S[(n*3+k) * sz * sz + i * sz + j] = this->overlap_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
-                    T[(n*3+k) * sz * sz + i * sz + j] = this->kinetic_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
+                    const size_t idx = (n*3+k) * sz * sz + i * sz + j;
+                    S[idx] = this->overlap_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
+                    T[idx] = this->kinetic_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
 
 
                     for(unsigned int l=0; l<charges.size(); l++) {
@@ -185,7 +187,7 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
             for(unsigned int i=0; i<sz; i++) {
                 for(unsigned int j=0; j<sz; j++) {
                     for(unsigned int l=0; l<charges.size(); l++) {
-                        S[(n*3+k) * sz * sz + i * sz + j] += Vn[l*sz*sz + i*sz + j];
+                        V[(n*3+k) * sz * sz + i * sz + j] += Vn[l*sz*sz + i*sz + j];
                     }
                 }
             }
@@ -242,16 +244,16 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     // package everything into results vector, will be unpacked in
     // connected Python class
     std::vector<double> results(charges.size() * 3 * sz * sz * 3 + tedouble.size());
-    for(size_t n=0; n<charges.size(); n++) { // nuclear derivatives
-        for(size_t d=0; d<3; d++) { // directions
+    for(size_t n=0; n<charges.size(); n++) {        // loop over nuclei
+        for(size_t d=0; d<3; d++) {                 // loop over directions
             size_t spos = (n * 3 + d) * sz * sz;
-            std::memcpy(&results[spos], S.data(), S.size() * sizeof(double));
+            std::memcpy(&results[spos], &S[(n*3+d) * sz * sz], sz * sz * sizeof(double));
 
             size_t tpos = spos + charges.size() * 3 * sz * sz;
-            std::memcpy(&results[tpos], T.data(), T.size() * sizeof(double));
+            std::memcpy(&results[tpos], &T[(n*3+d) * sz * sz], sz * sz * sizeof(double));
 
             size_t vpos = tpos + charges.size() * 3 * sz * sz;
-            std::memcpy(&results[vpos], V.data(), V.size() * sizeof(double));
+            std::memcpy(&results[vpos], &V[(n*3+d) * sz * sz], sz * sz * sizeof(double));
         }
     }
     std::memcpy(&results[charges.size() * 3 * sz * sz * 3], tedouble.data(), tedouble.size() * sizeof(double));

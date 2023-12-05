@@ -1,16 +1,16 @@
 #ifndef _VEC3_H
 #define _VEC3_H
 
-typedef float mat33[3][3];
+typedef double mat33[3][3];
 
 /**
  * Custom 3-vector class
 */
 class Vec3 {
 public:
-    float x = 0.0;
-    float y = 0.0;
-    float z = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
 
     /**
      * Default constructor 
@@ -20,9 +20,9 @@ public:
     /**
      * Initialization constructor
     */
-    Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+    Vec3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
 
-    float& operator[](int n) {
+    double& operator[](int n) {
         switch(n) {
             case 0:
                 return this->x;
@@ -35,7 +35,7 @@ public:
         }
     }
 
-    const float& operator[](int n) const {
+    const double& operator[](int n) const {
         switch(n) {
             case 0:
                 return this->x;
@@ -63,14 +63,14 @@ public:
     /**
      * Multiplication operation between scalar and vector
     */
-    friend Vec3 operator*(float v, const Vec3& rhs) {
+    friend Vec3 operator*(double v, const Vec3& rhs) {
         return Vec3(v * rhs.x, v * rhs.y, v * rhs.z);
     }
 
     /**
      * Multiplication operation between vector and scalar
     */
-    friend Vec3 operator*(const Vec3& rhs, float v) {
+    friend Vec3 operator*(const Vec3& rhs, double v) {
         return Vec3(v * rhs.x, v * rhs.y, v * rhs.z);
     }
 
@@ -78,14 +78,14 @@ public:
      * Return normalized vector
     */
     Vec3 normalized() const {
-        float l = std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+        double l = std::sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
         return Vec3(this->x / l, this->y / l, this->z / l);
     }
 
     /**
      * Return dot product between two vectors
     */
-    float dot(const Vec3& rhs) const {
+    double dot(const Vec3& rhs) const {
         return this->x * rhs.x + this->y * rhs.y + this->z * rhs.z;
     }
 
@@ -124,7 +124,7 @@ public:
     /**
      * Divide vector by a scalar operation
     */
-    friend Vec3 operator/(const Vec3& rhs, float v) {
+    friend Vec3 operator/(const Vec3& rhs, double v) {
         return Vec3(rhs.x / v, rhs.y / v, rhs.z / v);
     }
 
@@ -143,7 +143,7 @@ public:
      * Calculate squared sum of coefficients
     */
     double norm2() const {
-        return this->x * this->x + this->y * this->y + this->z * this->z;
+        return (this->x * this->x) + (this->y * this->y) + (this->z * this->z);
     }
 
     /**
