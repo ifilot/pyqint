@@ -134,7 +134,7 @@ class HF:
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            #enorm = np.linalg.norm(e)                           # store error vector norm
+            #enorm = np.linalg.norm(e)                          # store error vector norm
             fmats_diis.append(F)                                # add Fock matrix to list
             pmat_diis.append(P)                                 # add density matrix to list
             evs_diis.append(e)
@@ -175,8 +175,9 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
-        # update density matrix
+        # update density matrix and final energy
         P = np.einsum('ik,jk,k->ij', C, C, occ)
+        energies[-1] = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
 
         # build solution dictionary
         sol = {
