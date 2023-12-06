@@ -13,7 +13,7 @@ class HF:
     Routines to perform a restricted Hartree-Fock calculations
     """
     def rhf(self, mol, basis, calc_forces=False, itermax=100,
-            use_diis=True, verbose=False, tolerance=1e-7,
+            use_diis=True, verbose=False, tolerance=1e-9,
             orbc_init=None, ortho='canonical'):
         """
         Performs a Hartree-Fock type calculation

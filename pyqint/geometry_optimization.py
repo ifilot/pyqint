@@ -20,7 +20,7 @@ class GeometryOptimization:
         self.coordinates_history = []
         self.coord = None
 
-    def run(self, mol, basis):
+    def run(self, mol, basis, gtol=1e-4):
         """
         Perform geometry optimization
         """
@@ -39,7 +39,7 @@ class GeometryOptimization:
             self.__print_break(newline=True)
 
         res_opt = scipy.optimize.minimize(self.energy, x0, args=(mol, basis), method='CG',
-                                          jac=self.jacobian)
+                                          jac=self.jacobian, options={'gtol':gtol})
 
         res = {
             'opt': res_opt,
