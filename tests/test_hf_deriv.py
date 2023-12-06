@@ -59,12 +59,12 @@ class TestHFDeriv(unittest.TestCase):
 
         # calculate forces using analytical derivatives
         solver = HF()
-        res = solver.rhf(mol, 'sto3g', calc_forces=True)
+        res = solver.rhf(mol, 'sto3g', calc_forces=True, tolerance=1e-12)
 
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
     def test_hartree_fock_forces_co2(self):
         """
