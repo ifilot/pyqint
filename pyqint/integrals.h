@@ -27,6 +27,10 @@
 #include <vector>
 #include <array>
 
+#ifdef __GNUG__
+#include <omp.h>
+#endif
+
 #include "gamma.h"
 #include "cgf.h"
 #include "factorials.h"
