@@ -44,7 +44,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', 0.9, 0.0, 0.0)
         mol.add_atom('H', -0.9, 0.0, 0.0)
 
-        res = GeometryOptimization(verbose=False).run(mol, 'p321')
+        res = GeometryOptimization(verbose=False).run(mol, 'p321', gtol=1e-7)
         np.testing.assert_almost_equal(res['opt'].fun, -1.1232790915, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))

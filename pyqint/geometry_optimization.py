@@ -20,7 +20,7 @@ class GeometryOptimization:
         self.coordinates_history = []
         self.coord = None
 
-    def run(self, mol, basis, gtol=1e-4):
+    def run(self, mol, basis, gtol=1e-5):
         """
         Perform geometry optimization
         """
