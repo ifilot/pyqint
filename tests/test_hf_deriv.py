@@ -1,10 +1,7 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
+from pyqint import Molecule, HF
 from copy import deepcopy
 import numpy as np
-import multiprocessing
-import os
-from nose.tools import nottest
 
 class TestHFDeriv(unittest.TestCase):
 

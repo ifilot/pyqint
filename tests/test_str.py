@@ -2,9 +2,6 @@ import unittest
 from nose.tools import nottest
 import pyqint
 from pyqint import PyQInt, Molecule
-import numpy as np
-import multiprocessing
-import os
 
 class TestString(unittest.TestCase):
 

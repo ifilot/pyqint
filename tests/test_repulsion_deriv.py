@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule
+from pyqint import PyQInt, gto, Molecule
 from copy import deepcopy
 import numpy as np
 

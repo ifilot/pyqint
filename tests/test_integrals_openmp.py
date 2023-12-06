@@ -3,7 +3,6 @@ from pyqint import PyQInt, Molecule
 import numpy as np
 import multiprocessing
 import os
-from nose.tools import nottest
 
 class TestIntegralsOpenMP(unittest.TestCase):
 

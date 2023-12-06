@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
+from pyqint import Molecule, HF
 import numpy as np
 
 class TestHF(unittest.TestCase):

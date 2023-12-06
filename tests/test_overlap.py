@@ -1,6 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule
-from copy import deepcopy
+from pyqint import PyQInt, gto, Molecule
 import numpy as np
 
 class TestOverlap(unittest.TestCase):
