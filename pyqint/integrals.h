@@ -27,7 +27,7 @@
 #include <vector>
 #include <array>
 
-#ifdef __GNUG__
+#if defined(__GNUG__) || defined(_MSC_VER)
 #include <omp.h>
 #endif
 
