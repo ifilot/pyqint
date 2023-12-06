@@ -80,7 +80,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                 for(size_t l=0; l<sz; l++) {
                     size_t kl = k * (k+1)/2 + l;
                     if(ij <= kl) {
-                        size_t idx = this->teindex(i,j,k,l);
+                        const size_t idx = this->teindex(i,j,k,l);
 
                         if(idx >= tedouble.size()) {
                             throw std::runtime_error("Process tried to access illegal array position");
@@ -88,7 +88,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 
                         if(tedouble[idx] < 0.0) {
                             tedouble[idx] = 1.0;
-                            jobs.push_back({idx, i, j, k, l});
+                            jobs.emplace_back(std::array<size_t,5>({idx, i, j, k, l}));
                         }
                     }
                 }
@@ -216,7 +216,7 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
 
                                 if(tedouble[idx] < 0.0) {
                                     tedouble[idx] = 1.0;
-                                    jobs.push_back({idx, i, j, k, l, n, d});
+                                    jobs.emplace_back(std::array<size_t, 7>({idx, i, j, k, l, n, d}));
                                 }
                             }
                         }

@@ -83,7 +83,7 @@ elif os.name == 'nt':
     extra_compile_args = ["/openmp"]
     extra_link_args = []
 elif sys.platform == 'darwin':
-    extra_compile_args = ["-Wno-date-time", "-fPIC", "-std=c++11"]
+    extra_compile_args = ["-Wno-date-time", "-fPIC", "-std=c++14"]
     extra_link_args = []
 
 ext_modules = [

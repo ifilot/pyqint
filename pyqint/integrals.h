@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <omp.h>
 #include <cstring>
+#include <vector>
+#include <array>
 
 #include "gamma.h"
 #include "cgf.h"
