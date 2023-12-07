@@ -119,7 +119,7 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(res['data']['nuclear'].shape, (N, N))
         self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
-    @unittest.skipIf(sys.platform == "Darwin",
+    @unittest.skipIf(sys.platform == "darwin",
                      "skipping test for MacOS")
     def test_optimization_c2h4(self):
         """
