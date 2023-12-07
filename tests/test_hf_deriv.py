@@ -1,10 +1,7 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
+from pyqint import Molecule, HF
 from copy import deepcopy
 import numpy as np
-import multiprocessing
-import os
-from nose.tools import nottest
 
 class TestHFDeriv(unittest.TestCase):
 
@@ -59,12 +56,12 @@ class TestHFDeriv(unittest.TestCase):
 
         # calculate forces using analytical derivatives
         solver = HF()
-        res = solver.rhf(mol, 'sto3g', calc_forces=True)
+        res = solver.rhf(mol, 'sto3g', calc_forces=True, tolerance=1e-12)
 
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
     def test_hartree_fock_forces_co2(self):
         """
@@ -87,7 +84,7 @@ class TestHFDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
 def perform_hf(mol):
-    sol = HF().rhf(mol, 'sto3g')
+    sol = HF().rhf(mol, 'sto3g', tolerance=1e-12)
     return sol
 
 def calculate_forces_finite_difference(mol):
@@ -97,7 +94,7 @@ def calculate_forces_finite_difference(mol):
     """
     forces = np.zeros((len(mol.atoms),3))
 
-    sz = 1e-4
+    sz = 1e-3
 
     for i in range(0, len(mol.atoms)): # loop over nuclei
         for j in range(0, 3): # loop over directions

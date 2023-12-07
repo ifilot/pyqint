@@ -1,10 +1,6 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
-from copy import deepcopy
+from pyqint import Molecule, HF
 import numpy as np
-import multiprocessing
-import os
-from nose.tools import nottest
 
 class TestMoleculeOrder(unittest.TestCase):
     
@@ -36,7 +32,7 @@ def build_mol_order1():
     mol.add_atom('H',  1.2288875372,  0.9156191261 ,0.0000000000, unit='angstrom')
     mol.add_atom('H',  1.2288875372, -0.9156191261 ,0.0000000000, unit='angstrom')
 
-    results = HF().rhf(mol, basis='sto3g', verbose=True)
+    results = HF().rhf(mol, basis='sto3g', tolerance=1e-12)
     
     return results
     
@@ -54,7 +50,7 @@ def build_mol_order2():
     mol.add_atom('H',  1.2288875372,  0.9156191261 ,0.0000000000, unit='angstrom')
     mol.add_atom('H',  1.2288875372, -0.9156191261 ,0.0000000000, unit='angstrom')
 
-    results = HF().rhf(mol, basis='sto3g', verbose=True)
+    results = HF().rhf(mol, basis='sto3g', tolerance=1e-12)
     
     return results
 

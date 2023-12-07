@@ -1,10 +1,6 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF, GeometryOptimization
-from copy import deepcopy
+from pyqint import Molecule, GeometryOptimization
 import numpy as np
-import multiprocessing
-import os
-from nose.tools import nottest
 
 class TestHFMoleculeCharged(unittest.TestCase):
 

@@ -1,9 +1,6 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
-from copy import deepcopy
+from pyqint import Molecule, HF
 import numpy as np
-import multiprocessing
-import os
 
 class TestHF(unittest.TestCase):
 

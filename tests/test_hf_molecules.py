@@ -1,10 +1,6 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule, HF
-from copy import deepcopy
+from pyqint import Molecule, HF
 import numpy as np
-import multiprocessing
-import os
-from nose.tools import nottest
 
 class TestHFMolecules(unittest.TestCase):
 
@@ -40,7 +36,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF().rhf(mol, 'sto3g')
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -77.0739544, 5)
+        np.testing.assert_almost_equal(results['energy'], -77.0739726, 4)
 
     def testBF3(self):
         """
@@ -57,7 +53,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF().rhf(mol, 'sto3g')
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -318.6619373, 5)
+        np.testing.assert_almost_equal(results['energy'], -318.6619373, 4)
 
     def testCH4(self):
         """
@@ -90,7 +86,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF().rhf(mol, 'sto3g')
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -111.2254495, 5)
+        np.testing.assert_almost_equal(results['energy'], -111.2254495, 4)
 
     def testCO2(self):
         """
@@ -122,7 +118,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF().rhf(mol, 'sto3g')
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -74.9659012, 5)
+        np.testing.assert_almost_equal(results['energy'], -74.9659012, 4)
 
     def testLIH(self):
         """

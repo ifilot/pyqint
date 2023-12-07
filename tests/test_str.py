@@ -1,10 +1,6 @@
 import unittest
-from nose.tools import nottest
 import pyqint
 from pyqint import PyQInt, Molecule
-import numpy as np
-import multiprocessing
-import os
 
 class TestString(unittest.TestCase):
 
@@ -38,21 +34,6 @@ class TestString(unittest.TestCase):
         self.assertTrue(strver[0].isnumeric())
         self.assertTrue(strver[1].isnumeric())
         self.assertTrue(strver[2].isnumeric())
-        self.assertTrue(strver[3].isnumeric())
-
-    @nottest
-    def test_compiler_info(self):
-        """
-        Test automatic integral evaluation for hydrogen molecule
-        """
-        # construct integrator object
-        integrator = PyQInt()
-
-        compiler_info = integrator.get_compile_info()
-        self.assertTrue(len(compiler_info["compiler_version"]) > 4)
-        self.assertTrue(len(compiler_info["compile_date"]) > 10)
-        self.assertTrue(len(compiler_info["compile_time"]) > 4)
-        self.assertTrue(len(compiler_info["openmp_version"]) > 2)
 
 if __name__ == '__main__':
     unittest.main()

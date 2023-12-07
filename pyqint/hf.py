@@ -13,8 +13,8 @@ class HF:
     Routines to perform a restricted Hartree-Fock calculations
     """
     def rhf(self, mol, basis, calc_forces=False, itermax=100,
-            use_diis=True, verbose=False, tolerance=1e-7,
-            orbc_init=None):
+            use_diis=True, verbose=False, tolerance=1e-9,
+            orbc_init=None, ortho='canonical'):
         """
         Performs a Hartree-Fock type calculation
 
@@ -23,6 +23,10 @@ class HF:
         calc_forces:    whether first derivatives need to be calculed
         verbose:        whether verbose output is given
         """
+
+        # crank up the tolerance when calculating forces
+        if calc_forces and tolerance > 1e-12:
+            tolerance = 1e-12
 
         # create empty dictionary for time tracking statistics
         time_stats = {}
@@ -51,7 +55,14 @@ class HF:
         s, U = np.linalg.eigh(S)
 
         # construct transformation matrix X
-        X = U.dot(np.diag(1.0/np.sqrt(s)))
+        if ortho == 'canonical': # perform canonical orthogonalization
+            X = U @ np.diag(1.0/np.sqrt(s))
+        elif ortho == 'symmetric':
+            X = U @ np.diag(1.0/np.sqrt(s)) @ U.transpose()
+        else:
+            raise Exception("Invalid orthogonalization option selected: ", ortho)
+        
+        
 
         # create empty P matrix as initial guess
         if orbc_init is None:
@@ -83,9 +94,9 @@ class HF:
                     continue
 
                 F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
-                Fprime = X.transpose().dot(F).dot(X)
+                Fprime = X.transpose() @ F @ X
                 e, Cprime = np.linalg.eigh(Fprime)
-                C = X.dot(Cprime)
+                C = X @ Cprime
                 P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
@@ -100,13 +111,13 @@ class HF:
             F = T + V + G
 
             # transform Fock matrix
-            Fprime = X.transpose().dot(F).dot(X)
+            Fprime = X.transpose() @ F @ X
 
             # diagonalize F
             orbe, Cprime = np.linalg.eigh(Fprime)
 
             # back-transform
-            C = X.dot(Cprime)
+            C = X @ Cprime
 
             # calculate energy E
             energy = 0.0
@@ -127,7 +138,7 @@ class HF:
 
             # calculate DIIS coefficients
             e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            #enorm = np.linalg.norm(e)                           # store error vector norm
+            #enorm = np.linalg.norm(e)                          # store error vector norm
             fmats_diis.append(F)                                # add Fock matrix to list
             pmat_diis.append(P)                                 # add density matrix to list
             evs_diis.append(e)
@@ -168,8 +179,9 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
-        # update density matrix
+        # update density matrix and final energy
         P = np.einsum('ik,jk,k->ij', C, C, occ)
+        energies[-1] = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
 
         # build solution dictionary
         sol = {

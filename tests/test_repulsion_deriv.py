@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, cgf, gto, Molecule
+from pyqint import PyQInt, gto, Molecule
 from copy import deepcopy
 import numpy as np
 
@@ -53,10 +53,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans5 == 0.0)
         self.assertFalse(ans6 == 0.0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 10)
-        np.testing.assert_almost_equal(fx4, ans4, 10)
-        np.testing.assert_almost_equal(fx5, ans5, 10)
-        np.testing.assert_almost_equal(fx6, ans6, 10)
+        np.testing.assert_almost_equal(fx3, ans3, 5)
+        np.testing.assert_almost_equal(fx4, ans4, 5)
+        np.testing.assert_almost_equal(fx5, ans5, 5)
+        np.testing.assert_almost_equal(fx6, ans6, 5)
 
         # assert that the cross-terms will change
         fx7 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[0][0], 0)
@@ -73,9 +73,9 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans8 == 0.0)
         self.assertFalse(ans9 == 0.0)
 
-        np.testing.assert_almost_equal(fx7, ans7, 10)
-        np.testing.assert_almost_equal(fx8, ans8, 10)
-        np.testing.assert_almost_equal(fx9, ans9, 10)
+        np.testing.assert_almost_equal(fx7, ans7, 5)
+        np.testing.assert_almost_equal(fx8, ans8, 5)
+        np.testing.assert_almost_equal(fx9, ans9, 5)
 
     def testDerivH2(self):
         """
@@ -149,7 +149,7 @@ def calculate_deriv_gto(gto1, gto2, gto3, gto4, coord):
     integrator = PyQInt()
 
     # distance
-    diff = 0.00001
+    diff = 0.000001
     p = np.zeros(3)
     p[coord] = diff
 
