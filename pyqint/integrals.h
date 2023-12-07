@@ -684,6 +684,6 @@ private:
     const double gamma2, const double delta) const;
 
     double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
-    double B0(int i, int r, double q) const;
+    double BB0(int i, int r, double q) const;
     double fact_ratio2(unsigned int a, unsigned int b) const;
 };

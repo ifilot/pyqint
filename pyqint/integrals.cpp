@@ -1239,10 +1239,10 @@ double Integrator::B_term(const int i1, const int i2, const int r1, const int r2
 }
 
 double Integrator::fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double g) const {
-    return binomial_prefactor(i, l1, l2, p-a, p-b) * B0(i, r, g);
+    return binomial_prefactor(i, l1, l2, p-a, p-b) * BB0(i, r, g);
 }
 
-double Integrator::B0(int i, int r, double g) const {
+double Integrator::BB0(int i, int r, double g) const {
     return fact_ratio2(i,r) * pow(4*g,r-i);
 }
 
