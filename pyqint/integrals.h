@@ -31,6 +31,10 @@
 #include "cgf.h"
 #include "factorials.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 class Integrator {
 private:
     std::string compile_date;
