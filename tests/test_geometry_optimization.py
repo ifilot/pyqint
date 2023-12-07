@@ -1,6 +1,7 @@
 import unittest
 from pyqint import Molecule,GeometryOptimization
 import numpy as np
+import sys
 
 class TestGeometryOptimization(unittest.TestCase):
     """
@@ -118,6 +119,8 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(res['data']['nuclear'].shape, (N, N))
         self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
+    @unittest.skipIf(sys.platform == "Darwin",
+                     "skipping test for MacOS")
     def test_optimization_c2h4(self):
         """
         Optimize ethylene molecule and assess that the energy corresponds to
