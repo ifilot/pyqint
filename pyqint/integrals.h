@@ -27,10 +27,6 @@
 #include <vector>
 #include <array>
 
-#if defined(__GNUG__) || defined(_MSC_VER)
-#include <omp.h>
-#endif
-
 #include "gamma.h"
 #include "cgf.h"
 #include "factorials.h"

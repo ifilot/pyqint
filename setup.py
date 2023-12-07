@@ -75,11 +75,14 @@ if os.name == 'nt':
         os.environ['PATH'] = ";".join(newpaths)
 
 # specify compilation instructions for other platforms
-if os.name == 'posix':
+if os.name == 'posix' and sys.platform != 'darwin':
     extra_compile_args = ["-Wno-date-time", "-fopenmp", "-fPIC"]
     extra_link_args = ["-fopenmp"]
-else:
+elif os.name == 'nt':
     extra_compile_args = ["/openmp"]
+    extra_link_args = []
+elif sys.platform == 'darwin':
+    extra_compile_args = ["-Wno-date-time", "-fPIC", "-std=c++14"]
     extra_link_args = []
 
 ext_modules = [
