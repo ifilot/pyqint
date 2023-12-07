@@ -78,7 +78,7 @@ if os.name == 'nt':
 if os.name == 'posix':
     extra_compile_args = ["-Wno-date-time", "-fopenmp", "-fPIC"]
     extra_link_args = ["-fopenmp"]
-else os.name == 'nt':
+else:
     extra_compile_args = ["/openmp"]
     extra_link_args = []
 
