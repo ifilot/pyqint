@@ -12,4 +12,4 @@ test-requires = "pytest"
 test-command = "pytest {project}/tests"
 
 # skip PyPy wheels and 32 bit builds
-skip = ["pp*", "*-win32", "*-manylinux_i686"]
+skip = ["pp*", "*-win32", "*-manylinux_i686", "cp36-*"]
