@@ -11,8 +11,5 @@ build-backend = "setuptools.build_meta"
 test-requires = "pytest"
 test-command = "pytest {project}/tests"
 
-# Skip 32-bit builds
-skip = ["*-win32", "*-manylinux_i686"]
-
-# skip PyPy wheels
-skip = ["pp*"]
+# skip PyPy wheels and 32 bit builds
+skip = ["pp*", "*-win32", "*-manylinux_i686"]
