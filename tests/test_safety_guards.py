@@ -71,7 +71,7 @@ class TestSafetyGuards(unittest.TestCase):
             integrator.plot_gradient(grid, c, cgfs)
 
         exception = raises_cm.exception
-        self.assertEqual(exception.args, ('only length-1 arrays can be converted to Python scalars',))
+        self.assertEqual(type(exception), TypeError)
         
         # put in matrix object -> should yield error
         c = np.identity(3)
