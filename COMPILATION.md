@@ -90,20 +90,29 @@ To upload, run
 python -m twine upload wheelhouse/*
 ```
 
-## Compilation and testing under Linux Debian
+## Compilation
 
 Compile locally
 ```
-python3 setup.py build
+python3 setup.py build --inplace
 ```
 
-and install it locally
-```
-pip3 install -e .
-```
+## Building via cibuildwheel
 
-and finally test it
+To create a wheel (`whl`), run
 
 ```
-pytest-3 tests/*
+pipx run cibuildwheel --only cp310-manylinux_x86_64
+```
+
+To install the `whl` file
+
+```
+pip3 install wheelhouse/pyqint-<VERSION>-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+```
+
+and to locally test
+
+```
+pytest-3 tests/*.py
 ```

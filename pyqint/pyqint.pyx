@@ -1,40 +1,59 @@
 # distutils: language = c++
 
 from .pyqint cimport Integrator, GTO, CGF
-from multiprocessing import Pool
 import numpy as np
+from collections.abc import Iterable
+from . import gto
+from . import cgf
+import numpy.typing as npt
 
 cdef class PyGTO:
+    """
+    Python representation of the Gaussian Type Orbital
+    
+    c: linear expansion coefficient in CGF
+    p: position (3-vector)
+    alpha: exponential
+    l: order in x
+    m: order in y
+    n: order in z
+    """
     cdef GTO gto
 
-    def __cinit__(self, _c, _p, _alpha, _l, _m, _n):
+    def __cinit__(self, _c:float, _p:Iterable[float], _alpha:float, _l:int, _m:int, _n:int):
         self.gto = GTO(_c, _p[0], _p[1], _p[2], _alpha, _l, _m, _n)
 
-    def get_amp(self, x, y, z):
+    def get_amp(self, x:float, y:float, z:float):
         return self.gto.get_amp(x, y, z)
 
 cdef class PyCGF:
+    """
+    Python representation of the Contracted Gaussian Function
+    """
     cdef CGF cgf
 
-    def __cinit__(self, _p):
+    def __cinit__(self, _p:Iterable[float]):
         self.cgf = CGF(_p[0], _p[1], _p[2])
 
-    def add_gto(self, c, alpha, l, m, n):
+    def add_gto(self, c:float, alpha:float, l:int, m:int, n:int):
         self.cgf.add_gto(c, alpha, l, m, n)
 
-    def get_amp_f(self, x, y, z):
+    def get_amp_f(self, x:float, y:float, z:float):
         return self.cgf.get_amp(x, y, z)
 
-    def get_amp(self, r):
+    def get_amp(self, r:Iterable[float]):
         return self.cgf.get_amp(r[0], r[1], r[2])
 
-    def get_grad_f(self, x, y, z):
+    def get_grad_f(self, x:float, y:float, z:float):
         return self.cgf.get_grad(x, y, z)
 
-    def get_grad(self, r):
+    def get_grad(self, r:Iterable[float]):
         return self.cgf.get_grad(r[0], r[1], r[2])
 
 cdef class PyQInt:
+    """
+    Python representation of the Integrator class
+    """
     cdef Integrator *integrator
     integrator_uint = 0
 
@@ -67,10 +86,22 @@ cdef class PyQInt:
 
         return compile_info
 
-    def get_num_threads(self):
+    def get_num_threads(self) -> int:
+        """
+        Get the number of OpenMP threads
+        """
         return self.integrator.get_num_threads()
 
-    def overlap_gto(self, gto1, gto2):
+    def overlap_gto(self, gto1:gto, gto2:gto) -> float:
+        """Calculates overlap integral between two GTOs
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+
+        Returns:
+            float: overlap integral
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -80,7 +111,16 @@ cdef class PyQInt:
 
         return self.integrator.overlap_gto(c_gto1, c_gto2)
 
-    def overlap(self, cgf1, cgf2):
+    def overlap(self, cgf1:cgf, cgf2:cgf) -> float:
+        """Calculates overlap integral between two CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+
+        Returns:
+            float: overlap integral
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -97,7 +137,18 @@ cdef class PyQInt:
 
         return self.integrator.overlap(c_cgf1, c_cgf2)
 
-    def dipole_gto(self, gto1, gto2, cc, cref = 0.0):
+    def dipole_gto(self, gto1:gto, gto2:gto, cc:int, cref:float = 0.0) -> float:
+        """Calculates dipole integral between two GTOs
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+            cc (int): cartesian coordinate [0-2]    
+            cref (float, optional): coordinate reference. Defaults to 0.0.
+
+        Returns:
+            float: dipole integral in direction cc
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -107,7 +158,18 @@ cdef class PyQInt:
 
         return self.integrator.dipole_gto(c_gto1, c_gto2, cc, cref)
 
-    def dipole(self, cgf1, cgf2, cc, cref = 0.0):
+    def dipole(self, cgf1:cgf, cgf2:cgf, cc:int, cref:float = 0.0) -> float:
+        """Calculates dipole integral between two CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            cc (int): cartesian coordinate [0-2]
+            cref (float, optional): coordinate reference. Defaults to 0.0.
+
+        Returns:
+            float: dipole integral in direction cc
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -124,7 +186,18 @@ cdef class PyQInt:
 
         return self.integrator.dipole(c_cgf1, c_cgf2, cc, cref)
 
-    def overlap_deriv(self, cgf1, cgf2, nuc, coord):
+    def overlap_deriv(self, cgf1:cgf, cgf2:cgf, nuc:Iterable[float], coord:int) -> float:
+        """Calculate derivative of overlap integral between two CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            nuc (Iterable[float]): nuclear coordinate
+            coord (int): cartesian coordinate [0-2]
+
+        Returns:
+            float: derivate of overlap integral in cartesian direction coord
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -141,7 +214,16 @@ cdef class PyQInt:
 
         return self.integrator.overlap_deriv(c_cgf1, c_cgf2, nuc[0], nuc[1], nuc[2], coord)
 
-    def kinetic_gto(self, gto1, gto2):
+    def kinetic_gto(self, gto1:gto, gto2:gto) -> float:
+        """Calculate kinetic integral between two GTOs
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+
+        Returns:
+            float: kinetic integral
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -151,7 +233,16 @@ cdef class PyQInt:
 
         return self.integrator.kinetic_gto(c_gto1, c_gto2)
 
-    def kinetic(self, cgf1, cgf2):
+    def kinetic(self, cgf1:cgf, cgf2:cgf) -> float:
+        """Calculates kinetic integral between two CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            
+        Returns:
+            float: kinetic integral
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -168,7 +259,18 @@ cdef class PyQInt:
 
         return self.integrator.kinetic(c_cgf1, c_cgf2)
 
-    def kinetic_deriv(self, cgf1, cgf2, nuc, coord):
+    def kinetic_deriv(self, cgf1:cgf, cgf2:cgf, nuc:Iterable[float], coord:int) -> float:
+        """Calculates derivative of kinetic integral
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            nuc (Iterable[float]): nuclear coordinate
+            coord (int): cartesian direction [0-2]
+
+        Returns:
+            float: kinetic integral derivative
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -185,7 +287,17 @@ cdef class PyQInt:
 
         return self.integrator.kinetic_deriv(c_cgf1, c_cgf2, nuc[0], nuc[1], nuc[2], coord)
 
-    def nuclear_gto(self, gto1, gto2, rc):
+    def nuclear_gto(self, gto1:gto, gto2:gto, rc:Iterable[float]) -> float:
+        """Calculates nuclear integral between two GTOs (assuming unit charge)
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+            rc (Iterable[float]): nuclear coordinate
+
+        Returns:
+            float: nuclear coordinate
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -195,7 +307,18 @@ cdef class PyQInt:
 
         return self.integrator.nuclear_gto(c_gto1, c_gto2, rc[0], rc[1], rc[2])
 
-    def nuclear(self, cgf1, cgf2, rc, zc):
+    def nuclear(self, cgf1:cgf, cgf2:cgf, rc:Iterable[float], zc:int) -> float:
+        """Calculates nuclear coordinate integral between two CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            rc (Iterable[float]): nuclear coordinate
+            zc (Iterable[float]): nuclear charge
+
+        Returns:
+            float: nuclear integral
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -212,7 +335,20 @@ cdef class PyQInt:
 
         return self.integrator.nuclear(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc)
 
-    def nuclear_deriv(self, cgf1, cgf2, rc, zc, rd, coord):
+    def nuclear_deriv(self, cgf1:cgf, cgf2:cgf, rc:Iterable[float], zc:int, rd:Iterable[float], coord:int) -> float:
+        """Calculates nuclear derivative
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            rc (Iterable[float]): nuclear position
+            zc (Iterable[float]): nuclear charge
+            rd (Iterable[float]): nuclear coordinate for derivative
+            coord (int): cartesian direction [0-2]
+
+        Returns:
+            float: nuclear derivative
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -229,7 +365,18 @@ cdef class PyQInt:
 
         return self.integrator.nuclear_deriv(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc, rd[0], rd[1], rd[2], coord)
 
-    def repulsion_gto(self, gto1, gto2, gto3, gto4):
+    def repulsion_gto(self, gto1:gto, gto2:gto, gto3:gto, gto4:gto) -> float:
+        """Calculates repulsion integral between GTOs
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+            gto3 (gto): gto3
+            gto4 (gto): gto4
+
+        Returns:
+            float: Repulsion integral
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -243,7 +390,18 @@ cdef class PyQInt:
 
         return self.integrator.repulsion(c_gto1, c_gto2, c_gto3, c_gto4)
 
-    def repulsion(self, cgf1, cgf2, cgf3, cgf4):
+    def repulsion(self, cgf1:cgf, cgf2:cgf, cgf3:cgf, cgf4:cgf) -> float:
+        """Calculates repulsion integral between CGFs
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            cgf3 (cgf): cgf3
+            cgf4 (cgf): cgf4
+
+        Returns:
+            float: repulsion integral
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -272,7 +430,20 @@ cdef class PyQInt:
 
         return self.integrator.repulsion(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
 
-    def repulsion_deriv(self, cgf1, cgf2, cgf3, cgf4, nuc, coord):
+    def repulsion_deriv(self, cgf1:cgf, cgf2:cgf, cgf3:cgf, cgf4:cgf, nuc:Iterable[float], coord:int) -> float:
+        """Calculates derivative for repulsion integral
+
+        Args:
+            cgf1 (cgf): cgf1
+            cgf2 (cgf): cgf2
+            cgf3 (cgf): cgf3
+            cgf4 (cgf): cgf4
+            nuc (Iterable[float]): nuclear coordinate
+            coord (int): cartesian direction [0-2]
+
+        Returns:
+            float: nuclear integral derivative
+        """
 
         cdef CGF c_cgf1
         cdef CGF c_cgf2
@@ -301,7 +472,19 @@ cdef class PyQInt:
 
         return self.integrator.repulsion_deriv(c_cgf1, c_cgf2, c_cgf3, c_cgf4, nuc[0], nuc[1], nuc[2], coord)
 
-    def repulsion_gto_deriv(self, gto1, gto2, gto3, gto4, coord):
+    def repulsion_gto_deriv(self, gto1:gto, gto2:gto, gto3:gto, gto4:gto, coord:int) -> float:
+        """Calculate repulsion integral derivative between GTOs
+
+        Args:
+            gto1 (gto): gto1
+            gto2 (gto): gto2
+            gto3 (gto): gto3
+            gto4 (gto): gto4
+            coord (int): cartesian coordinate
+
+        Returns:
+            float: repulsion integral derivative
+        """
 
         cdef GTO c_gto1
         cdef GTO c_gto2
@@ -315,13 +498,41 @@ cdef class PyQInt:
 
         return self.integrator.repulsion_deriv(c_gto1, c_gto2, c_gto3, c_gto4, coord)
 
-    def repulsion_contracted(self, cgfs):
+    def repulsion_contracted(self, cgfs:Iterable[cgf]) -> float:
+        """Calculate repulsion integral via contracted function
+
+        Args:
+            cgfs (Iterable[cgf]): list of CGFs (only first four used)
+
+        Returns:
+            float: repulsion integrak
+        """
         return self.repulsion(cgfs[0], cgfs[1], cgfs[2], cgfs[3])
 
-    def teindex(self, i, j, k, l):
+    def teindex(self, i:int, j:int, k:int, l:int) -> int:
+        """Calculates two-electron integral index
+
+        Args:
+            i (int): id 1
+            j (int): id 2
+            k (int): id 3
+            l (int): id 4
+
+        Returns:
+            int: index
+        """
         return self.integrator.teindex(i, j, k, l)
 
-    def build_integrals_openmp(self, cgfs, nuclei):
+    def build_integrals_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]]) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
+        """Build overlap matrix, nuclear attraction matrix, kinetic energy matrix and four-dimensional two-electron array
+
+        Args:
+            cgfs (Iterable[cgf]): list of contracted gaussian functions
+            nuclei (Iterable[tuple[Iterable[float], float]]): list of nuclei
+
+        Returns:
+            tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]: overlap matrix, kinetic energy matrix, nuclear attraction matrix, four-dimensional two-electron array
+        """
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
         cdef vector[double] px
@@ -351,7 +562,7 @@ cdef class PyQInt:
 
         return S, T, V, tetensor
 
-    def build_geometric_derivatives_openmp(self, cgfs, nuclei):
+    def build_geometric_derivatives_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]]) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
         cdef vector[double] px
@@ -385,20 +596,36 @@ cdef class PyQInt:
 
         return S, T, V, teints
 
-    def build_rectgrid3d(self, xmin, xmax, sz):
-        """
-        Build rectangular grid with z the slowest moving index
-        and x the fastest moving index
+    def build_rectgrid3d(self, xmin:float, xmax:float, sz:float) -> npt.NDArray[np.float64]:
+        """Build three-dimensional grid
+
+        Args:
+            xmin (float): negative coordinate
+            xmax (float): positive coordinate
+            sz (float): number of values
+
+        Returns:
+            npt.NDArray[np.float64]: array containing grid points
         """
         x = np.linspace(xmin, xmax, sz, endpoint=False)
         grid = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
         return grid
 
-    def plot_wavefunction(self, grid, coeff, cgfs):
-        """
-        Build wavefunction on grid
+    def plot_wavefunction(self, grid:npt.NDArray[np.float64], coeff:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+        """Calculates the wave function on a grid for a single molecular orbital
+
+        Args:
+            grid (npt.NDArray[np.float64]): grid coordinates
+            coeff (npt.NDArray[np.float64]): vector of linear expansion coordinates of molecular orbital
+            cgfs (Iterable[cgf]): list of CGFs
+
+        Returns:
+            npt.NDArray[np.float64]: wave function values on grid
         """
         cdef vector[CGF] c_cgfs
+
+        if len(cgfs) != len(coeff):
+            raise Exception('Dimensions of cgf list and coefficient matrix do not match (%i != %i)' % (len(cgfs), len(coeff)))
 
         # build CGFS objects
         for cgf in cgfs:
@@ -418,11 +645,21 @@ cdef class PyQInt:
 
         return np.array(res)
     
-    def plot_gradient(self, grid, coeff, cgfs):
-        """
-        Build gradient on grid
+    def plot_gradient(self, grid:npt.NDArray[np.float64], coeff:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+        """Build the gradient on the grid
+
+        Args:
+            grid (npt.NDArray[np.float64]): grid coordinates
+            coeff (npt.NDArray[np.float64]): vector of linear expansion coordinates of molecular orbital
+            cgfs (Iterable[cgf]): list of contracted gaussian functions
+
+        Returns:
+            npt.NDArray[np.float64]: wave function gradient on the grid
         """
         cdef vector[CGF] c_cgfs
+
+        if len(cgfs) != len(coeff):
+            raise Exception('Dimensions of cgf list and coefficient matrix do not match (%i != %i)' % (len(cgfs), len(coeff)))
 
         # build CGFS objects
         for cgf in cgfs:
