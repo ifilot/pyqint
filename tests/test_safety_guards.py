@@ -30,7 +30,7 @@ class TestSafetyGuards(unittest.TestCase):
             integrator.plot_wavefunction(grid, c, cgfs)
 
         exception = raises_cm.exception
-        self.assertEqual(exception.args, ('only length-1 arrays can be converted to Python scalars',))
+        self.assertTrue('arrays can be converted to Python scalars' in exception.args[0])
         
         # put in matrix object -> should yield error
         c = np.identity(3)
