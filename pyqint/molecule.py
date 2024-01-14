@@ -150,4 +150,7 @@ class Molecule:
             self.__charges[aidx] = getattr(el, atom[0])
             self.__nuclei.append([atom[1], self.__charges[aidx]])
 
+        # populate number of electrons
+        self.__nelec = np.sum(self.__charges)
+
         return self.__nuclei
