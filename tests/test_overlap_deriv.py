@@ -98,9 +98,9 @@ def calculate_force_finite_difference(mol, nuc_id, cgf_id1, cgf_id2, coord):
     diff = 0.00001
 
     mol1 = deepcopy(mol)
-    mol1.atoms[nuc_id][1][coord] -= diff / 2
+    mol1.get_atoms()[nuc_id][1][coord] -= diff / 2
     mol2 = deepcopy(mol)
-    mol2.atoms[nuc_id][1][coord] += diff / 2
+    mol2.get_atoms()[nuc_id][1][coord] += diff / 2
 
     # build hydrogen molecule
     cgfs1, nuclei = mol1.build_basis('sto3g')
