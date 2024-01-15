@@ -92,16 +92,16 @@ def calculate_forces_finite_difference(mol):
     Calculates the forces on each of the atoms using a finite difference
     approach.
     """
-    forces = np.zeros((len(mol.atoms),3))
+    forces = np.zeros((len(mol.get_atoms()),3))
 
     sz = 1e-3
 
-    for i in range(0, len(mol.atoms)): # loop over nuclei
+    for i in range(0, len(mol.get_atoms())): # loop over nuclei
         for j in range(0, 3): # loop over directions
             mol1 = deepcopy(mol)
-            mol1.atoms[i][1][j] -= sz / 2
+            mol1.get_atoms()[i][1][j] -= sz / 2
             mol2 = deepcopy(mol)
-            mol2.atoms[i][1][j] += sz / 2
+            mol2.get_atoms()[i][1][j] += sz / 2
 
             energy1 = perform_hf(mol1)['energy']
             energy2 = perform_hf(mol2)['energy']

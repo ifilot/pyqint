@@ -20,7 +20,7 @@ class TestNuclearDeriv(unittest.TestCase):
         forces_fd = calculate_deriv_nuclear_repulsion_finite_difference(mol)
 
         forces = np.zeros(forces_fd.shape)
-        for i in range(0, len(mol.atoms)): # loop over nuclei
+        for i in range(0, len(mol.get_atoms())): # loop over nuclei
             for j in range(0, 3): # loop over directions
                 forces[i,j] = deriv_nuclear_repulsion(nuclei, i, j)
 
@@ -71,7 +71,7 @@ def calculate_force_finite_difference(cgf_id1, cgf_id2, nuc_id, coord, probe_ato
         mol.add_atom('H',  -0.86681, 0.60144, 0.00000, unit='angstrom')
 
         # adjust molecule
-        mol.atoms[nuc_id][1][coord] += v * diff / 2
+        mol.get_atoms()[nuc_id][1][coord] += v * diff / 2
 
         # build basis
         cgfs, nuclei = mol.build_basis('sto3g')
@@ -106,12 +106,12 @@ def calculate_deriv_nuclear_repulsion_finite_difference(mol):
 
     sz = 0.0001
 
-    for i in range(0, len(mol.atoms)): # loop over nuclei
+    for i in range(0, len(mol.get_atoms())): # loop over nuclei
         for j in range(0, 3): # loop over directions
             mol1 = deepcopy(mol)
-            mol1.atoms[i][1][j] -= sz / 2
+            mol1.get_atoms()[i][1][j] -= sz / 2
             mol2 = deepcopy(mol)
-            mol2.atoms[i][1][j] += sz / 2
+            mol2.get_atoms()[i][1][j] += sz / 2
 
             cgfs, nuclei1= mol1.build_basis('sto3g')
             cgfs, nuclei2 = mol2.build_basis('sto3g')

@@ -4,21 +4,22 @@ import json
 import os
 import numpy as np
 from .cgf import cgf
+from .element import Element
 
 class Molecule:
     """
     Molecule class
     """
     def __init__(self, _name='unknown'):
-        self.atoms = []
-        self.charges = []
+        self.__atoms = []
+        self.__charges = []
         self.name = _name
-        self.charge = 0
-        self.nelec = None
+        self.__charge = 0
+        self.__nelec = None
 
     def __str__(self):
         res = "Molecule: %s\n" % self.name
-        for atom in self.atoms:
+        for atom in self.__atoms:
             res += " %s (%f,%f,%f)\n" % (atom[0], atom[1][0], atom[1][1], atom[1][2])
 
         return res
@@ -27,17 +28,26 @@ class Molecule:
         """
         Get the number of electrons
         """
-        if self.nelec == None:
-            raise Exception('You need to use build_basis() before using this function.')
-        return self.nelec - self.charge
+        if self.__nelec == None:
+            raise Exception('You need to use build_basis() or get_nuclei() before using this function.')
+        return self.__nelec - self.__charge
+
+    def get_atoms(self):
+        return self.__atoms
+    
+    def get_charge(self):
+        return self.__charge
 
     def set_charge(self, charge):
         """
         Set the charge of the molecule
         """
-        self.charge = charge
+        self.__charge = charge
 
     def add_atom(self, atom, x, y, z, unit='bohr'):
+        """
+        Add an atom to the molecule
+        """
         ang2bohr = 1.8897259886
 
         x = float(x)
@@ -45,77 +55,102 @@ class Molecule:
         z = float(z)
 
         if unit == "bohr":
-            self.atoms.append([atom, np.array([x, y, z])])
+            self.__atoms.append([atom, np.array([x, y, z])])
         elif unit == "angstrom":
-            self.atoms.append([atom, np.array([x*ang2bohr, y*ang2bohr, z*ang2bohr])])
+            self.__atoms.append([atom, np.array([x*ang2bohr, y*ang2bohr, z*ang2bohr])])
         else:
             raise RuntimeError("Invalid unit encountered: %s. Accepted units are 'bohr' and 'angstrom'." % unit)
 
-        self.charges.append(0)
+        self.__charges.append(0)
 
     def build_basis(self, name):
+        """
+        Build a basis set from a label
+
+        Returns list of CGFs and nuclei
+        """
         basis_filename = os.path.join(os.path.dirname(__file__), 'basissets', '%s.json' % name)
         f = open(basis_filename, 'r')
         basis = json.load(f)
         f.close()
         
-        self.cgfs = []
-        self.nuclei = []
+        self.__cgfs = []
 
-        for aidx, atom in enumerate(self.atoms):
+        for aidx, atom in enumerate(self.__atoms):
             cgfs_template = basis[atom[0]]
 
             # store information about the nuclei
-            self.charges[aidx] = cgfs_template['atomic_number']
-            self.nuclei.append([atom[1], cgfs_template['atomic_number']])
+            self.__charges[aidx] = cgfs_template['atomic_number']
 
             for cgf_t in cgfs_template['cgfs']:
                 # s-orbitals
                 if cgf_t['type'] == 'S':
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 0)
 
                 # p-orbitals
                 if cgf_t['type'] == 'P':
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 0)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 0)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 1)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 1)
 
                 # d-orbitals
                 if cgf_t['type'] == 'D':
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 2, 0, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 2, 0, 0)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 2, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 2, 0)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 2)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 2)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 1, 0)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 1, 0)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 1)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 1)
                     
-                    self.cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(cgf(atom[1]))
                     for gto in cgf_t['gtos']:
-                        self.cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
+                        self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
 
-        self.nelec = np.sum(self.charges)
+        # build nuclei objects
+        self.get_nuclei()
+        self.__nelec = np.sum(self.__charges)
 
-        return self.cgfs, self.nuclei
+        return self.__cgfs, self.__nuclei
+    
+    def get_nuclei(self):
+        """
+        Get the nuclei as a packed array
+        """
+        el = Element()
+
+        # reset list
+        self.__nuclei = []
+
+        for aidx, atom in enumerate(self.__atoms):
+
+            # store information about the nuclei
+            self.__charges[aidx] = getattr(el, atom[0])
+            self.__nuclei.append([atom[1], self.__charges[aidx]])
+
+        # populate number of electrons
+        self.__nelec = np.sum(self.__charges)
+
+        return self.__nuclei

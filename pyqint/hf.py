@@ -19,7 +19,7 @@ class HF:
         Performs a Hartree-Fock type calculation
 
         mol:            molecule
-        basis:          basis set
+        basis:          basis set; either list of CGFs or string
         calc_forces:    whether first derivatives need to be calculed
         verbose:        whether verbose output is given
         """
@@ -32,7 +32,12 @@ class HF:
         time_stats = {}
 
         # build cgfs, nuclei and calculate nr of electrons
-        cgfs, nuclei = mol.build_basis(basis)
+        if issubclass(type(basis), str): # if a basis set name is given
+            cgfs, nuclei = mol.build_basis(basis)
+        else: # either assume a list of CGFs objects is given
+            cgfs = basis
+            nuclei = mol.get_nuclei()
+            
         nelec = mol.get_nelec()
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(N)]

@@ -24,7 +24,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
-        self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+        self.assertEqual(res['coordinates'][0].shape, (len(mol.get_atoms()),3))
 
         # test existence of data object
         N = len(res['data']['cgfs'])
@@ -51,7 +51,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
-        self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+        self.assertEqual(res['coordinates'][0].shape, (len(mol.get_atoms()),3))
 
         # test existence of data object
         N = len(res['data']['cgfs'])
@@ -81,7 +81,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
-        self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+        self.assertEqual(res['coordinates'][0].shape, (len(mol.get_atoms()),3))
 
         # test existence of data object
         N = len(res['data']['cgfs'])
@@ -108,7 +108,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
-        self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+        self.assertEqual(res['coordinates'][0].shape, (len(mol.get_atoms()),3))
 
         # test existence of data object
         N = len(res['data']['cgfs'])
@@ -140,7 +140,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
-        self.assertEqual(res['coordinates'][0].shape, (len(mol.atoms),3))
+        self.assertEqual(res['coordinates'][0].shape, (len(mol.get_atoms()),3))
 
         # test existence of data object
         N = len(res['data']['cgfs'])

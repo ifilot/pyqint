@@ -79,7 +79,7 @@ class GeometryOptimization:
 
         # append history
         self.forces_history.append(self.forces)
-        self.coordinates_history.append(self.coord.reshape(len(mol.atoms),3))
+        self.coordinates_history.append(self.coord.reshape(len(mol.get_atoms()),3))
         self.energies_history.append(res['energies'][-1])
 
         if self.verbose:
@@ -116,7 +116,7 @@ class GeometryOptimization:
         Unpack coordinates from molecule class
         """
         coords = []
-        for atom in mol.atoms:
+        for atom in mol.get_atoms():
             coords.append(atom[1])
 
         return np.array(coords).flatten()
@@ -127,10 +127,10 @@ class GeometryOptimization:
         """
 
         newmol = Molecule(mol.name)
-        newmol.charge = mol.charge
-        coords = coords.reshape((len(mol.atoms), 3))
-        for i,atom in enumerate(mol.atoms):
-            newmol.add_atom(mol.atoms[i][0], coords[i][0], coords[i][1], coords[i][2])
+        newmol.set_charge(mol.get_charge())
+        coords = coords.reshape((len(mol.get_atoms()), 3))
+        for i,atom in enumerate(mol.get_atoms()):
+            newmol.add_atom(mol.get_atoms()[i][0], coords[i][0], coords[i][1], coords[i][2])
 
         return newmol
 
@@ -141,7 +141,7 @@ class GeometryOptimization:
         print('-------------')
         print('  POSITIONS  ')
         print('-------------')
-        for atom in mol.atoms:
+        for atom in mol.get_atoms():
             print('  %2s %12.8f %12.8f %12.8f' % (atom[0],
                                                   atom[1][0],
                                                   atom[1][1],
@@ -155,7 +155,7 @@ class GeometryOptimization:
         print('  FORCES  ')
         print('----------')
 
-        for atom,force in zip(mol.atoms, forces):
+        for atom,force in zip(mol.get_atoms(), forces):
             print('  %2s %12.4e %12.4e %12.4e' % (atom[0],
                                                   force[0],
                                                   force[1],
