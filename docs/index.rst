@@ -3,8 +3,10 @@ PyQInt: a Python package for evaluating Gaussian integrals and performing electr
 
 .. image:: https://img.shields.io/github/v/tag/ifilot/pyqint?label=version
    :alt: GitHub tag (latest SemVer)
-.. image:: https://github.com/ifilot/pyqint/actions/workflows/build.yml/badge.svg
-   :target: https://github.com/ifilot/pyqint/actions/workflows/build.yml
+.. image:: https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg
+   :target: https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml
+.. image:: https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml/badge.svg
+   :target: https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml
 .. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: https://www.gnu.org/licenses/gpl-3.0
 
