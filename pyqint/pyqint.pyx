@@ -596,18 +596,18 @@ cdef class PyQInt:
 
         return S, T, V, teints
 
-    def build_rectgrid3d(self, xmin:float, xmax:float, sz:float) -> npt.NDArray[np.float64]:
+    def build_rectgrid3d(self, xmin:float, xmax:float, npts:int) -> npt.NDArray[np.float64]:
         """Build three-dimensional grid
 
         Args:
             xmin (float): negative coordinate
             xmax (float): positive coordinate
-            sz (float): number of values
+            npts (int): number of sampling points per Cartesian direction
 
         Returns:
             npt.NDArray[np.float64]: array containing grid points
         """
-        x = np.linspace(xmin, xmax, sz, endpoint=False)
+        x = np.linspace(xmin, xmax, npts, endpoint=False)
         grid = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
         return grid
 
