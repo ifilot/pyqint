@@ -40,11 +40,7 @@ class TestPlotData(unittest.TestCase):
         
         # construct integrator object
         integrator = PyQInt()
-        
-        # build grid points
-        x = np.linspace(-2, 2, 6, endpoint=True)
-        coord = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
-               
+                       
         c = np.array([0.54893397, 0.54893397])
         
         # test couple of single points
@@ -71,6 +67,9 @@ class TestPlotData(unittest.TestCase):
         np.testing.assert_almost_equal(grad, res, 4)
         
         # test grid of points
+        # x = np.linspace(-2, 2, 6, endpoint=True)
+        # coord = np.flipud(np.vstack(np.meshgrid(x, x, x, indexing='ij')).reshape(3,-1)).T
+        coord = integrator.build_rectgrid3d(-2, 2, 6, endpoint=True)
         grad = integrator.plot_gradient(coord, c, cgfs)
         self.assertEqual(grad.shape[0], 6*6*6)
         self.assertEqual(grad.shape[1], 3)        
