@@ -44,5 +44,8 @@ class gto:
     def get_amp(self, x, y, z):
         return self.gto.get_amp(x, y, z)
 
-    def get_norm():
+    def get_norm(self):
+        """
+        Returns the normalization constant for the GTO
+        """
         return self.gto.get_norm()

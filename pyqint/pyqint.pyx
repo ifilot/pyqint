@@ -26,6 +26,9 @@ cdef class PyGTO:
     def get_amp(self, x:float, y:float, z:float):
         return self.gto.get_amp(x, y, z)
 
+    def get_norm(self):
+        return self.gto.get_norm()
+
 cdef class PyCGF:
     """
     Python representation of the Contracted Gaussian Function
