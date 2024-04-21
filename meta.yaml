@@ -30,14 +30,14 @@ test:
     - numpy
     - scipy
     - setuptools
-    - nose
+    - pytest
   source_files:
     - tests/*.py
     - tests/results/*.npy
     - tests/results/*.txt
     - tests/results/*.xyz
   commands:
-    - nosetests tests
+    - pytest tests/*.py
 
 about:
   home: https://github.com/ifilot/pyqint
