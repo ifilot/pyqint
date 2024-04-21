@@ -37,7 +37,7 @@ test:
     - tests/results/*.txt
     - tests/results/*.xyz
   commands:
-    - pytest tests/*.py
+    - pytest
 
 about:
   home: https://github.com/ifilot/pyqint
