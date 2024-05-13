@@ -1,6 +1,5 @@
 from pyqint import MoleculeBuilder, GeometryOptimization, AboBuilder, FosterBoys
 import numpy as np
-import matplotlib.pyplot as plt
 
 #
 # Plot the isosurfaces for the CO molecule
