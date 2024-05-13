@@ -72,7 +72,9 @@ class FosterBoys:
             'nriter': nriter,
             'mol': self.mol,
             'r2start': self.__calculate_r2(self.orbc_canonical),
-            'r2final': self.__calculate_r2(orbc)
+            'r2final': self.__calculate_r2(orbc),
+            'nelec': self.nelec,
+            'cgfs': self.cgfs,
         }
 
         return result
