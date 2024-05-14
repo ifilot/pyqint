@@ -23,6 +23,9 @@ class Molecule:
             res += " %s (%f,%f,%f)\n" % (atom[0], atom[1][0], atom[1][1], atom[1][2])
 
         return res
+    
+    def __len__(self):
+        return len(self.__atoms)
 
     def get_nelec(self):
         """
