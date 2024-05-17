@@ -80,7 +80,7 @@ class AboBuilder:
             # write frame_idx
             f.write((i+1).to_bytes(2, byteorder='little'))
 
-            descriptor = "MO %02i (E = %.1f Ht)" % (i+1, self.orbe_canonical[i])
+            descriptor = "MO %02i (E = %.5f Ht)" % (i+1, self.orbe_canonical[i])
 
             f.write(len(descriptor).to_bytes(2, byteorder='little'))
             f.write(bytearray(descriptor, encoding='utf8'))
