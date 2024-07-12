@@ -51,10 +51,12 @@ class cgf:
 
     def add_spherical_gto(self, c, alpha, l, m):
         """
-        Add Spherical Gaussian Type Orbital to Contracted Gaussian Function
+        Add Spherical Gaussian Type Orbital to Contracted Gaussian Function.
+        l and m are the coefficients of the requested spherical harmonic function. 
+        l must be <= 6 and -l <= m <= l.
         """
         for gto in sh.spherical_harmonics[l][m]:
-            self.add_gto(gto[0], alpha, gto[1][0], gto[1][1], gto[1][2])
+            self.add_gto(gto[0] * c, alpha, gto[1][0], gto[1][1], gto[1][2])
 
     def get_amp_f(self, x, y, z):
         """
