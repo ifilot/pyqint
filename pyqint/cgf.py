@@ -55,6 +55,8 @@ class cgf:
         l and m are the coefficients of the requested spherical harmonic function. 
         l must be <= 6 and -l <= m <= l.
         """
+        if not l <= 6 or not abs(m) <=l:
+            raise ValueError("l must be <= 6 and -l <= m <= l")
         for gto in sh.spherical_harmonics[l][m]:
             self.add_gto(gto[0] * c, alpha, gto[1][0], gto[1][1], gto[1][2])
 
