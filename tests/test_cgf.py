@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, Molecule
+from pyqint import PyQInt, Molecule, cgf
 from copy import deepcopy
 import numpy as np
 import os
@@ -66,6 +66,25 @@ class TestCGF(unittest.TestCase):
 
         ans = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_orb_1b2.npy'))
         np.testing.assert_almost_equal(res, ans, 6)
+
+    def testSphericalHarmonicsOnSite(self):
+        """
+        Check if the overlap matrix of all spherical harmonics up to l=6 is the identity matrix
+        """
+        basis_functions = []
+        p0 = [0.0, 0.0, 0.0]
+        for l in range(7):
+            for m in range(-l, l+1):
+                orb = cgf(p0)
+                orb.add_spherical_gto(1.0, 1.0, l, m)
+                basis_functions.append(orb)
+        # build overlap matrix
+        om = np.zeros((len(basis_functions), len(basis_functions)))
+        integrator = PyQInt()
+        for i,orb1 in enumerate(basis_functions):
+            for j,orb2 in enumerate(basis_functions):
+                om[i,j] = integrator.overlap(orb1, orb2)
+        np.testing.assert_almost_equal(om, np.eye(om.shape[0]), 6)
 
 if __name__ == '__main__':
     unittest.main()
