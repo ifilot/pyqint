@@ -15,11 +15,11 @@ be quite computationally intensive, the evaluation is programmed in C++ and
 connected to Python using Cython.
 
 PyQInt mainly serves as an educational package to teach students how to perform
-(simple) electronic structure calculations wherein the most difficult task,
-i.e. the integral evaluation, is already encapsulated in a handy set of
-routines. With PyQInt, the student can for example build their own Hartree-Fock
-routine. Some common electronic structure routine, most notably the
-Hartree-Fock algorithm, is also readily available.
+(simple) electronic structure calculations wherein the most difficult task, i.e.
+the integral evaluation, is already encapsulated in a handy set of routines.
+With PyQInt, the student can for example build their own Hartree-Fock routine.
+Some common electronic structure routine, most notably the Hartree-Fock
+algorithm, is also readily available.
 
 > **Note**
 > Although PyQInt connects to a C++ backend, it is certainly not optimized for
@@ -52,13 +52,14 @@ PyQInt offers additional features such as
 * Performing [restricted Hartree-Fock](https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method)
   calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS)
 * Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/) coefficients
-* Construction of localized orbitals using the [Boys-Foster method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
+* Construction of localized orbitals using the [Boys-Foster
+  method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
 * Visualization of molecular orbitals
 
 All routines are (automatically) tested and verified against several open-source
-as well as commercial programs that use cartesian Gaussian orbitals. Nevertheless,
-if you spot any mistake, please kindly open an [issue](https://github.com/ifilot/pyqint/issues)
-in this Github repository.
+as well as commercial programs that use cartesian Gaussian orbitals.
+Nevertheless, if you spot any mistake, please kindly open an
+[issue](https://github.com/ifilot/pyqint/issues) in this Github repository.
 
 In the image below, the (canonical) molecular orbitals as found using a restricted
 Hartree-Fock calculation for the CO molecule are shown.
