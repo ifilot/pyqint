@@ -1,4 +1,4 @@
-name: Build PyPI packages
+name: PyPI pkg
 
 on:
   workflow_dispatch:

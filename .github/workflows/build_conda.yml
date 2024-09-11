@@ -1,4 +1,4 @@
-name: Build Conda packages
+name: Conda pkg
 
 on:
   workflow_dispatch:
