@@ -1,6 +1,7 @@
 import unittest
 from pyqint import cgf
 import numpy as np
+import itertools
 
 class TestGrad(unittest.TestCase):
     """
@@ -14,7 +15,8 @@ class TestGrad(unittest.TestCase):
         """
         h = 1e-4 # set step size for finite difference
 
-        pp = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [0,1,1], [1,0,1], [1,1,1]]
+        pp = list(itertools.product(range(4), repeat=3))
+
         for exp in pp:
             for p in pp:
                 l,m,n = exp
@@ -32,7 +34,7 @@ class TestGrad(unittest.TestCase):
         """
         h = 1e-4 # set step size for finite difference
 
-        pp = [[0,0,0], [1,0,0], [0,1,0], [0,0,1], [1,1,0], [0,1,1], [1,0,1], [1,1,1]]
+        pp = list(itertools.product(range(4), repeat=3))
         for exp in pp:
             for p in pp:
                 l,m,n = exp

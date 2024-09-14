@@ -11,7 +11,7 @@ pipx run cibuildwheel --only cp310-manylinux_x86_64
 To install the `whl` file
 
 ```bash
-pip3 install wheelhouse/pyqint-0.17.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+pip3 install wheelhouse/pyqint-0.17.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 ```
 
 and to locally test
