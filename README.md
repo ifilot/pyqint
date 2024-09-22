@@ -21,10 +21,19 @@ With PyQInt, the student can for example build their own Hartree-Fock routine.
 Some common electronic structure routine, most notably the Hartree-Fock
 algorithm, is also readily available.
 
-> **Note**
+> [!NOTE]
 > Although PyQInt connects to a C++ backend, it is certainly not optimized for
 > speed and might be (too) slow for anything outside of the calculation of the
 > electronic structure of simple molecules.
+
+> [!TIP]  
+> Interested in other **education** quantum chemical codes? Have a look at the packages below.
+> * [PyDFT](https://github.com/ifilot/pydft) is a pure-Python density functional
+>   theory code, built on top of PyQInt.
+> * [HFCXX](https://github.com/ifilot/hfcxx) is a full C++ code for performing
+>   Hartree-Fock calculations.
+> * [DFTCXX](https://github.com/ifilot/dftcxx) is a full C++ code for performing
+>   Density Functional Theory Calculations.
 
 ## Documentation
 
@@ -49,9 +58,11 @@ as well as the following geometric derivatives
 - [x] Two-electron repulsion integral
 
 PyQInt offers additional features such as
-* Performing [restricted Hartree-Fock](https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method)
+* Performing [restricted
+  Hartree-Fock](https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method)
   calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS)
-* Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/) coefficients
+* Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/)
+  coefficients
 * Construction of localized orbitals using the [Boys-Foster
   method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
 * Visualization of molecular orbitals

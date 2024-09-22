@@ -152,3 +152,4 @@ anaconda-upload/*
 
 # managlyph .abo files
 *.abo
+.vscode
