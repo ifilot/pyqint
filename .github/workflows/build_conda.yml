@@ -55,7 +55,7 @@ jobs:
           echo $PATH
           conda build . --no-include-recipe
       - name: Archive packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: anaconda-windows-packages
           path: C:\Miniconda\envs\test\conda-bld\win-64\pyqint-*.tar.bz2
@@ -79,7 +79,7 @@ jobs:
           python-version: 3.8
           auto-activate-base: false
       - name: Retrieve packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: anaconda-windows-packages
           path: packages
@@ -115,7 +115,7 @@ jobs:
           conda install conda-build
           conda build . --no-include-recipe
       - name: Archive packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: anaconda-linux-packages
           path: /usr/share/miniconda/conda-bld/linux-64/pyqint-*.tar.bz2
@@ -139,7 +139,7 @@ jobs:
           python-version: 3.8
           auto-activate-base: false
       - name: Retrieve packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: anaconda-linux-packages
           path: packages
