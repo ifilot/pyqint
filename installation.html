@@ -1,0 +1,174 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User Interface" href="user_interface.html" />
+    <link rel="prev" title="PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#windows-anaconda">Windows / Anaconda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-pypi">Linux / PyPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_interface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="index-0">
+<span id="installation"></span><span id="id1"></span><h1>Installation<a class="headerlink" href="#index-0" title="Link to this heading"></a></h1>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For Windows users with relatively little experience with Python, we warmly
+recommend to use the <a class="reference external" href="https://www.anaconda.com/products/distribution">Anaconda distribution</a>.
+Anaconda is an all-in-one package containing the Python compiler,
+an integrated desktop environment (Spyder) and plenty of useful Python
+packages such as numpy and matplotlib.</p>
+</div>
+<p><strong class="program">PyQInt</strong> is distributed via both Anaconda package as well as PyPI. For
+Windows, it is recommended to install <strong class="program">PyQInt</strong> via Anaconda, while
+for Linux, we recommend to use PyPI.</p>
+<section id="windows-anaconda">
+<h2>Windows / Anaconda<a class="headerlink" href="#windows-anaconda" title="Link to this heading"></a></h2>
+<p>To install <strong class="program">PyQInt</strong> under Windows, open an Anaconda Prompt window
+and run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sometimes Anaconda is unable to resolve the package dependencies. This can
+be caused by a broken environment. An easy solution is to create a new
+environment. See the “Troubleshooting” section at the end of this page
+for more information.</p>
+</div>
+</section>
+<section id="linux-pypi">
+<h2>Linux / PyPI<a class="headerlink" href="#linux-pypi" title="Link to this heading"></a></h2>
+<p>To install <strong class="program">PyQInt</strong> systemwide, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyqint</span>
+</pre></div>
+</div>
+<p>or to install <strong class="program">PyQInt</strong> only for the current user, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pyqint</span>
+</pre></div>
+</div>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<p>The Anaconda packaging system can sometimes be quite finicky and sometimes
+packages conflict with each other. A way to work around this issue is to create
+a separate environment and only use that environment for the electronic
+resources associated with this project.</p>
+<p>To create the new environment (called eoesc-env), run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
+</pre></div>
+</div>
+<p>Next, open the environment with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+<p>and install the required packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span> <span class="n">pytessel</span>
+</pre></div>
+</div>
+<p>Finally, you can install the IDE Spyder using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">spyder</span> <span class="n">matplotlib</span> <span class="n">scipy</span> <span class="n">pandas</span> <span class="n">openpyxl</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user_interface.html" class="btn btn-neutral float-right" title="User Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

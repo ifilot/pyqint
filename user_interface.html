@@ -1,0 +1,1648 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Interface &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Community guidelines" href="community_guidelines.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basis-functions">Basis functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gaussian-type-orbitals-gto">Gaussian type orbitals (GTO)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#contracted-gaussian-functions-cgf">Contracted Gaussian Functions (CGF)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integral-evaluation">Integral evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overlap-integrals">Overlap integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#kinetic-integrals">Kinetic integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nuclear-attraction-integrals">Nuclear attraction integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#two-electron-integrals">Two-electron integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dipole-moment-integrals">Dipole-moment integrals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#basis-sets-and-molecules">Basis sets and molecules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#building-molecules">Building molecules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-moleculebuilder-class">Using the MoleculeBuilder class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constructing-basis-functions-for-a-molecule">Constructing basis functions for a molecule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-evaluation-of-integrals">Parallel evaluation of integrals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#electronic-structure-calculations">Electronic structure calculations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hartree-fock">Hartree-Fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#result-dictionary">Result dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-basis-sets">Custom basis sets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#orbital-visualization">Orbital visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#contour-plots">Contour plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constructing-isosurfaces">Constructing isosurfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#orbital-localization-foster-boys">Orbital localization: Foster-Boys</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background-of-fb">Background of FB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#procedure-of-fb">Procedure of FB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foster-boys-output-object">Foster-Boys output object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#geometry-optimization">Geometry optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#performing-a-geometry-optimization">Performing a geometry optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#result-dictionary-of-a-geometry-optimization">Result dictionary of a geometry optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#crystal-orbital-hamilton-population-analysis">Crystal Orbital Hamilton Population Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background-of-cohp">Background of COHP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#procedure-of-cohp">Procedure of COHP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cohp-analysis-of-the-foster-boys-localized-orbitals">COHP analysis of the Foster-Boys localized orbitals</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="index-0">
+<span id="user-interface"></span><span id="id1"></span><h1><a class="toc-backref" href="#id10" role="doc-backlink">User Interface</a><a class="headerlink" href="#index-0" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#index-0" id="id10">User Interface</a></p>
+<ul>
+<li><p><a class="reference internal" href="#basis-functions" id="id11">Basis functions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#gaussian-type-orbitals-gto" id="id12">Gaussian type orbitals (GTO)</a></p></li>
+<li><p><a class="reference internal" href="#contracted-gaussian-functions-cgf" id="id13">Contracted Gaussian Functions (CGF)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#integral-evaluation" id="id14">Integral evaluation</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overlap-integrals" id="id15">Overlap integrals</a></p></li>
+<li><p><a class="reference internal" href="#kinetic-integrals" id="id16">Kinetic integrals</a></p></li>
+<li><p><a class="reference internal" href="#nuclear-attraction-integrals" id="id17">Nuclear attraction integrals</a></p></li>
+<li><p><a class="reference internal" href="#two-electron-integrals" id="id18">Two-electron integrals</a></p></li>
+<li><p><a class="reference internal" href="#dipole-moment-integrals" id="id19">Dipole-moment integrals</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#basis-sets-and-molecules" id="id20">Basis sets and molecules</a></p>
+<ul>
+<li><p><a class="reference internal" href="#building-molecules" id="id21">Building molecules</a></p></li>
+<li><p><a class="reference internal" href="#using-the-moleculebuilder-class" id="id22">Using the MoleculeBuilder class</a></p></li>
+<li><p><a class="reference internal" href="#constructing-basis-functions-for-a-molecule" id="id23">Constructing basis functions for a molecule</a></p></li>
+<li><p><a class="reference internal" href="#parallel-evaluation-of-integrals" id="id24">Parallel evaluation of integrals</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#electronic-structure-calculations" id="id25">Electronic structure calculations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#hartree-fock" id="id26">Hartree-Fock</a></p></li>
+<li><p><a class="reference internal" href="#result-dictionary" id="id27">Result dictionary</a></p></li>
+<li><p><a class="reference internal" href="#custom-basis-sets" id="id28">Custom basis sets</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#orbital-visualization" id="id29">Orbital visualization</a></p>
+<ul>
+<li><p><a class="reference internal" href="#contour-plots" id="id30">Contour plots</a></p></li>
+<li><p><a class="reference internal" href="#constructing-isosurfaces" id="id31">Constructing isosurfaces</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#orbital-localization-foster-boys" id="id32">Orbital localization: Foster-Boys</a></p>
+<ul>
+<li><p><a class="reference internal" href="#background-of-fb" id="id33">Background of FB</a></p></li>
+<li><p><a class="reference internal" href="#procedure-of-fb" id="id34">Procedure of FB</a></p></li>
+<li><p><a class="reference internal" href="#foster-boys-output-object" id="id35">Foster-Boys output object</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#geometry-optimization" id="id36">Geometry optimization</a></p>
+<ul>
+<li><p><a class="reference internal" href="#performing-a-geometry-optimization" id="id37">Performing a geometry optimization</a></p></li>
+<li><p><a class="reference internal" href="#result-dictionary-of-a-geometry-optimization" id="id38">Result dictionary of a geometry optimization</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#crystal-orbital-hamilton-population-analysis" id="id39">Crystal Orbital Hamilton Population Analysis</a></p>
+<ul>
+<li><p><a class="reference internal" href="#background-of-cohp" id="id40">Background of COHP</a></p></li>
+<li><p><a class="reference internal" href="#procedure-of-cohp" id="id41">Procedure of COHP</a></p></li>
+<li><p><a class="reference internal" href="#cohp-analysis-of-the-foster-boys-localized-orbitals" id="id42">COHP analysis of the Foster-Boys localized orbitals</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="basis-functions">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Basis functions</a><a class="headerlink" href="#basis-functions" title="Link to this heading"></a></h2>
+<section id="gaussian-type-orbitals-gto">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Gaussian type orbitals (GTO)</a><a class="headerlink" href="#gaussian-type-orbitals-gto" title="Link to this heading"></a></h3>
+<p><strong class="program">PyQInt</strong> uses cartesian Gaussian type orbitals as given by</p>
+<div class="math notranslate nohighlight">
+\[\Phi(\alpha,l,m,n,\vec{R}) = N (x - X)^{l} (y - Y)^{m} (z - Z)^{n} \exp \left(- \alpha |\vec{r} - \vec{R}|^{2} \right)\]</div>
+<p>wherein <span class="math notranslate nohighlight">\(\alpha\)</span> is the exponent, <span class="math notranslate nohighlight">\(\vec{R} = \left(X,Y,Z\right)\)</span> the
+position of the orbital, <span class="math notranslate nohighlight">\((l,m,n)\)</span> the orders of the pre-exponential
+polynomial, and <span class="math notranslate nohighlight">\(N\)</span> a normalization constant such that</p>
+<div class="math notranslate nohighlight">
+\[\left&lt; \Phi | \Phi \right&gt; = 1\]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The normalization constant is automatically calculated by <cite>PyQInt</cite> based
+on the value of <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\((l,m,n)\)</span> and does not have
+to be supplied by the user.</p>
+</div>
+<p>GTOs are a fundamental building block of CGF (see below) and typically a user would
+not directly work with them. Nevertheless, GTO objects can be constructed as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+
+<span class="n">coeff</span> <span class="o">=</span> <span class="mf">1.0</span>    <span class="c1"># coefficients only have meaning for GTOs within a CGF</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">gto</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you work with individual GTOs, the first parameter to construct the GTO
+should have a value of 1.0. This first parameter corresponds to the linear
+expansion coefficient used in the formulation of Contracted Gaussian Functions
+(see below).</p>
+</div>
+</section>
+<section id="contracted-gaussian-functions-cgf">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Contracted Gaussian Functions (CGF)</a><a class="headerlink" href="#contracted-gaussian-functions-cgf" title="Link to this heading"></a></h3>
+<p>Several GTOs can be combined to produce a so-called Contracted Gaussian Functional which
+is esentially a linear combination of GTOs as given by</p>
+<div class="math notranslate nohighlight">
+\[\phi = \sum_{i} c_{i} \Phi_{i}(\alpha,l,m,n,\vec{R})\]</div>
+<p>To build a CGF, we first have to produce the CGF object and then
+add GTOs to it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span>
+
+<span class="n">cgf</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The first argument of the <code class="code docutils literal notranslate"><span class="pre">add_gto</span></code> function is the linear expansion coefficient
+<span class="math notranslate nohighlight">\(c_{i}\)</span> and the second argument is <span class="math notranslate nohighlight">\(\alpha\)</span>.</p>
+</div>
+</section>
+</section>
+<section id="integral-evaluation">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink">Integral evaluation</a><a class="headerlink" href="#integral-evaluation" title="Link to this heading"></a></h2>
+<p>Electronic structure calculations require the construction of molecular
+integrals. Here, an overview is given of the integrals involved and how these
+can be evaluated using <strong class="program">PyQInt</strong>.</p>
+<section id="overlap-integrals">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Overlap integrals</a><a class="headerlink" href="#overlap-integrals" title="Link to this heading"></a></h3>
+<p>Overlap integrals effectively probe the overlap between two CGFs and are given by</p>
+<div class="math notranslate nohighlight">
+\[S_{ij} = \left&lt; \phi_{i} | \phi_{j} \right&gt;\]</div>
+<p>CGFs should be normalized and as such, their self-overlap should be equal to
+1. In the code snippet below, the overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is
+calculated for a basis set composed of the two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which
+are separated by a distance of 1.4 Bohr.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build CGF for a H atom located at the origin</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># create a copy of the CGF located 1.4 a.u. separated from CGF1</span>
+<span class="n">cgf2</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">cgf1</span><span class="p">)</span>
+<span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.4</span>
+
+<span class="c1"># construct empty matrix</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">overlap</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">)</span>
+<span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">overlap</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">overlap</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+
+<span class="c1"># output result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result of this script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="mf">1.00000011</span> <span class="mf">0.6593185</span> <span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.6593185</span>  <span class="mf">1.00000011</span><span class="p">]]</span>
+</pre></div>
+</div>
+</section>
+<section id="kinetic-integrals">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">Kinetic integrals</a><a class="headerlink" href="#kinetic-integrals" title="Link to this heading"></a></h3>
+<p>Kinetic integrals determine the kinetic energy of a given orbital and are given
+by</p>
+<div class="math notranslate nohighlight">
+\[T_{ij} = \left&lt; \phi_{i} \left| -\frac{1}{2} \nabla^{2} \right| \phi_{j} \right&gt;\]</div>
+<p>In the code snippet below, the kinetic energy matrix <span class="math notranslate nohighlight">\(\mathbf{T}\)</span> is
+calculated for a basis set composed of the two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which
+are separated by a distance of 1.4 Bohr.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build CGF for a H atom located at the origin</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># create a copy of the CGF located 1.4 a.u. separated from CGF1</span>
+<span class="n">cgf2</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">cgf1</span><span class="p">)</span>
+<span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.4</span>
+
+<span class="c1"># construct empty matrix</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">kinetic</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">)</span>
+<span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">kinetic</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">kinetic</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+
+<span class="c1"># output result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="mf">0.76003161</span> <span class="mf">0.23645446</span><span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.23645446</span> <span class="mf">0.76003161</span><span class="p">]]</span>
+</pre></div>
+</div>
+</section>
+<section id="nuclear-attraction-integrals">
+<h3><a class="toc-backref" href="#id17" role="doc-backlink">Nuclear attraction integrals</a><a class="headerlink" href="#nuclear-attraction-integrals" title="Link to this heading"></a></h3>
+<p>Nuclear attraction integrals determine the attraction between a given nucleus
+and the atomic orbital and are given by</p>
+<div class="math notranslate nohighlight">
+\[V_{ij} = \left&lt; \phi_{i} \left| -\frac{Z_{c}}{r_{i,c}} \right| \phi_{j} \right&gt;\]</div>
+<p>In the code snippet below, the nuclear attraction energy matrices <span class="math notranslate nohighlight">\(\mathbf{V}_{1}\)</span>
+and <span class="math notranslate nohighlight">\(\mathbf{V}_{2}\)</span> are calculated for a basis set composed of the
+two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which are separated by a distance of 1.4 Bohr.
+Due to the symmetry of the system, the nuclear attraction matrices for each of
+the nuclei are the same.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build CGF for a H atom located at the origin</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># create a copy of the CGF located 1.4 a.u. separated from CGF1</span>
+<span class="n">cgf2</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">cgf1</span><span class="p">)</span>
+<span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.4</span>
+
+<span class="c1"># Build nuclear attraction integrals</span>
+<span class="n">V1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">V1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">V1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">V1</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf1</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">V1</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf1</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">V2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">V2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">V2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">V2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">V2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># print result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">V1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">V2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="o">-</span><span class="mf">1.22661358</span> <span class="o">-</span><span class="mf">0.59741732</span><span class="p">]</span>
+ <span class="p">[</span><span class="o">-</span><span class="mf">0.59741732</span> <span class="o">-</span><span class="mf">0.6538271</span> <span class="p">]]</span>
+<span class="p">[[</span><span class="o">-</span><span class="mf">0.6538271</span>  <span class="o">-</span><span class="mf">0.59741732</span><span class="p">]</span>
+ <span class="p">[</span><span class="o">-</span><span class="mf">0.59741732</span> <span class="o">-</span><span class="mf">1.22661358</span><span class="p">]]</span>
+</pre></div>
+</div>
+</section>
+<section id="two-electron-integrals">
+<h3><a class="toc-backref" href="#id18" role="doc-backlink">Two-electron integrals</a><a class="headerlink" href="#two-electron-integrals" title="Link to this heading"></a></h3>
+<p>Two electron integrals capture electron-electron interactions, specifically
+electron-electron repulsion and electron exchange. They are defined as</p>
+<div class="math notranslate nohighlight">
+\[(i,j,k,l) = \left&lt; \phi_{i}(x_{1})\phi_{j}(x_{2}) \left| r_{12}^{-1} \right| \phi_{k}(x_{1})\phi_{l}(x_{2}) \right&gt;\]</div>
+<p>The two-electron integrals are the most expensive terms to calculate in any
+electronic structure calculation due to their <span class="math notranslate nohighlight">\(N^{4}\)</span> scaling where
+<span class="math notranslate nohighlight">\(N\)</span> is the number of basis functions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong class="program">PyQInt</strong> offers a <a class="reference external" href="#parallel-evaluation-of-integrals">separate routine</a>
+for the efficient evaluation of all the integrals including the two electron integrals.</p>
+</div>
+<p>Although there are essentially <span class="math notranslate nohighlight">\(N^{4}\)</span> different two-electron integrals,
+due to certain symmetries the number of unique two-electron integrals is smaller.
+In the script below, the six unique two-electron integrals for the H<sub>2</sub>
+system are calculated.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build CGF for a H atom located at the origin</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># create a copy of the CGF located 1.4 a.u. separated from CGF1</span>
+<span class="n">cgf2</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">cgf1</span><span class="p">)</span>
+<span class="n">cgf2</span><span class="o">.</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.4</span>
+
+<span class="n">T1111</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">)</span>
+<span class="n">T1122</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">T1112</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">T2121</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">)</span>
+<span class="n">T1222</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">T2211</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">T1111</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T1122</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T1112</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T2121</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T1222</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T2211</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.7746057639733748</span>
+<span class="mf">0.5696758530951017</span>
+<span class="mf">0.44410766568798127</span>
+<span class="mf">0.29702859983423036</span>
+<span class="mf">0.4441076656879813</span>
+<span class="mf">0.5696758530951017</span>
+</pre></div>
+</div>
+</section>
+<section id="dipole-moment-integrals">
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">Dipole-moment integrals</a><a class="headerlink" href="#dipole-moment-integrals" title="Link to this heading"></a></h3>
+<p>Dipole-moment integrals are defined as</p>
+<div class="math notranslate nohighlight">
+\[\mu_{x,i,j} = \left&lt; \phi_{i}(x_{1}) \left| x \right| \phi_{j}(x_{1}) \right&gt;\]</div>
+<div class="math notranslate nohighlight">
+\[\mu_{y,i,j} = \left&lt; \phi_{i}(x_{1}) \left| y \right| \phi_{j}(x_{1}) \right&gt;\]</div>
+<div class="math notranslate nohighlight">
+\[\mu_{z,i,j} = \left&lt; \phi_{i}(x_{1}) \left| z \right| \phi_{j}(x_{1}) \right&gt;\]</div>
+<p>and are evaluated with respect to the coordinate center of the system. Dipole moments
+are vector quantities, but in this implementation the dipoles are evaluated
+in the <span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span>, <span class="math notranslate nohighlight">\(z\)</span> separately.</p>
+<p>In the script below, the dipole integrals are evaluated for the H<sub>2</sub>O
+molecule using a <code class="code docutils literal notranslate"><span class="pre">sto3g</span></code> basis set and in each cartesian direction. The result
+is collected in a three-dimensional array.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build water molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;H2O&quot;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span>  <span class="mf">0.00000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.07579</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span>  <span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span> <span class="c1"># loop over directions</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">dipole</span><span class="p">(</span><span class="n">cgfs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cgfs</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">k</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">1.43222417e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">3.39013356e-02</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">5.07919476e-02</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">5.07919476e-02</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">5.07919476e-02</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">2.22964944e-03</span> <span class="o">-</span><span class="mf">3.75854187e-03</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">2.22964944e-03</span> <span class="o">-</span><span class="mf">3.75854187e-03</span>  <span class="mf">0.00000000e+00</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">1.43222278e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">6.41172506e-01</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">6.41172506e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">6.41172506e-01</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">2.62741706e-01</span>  <span class="mf">1.49973767e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">2.62741706e-01</span>  <span class="mf">1.49973767e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">1.43222278e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">9.08620418e-18</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">4.37629746e-01</span>  <span class="mf">1.08953250e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">4.37629746e-01</span> <span class="o">-</span><span class="mf">1.08953250e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">1.43222278e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">9.08620418e-18</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">1.47399486e-01</span>  <span class="mf">3.34092154e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">1.47399486e-01</span>  <span class="mf">3.34092154e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span> <span class="o">-</span><span class="mf">1.43222278e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">2.48968067e-01</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">2.48968067e-01</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">1.63803356e+00</span>  <span class="mf">1.13655692e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">1.38777878e-17</span>  <span class="mf">2.06582174e-01</span>  <span class="mf">0.00000000e+00</span><span class="p">]]</span>
+
+ <span class="p">[[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span> <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]</span>
+  <span class="p">[</span><span class="o">-</span><span class="mf">1.63803356e+00</span>  <span class="mf">1.13655692e+00</span>  <span class="mf">0.00000000e+00</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Each row in the above output corresponds to the dipole moment <strong>vector</strong>.
+There are in total 7 blocks to be observed and each block contains 7
+rows. Each block corresponds to a different basis function in the <em>bra</em>
+and each row inside a block loops over the different basis functions in the
+<em>ket</em>.</p>
+</div>
+</section>
+</section>
+<section id="basis-sets-and-molecules">
+<h2><a class="toc-backref" href="#id20" role="doc-backlink">Basis sets and molecules</a><a class="headerlink" href="#basis-sets-and-molecules" title="Link to this heading"></a></h2>
+<section id="building-molecules">
+<h3><a class="toc-backref" href="#id21" role="doc-backlink">Building molecules</a><a class="headerlink" href="#building-molecules" title="Link to this heading"></a></h3>
+<p>Molecules can be efficiently built from the <code class="code docutils literal notranslate"><span class="pre">Molecule</span></code> class. For example,
+to build the H<sub>2</sub> molecule, one can run the script below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Molecule</span><span class="p">:</span> <span class="n">H2</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="using-the-moleculebuilder-class">
+<h3><a class="toc-backref" href="#id22" role="doc-backlink">Using the MoleculeBuilder class</a><a class="headerlink" href="#using-the-moleculebuilder-class" title="Link to this heading"></a></h3>
+<p>Next to constructing molecules from scratch, one can also use the
+<code class="code docutils literal notranslate"><span class="pre">MoleculeBuilder</span></code> class which contains a number of pre-generated molecules.</p>
+<p>The following molecules are available:</p>
+<ul class="simple">
+<li><p>benzene</p></li>
+<li><p>bf3</p></li>
+<li><p>ch4</p></li>
+<li><p>co</p></li>
+<li><p>co2</p></li>
+<li><p>ethylene</p></li>
+<li><p>h2</p></li>
+<li><p>h2o</p></li>
+<li><p>he</p></li>
+<li><p>lih</p></li>
+<li><p>nh3</p></li>
+</ul>
+<p>To load any of these molecules, one uses the <code class="code docutils literal notranslate"><span class="pre">from_name</span></code> function
+as shown in the script below</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span>
+
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;CH4&#39;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script shows the elements and the atom positions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Molecule</span><span class="p">:</span> <span class="n">CH4</span>
+ <span class="n">C</span> <span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">1.195756</span><span class="p">,</span><span class="mf">1.195756</span><span class="p">,</span><span class="mf">1.195756</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">,</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">,</span><span class="mf">1.195756</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">,</span><span class="mf">1.195756</span><span class="p">,</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">1.195756</span><span class="p">,</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">,</span><span class="o">-</span><span class="mf">1.195756</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Naming a molecule is completely optional and has no further implications
+on any of the calculations. To name a molecule, populate the <code class="code docutils literal notranslate"><span class="pre">name</span></code>
+member of the <code class="code docutils literal notranslate"><span class="pre">Molecule</span></code> class.</p>
+</div>
+<p>Alternatively, one can load molecules from a <code class="code docutils literal notranslate"><span class="pre">.xyz</span></code> file via the
+<code class="code docutils literal notranslate"><span class="pre">from_file</span></code> routine.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;ch4.xyz&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is assumed that the positions inside the <cite>.xyz</cite> file are stored in
+<strong>angstroms</strong>. Internally, <strong class="program">PyQInt</strong> uses Bohr distances and the
+distances as reported in the <code class="code docutils literal notranslate"><span class="pre">.xyz</span></code> file are automatically converted.</p>
+</div>
+</section>
+<section id="constructing-basis-functions-for-a-molecule">
+<h3><a class="toc-backref" href="#id23" role="doc-backlink">Constructing basis functions for a molecule</a><a class="headerlink" href="#constructing-basis-functions-for-a-molecule" title="Link to this heading"></a></h3>
+<p>To construct the basis functions for a given molecule, one first needs to
+construct the molecule after which the <code class="code docutils literal notranslate"><span class="pre">build_basis</span></code> function can be used
+to construct a basis.</p>
+<p>The following basis sets are supported. For each basis set, the range of atoms
+that are supported are given:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">sto3g</span></code> (H-I)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">sto6g</span></code> (H-Kr)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">p321</span></code> (H-Cs)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">p631</span></code> (H-Zn)</p></li>
+</ul>
+<p>The example code below builds the basis functions for the H<sub>2</sub> molecule:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">cgf</span> <span class="ow">in</span> <span class="n">cgfs</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">nucleus</span> <span class="ow">in</span> <span class="n">nuclei</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nucleus</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">&lt;</span><span class="n">pyqint</span><span class="o">.</span><span class="n">cgf</span><span class="o">.</span><span class="n">cgf</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x000001BDEDB37430</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">pyqint</span><span class="o">.</span><span class="n">cgf</span><span class="o">.</span><span class="n">cgf</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x000001BDEDB37F10</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">pyqint</span><span class="o">.</span><span class="n">cgf</span><span class="o">.</span><span class="n">cgf</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x000001BDEDB37430</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">pyqint</span><span class="o">.</span><span class="n">cgf</span><span class="o">.</span><span class="n">cgf</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x000001BDEDB37F10</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="p">[</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span> <span class="p">,</span> <span class="mf">0.</span> <span class="p">,</span> <span class="mf">1.4</span><span class="p">]),</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="parallel-evaluation-of-integrals">
+<h3><a class="toc-backref" href="#id24" role="doc-backlink">Parallel evaluation of integrals</a><a class="headerlink" href="#parallel-evaluation-of-integrals" title="Link to this heading"></a></h3>
+<p>From a collection of Contracted Gaussian Functions, the complete set of overlap,
+kinetic, nuclear attraction and two-electron integrals can be quickly evaluated
+using the <cite>build_integrals_openmp</cite> function. The function will automatically determine
+the number of available cores to allocate for this process.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="c1"># evaluate all integrals</span>
+<span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">teint</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_integrals_openmp</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">teint</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="mf">1.00000011</span> <span class="mf">0.6593185</span> <span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.6593185</span>  <span class="mf">1.00000011</span><span class="p">]]</span>
+<span class="p">[[</span><span class="mf">0.76003161</span> <span class="mf">0.23645446</span><span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.23645446</span> <span class="mf">0.76003161</span><span class="p">]]</span>
+<span class="p">[[</span><span class="o">-</span><span class="mf">1.88044067</span> <span class="o">-</span><span class="mf">1.19483464</span><span class="p">]</span>
+ <span class="p">[</span><span class="o">-</span><span class="mf">1.19483464</span> <span class="o">-</span><span class="mf">1.88044067</span><span class="p">]]</span>
+<span class="p">[</span><span class="mf">0.7746057639733748</span><span class="p">,</span> <span class="mf">0.4441076656879813</span><span class="p">,</span> <span class="mf">0.29702859983423036</span><span class="p">,</span> <span class="mf">0.5696758530951017</span><span class="p">,</span> <span class="mf">0.44410766568798105</span><span class="p">,</span> <span class="mf">0.7746057639733748</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="electronic-structure-calculations">
+<h2><a class="toc-backref" href="#id25" role="doc-backlink">Electronic structure calculations</a><a class="headerlink" href="#electronic-structure-calculations" title="Link to this heading"></a></h2>
+<section id="hartree-fock">
+<h3><a class="toc-backref" href="#id26" role="doc-backlink">Hartree-Fock</a><a class="headerlink" href="#hartree-fock" title="Link to this heading"></a></h3>
+<p>The Hartree-Fock procedure is readily available as a separate class in the
+<strong class="program">PyQInt</strong> package. It gives rich output allowing the user to investigate
+the Hartree-Fock coefficient optimization procedure in detail.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># calculate sto3g coefficients for h2o</span>
+    <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">()</span>
+
+    <span class="c1"># visualize orbitals</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">dens</span> <span class="o">=</span> <span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="n">i</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dens</span><span class="p">)),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dens</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;bilinear&#39;</span><span class="p">,</span>
+              <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;PiYG&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Distance a.u.&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Distance a.u.&#39;</span><span class="p">)</span>
+            <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;5%&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">():</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">):</span>
+    <span class="c1"># build integrator</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+    <span class="c1"># build grid</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">yy</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">zz</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id2">
+<img alt="_images/co.jpg" src="_images/co.jpg" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using contour plots.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="result-dictionary">
+<h3><a class="toc-backref" href="#id27" role="doc-backlink">Result dictionary</a><a class="headerlink" href="#result-dictionary" title="Link to this heading"></a></h3>
+<p>The result of a Hartree-Fock calculation is captured inside a dictionary
+object. This dictionary objects contains the following keys</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Description of the data contained in the result library</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+<td><p>Final energy of the electronic structure calculation</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclei</span></code></p></td>
+<td><p>List of elements and their position in Bohr units</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">cgfs</span></code></p></td>
+<td><p>List of contracted Gaussian functional objects</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">energies</span></code></p></td>
+<td><p>List of energies during the self-convergence procedure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe</span></code></p></td>
+<td><p>Orbital energies (converged) (array of N element)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc</span></code></p></td>
+<td><p>Orbital coefficients (converted) (matrix of N x N elements)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density</span></code></p></td>
+<td><p>Density matrix <span class="math notranslate nohighlight">\(\mathbf{P}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">fock</span></code></p></td>
+<td><p>Fock matrix <span class="math notranslate nohighlight">\(\mathbf{F}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">transform</span></code></p></td>
+<td><p>Unitary transformation matrix <span class="math notranslate nohighlight">\(\mathbf{X}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">overlap</span></code></p></td>
+<td><p>Overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">kinetic</span></code></p></td>
+<td><p>Kinetic energy matrix <span class="math notranslate nohighlight">\(\mathbf{T}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclear</span></code></p></td>
+<td><p>Nuclear attraction matrix <span class="math notranslate nohighlight">\(\mathbf{V}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">hcore</span></code></p></td>
+<td><p>Core Hamiltonian matrix <span class="math notranslate nohighlight">\(\mathbf{H_\textrm{core}}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">tetensor</span></code></p></td>
+<td><p>Two-electron tensor object <span class="math notranslate nohighlight">\((i,j,k,l)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">time_stats</span></code></p></td>
+<td><p>Time statistics object</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ecore</span></code></p></td>
+<td><p>Sum of kinetic and nuclear attraction energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">ekin</span></code></p></td>
+<td><p>Total kinetic energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">enuc</span></code></p></td>
+<td><p>Total nuclear attraction energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">erep</span></code></p></td>
+<td><p>Total electron-electron repulsion energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ex</span></code></p></td>
+<td><p>Total exchange energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">enucrep</span></code></p></td>
+<td><p>Electrostatic repulsion energy of the nuclei</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nelec</span></code></p></td>
+<td><p>Total number of electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">forces</span></code></p></td>
+<td><p>Forces on the atoms (if calculated, else <code class="code docutils literal notranslate"><span class="pre">None</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>To provide an example how one can use the above data, let us consider the
+situation wherein the user wants to decompose the individual components of the
+total energy as given by</p>
+<div class="math notranslate nohighlight">
+\[E_{\textrm{total}} = E_{\textrm{kin}} + E_{\textrm{nuc}} + E_{\textrm{e-e}} + E_{\textrm{ex}} + E_{\textrm{nuc,rep}}\]</div>
+<p>Via the script below, one can easily verify that the above equation holds and
+that the total energy is indeed the sum of the kinetic, nuclear attraction,
+electron-electron repulsion, exchange and nuclear repulsion energies within a
+Hartree-Fock calculation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span><span class="n">HF</span>
+
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;CH4&#39;</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Kinetic energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Nuclear attraction energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Electron-electron repulsion: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exchange energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Repulsion between nuclei: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of the individual terms: &#39;</span><span class="p">,</span>
+      <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The output of the above script yields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kinetic</span> <span class="n">energy</span><span class="p">:</span>  <span class="mf">39.42613774982387</span>
+<span class="n">Nuclear</span> <span class="n">attraction</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">118.63789179775034</span>
+<span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">32.7324270326041</span>
+<span class="n">Exchange</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">6.609004673631048</span>
+<span class="n">Repulsion</span> <span class="n">between</span> <span class="n">nuclei</span><span class="p">:</span>  <span class="mf">13.362026647057352</span>
+
+<span class="n">Total</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.72630504189621</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">the</span> <span class="n">individual</span> <span class="n">terms</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.726305041896055</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-basis-sets">
+<h3><a class="toc-backref" href="#id28" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h3>
+<p>Besides the basis sets offered by <strong class="program">PyQInt</strong>, one can also use a custom
+basis set defined by the user. The <code class="code docutils literal notranslate"><span class="pre">rhf</span></code> routine accepts either a basis set
+for its <code class="code docutils literal notranslate"><span class="pre">basis</span></code> argument, or alternatively a list of <code class="code docutils literal notranslate"><span class="pre">cgf</span></code> objects.
+In the example code shown below, the latter is done.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">get_nuclei</span><span class="p">()</span>
+
+<span class="n">cgfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nuclei</span><span class="p">:</span>
+    <span class="n">_cgf</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cgfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_cgf</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">cgfs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>A nice website to find a large collection of Gaussian Type basis set coefficients is
+<a class="reference external" href="https://www.basissetexchange.org/">https://www.basissetexchange.org/</a>.</p>
+</div>
+</section>
+</section>
+<section id="orbital-visualization">
+<h2><a class="toc-backref" href="#id29" role="doc-backlink">Orbital visualization</a><a class="headerlink" href="#orbital-visualization" title="Link to this heading"></a></h2>
+<p>Since orbitals are essentially three-dimensional scalar fields, there are two
+useful procedures to visualize them. The scalar field can either be projected
+onto a plane, creating so-called contour plots. Alternatively, a specific
+value (i.e. the isovalue) of the scalar field can be chosen and all points in
+space that have this value can be tied together creating a so-called isosurface.</p>
+<p>Contour plots can be easily created using <a class="reference external" href="https://matplotlib.org/">matplotlib</a>.
+For the creation of isosurfaces, we use <a class="reference external" href="https://pytessel.imc-tue.nl.">PyTessel</a>.</p>
+<section id="contour-plots">
+<h3><a class="toc-backref" href="#id30" role="doc-backlink">Contour plots</a><a class="headerlink" href="#contour-plots" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># coefficients (calculated by Hartree-Fock using a sto3g basis set)</span>
+<span class="n">coeff</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.37612e-17</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.73592e-16</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.713011</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.8627e-17</span><span class="p">,</span> <span class="mf">9.53496e-17</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.379323</span><span class="p">,</span>  <span class="mf">0.379323</span><span class="p">]</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build water molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2O&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="c1"># build grid</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">yy</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">zz</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+<span class="c1"># plot wave function</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;PiYG&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;1b$_</span><span class="si">{2}</span><span class="s1">$ Molecular orbital of H$_</span><span class="si">{2}</span><span class="s1">$O&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="constructing-isosurfaces">
+<h3><a class="toc-backref" href="#id31" role="doc-backlink">Constructing isosurfaces</a><a class="headerlink" href="#constructing-isosurfaces" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Isosurface generation requires the <strong class="program">PyTessel</strong> package to be
+installed. More information can be found <a class="reference external" href="https://pytessel.imc-tue.nl">here</a>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytessel</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyTessel</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># calculate sto3g coefficients for h2o</span>
+    <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">()</span>
+
+    <span class="c1"># build isosurface of the fifth MO</span>
+    <span class="c1"># isovalue = 0.1</span>
+    <span class="c1"># store result as .ply file</span>
+    <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">&#39;co_04.ply&#39;</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_isosurface</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">isovalue</span><span class="p">):</span>
+    <span class="c1"># generate some data</span>
+    <span class="n">sz</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_rectgrid3d</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span>
+    <span class="n">scalarfield</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">),</span> <span class="p">(</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">))</span>
+    <span class="n">unitcell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span><span class="p">)</span>
+
+    <span class="n">pytessel</span> <span class="o">=</span> <span class="n">PyTessel</span><span class="p">()</span>
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">():</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="orbital-localization-foster-boys">
+<h2><a class="toc-backref" href="#id32" role="doc-backlink">Orbital localization: Foster-Boys</a><a class="headerlink" href="#orbital-localization-foster-boys" title="Link to this heading"></a></h2>
+<section id="background-of-fb">
+<h3><a class="toc-backref" href="#id33" role="doc-backlink">Background of FB</a><a class="headerlink" href="#background-of-fb" title="Link to this heading"></a></h3>
+<p>The canonical orbitals of a Hartree-Fock calculation are defined such that these
+will diagonalize the Fock-matrix by which these molecular orbitals are eigenfunctions
+of the Fock-operator. Nevertheless, this set of solutions is not unique in the sense
+that multiple sets of molecular orbitals produce the same electron density and
+the same total electronic energy. One is allowed to perform an arbitrary
+unitary transformations on the set of <strong>occupied</strong> orbitals yielding a new
+set that is as good as a representation as the old set. Some of these representations
+are however more useful than others and one particular useful representation is
+the one that makes the orbitals as localized (compact and condensed) as possible.</p>
+<p>The degree of localization can be captured via relatively simple metric as given
+by</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{M} = \sum_{i \in \textrm{occ}} \left&lt;\psi_{i} | \vec{r} | \psi_{i} \right&gt;^{2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\psi_{i}\)</span> is a molecular orbital and <span class="math notranslate nohighlight">\(i\)</span> loops over the occupied
+molecular orbitals. One obtains (perhaps counter-intuitively) the most localized orbitals
+by <strong>maximizing</strong> the value of <code class="code docutils literal notranslate"><span class="pre">mathcal{M}</span></code>.</p>
+<p>The process of mixing the molecular orbitals among themselves to the aim of maximizing
+is <code class="code docutils literal notranslate"><span class="pre">mathcal{M}</span></code> is embedded in the <code class="code docutils literal notranslate"><span class="pre">FosterBoys</span></code> class.</p>
+</section>
+<section id="procedure-of-fb">
+<h3><a class="toc-backref" href="#id34" role="doc-backlink">Procedure of FB</a><a class="headerlink" href="#procedure-of-fb" title="Link to this heading"></a></h3>
+<p>The code below first performs a Hartree-Fock calculation on the CO molecule
+after which the localized molecular orbitals are calculated using the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys">Foster-Boys method</a>.
+The Foster-Boys localization procedure is present as a separate class in the
+<strong class="program">PyQInt</strong> package. It takes the output of a Hartree-Fock calculation
+as its input.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The code below uses the PyTessel package for constructing the isosurfaces.
+PyTessel is an external package for easy construction of isosurfaces from
+scalar fields. More information is given <a class="reference external" href="#constructing-isosurfaces">in the corresponding section</a>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">FosterBoys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyqint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytessel</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyTessel</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">(</span><span class="mf">1.145414</span><span class="p">)</span>
+    <span class="n">resfb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">])):</span>
+        <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">&#39;MO_</span><span class="si">%03i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span>
+                         <span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">][:,</span><span class="n">i</span><span class="p">],</span>
+                         <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Full function for evaluation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_isosurface</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">isovalue</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">npts</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="c1"># generate some data</span>
+    <span class="n">isovalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_rectgrid3d</span><span class="p">(</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
+    <span class="n">scalarfield</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">),</span> <span class="p">(</span><span class="n">npts</span><span class="p">,</span> <span class="n">npts</span><span class="p">,</span> <span class="n">npts</span><span class="p">))</span>
+    <span class="n">unitcell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sz</span><span class="p">)</span>
+
+    <span class="n">pytessel</span> <span class="o">=</span> <span class="n">PyTessel</span><span class="p">()</span>
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_pos.ply&#39;</span>
+    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="o">-</span><span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_neg.ply&#39;</span>
+    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id4">
+<img alt="_images/co_canonical_isosurfaces.jpg" src="_images/co_canonical_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id5">
+<img alt="_images/co_fosterboys_isosurfaces.jpg" src="_images/co_fosterboys_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Localized molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03. Note that the localization procedure has only been
+applied to the occupied molecular orbitals. Observe that the localized
+orbitals contain a triple-degenerate state corresponding to the triple
+bond and two lone pairs for C and O.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="foster-boys-output-object">
+<h3><a class="toc-backref" href="#id35" role="doc-backlink">Foster-Boys output object</a><a class="headerlink" href="#foster-boys-output-object" title="Link to this heading"></a></h3>
+<p>The output object of a Foster-Boys calculation is very similar to the one
+of a Hartree-Fock calculation. It is a dictionary that contains the following
+elements.</p>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">Description of the data contained in the result library</span><a class="headerlink" href="#id6" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe</span></code></p></td>
+<td><p>Orbital energies after the unitary transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc</span></code></p></td>
+<td><p>Orbital coefficient after the unitary transformation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">nriter</span></code></p></td>
+<td><p>Number of iterations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">r2start</span></code></p></td>
+<td><p>Initial sum of the squared dipole moment norm of the molecular orbitals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">r2final</span></code></p></td>
+<td><p>Final sum of the squared dipole moment norm of the molecular orbitals.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>One can directly connect the output of a Foster-Boys calculation to a
+COHP calculation. The details of the process are found in the
+<a class="reference external" href="#cohp-analysis-of-the-foster-boys-localized-orbitals">cohp analysis of Foster-Boys localized orbitals section</a>.</p>
+</div>
+</section>
+</section>
+<section id="geometry-optimization">
+<h2><a class="toc-backref" href="#id36" role="doc-backlink">Geometry optimization</a><a class="headerlink" href="#geometry-optimization" title="Link to this heading"></a></h2>
+<section id="performing-a-geometry-optimization">
+<h3><a class="toc-backref" href="#id37" role="doc-backlink">Performing a geometry optimization</a><a class="headerlink" href="#performing-a-geometry-optimization" title="Link to this heading"></a></h3>
+<p><strong class="program">PyQInt</strong> is able to perform a geometry optimization of a molecule. It
+should however be noted that this functionality is rather limited and essentially
+makes use of existing routines available in <a class="reference external" href="https://scipy.org/">Scipy</a>,
+specifically the <code class="code docutils literal notranslate"><span class="pre">scipy.optimize.minimize</span></code> routine using the
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.minimize-cg.html">conjugate gradient</a> method.</p>
+<p>To demonstrate the procedure, let us consider the CH<sub>4</sub> molecule in a
+non-converged geometry wherein the C-H bonds are longer than their optimal
+value and where the C molecule does not lie in the middle of the 4 hydrogen
+atoms.</p>
+<p>Geometry optimization is handled by the <code class="code docutils literal notranslate"><span class="pre">GeometryOptimization</span></code> class
+which takes a molecule and a basis set as input. The user can indicate whether
+they prefer verbose output or not. By default, geometry optimization is <em>silent</em>
+and does not yield any output.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryOptimization</span><span class="p">,</span> <span class="n">Molecule</span>
+
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">GeometryOptimization</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script (condensed) is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">================================================================================</span>
+<span class="n">START</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span>
+<span class="n">USING</span> <span class="n">CONJUGATE</span> <span class="n">GRADIENT</span> <span class="n">PROCEDURE</span>
+<span class="o">================================================================================</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">START</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">001</span>
+<span class="o">================================================================================</span>
+
+<span class="o">-------------</span>
+  <span class="n">POSITIONS</span>
+<span class="o">-------------</span>
+   <span class="n">C</span>   <span class="mf">0.18897260</span>   <span class="mf">0.00000000</span>   <span class="mf">0.18897260</span>
+   <span class="n">H</span>   <span class="mf">1.88972599</span>   <span class="mf">1.88972599</span>   <span class="mf">1.88972599</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.88972599</span>  <span class="o">-</span><span class="mf">1.88972599</span>   <span class="mf">1.88972599</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.88972599</span>   <span class="mf">1.88972599</span>  <span class="o">-</span><span class="mf">1.88972599</span>
+   <span class="n">H</span>   <span class="mf">1.88972599</span>  <span class="o">-</span><span class="mf">1.88972599</span>  <span class="o">-</span><span class="mf">1.88972599</span>
+
+<span class="o">------------</span>
+  <span class="n">ENERGIES</span>
+<span class="o">------------</span>
+  <span class="n">Kinetic</span><span class="p">:</span>                      <span class="mf">39.25312907</span>
+  <span class="n">Nuclear</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">108.88176703</span>
+  <span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">28.15079420</span>
+  <span class="n">Exchange</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">6.09926187</span>
+  <span class="n">Nuclear</span> <span class="n">repulsion</span><span class="p">:</span>             <span class="mf">8.45508042</span>
+  <span class="n">TOTAL</span><span class="p">:</span>                       <span class="o">-</span><span class="mf">39.12202522</span>
+
+<span class="o">----------</span>
+  <span class="n">FORCES</span>
+<span class="o">----------</span>
+   <span class="n">C</span>   <span class="mf">3.1181e-02</span>   <span class="mf">4.3241e-04</span>   <span class="mf">3.1181e-02</span>
+   <span class="n">H</span>   <span class="mf">8.2117e-02</span>   <span class="mf">9.6104e-02</span>   <span class="mf">8.2117e-02</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">9.8833e-02</span>  <span class="o">-</span><span class="mf">8.6370e-02</span>   <span class="mf">7.3271e-02</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">8.7735e-02</span>   <span class="mf">7.6203e-02</span>  <span class="o">-</span><span class="mf">8.7735e-02</span>
+   <span class="n">H</span>   <span class="mf">7.3271e-02</span>  <span class="o">-</span><span class="mf">8.6370e-02</span>  <span class="o">-</span><span class="mf">9.8833e-02</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">END</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">001</span>
+<span class="o">================================================================================</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">START</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">002</span>
+<span class="o">================================================================================</span>
+
+<span class="o">-------------</span>
+  <span class="n">POSITIONS</span>
+<span class="o">-------------</span>
+   <span class="n">C</span>   <span class="mf">0.15779172</span>  <span class="o">-</span><span class="mf">0.00043241</span>   <span class="mf">0.15779172</span>
+   <span class="n">H</span>   <span class="mf">1.80760940</span>   <span class="mf">1.79362217</span>   <span class="mf">1.80760940</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.79089261</span>  <span class="o">-</span><span class="mf">1.80335642</span>   <span class="mf">1.81645509</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.80199100</span>   <span class="mf">1.81352308</span>  <span class="o">-</span><span class="mf">1.80199100</span>
+   <span class="n">H</span>   <span class="mf">1.81645509</span>  <span class="o">-</span><span class="mf">1.80335642</span>  <span class="o">-</span><span class="mf">1.79089261</span>
+
+<span class="o">------------</span>
+  <span class="n">ENERGIES</span>
+<span class="o">------------</span>
+  <span class="n">Kinetic</span><span class="p">:</span>                      <span class="mf">39.15431742</span>
+  <span class="n">Nuclear</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">109.64154344</span>
+  <span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">28.55700060</span>
+  <span class="n">Exchange</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">6.14351258</span>
+  <span class="n">Nuclear</span> <span class="n">repulsion</span><span class="p">:</span>             <span class="mf">8.85933366</span>
+  <span class="n">TOTAL</span><span class="p">:</span>                       <span class="o">-</span><span class="mf">39.21440434</span>
+
+<span class="o">----------</span>
+  <span class="n">FORCES</span>
+<span class="o">----------</span>
+   <span class="n">C</span>   <span class="mf">2.9218e-02</span>   <span class="mf">1.2969e-03</span>   <span class="mf">2.9218e-02</span>
+   <span class="n">H</span>   <span class="mf">8.3762e-02</span>   <span class="mf">9.5182e-02</span>   <span class="mf">8.3762e-02</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">9.9519e-02</span>  <span class="o">-</span><span class="mf">8.8931e-02</span>   <span class="mf">7.7954e-02</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">9.1414e-02</span>   <span class="mf">8.1383e-02</span>  <span class="o">-</span><span class="mf">9.1414e-02</span>
+   <span class="n">H</span>   <span class="mf">7.7954e-02</span>  <span class="o">-</span><span class="mf">8.8931e-02</span>  <span class="o">-</span><span class="mf">9.9519e-02</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">END</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">002</span>
+<span class="o">================================================================================</span>
+
+<span class="o">...</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">START</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">023</span>
+<span class="o">================================================================================</span>
+
+<span class="o">-------------</span>
+  <span class="n">POSITIONS</span>
+<span class="o">-------------</span>
+   <span class="n">C</span>   <span class="mf">0.03778625</span>  <span class="o">-</span><span class="mf">0.00000429</span>   <span class="mf">0.03778625</span>
+   <span class="n">H</span>   <span class="mf">1.21921718</span>   <span class="mf">1.18193814</span>   <span class="mf">1.21921718</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.14362357</span>  <span class="o">-</span><span class="mf">1.18156895</span>   <span class="mf">1.21959236</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">1.14399962</span>   <span class="mf">1.18120405</span>  <span class="o">-</span><span class="mf">1.14399962</span>
+   <span class="n">H</span>   <span class="mf">1.21959236</span>  <span class="o">-</span><span class="mf">1.18156895</span>  <span class="o">-</span><span class="mf">1.14362357</span>
+
+<span class="o">------------</span>
+  <span class="n">ENERGIES</span>
+<span class="o">------------</span>
+  <span class="n">Kinetic</span><span class="p">:</span>                      <span class="mf">39.46557443</span>
+  <span class="n">Nuclear</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">118.95707554</span>
+  <span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">32.86555691</span>
+  <span class="n">Exchange</span><span class="p">:</span>                     <span class="o">-</span><span class="mf">6.62308238</span>
+  <span class="n">Nuclear</span> <span class="n">repulsion</span><span class="p">:</span>            <span class="mf">13.52216307</span>
+  <span class="n">TOTAL</span><span class="p">:</span>                       <span class="o">-</span><span class="mf">39.72686352</span>
+
+<span class="o">----------</span>
+  <span class="n">FORCES</span>
+<span class="o">----------</span>
+   <span class="n">C</span>  <span class="o">-</span><span class="mf">6.5246e-06</span>  <span class="o">-</span><span class="mf">4.8303e-06</span>  <span class="o">-</span><span class="mf">6.5246e-06</span>
+   <span class="n">H</span>   <span class="mf">2.1794e-06</span>  <span class="o">-</span><span class="mf">3.7479e-06</span>   <span class="mf">2.1795e-06</span>
+   <span class="n">H</span>   <span class="mf">2.6888e-06</span>   <span class="mf">7.3055e-06</span>  <span class="o">-</span><span class="mf">5.7105e-07</span>
+   <span class="n">H</span>   <span class="mf">2.2273e-06</span>  <span class="o">-</span><span class="mf">6.0329e-06</span>   <span class="mf">2.2273e-06</span>
+   <span class="n">H</span>  <span class="o">-</span><span class="mf">5.7103e-07</span>   <span class="mf">7.3056e-06</span>   <span class="mf">2.6888e-06</span>
+
+<span class="o">================================================================================</span>
+  <span class="n">END</span> <span class="n">GEOMETRY</span> <span class="n">OPTIMIZATION</span> <span class="n">STEP</span> <span class="mi">023</span>
+<span class="o">================================================================================</span>
+</pre></div>
+</div>
+</section>
+<section id="result-dictionary-of-a-geometry-optimization">
+<h3><a class="toc-backref" href="#id38" role="doc-backlink">Result dictionary of a geometry optimization</a><a class="headerlink" href="#result-dictionary-of-a-geometry-optimization" title="Link to this heading"></a></h3>
+<p>The result of a Geometry Optimization calculation is captured inside a dictionary
+object. This dictionary objects contains the following keys</p>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">Description of the data contained in the result library</span><a class="headerlink" href="#id7" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">res_opt</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">OptimizeResult</span></code> object from the scipy routine. For more information, please consult the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize">documentation</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">energies</span></code></p></td>
+<td><p>List of the total electronic energy at each ionic step.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">forces</span></code></p></td>
+<td><p>List of the forces on all the atoms at each ionic step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">coordinates</span></code></p></td>
+<td><p>Coordinates of the atoms at each ionic step.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Result dictionary of the Hartree-Fock calculation <strong>last</strong> ionic step.</p></td>
+</tr>
+</tbody>
+</table>
+<p>To demonstrate the use of the above data, consider the script as shown below.
+In this script, we generate a CH<sub>4</sub> in a (highly) perturbed configuration.
+The perturbed configuration is generated using a random number generator (RNG). For
+reproduction purposes, we have seeded this RNG such that the result as shown
+below can be easily reproduced. The result of the geometry optimization is
+captured in the <code class="code docutils literal notranslate"><span class="pre">res</span></code> variable which is a dictionary according to the
+above-mentioned specifications.</p>
+<p>To show how the contents of this dictionary can be used, we produce two plots
+which are explained below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryOptimization</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># seed the random number generator to yield reproducible result</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># build a CH4 molecule where the atom positions are perturbed based on a</span>
+<span class="c1"># random number generator</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="o">-</span><span class="n">dist</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(),</span>
+                  <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+<span class="c1"># perform the geometry optimization</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">GeometryOptimization</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="c1"># collect the RMS of the force</span>
+<span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">])):</span>
+    <span class="n">forces</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;forces&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">rms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">forces</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">forces</span><span class="p">))))</span>
+
+<span class="c1"># plot electronic energy and RMS of the force</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">144</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">],</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rms</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Root-mean-square force&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration [-]&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Electronic energy [Ht]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># show convergence of C-H bond distances for all bonds</span>
+<span class="c1"># collect data</span>
+<span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">])))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">])):</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># plot in a figure</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">144</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">distances</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;H$_{</span><span class="si">%i</span><span class="s1">}$&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Iteration [-]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;C-H bond distance [Bohr]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The result of the above script are the following two images, showcasing the
+optimization procedure and an example application of the data in the result dictionary.
+The first figure shows the total electronic energy and the root-mean-square
+of the force as function of the iteration number. The convergence criterion
+is essentially such that these forces need to be smaller than a threshold
+value. From the figure, it is clear that the total electronic energy converges
+faster than the forces.</p>
+<figure class="align-default" id="id8">
+<img alt="_images/ch4_geomopt_energy_rms_force.png" src="_images/ch4_geomopt_energy_rms_force.png" />
+<figcaption>
+<p><span class="caption-text">Energy and root-mean-square of the forces as function of the iteration number.</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>In the second figure, we can observe the C-H bond distance as function of the
+iteration number. Clearly, we start at a relatively unfavorable geometry where
+one of the H atoms is quite distanced from the central C atom. With increasing
+iteration, we can however readily see that all C-H bond distances converge
+to the same value, as expected for the highly symmetric CH<sub>4</sub> molecule.</p>
+<figure class="align-default" id="id9">
+<img alt="_images/ch4_geomopt_ch_bond.png" src="_images/ch4_geomopt_ch_bond.png" />
+<figcaption>
+<p><span class="caption-text">C-H bond distances as function of the iteration number.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>It is by no means guaranteed that a geometry optimization converges. Even
+more important, when the geometry optimization has not converged, it is
+also highly likely that the underlying electronic structure calculation
+has not been properly converged as well. One should absolutely distrust
+any result coming out of such a calculation.</p>
+<p><strong>Always verify that a calculation is properly converged before using
+its output.</strong></p>
+</div>
+</section>
+</section>
+<section id="crystal-orbital-hamilton-population-analysis">
+<h2><a class="toc-backref" href="#id39" role="doc-backlink">Crystal Orbital Hamilton Population Analysis</a><a class="headerlink" href="#crystal-orbital-hamilton-population-analysis" title="Link to this heading"></a></h2>
+<section id="background-of-cohp">
+<h3><a class="toc-backref" href="#id40" role="doc-backlink">Background of COHP</a><a class="headerlink" href="#background-of-cohp" title="Link to this heading"></a></h3>
+<p>Within the scope of chemical bonding, we can classify molecular orbitals to be
+bonding, anti-bonding or non-bonding with respect to any pair of atoms. When
+working with localized basis functions, the process of capturing the bonding
+character of the molecular orbitals is relatively straightforward as we can
+assign the basis functions constituting the molecular orbitals to an atom.</p>
+<p>Within the framework of localized orbitals, the COHP coefficient of a given
+molecular orbital (<span class="math notranslate nohighlight">\(\chi\)</span>) is therefore defined as</p>
+<div class="math notranslate nohighlight">
+\[\chi_{} = \eta_{k} \sum_{i \in A} \sum_{j \in B} C_{ki} C_{kj} H_{ij}\]</div>
+<p>where <span class="math notranslate nohighlight">\(C_{ki}\)</span> and <span class="math notranslate nohighlight">\(C_{kj}\)</span> are elements of the coefficient matrix
+<span class="math notranslate nohighlight">\(\mathbf{C}\)</span>, <span class="math notranslate nohighlight">\(H_{ij}\)</span> an element of the Hamiltonian (Fock)
+matrix <span class="math notranslate nohighlight">\(\mathbf{H}\)</span> and <span class="math notranslate nohighlight">\(\eta_{k}\)</span> is the occupancy factor of
+molecular orbital <span class="math notranslate nohighlight">\(k\)</span> which is always 2 within a restricted Hartree-Fock
+calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is perfectly possible to apply the above equation for unoccupied (virtual)
+orbitals, however the result should be interpreted from the perspective that
+such orbitals are merely artifacts of the diagonalization process as these
+orbitals do not correspond to any electron of the system.</p>
+</div>
+</section>
+<section id="procedure-of-cohp">
+<h3><a class="toc-backref" href="#id41" role="doc-backlink">Procedure of COHP</a><a class="headerlink" href="#procedure-of-cohp" title="Link to this heading"></a></h3>
+<p>To perform a COHP calculation, one can direct the output of a Hartree-Fock
+calculation directly to the COHP class as demonstrated using the script below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">COHP</span><span class="p">,</span> <span class="n">FosterBoys</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="mf">1.145414</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">cohp</span> <span class="o">=</span> <span class="n">COHP</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;COHP values of canonical Hartree-Fock orbitals&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">cohp</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COHP</span> <span class="n">values</span> <span class="n">of</span> <span class="n">canonical</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">orbitals</span>
+  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.4156</span>       <span class="mf">0.0399</span>
+  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0922</span>       <span class="mf">0.0104</span>
+  <span class="mi">3</span>      <span class="o">-</span><span class="mf">1.4453</span>      <span class="o">-</span><span class="mf">0.4365</span>
+  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6968</span>       <span class="mf">0.2051</span>
+  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5400</span>      <span class="o">-</span><span class="mf">0.2918</span>
+  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5400</span>      <span class="o">-</span><span class="mf">0.2918</span>
+  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4451</span>       <span class="mf">0.1098</span>
+  <span class="mi">8</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+  <span class="mi">9</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+ <span class="mi">10</span>       <span class="mf">1.0092</span>       <span class="mf">6.4828</span>
+</pre></div>
+</div>
+</section>
+<section id="cohp-analysis-of-the-foster-boys-localized-orbitals">
+<h3><a class="toc-backref" href="#id42" role="doc-backlink">COHP analysis of the Foster-Boys localized orbitals</a><a class="headerlink" href="#cohp-analysis-of-the-foster-boys-localized-orbitals" title="Link to this heading"></a></h3>
+<p>It can be quite interesting to perform the COHP analysis on the Foster-Boys
+localized orbitals. The procedure is remarkably simple as the output of a
+Foster-Boys localization is very similar to the output of a Hartree-Fock
+calculation and one can direct the output of the former to the COHP class
+in the same manner.</p>
+<p>In the script below, a Foster-Boys localization procedure is performed on the
+canonical Hartree-Fock orbitals of CO and on both results, a COHP analysis
+is performed, which can be readily compared.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">COHP</span><span class="p">,</span> <span class="n">FosterBoys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="mf">1.145414</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">cohp</span> <span class="o">=</span> <span class="n">COHP</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">resfb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">cohp_fb</span> <span class="o">=</span> <span class="n">COHP</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;COHP values of canonical Hartree-Fock orbitals&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">cohp</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;COHP values after Foster-Boys localization&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">cohp_fb</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">chi</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of COHP coefficient canonical orbitals: &#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cohp</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of COHP coefficient Foster-Boys orbitals: &#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cohp_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">COHP</span> <span class="n">values</span> <span class="n">of</span> <span class="n">canonical</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">orbitals</span>
+  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.4156</span>       <span class="mf">0.0399</span>
+  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0922</span>       <span class="mf">0.0104</span>
+  <span class="mi">3</span>      <span class="o">-</span><span class="mf">1.4453</span>      <span class="o">-</span><span class="mf">0.4365</span>
+  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6968</span>       <span class="mf">0.2051</span>
+  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5400</span>      <span class="o">-</span><span class="mf">0.2918</span>
+  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5400</span>      <span class="o">-</span><span class="mf">0.2918</span>
+  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4451</span>       <span class="mf">0.1098</span>
+  <span class="mi">8</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+  <span class="mi">9</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+ <span class="mi">10</span>       <span class="mf">1.0092</span>       <span class="mf">6.4828</span>
+
+<span class="n">COHP</span> <span class="n">values</span> <span class="n">after</span> <span class="n">Foster</span><span class="o">-</span><span class="n">Boys</span> <span class="n">localization</span>
+  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.3075</span>       <span class="mf">0.0701</span>
+  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0370</span>       <span class="mf">0.0450</span>
+  <span class="mi">3</span>      <span class="o">-</span><span class="mf">0.8309</span>      <span class="o">-</span><span class="mf">0.4092</span>
+  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.8309</span>      <span class="o">-</span><span class="mf">0.4092</span>
+  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.8309</span>      <span class="o">-</span><span class="mf">0.4092</span>
+  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.8137</span>       <span class="mf">0.2783</span>
+  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.5241</span>       <span class="mf">0.1792</span>
+  <span class="mi">8</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+  <span class="mi">9</span>       <span class="mf">0.3062</span>       <span class="mf">0.5029</span>
+ <span class="mi">10</span>       <span class="mf">1.0092</span>       <span class="mf">6.4828</span>
+
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">COHP</span> <span class="n">coefficient</span> <span class="n">canonical</span> <span class="n">orbitals</span><span class="p">:</span>  <span class="o">-</span><span class="mf">0.6549007057824876</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">COHP</span> <span class="n">coefficient</span> <span class="n">Foster</span><span class="o">-</span><span class="n">Boys</span> <span class="n">orbitals</span><span class="p">:</span>  <span class="o">-</span><span class="mf">0.654900705782488</span>
+</pre></div>
+</div>
+<p>The results as shown above clearly demonstrate that not only the total energy
+and the electron density is invariant under a unitary transformation of the
+occupied molecular orbitals, also the sum of the COHP coefficient is an
+invariant. In other words, the (overall) bonding characteristics of the molecule
+remain the same under a unitary transformation.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="community_guidelines.html" class="btn btn-neutral float-right" title="Community guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

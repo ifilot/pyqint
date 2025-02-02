@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_interface.html">User Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pyqint-a-python-package-for-evaluating-gaussian-integrals-and-performing-electronic-structure-calculations">
+<h1>PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations<a class="headerlink" href="#pyqint-a-python-package-for-evaluating-gaussian-integrals-and-performing-electronic-structure-calculations" title="Link to this heading"></a></h1>
+<img alt="GitHub tag (latest SemVer)" src="https://img.shields.io/github/v/tag/ifilot/pyqint?label=version" />
+<a class="reference external image-reference" href="https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml"><img alt="https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg" src="https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg" />
+</a>
+<a class="reference external image-reference" href="https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml"><img alt="https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml/badge.svg" src="https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml/badge.svg" />
+</a>
+<a class="reference external image-reference" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="https://img.shields.io/badge/License-GPLv3-blue.svg" src="https://img.shields.io/badge/License-GPLv3-blue.svg" />
+</a>
+<p><strong class="program">PyQInt</strong> is a Python package for calculating one- and two-electron
+integrals as encountered in electronic structure calculations. Since
+integral evaluation can be quite computationally intensive, the evaluation
+is programmed in C++ and connected to Python using Cython.</p>
+<p><strong class="program">PyQInt</strong> mainly serves as an educational package to teach students
+how to perform (simple) electronic structure calculations wherein the most
+difficult task, i.e. the integral evaluation, is already encapsulated in
+a handy set of routines. With <strong class="program">PyQInt</strong>, the student can for example
+build their own Hartree-Fock routine. Some common electronic structure routine,
+most notably the Hartree-Fock algorithm, is also readily available.</p>
+<p><strong class="program">PyQInt</strong> offers supporting scripts for facile visualization of result
+such as producing contour plots for the molecular orbitals. Below, an example
+is shown for the molecular orbitals of the CO molecule.</p>
+<figure class="align-default" id="id1">
+<img alt="_images/co.jpg" src="_images/co.jpg" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using contour plots.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong class="program">PyQInt</strong> not only supports calculation of the canonical molecular orbitals
+via the (restricted) Hartee-Fock procedure, but can also be used to construct
+the localized molecular orbitals which is relevant for showing the similarity
+between modern electronic structure methods and classical Lewis theory. In the
+image below, one can observe the <strong>canonical</strong> molecular orbitals for the CO molecule
+as well as the <strong>localized</strong> molecular orbitals.</p>
+<figure class="align-default" id="id2">
+<img alt="_images/co_canonical_isosurfaces.jpg" src="_images/co_canonical_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id3">
+<img alt="_images/co_fosterboys_isosurfaces.jpg" src="_images/co_fosterboys_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Localized molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03. Note that the localization procedure has only been
+applied to the occupied molecular orbitals. Observe that the localized
+orbitals contain a triple-degenerate state corresponding to the triple
+bond and two lone pairs for C and O.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong class="program">PyQInt</strong> has been developed at the Eindhoven University of Technology,
+Netherlands. <strong class="program">PyQInt</strong> and its development are hosted on <a class="reference external" href="https://github.com/ifilot/pyqint">github</a>.  Bugs and feature
+requests are ideally submitted via the <a class="reference external" href="https://github.com/ifilot/pyqint/issues">github issue tracker</a>.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#windows-anaconda">Windows / Anaconda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#linux-pypi">Linux / PyPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_interface.html">User Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#basis-functions">Basis functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#gaussian-type-orbitals-gto">Gaussian type orbitals (GTO)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#contracted-gaussian-functions-cgf">Contracted Gaussian Functions (CGF)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#integral-evaluation">Integral evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#overlap-integrals">Overlap integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#kinetic-integrals">Kinetic integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#nuclear-attraction-integrals">Nuclear attraction integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#two-electron-integrals">Two-electron integrals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#dipole-moment-integrals">Dipole-moment integrals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#basis-sets-and-molecules">Basis sets and molecules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#building-molecules">Building molecules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#using-the-moleculebuilder-class">Using the MoleculeBuilder class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#constructing-basis-functions-for-a-molecule">Constructing basis functions for a molecule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#parallel-evaluation-of-integrals">Parallel evaluation of integrals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#electronic-structure-calculations">Electronic structure calculations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#hartree-fock">Hartree-Fock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#result-dictionary">Result dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#custom-basis-sets">Custom basis sets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#orbital-visualization">Orbital visualization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#contour-plots">Contour plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#constructing-isosurfaces">Constructing isosurfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#orbital-localization-foster-boys">Orbital localization: Foster-Boys</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#background-of-fb">Background of FB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#procedure-of-fb">Procedure of FB</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#foster-boys-output-object">Foster-Boys output object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#geometry-optimization">Geometry optimization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#performing-a-geometry-optimization">Performing a geometry optimization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#result-dictionary-of-a-geometry-optimization">Result dictionary of a geometry optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_interface.html#crystal-orbital-hamilton-population-analysis">Crystal Orbital Hamilton Population Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#background-of-cohp">Background of COHP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#procedure-of-cohp">Procedure of COHP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_interface.html#cohp-analysis-of-the-foster-boys-localized-orbitals">COHP analysis of the Foster-Boys localized orbitals</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+</div>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
