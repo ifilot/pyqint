@@ -39,7 +39,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Set-up miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: test
           environment-file: environment.yml
@@ -72,7 +72,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Set-up miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: test
           environment-file: environment.yml
@@ -104,7 +104,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential
       - name: Set-up miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: test
           environment-file: environment.yml
@@ -132,7 +132,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Set-up miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: test
           environment-file: environment.yml
