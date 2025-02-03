@@ -550,14 +550,13 @@ Parallel evaluation of integrals
 
 From a collection of Contracted Gaussian Functions, the complete set of overlap,
 kinetic, nuclear attraction and two-electron integrals can be quickly evaluated
-using the `build_integrals` function. Using the `npar` argument, the number of
-threads to be spawned can be set.
+using the `build_integrals_openmp` function. The function will automatically determine
+the number of available cores to allocate for this process.
 
 .. code-block:: python
 
     from pyqint import PyQInt, Molecule
     import numpy as np
-    import multiprocessing
 
     # construct integrator object
     integrator = PyQInt()
@@ -569,8 +568,7 @@ threads to be spawned can be set.
     cgfs, nuclei = mol.build_basis('sto3g')
 
     # evaluate all integrals
-    ncpu = multiprocessing.cpu_count()
-    S, T, V, teint = integrator.build_integrals(cgfs, nuclei, npar=ncpu, verbose=False)
+    S, T, V, teint = integrator.build_integrals_openmp(cgfs, nuclei)
 
     print(S)
     print(T)
@@ -753,6 +751,38 @@ The output of the above script yields::
 
     Total energy:  -39.72630504189621
     Sum of the individual terms:  -39.726305041896055
+
+Custom basis sets
+-----------------
+
+Besides the basis sets offered by :program:`PyQInt`, one can also use a custom
+basis set defined by the user. The :code:`rhf` routine accepts either a basis set
+for its :code:`basis` argument, or alternatively a list of :code:`cgf` objects.
+In the example code shown below, the latter is done.
+
+.. code-block:: python
+
+    mol = Molecule()
+    mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
+    mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')        
+    nuclei = mol.get_nuclei()
+
+    cgfs = []
+    for n in nuclei:
+        _cgf = cgf(n[0])
+
+        _cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
+        _cgf.add_gto(0.535328, 0.623914, 0, 0, 0)
+        _cgf.add_gto(0.444635, 0.168855, 0, 0, 0)
+
+        cgfs.append(_cgf)
+
+    res = HF().rhf(mol, basis=cgfs)
+
+.. hint::
+
+    A nice website to find a large collection of Gaussian Type basis set coefficients is
+    `https://www.basissetexchange.org/ <https://www.basissetexchange.org/>`_.
 
 Orbital visualization
 =====================

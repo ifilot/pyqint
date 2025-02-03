@@ -84,6 +84,8 @@ const double GTO::get_amp(const Vec3& r) const {
  * @return gradient
  */
 Vec3 GTO::get_grad(const Vec3& r) const {
+    // calculate exponential term and its product with the cartesian terms
+    // for x,y,z components
     const double ex = std::exp(-this->alpha * std::pow(r[0]-this->position[0],2));
     const double fx = std::pow(r[0] - this->position[0], this->l) * ex;
 
@@ -93,20 +95,24 @@ Vec3 GTO::get_grad(const Vec3& r) const {
     const double ez = std::exp(-this->alpha * std::pow(r[2]-this->position[2],2));
     const double fz = std::pow(r[2] - this->position[2], this->n) * ez;
 
+    // calculate first derivative of the exponential term
     double gx = -2.0 * this->alpha * (r[0]-this->position[0]) * fx;
     double gy = -2.0 * this->alpha * (r[1]-this->position[1]) * fy;
     double gz = -2.0 * this->alpha * (r[2]-this->position[2]) * fz;
 
+    // if there is a Cartesian component (l,m,n > 0), apply the product rule
+    // and add the contribution of this term
     if(this->l > 0) {
-        gx += std::pow(r[0] - this->position[0], this->l-1) * ex;
+        gx += this->l * std::pow(r[0] - this->position[0], this->l-1) * ex;
     }
     if(this->m > 0) {
-        gy += std::pow(r[1] - this->position[1], this->m-1) * ey;
+        gy += this->m * std::pow(r[1] - this->position[1], this->m-1) * ey;
     }
     if(this->n > 0) {
-        gz += std::pow(r[2] - this->position[2], this->n-1) * ez;
+        gz += this->n * std::pow(r[2] - this->position[2], this->n-1) * ez;
     }
 
+    // return vector with derivative towards x,y and z
     return Vec3(this->norm * gx * fy * fz,
                 this->norm * fx * gy * fz,
                 this->norm * fx * fy * gz);
