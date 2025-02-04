@@ -1034,7 +1034,7 @@ double Integrator::binomial_prefactor(int s, int ia, int ib,
 }
 
 double Integrator::binomial(int a, int b) const {
-    if( (a < 0) | (b < 0) | (a-b < 0) ) {
+    if( (a < 0) || (b < 0) || (a-b < 0) ) {
         return 1.0;
     }
     return factorial(a) / (factorial(b) * factorial(a-b));
