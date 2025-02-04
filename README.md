@@ -1,7 +1,7 @@
 # PyQInt
 
-[![build](https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml)
-[![build](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml)
+[![Conda pkg](https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_conda.yml)
+[![PyPI pkg](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml)
 [![docs](https://github.com/ifilot/pyqint/actions/workflows/docs.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/docs.yml)
 [![Anaconda-Server Badge](https://anaconda.org/ifilot/pyqint/badges/version.svg)](https://anaconda.org/ifilot/pyqint)
 [![PyPI](https://img.shields.io/pypi/v/pyqint?style=flat-square)](https://pypi.org/project/pyqint/)
@@ -38,7 +38,7 @@ algorithm, is also readily available.
 ## Documentation
 
 PyQInt comes with detailed documentation and examples, which can be found
-at https://pyqint.imc-tue.nl.
+at https://ifilot.github.io/pyqint/.
 
 ## Features
 
