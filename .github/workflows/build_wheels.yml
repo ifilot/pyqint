@@ -68,7 +68,7 @@ jobs:
           name: distfiles
           path: dist/*.tar.gz
 
-    upload_pypi:
+  upload_pypi:
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     environment: pypi
