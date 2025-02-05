@@ -1,3 +1,2 @@
 include pyqint/basissets/*.json
 include pyqint/molecules/*.xyz
-include pyqint/*.pyx

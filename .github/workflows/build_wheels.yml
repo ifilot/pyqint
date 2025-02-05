@@ -78,6 +78,18 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          name: wheels-ubuntu-latest
+          path: wheelhouse
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-windows-latest
+          path: wheelhouse
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-latest
+          path: wheelhouse
+      - uses: actions/download-artifact@v4
+        with:
           name: distfiles
           path: dist
 
