@@ -68,51 +68,7 @@ jobs:
           name: distfiles
           path: dist/*.tar.gz
 
-  validate:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
-    steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip install --upgrade pip
-          pip install setuptools wheel twine
-     
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheels-ubuntu-latest
-          path: dist
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheels-windows-latest
-          path: dist
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheels-macos-latest
-          path: dist
-      - uses: actions/download-artifact@v4
-        with:
-          name: distfiles
-          path: dist
-
-      - name: Validate package metadata
-        run: twine check dist/*
-
-      - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
-  upload_pypi:
+    upload_pypi:
     needs: [build_wheels, build_sdist, validate]
     runs-on: ubuntu-latest
     environment: pypi
