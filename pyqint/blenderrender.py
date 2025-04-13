@@ -6,17 +6,13 @@ import json
 import subprocess
 import shutil
 from sys import platform
+from .element import Element
 
 # try to import PyTessel but do not throw an error if it cannot be loaded
 try:
     from pytessel import PyTessel
 except ModuleNotFoundError:
     print('Cannot find module PyTessel')
-
-try:
-    from mendeleev import element
-except ModuleNotFoundError:
-    print('Cannot find module mendeleev')
 
 try:
     from tqdm import tqdm
@@ -169,9 +165,10 @@ class BlenderRender:
         f.write('\n')
 
         angtobohr = 1.8897259886
+        el = Element()
 
         for a in mol.atoms:
-            elname = element(a[0]).symbol
+            elname = getattr(el, a[0]).symbol
             f.write('%s  %12.6f  %12.6f  %12.6f\n' % (elname, a[1][0] / angtobohr,
                                                               a[1][1] / angtobohr,
                                                               a[1][2] / angtobohr))
