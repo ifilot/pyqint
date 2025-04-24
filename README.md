@@ -9,22 +9,24 @@
 
 ## Purpose
 
-PyQInt is a Python package for calculating one- and two-electron integrals as
-encountered in electronic structure calculations. Since integral evaluation can
-be quite computationally intensive, the evaluation is programmed in C++ and
-connected to Python using Cython.
+PyQInt is a Python-based, teaching-oriented implementation of the Hartree-Fock
+method, designed to make the inner workings of electronic structure theory
+accessible and transparent. It provides a clear, readable interface to
+fundamental components such as molecular integrals over Gaussian basis
+functions, SCF procedures (with DIIS acceleration), orbital localization, and
+geometry optimization.
 
-PyQInt mainly serves as an educational package to teach students how to perform
-(simple) electronic structure calculations wherein the most difficult task, i.e.
-the integral evaluation, is already encapsulated in a handy set of routines.
-With PyQInt, the student can for example build their own Hartree-Fock routine.
-Some common electronic structure routine, most notably the Hartree-Fock
-algorithm, is also readily available.
+What sets PyQInt apart is its educational design philosophy: all matrices,
+intermediate results, and algorithmic steps are exposed—allowing students,
+educators, and developers to inspect, understand, and experiment with every part
+of the computation. Whether you're learning how Hartree-Fock works, developing
+your own extensions, or teaching a course in computational chemistry, PyQInt
+offers a hands-on, exploratory platform.
 
-> [!NOTE]
-> Although PyQInt connects to a C++ backend, it is certainly not optimized for
-> speed and might be (too) slow for anything outside of the calculation of the
-> electronic structure of simple molecules.
+> [!NOTE] 
+> PyQInt connects to a C++ backend for core numerical routines, but it
+> is not optimized for performance. It is best suited for learning, prototyping,
+> and small molecule calculations—not production-scale quantum chemistry.
 
 > [!TIP]  
 > Interested in other **education** quantum chemical codes? Have a look at the packages below.
@@ -63,8 +65,9 @@ PyQInt offers additional features such as
   calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS)
 * Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/)
   coefficients
-* Construction of localized orbitals using the [Boys-Foster
+* Construction of localized orbitals using the [Foster-Boys
   method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
+* Geometry optimization using Conjugate Gradient
 * Visualization of molecular orbitals
 
 All routines are (automatically) tested and verified against several open-source
@@ -72,7 +75,7 @@ as well as commercial programs that use cartesian Gaussian orbitals.
 Nevertheless, if you spot any mistake, please kindly open an
 [issue](https://github.com/ifilot/pyqint/issues) in this Github repository.
 
-In the image below, the (canonical) molecular orbitals as found using a restricted
-Hartree-Fock calculation for the CO molecule are shown.
+In the image below, the (canonical) molecular orbitals as found using a
+restricted Hartree-Fock calculation for the CO molecule are shown.
 
 ![Molecular orbitals of CO](img/co.jpg)

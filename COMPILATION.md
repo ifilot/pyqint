@@ -5,13 +5,13 @@
 To create a wheel (`whl`), run
 
 ```bash
-pipx run cibuildwheel --only cp310-manylinux_x86_64
+pipx run cibuildwheel --only cp312-manylinux_x86_64
 ```
 
 To install the `whl` file
 
 ```bash
-pip3 install wheelhouse/pyqint-0.17.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+pip3 install wheelhouse/pyqint-0.18.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 ```
 
 and to locally test
@@ -23,7 +23,7 @@ pytest-3 tests/*.py
 For skipping unit testing when compiling with `cibuildwheel`, run
 
 ```bash
-CIBW_TEST_SKIP="cp310-manylinux_x86_64" pipx run cibuildwheel --only cp310-manylinux_x86_64
+CIBW_TEST_SKIP="cp312-manylinux_x86_64" pipx run cibuildwheel --only cp312-manylinux_x86_64
 ```
 
 ### Uploading to PyPi
