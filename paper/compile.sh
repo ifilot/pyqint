@@ -9,5 +9,5 @@ PAPERPATH="$PWD"
 docker run --rm \
 --volume $PAPERPATH:/data \
 --user $(id -u):$(id -g) \
---env JOURNAL=joss \
+--env JOURNAL=jose \
 openjournals/inara
