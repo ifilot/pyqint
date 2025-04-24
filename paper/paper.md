@@ -67,12 +67,15 @@ mathematical basis for hybrid functionals like B3LYP[@becke:1993; @lee:1988],
 which are among the most widely used methods in applied quantum
 chemistry.[@sousa:2007]
 
-`PyQInt` addresses this educational gap by offering a transparent, modular
-implementation of Hartree-Fock theory using Gaussian-type orbitals. Unlike
-black-box software, `PyQInt` is designed to expose every major computational
-step—integral evaluation, matrix construction, SCF iterations, and orbital
-manipulation—making it an ideal platform for teaching, learning, and prototyping
-in electronic structure theory.
+`PyQInt` is designed to support education and exploration in electronic
+structure theory through a modular and transparent implementation of
+Hartree–Fock methodology using Gaussian-type orbitals. In contrast to software
+packages that abstract away computational details, PyQInt provides access to
+individual steps such as integral evaluation, matrix construction, SCF
+procedures, and orbital manipulation. This structure makes the program suitable
+for instructional use as well as for prototyping and method development.
+
+![Visualization of the coefficient matrix from a Hartree–Fock calculation of the CO molecule, obtained using `PyQInt`.\label{fig:co-coefficient}](img/co-coefficient-matrix.jpg)
 
 # Features
 
@@ -89,42 +92,53 @@ transparency allows users not only to use the code but also to study it as an
 educational resource, reinforcing theoretical concepts through hands-on
 engagement with working algorithms.
 
-![``PyQInt`` exposing the coefficient matrix of a Hatree-Fock calculation of the CO molecule.\label{fig:co-coefficient}](img/co-coefficient-matrix.jpg)
-
-The package provides low-level functionality for constructing and manipulating
-Gaussian basis functions and computing the associated one- and two-electron
-integrals. These capabilities support detailed investigation of integral
-evaluation and basis set structure. In parallel, `PyQInt` offers higher-level
-features such as self-consistent field (SCF) Hartree-Fock calculations with DIIS
-acceleration, orbital localization using the Foster–Boys method[@boys:1960],
-Crystal Orbital Hamilton Population (COHP) analysis [@dronskowski:1993], and
-geometry optimization based on analytic energy gradients.
+The package provides functionality for constructing and manipulating Gaussian
+basis functions, along with the evaluation of the corresponding one- and
+two-electron integrals. These integrals are computed using a C++ backend with
+OpenMP parallelization, which ensures efficient performance suitable for small
+to medium-sized systems. This low-level access supports detailed exploration of
+integral evaluation and basis set structure. In addition, PyQInt includes
+higher-level capabilities such as self-consistent field (SCF) Hartree–Fock
+calculations with DIIS acceleration, orbital localization using the Foster–Boys
+method[@boys:1960], Crystal Orbital Hamilton Population (COHP) analysis
+[@dronskowski:1993], and geometry optimization based on analytic energy
+gradients.
 
 A key design feature is that all calculations return structured Python
-dictionary objects, which expose the internal matrices and tensors used during
-computation. These include, for example, the overlap, kinetic energy, Coulomb,
-coefficient (see \autoref{fig:co-coefficient}), and Fock matrices, as well as
-the four-index tensor of two-electron repulsion integrals. By providing this
-level of access, the program allows users to inspect, manipulate, and recompute
-quantities such as electronic energy and orbital-specific contributions using
-standard tools such as NumPy. This approach supports a deeper understanding of
-the theoretical framework and computational steps underlying quantum chemical
-models.
+dictionary objects, which expose the internal matrices and multidimensional
+arrays used during computation. These include, for example, the overlap, kinetic
+energy, Coulomb, coefficient (see \autoref{fig:co-coefficient}), and Fock
+matrices, as well as the four-dimensional array representing the two-electron
+repulsion integrals. By providing this level of access, the program allows users
+to inspect, manipulate, and recompute quantities such as electronic energy and
+orbital-specific contributions using standard tools such as NumPy. This design
+supports a more detailed understanding of the theoretical framework and
+computational procedures that underpin quantum chemical models.
 
 `PyQInt` also supports molecular orbital visualization through both
-two-dimensional contour plots (\autoref{fig:co-contour}) and three-dimensional
-isosurface rendering (\autoref{fig:co-isosurface}). These features aid in
-connecting computational results to chemical concepts and spatial
-representations. 
+two-dimensional contour plots (\autoref{fig:co-contour}) via
+Matplotlib[@hunter:2007] and three-dimensional isosurface rendering
+(\autoref{fig:co-isosurface}). These features aid in connecting computational
+results to chemical concepts and spatial representations. 
 
-![Contour plots of the molecular orbitals of the CO molecule.\label{fig:co-contour}](img/orbitals-co-contour.jpg)
+![Two-dimensional contour plots of selected molecular orbitals of the CO molecule, visualized using `PyQInt`.\label{fig:co-contour}](img/orbitals-co-contour.jpg)
 
-![Isosurfaces of the molecular orbitals of the CO molecule.\label{fig:co-isosurface}](img/orbitals-co-isosurface.jpg)
+![Three-dimensional isosurface representations of selected molecular orbitals of the CO molecule, generated with PyQInt and rendered using Blender.\label{fig:co-isosurface}](img/orbitals-co-isosurface.jpg)
+
+All features of PyQInt are accompanied by comprehensive documentation, which
+includes numerous examples and explanatory materials. The documentation is
+designed to guide users through both basic and advanced functionality, with an
+emphasis on clarity and reproducibility. Many of the examples are presented as
+richly commented Python code snippets, illustrating typical use cases and
+highlighting key computational steps. This approach allows users to connect
+theoretical concepts with practical implementation and lowers the barrier to
+entry for students and early-stage researchers engaging with electronic
+structure theory through programming.
 
 # Use in Teaching and Curriculum
 
 `PyQInt` is one of two computational tools used throughout the open-access
-textbook *Elements of Electronic Structure Theory*[@eoesbook], which is freely
+textbook *Elements of Electronic Structure Theory* [@eoesbook], which is freely
 available online. The textbook combines theoretical instruction with practical
 Python-based exercises, aiming to provide students with both a conceptual
 foundation and a working familiarity with electronic structure methods. `PyQInt`
@@ -132,17 +146,18 @@ is introduced as a lightweight and readable implementation of Hartree–Fock
 theory, enabling learners to explore the mathematical and computational
 framework of quantum chemistry from first principles.
 
-The software supports exercises involving basis function construction, integral
+The software supports exercises focused on basis function construction, integral
 evaluation, self-consistent field procedures, and orbital analysis. These
-activities are designed to foster active engagement with the material,
-encouraging students to examine and manipulate the internal components of a
-calculation, rather than relying solely on prepackaged black-box software. The
-modular architecture of `PyQInt` aligns with the textbook’s progressive
-pedagogical approach, promoting incremental learning and conceptual
-reinforcement through code-driven experimentation.
+activities are intended to promote active engagement with the subject matter by
+encouraging students to investigate and manipulate the internal components of
+electronic structure calculations, rather than relying exclusively on
+preconfigured, black-box software. The modular architecture of `PyQInt` is
+consistent with the pedagogical progression adopted in the accompanying
+textbook, facilitating incremental learning and conceptual reinforcement through
+hands-on, code-based experimentation.
 
-`PyQInt` has been used in four iterations of the course Theoretical and
-Computational Chemistry at Eindhoven University of Technology, where it was
+`PyQInt` has been used in four iterations of the course *Theoretical and
+Computational Chemistry* at *Eindhoven University of Technology*, where it was
 integrated into lectures and assignments. Student feedback collected through
 course evaluations indicates a high level of appreciation for the tool, with
 many students identifying it as instrumental in developing their understanding
