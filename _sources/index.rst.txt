@@ -1,6 +1,9 @@
 PyQInt: a Python package for evaluating Gaussian integrals and performing electronic structure calculations
 ===========================================================================================================
 
+.. image:: https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54/status.svg
+   :target: https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54
+   :alt: status
 .. image:: https://img.shields.io/github/v/tag/ifilot/pyqint?label=version
    :alt: GitHub tag (latest SemVer)
 .. image:: https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg
@@ -10,17 +13,25 @@ PyQInt: a Python package for evaluating Gaussian integrals and performing electr
 .. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: https://www.gnu.org/licenses/gpl-3.0
 
-:program:`PyQInt` is a Python package for calculating one- and two-electron
-integrals as encountered in electronic structure calculations. Since
-integral evaluation can be quite computationally intensive, the evaluation
-is programmed in C++ and connected to Python using Cython.
+:program:`PyQInt` is a Python-based, teaching-oriented implementation of the
+Hartree-Fock method, designed to make the inner workings of electronic structure
+theory accessible and transparent. It provides a clear, readable interface to
+fundamental components such as molecular integrals over Gaussian basis
+functions, SCF procedures (with DIIS acceleration), orbital localization, and
+geometry optimization.
 
-:program:`PyQInt` mainly serves as an educational package to teach students
-how to perform (simple) electronic structure calculations wherein the most
-difficult task, i.e. the integral evaluation, is already encapsulated in
-a handy set of routines. With :program:`PyQInt`, the student can for example
-build their own Hartree-Fock routine. Some common electronic structure routine,
-most notably the Hartree-Fock algorithm, is also readily available.
+What sets :program:`PyQInt` apart is its educational design philosophy: all
+matrices, intermediate results, and algorithmic steps are exposed—allowing
+students, educators, and developers to inspect, understand, and experiment with
+every part of the computation. Whether you are learning how Hartree-Fock works,
+developing your own extensions, or teaching a course in computational chemistry,
+PyQInt offers a hands-on, exploratory platform.
+
+.. admonition:: Tip
+
+   For students interested in the theoretical foundations and algorithmic
+   implementation of Hartree–Fock, we recommend the open-access textbook Elements
+   of `Electronic Structure Theory <https://ifilot.pages.tue.nl/elements-of-electronic-structure-theory/index.html>`_.
 
 :program:`PyQInt` offers supporting scripts for facile visualization of result
 such as producing contour plots for the molecular orbitals. Below, an example
