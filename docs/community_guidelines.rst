@@ -11,4 +11,4 @@ Community guidelines
   `to open a new issue on Github with the bug tag <https://github.com/ifilot/pyqint/issues/new?labels=bug>`_.
 * If you seek support in using :program:`PyQInt`, please
   `open an issue with the question tag <https://github.com/ifilot/pyqint/issues/new?labels=question>`_.
-* If you wish to contact the developers, please send an e-mail to i.a.w.filot@tue.nl.
+* If you wish to contact the developers, please send an e-mail to ivo@ivofilot.nl.
