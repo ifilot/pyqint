@@ -801,7 +801,7 @@ value (i.e. the isovalue) of the scalar field can be chosen and all points in
 space that have this value can be tied together creating a so-called isosurface.
 
 Contour plots can be easily created using `matplotlib <https://matplotlib.org/>`_.
-For the creation of isosurfaces, we use `PyTessel <https://pytessel.imc-tue.nl.>`_.
+For the creation of isosurfaces, we use `PyTessel <https://ifilot.github.io/pytessel/>`_.
 
 Contour plots
 -------------
@@ -844,7 +844,7 @@ Constructing isosurfaces
 
 .. note::
     Isosurface generation requires the :program:`PyTessel` package to be
-    installed. More information can be found `here <https://pytessel.imc-tue.nl>`_.
+    installed. More information can be found `here <https://ifilot.github.io/pytessel/>`_.
 
 .. code-block:: python
 
