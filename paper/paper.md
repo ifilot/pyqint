@@ -182,8 +182,10 @@ installation and integration across a range of computing environments. This
 accessibility ensures that students and instructors can easily incorporate the
 software into classroom exercises, Jupyter Notebooks, or larger Python-based
 projects without the need for complex setup procedures. The ability to install
-`PyQInt` with a single command facilitates its use in teaching environments where
-consistency and ease of deployment are critical, while also making it suitable
-for use in virtual labs, remote instruction, and open science workflows.
+`PyQInt` with a single command facilitates its use in teaching environments
+where consistency and ease of deployment are critical, while also making it
+suitable for use in virtual labs, remote instruction, and open science
+workflows. Detailed documentation, including the installation procedure, are
+available online.[@documentation]
 
 # References
