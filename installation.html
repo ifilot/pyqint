@@ -49,8 +49,10 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#windows-anaconda">Windows / Anaconda</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#linux-pypi">Linux / PyPI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-environments">Why environments?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#windows-conda-recommended">Windows / Conda (recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linux-macos-pypi-recommended-via-virtual-environment">Linux / macOS / PyPI (recommended via virtual environment)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#alternative-single-user-install-without-a-virtual-environment">Alternative (single-user install without a virtual environment)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
@@ -81,62 +83,92 @@
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>For Windows users with relatively little experience with Python, we warmly
-recommend to use the <a class="reference external" href="https://www.anaconda.com/products/distribution">Anaconda distribution</a>.
-Anaconda is an all-in-one package containing the Python compiler,
-an integrated desktop environment (Spyder) and plenty of useful Python
-packages such as numpy and matplotlib.</p>
+recommend the <a class="reference external" href="https://www.anaconda.com/products/distribution">Anaconda distribution</a>.
+Anaconda provides Python, an integrated desktop environment (Spyder), and
+widely used packages such as NumPy and Matplotlib.</p>
 </div>
-<p><strong class="program">PyQInt</strong> is distributed via both Anaconda package as well as PyPI. For
-Windows, it is recommended to install <strong class="program">PyQInt</strong> via Anaconda, while
-for Linux, we recommend to use PyPI.</p>
-<section id="windows-anaconda">
-<h2>Windows / Anaconda<a class="headerlink" href="#windows-anaconda" title="Link to this heading"></a></h2>
-<p>To install <strong class="program">PyQInt</strong> under Windows, open an Anaconda Prompt window
-and run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span>
+<p><strong class="program">PyQInt</strong> is available via both Conda and PyPI. We recommend <strong>using an
+isolated environment</strong> rather than installing into the global Python or Conda
+<code class="docutils literal notranslate"><span class="pre">base</span></code> environment. This avoids package conflicts and makes your setup easier
+to reproduce.</p>
+<section id="why-environments">
+<h2>Why environments?<a class="headerlink" href="#why-environments" title="Link to this heading"></a></h2>
+<p>An environment keeps the packages for a project separate from the rest of your
+system (and from other projects). This prevents accidental upgrades or conflicts
+that can break existing setups. It also makes it easy to remove the environment
+later without touching your system-wide Python. For these reasons, installing
+into Conda’s <code class="docutils literal notranslate"><span class="pre">base</span></code> environment is discouraged.</p>
+</section>
+<section id="windows-conda-recommended">
+<h2>Windows / Conda (recommended)<a class="headerlink" href="#windows-conda-recommended" title="Link to this heading"></a></h2>
+<p>Create and activate a fresh Conda environment, then install <strong class="program">PyQInt</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Sometimes Anaconda is unable to resolve the package dependencies. This can
-be caused by a broken environment. An easy solution is to create a new
-environment. See the “Troubleshooting” section at the end of this page
-for more information.</p>
+<p>If you would like to use <strong class="program">PyQInt</strong>’s <strong>isosurface functionality</strong>,
+you will also need the optional package <code class="docutils literal notranslate"><span class="pre">pytessel</span></code>. You can install it
+together with <strong class="program">PyQInt</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span> <span class="n">pytessel</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+<p>or add it later with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pytessel</span>
+</pre></div>
+</div>
+</div>
+<p>Optionally install the Spyder IDE and common scientific packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">spyder</span> <span class="n">matplotlib</span> <span class="n">scipy</span> <span class="n">pandas</span> <span class="n">openpyxl</span>
+</pre></div>
 </div>
 </section>
-<section id="linux-pypi">
-<h2>Linux / PyPI<a class="headerlink" href="#linux-pypi" title="Link to this heading"></a></h2>
-<p>To install <strong class="program">PyQInt</strong> systemwide, run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pyqint</span>
+<section id="linux-macos-pypi-recommended-via-virtual-environment">
+<h2>Linux / macOS / PyPI (recommended via virtual environment)<a class="headerlink" href="#linux-macos-pypi-recommended-via-virtual-environment" title="Link to this heading"></a></h2>
+<p>Use Python’s built-in virtual environments to isolate your installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
+<span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="n">pip</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">pyqint</span>
 </pre></div>
 </div>
-<p>or to install <strong class="program">PyQInt</strong> only for the current user, run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pyqint</span>
+<p>Optional extra for <strong>isosurface functionality</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pytessel</span>
 </pre></div>
+</div>
+<p>To leave the environment, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">deactivate</span>
+</pre></div>
+</div>
+</section>
+<section id="alternative-single-user-install-without-a-virtual-environment">
+<h2>Alternative (single-user install without a virtual environment)<a class="headerlink" href="#alternative-single-user-install-without-a-virtual-environment" title="Link to this heading"></a></h2>
+<p>If you prefer not to create a virtual environment, you can install for the
+current user only (no system-wide changes):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span> <span class="n">pyqint</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We <strong>do not recommend</strong> using <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">...</span></code>. Installing packages
+with administrative privileges can overwrite or conflict with system Python
+components and may break tools your operating system relies on.</p>
 </div>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
-<p>The Anaconda packaging system can sometimes be quite finicky and sometimes
-packages conflict with each other. A way to work around this issue is to create
-a separate environment and only use that environment for the electronic
-resources associated with this project.</p>
-<p>To create the new environment (called eoesc-env), run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11</span>
-</pre></div>
-</div>
-<p>Next, open the environment with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">eoesc</span><span class="o">-</span><span class="n">env</span>
-</pre></div>
-</div>
-<p>and install the required packages:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">ifilot</span> <span class="n">pyqint</span> <span class="n">pytessel</span>
-</pre></div>
-</div>
-<p>Finally, you can install the IDE Spyder using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">spyder</span> <span class="n">matplotlib</span> <span class="n">scipy</span> <span class="n">pandas</span> <span class="n">openpyxl</span>
-</pre></div>
-</div>
+<ul class="simple">
+<li><p>If Conda reports conflicts during installation, it usually means the active
+environment has incompatible packages. Creating a fresh environment (as shown
+above) is the most reliable fix.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">pip</span></code> cannot find the package or fails due to permissions, ensure your
+virtual environment is activated, or use <code class="docutils literal notranslate"><span class="pre">--user</span></code> for a local user install.</p></li>
+<li><p>If Spyder does not see the environment, launch Spyder <strong>from within</strong> the
+activated environment (<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">eoesc-env</span></code> then <code class="docutils literal notranslate"><span class="pre">spyder</span></code>), or
+configure the interpreter path in Spyder’s preferences.</p></li>
+</ul>
 </section>
 </section>
 
