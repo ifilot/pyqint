@@ -843,8 +843,10 @@ Constructing isosurfaces
 ------------------------
 
 .. note::
-    Isosurface generation requires the :program:`PyTessel` package to be
-    installed. More information can be found `here <https://ifilot.github.io/pytessel/>`_.
+    * Isosurface generation requires the :program:`PyTessel` package to be
+      installed. Make sure you have installed :program:`PyTessel` alongside 
+      :program:`PyQInt`. For more details, see the :ref:`installation`.
+    * Optionally, have a look at `PyTessel's documentation <https://ifilot.github.io/pytessel/>`_.
 
 .. code-block:: python
 
