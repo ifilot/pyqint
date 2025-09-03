@@ -597,7 +597,7 @@ the Hartree-Fock coefficient optimization procedure in detail.
 
 .. code-block:: python
 
-    from pyqint import PyQInt, Molecule, HF
+    from pyqint import PyQInt, MoleculeBuilder, HF
     import numpy as np
     import matplotlib.pyplot as plt
     from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -607,46 +607,52 @@ the Hartree-Fock coefficient optimization procedure in detail.
         cgfs, coeff = calculate_co()
 
         # visualize orbitals
-        fig, ax = plt.subplots(2,3, figsize=(18,10))
+        fig, ax = plt.subplots(2,5, figsize=(12, 5), dpi=144)
+        sz = 3
         for i in range(0,2):
-            for j in range(0,3):
-                dens = plot_wavefunction(cgfs, coeff[:,i*3+j])
+            for j in range(0,5):
+                dens = plot_wavefunction(cgfs, coeff[:,i*5+j], sz=sz)
                 limit = max(abs(np.min(dens)), abs(np.max(dens)) )
-                im = ax[i,j].imshow(dens, origin='lower', interpolation='bilinear',
-                  extent=[-2,2,-2,2], cmap='PiYG', vmin=-limit, vmax=limit)
-                ax[i,j].set_xlabel('Distance a.u.')
-                ax[i,j].set_ylabel('Distance a.u.')
-                divider = make_axes_locatable(ax[i,j])
-                cax = divider.append_axes('right', size='5%', pad=0.05)
-                fig.colorbar(im, cax=cax, orientation='vertical')
+                im = ax[i,j].contourf(dens, origin='lower',
+                  extent=[-sz, sz, -sz, sz], cmap='PiYG', vmin=-limit, vmax=limit,
+                  levels=11)
+                im = ax[i,j].contour(dens, origin='lower', colors='black',
+                  extent=[-sz, sz, -sz, sz], vmin=-limit, vmax=limit,
+                  levels=11)
+                ax[i,j].set_xlabel('x [Bohr]')
+                ax[i,j].set_ylabel('z [Bohr]')
+                ax[i,j].set_aspect('equal', adjustable='box')
+                ax[i,j].set_xticks(np.linspace(-3,3, 7))
+                ax[i,j].set_yticks(np.linspace(-3,3, 7))
+                ax[i,j].grid(linestyle='--', alpha=0.5)
+        plt.tight_layout()
+        plt.show()
 
     def calculate_co():
-        mol = Molecule()
-        mol.add_atom('C', 0.0, -0.5, 0.0)
-        mol.add_atom('O', 0.0, 0.5, 0.0)
+        mol = MoleculeBuilder().from_name('CO')
 
         result = HF().rhf(mol, 'sto3g')
 
         return result['cgfs'], result['orbc']
 
-    def plot_wavefunction(cgfs, coeff):
+    def plot_wavefunction(cgfs, coeff, sz=3.5):
         # build integrator
         integrator = PyQInt()
 
         # build grid
-        x = np.linspace(-2, 2, 100)
-        y = np.linspace(-2, 2, 100)
-        xx, yy = np.meshgrid(x,y)
-        zz = np.zeros(len(x) * len(y))
-        grid = np.vstack([xx.flatten(), yy.flatten(), zz]).reshape(3,-1).T
-        res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(y), len(x)))
+        x = np.linspace(-sz, sz, 150)
+        z = np.linspace(-sz, sz, 150)
+        xx, zz = np.meshgrid(x,z)
+        yy = np.zeros(len(x) * len(z))
+        grid = np.vstack([xx.flatten(), yy, zz.flatten()]).reshape(3,-1).T
+        res = integrator.plot_wavefunction(grid, coeff, cgfs).reshape((len(z), len(x)))
 
         return res
 
     if __name__ == '__main__':
         main()
 
-.. figure:: _static/img/co.jpg
+.. figure:: _static/img/co_orbs_contour.png
 
     Canonical molecular orbitals of CO visualized using contour plots.
 
@@ -762,6 +768,7 @@ In the example code shown below, the latter is done.
 
 .. code-block:: python
 
+    from pyqint import Molecule, HF, cgf
     mol = Molecule()
     mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
     mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')        
@@ -777,7 +784,7 @@ In the example code shown below, the latter is done.
 
         cgfs.append(_cgf)
 
-    res = HF().rhf(mol, basis=cgfs)
+    res = HF().rhf(mol, basis=cgfs, verbose=True)
 
 .. hint::
 
@@ -794,7 +801,7 @@ value (i.e. the isovalue) of the scalar field can be chosen and all points in
 space that have this value can be tied together creating a so-called isosurface.
 
 Contour plots can be easily created using `matplotlib <https://matplotlib.org/>`_.
-For the creation of isosurfaces, we use `PyTessel <https://pytessel.imc-tue.nl.>`_.
+For the creation of isosurfaces, we use `PyTessel <https://ifilot.github.io/pytessel/>`_.
 
 Contour plots
 -------------
@@ -836,8 +843,10 @@ Constructing isosurfaces
 ------------------------
 
 .. note::
-    Isosurface generation requires the :program:`PyTessel` package to be
-    installed. More information can be found `here <https://pytessel.imc-tue.nl>`_.
+    * Isosurface generation requires the :program:`PyTessel` package to be
+      installed. Make sure you have installed :program:`PyTessel` alongside 
+      :program:`PyQInt`. For more details, see the :ref:`installation`.
+    * Optionally, have a look at `PyTessel's documentation <https://ifilot.github.io/pytessel/>`_.
 
 .. code-block:: python
 
