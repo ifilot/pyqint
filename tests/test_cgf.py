@@ -1,6 +1,5 @@
 import unittest
-from pyqint import PyQInt, Molecule, cgf
-from copy import deepcopy
+from pyqint import PyQInt, Molecule, CGF
 import numpy as np
 import os
 
@@ -75,7 +74,7 @@ class TestCGF(unittest.TestCase):
         p0 = [0.0, 0.0, 0.0]
         for l in range(7):
             for m in range(-l, l+1):
-                orb = cgf(p0)
+                orb = CGF(p0)
                 orb.add_spherical_gto(1.0, 1.0, l, m)
                 basis_functions.append(orb)
         # build overlap matrix

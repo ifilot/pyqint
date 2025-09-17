@@ -1,6 +1,6 @@
 from .pyqint import PyGTO
 
-class gto:
+class GTO:
     """
     Primitive Gaussian Type Orbital
     """

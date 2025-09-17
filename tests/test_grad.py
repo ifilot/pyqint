@@ -1,5 +1,5 @@
 import unittest
-from pyqint import cgf
+from pyqint import CGF
 import numpy as np
 import itertools
 
@@ -20,7 +20,7 @@ class TestGrad(unittest.TestCase):
         for exp in pp:
             for p in pp:
                 l,m,n = exp
-                cgft = cgf()
+                cgft = CGF()
                 cgft.add_gto(0.154329, 3.425251, l, m, n)
                 cgft.add_gto(0.535328, 0.623914, l, m, n)
                 cgft.add_gto(0.444635, 0.168855, l, m, n)
@@ -38,7 +38,7 @@ class TestGrad(unittest.TestCase):
         for exp in pp:
             for p in pp:
                 l,m,n = exp
-                cgft = cgf()
+                cgft = CGF()
                 cgft.add_gto(0.154329, 3.425251, l, m, n)
                 cgft.add_gto(0.535328, 0.623914, l, m, n)
                 cgft.add_gto(0.444635, 0.168855, l, m, n)
@@ -56,7 +56,7 @@ def calculate_derivs_finite_diff(p, h, l=0, m=0, n=0):
         r = np.zeros(3)
         
         r[i] = -h
-        cgft = cgf()
+        cgft = CGF()
         cgft.add_gto(0.154329, 3.425251, l, m, n)
         cgft.add_gto(0.535328, 0.623914, l, m, n)
         cgft.add_gto(0.444635, 0.168855, l, m, n)
@@ -76,7 +76,7 @@ def calculate_derivs_density_finite_diff(p, h, l=0, m=0, n=0):
         r = np.zeros(3)
         
         r[i] = -h
-        cgft = cgf()
+        cgft = CGF()
         cgft.add_gto(0.154329, 3.425251, l, m, n)
         cgft.add_gto(0.535328, 0.623914, l, m, n)
         cgft.add_gto(0.444635, 0.168855, l, m, n)

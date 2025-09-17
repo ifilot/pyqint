@@ -1,8 +1,8 @@
-from .gto import gto
+from .gto import GTO
 from .pyqint import PyCGF
 from . import spherical_harmonics as sh
 
-class cgf:
+class CGF:
     """
     Contracted Gaussian Type Orbital
     """
@@ -46,7 +46,7 @@ class cgf:
         """
         Add Gaussian Type Orbital to Contracted Gaussian Function
         """
-        self.gtos.append(gto(c, self.p, alpha, l, m, n))
+        self.gtos.append(GTO(c, self.p, alpha, l, m, n))
         self.cgf.add_gto(c, alpha, l, m, n)
 
     def add_spherical_gto(self, c, alpha, l, m):

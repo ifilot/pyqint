@@ -35,13 +35,13 @@ polynomial, and :math:`N` a normalization constant such that
 GTOs are a fundamental building block of CGF (see below) and typically a user would
 not directly work with them. Nevertheless, GTO objects can be constructed as follows::
 
-    from pyqint import PyQInt, cgf, gto
+    from pyqint import PyQInt, CGF, GTO
 
     coeff = 1.0    # coefficients only have meaning for GTOs within a CGF
     alpha = 0.5
     l,m,n = 0,0,0
     p = (0,0,0)
-    G = gto(coeff, p, alpha, l, m, n)
+    G = GTO(coeff, p, alpha, l, m, n)
 
 .. note::
     If you work with individual GTOs, the first parameter to construct the GTO
@@ -62,9 +62,9 @@ is esentially a linear combination of GTOs as given by
 To build a CGF, we first have to produce the CGF object and then
 add GTOs to it::
 
-    from pyqint import PyQInt, cgf
+    from pyqint import PyQInt, CGF
 
-    cgf = cgf([0.0, 0.0, 0.0])
+    cgf = CGF([0.0, 0.0, 0.0])
 
     cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf.add_gto(0.535328, 0.623914, 0, 0, 0)
@@ -97,7 +97,7 @@ are separated by a distance of 1.4 Bohr.
 
 .. code-block:: python
 
-    from pyqint import PyQInt, cgf
+    from pyqint import PyQInt, CGF
     import numpy as np
     from copy import deepcopy
 
@@ -105,7 +105,7 @@ are separated by a distance of 1.4 Bohr.
     integrator = PyQInt()
 
     # build CGF for a H atom located at the origin
-    cgf1 = cgf([0.0, 0.0, 0.0])
+    cgf1 = CGF([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
@@ -145,7 +145,7 @@ are separated by a distance of 1.4 Bohr.
 
 .. code-block:: python
 
-    from pyqint import PyQInt, cgf, gto
+    from pyqint import PyQInt, CGF
     import numpy as np
     from copy import deepcopy
 
@@ -153,7 +153,7 @@ are separated by a distance of 1.4 Bohr.
     integrator = PyQInt()
 
     # build CGF for a H atom located at the origin
-    cgf1 = cgf([0.0, 0.0, 0.0])
+    cgf1 = CGF([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
@@ -195,7 +195,7 @@ the nuclei are the same.
 
 .. code-block:: python
 
-    from pyqint import PyQInt, cgf, gto
+    from pyqint import PyQInt, CGF
     import numpy as np
     from copy import deepcopy
 
@@ -203,7 +203,7 @@ the nuclei are the same.
     integrator = PyQInt()
 
     # build CGF for a H atom located at the origin
-    cgf1 = cgf([0.0, 0.0, 0.0])
+    cgf1 = CGF([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
@@ -260,7 +260,7 @@ system are calculated.
 
 .. code-block:: python
 
-    from pyqint import PyQInt, cgf, gto
+    from pyqint import PyQInt, CGF
     import numpy as np
     from copy import deepcopy
 
@@ -268,7 +268,7 @@ system are calculated.
     integrator = PyQInt()
 
     # build CGF for a H atom located at the origin
-    cgf1 = cgf([0.0, 0.0, 0.0])
+    cgf1 = CGF([0.0, 0.0, 0.0])
 
     cgf1.add_gto(0.154329, 3.425251, 0, 0, 0)
     cgf1.add_gto(0.535328, 0.623914, 0, 0, 0)
@@ -776,13 +776,13 @@ In the example code shown below, the latter is done.
 
     cgfs = []
     for n in nuclei:
-        _cgf = cgf(n[0])
+        cgf = CGF(n[0])
 
-        _cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
-        _cgf.add_gto(0.535328, 0.623914, 0, 0, 0)
-        _cgf.add_gto(0.444635, 0.168855, 0, 0, 0)
+        cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
+        cgf.add_gto(0.535328, 0.623914, 0, 0, 0)
+        cgf.add_gto(0.444635, 0.168855, 0, 0, 0)
 
-        cgfs.append(_cgf)
+        cgfs.append(cgf)
 
     res = HF().rhf(mol, basis=cgfs, verbose=True)
 
