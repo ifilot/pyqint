@@ -15,23 +15,23 @@ authors:
 affiliations:
  - name: Inorganic Materials and Catalysis, Department of Chemical Engineering and Chemistry, Eindhoven University of Technology
    index: 1
-date: 11 April 2023
+date: 3 September 2023
 bibliography: paper.bib
 ---
 
 # Summary
 
 `PyQInt` is a modular Python package for learning and prototyping quantum
-chemistry methods, with a particular focus on the Hartree-Fock
-formalism[@roothaan:1951] using Gaussian-type orbitals.[@pople:1995] Designed to
+chemistry methods, with a particular focus on the Hartree-Fock formalism
+[@roothaan:1951] using Gaussian-type orbitals [@pople:1995]. Designed to
 prioritize educational transparency, `PyQInt` exposes all computational building
 blocks—integrals, matrices, Hamiltonians, SCF procedures, and gradients—through
 a clean, inspectable API.
 
-Users can evaluate molecular integrals[@huzinaga:1966], perform self-consistent
+Users can evaluate molecular integrals [@huzinaga:1966], perform self-consistent
 field calculations with direct inversion of iterative subspace
-(DIIS)[@pulay:1980], construct and localize orbitals, compute crystal orbital
-Hamilton population (COHP) coefficients[@dronskowski:1993], and optimize
+(DIIS) [@pulay:1980], construct and localize orbitals, compute crystal orbital
+Hamilton population (COHP) coefficients [@dronskowski:1993], and optimize
 molecular geometries. `PyQInt` is especially well suited for students and
 researchers who want to interact with and understand the underlying steps of
 electronic structure theory, offering full access to intermediate data
@@ -48,7 +48,7 @@ Electronic structure theory plays a foundational role in modern computational
 chemistry, with widespread applications in materials discovery, catalyst design,
 drug development, and the prediction of molecular properties. As simulation
 tools become increasingly powerful and accessible, they are now integral to both
-academic research and industrial workflows.[@gordon:2020]
+academic research and industrial workflows [@gordon:2020].
 
 However, many students and early-career researchers engage with these tools as
 users—relying on established software packages—without gaining a clear
@@ -56,16 +56,16 @@ understanding of the underlying theoretical models, numerical procedures, or
 methodological limitations. This lack of transparency can lead to
 misinterpretation of results, inappropriate method selection, and an
 underappreciation of the approximations involved in electronic structure
-calculations.[@stefani:2009; @hulyadi:2023]
+calculations [@stefani:2009; @hulyadi:2023].
 
 Although the Hartree-Fock (HF) method is rarely used in isolation for practical
 applications, it remains a critical pedagogical foundation for understanding
 more advanced approaches such as Density Functional Theory (DFT) and
-post-Hartree-Fock correlation methods.[@szabo] In particular, the explicit
+post-Hartree-Fock correlation methods [@szabo]. In particular, the explicit
 evaluation of the exchange energy in Hartree-Fock forms the conceptual and
-mathematical basis for hybrid functionals like B3LYP[@becke:1993; @lee:1988],
+mathematical basis for hybrid functionals like B3LYP [@becke:1993; @lee:1988],
 which are among the most widely used methods in applied quantum
-chemistry.[@sousa:2007]
+chemistry [@sousa:2007].
 
 `PyQInt` is designed to support education and exploration in electronic
 structure theory through a modular and transparent implementation of
@@ -75,7 +75,7 @@ individual steps such as integral evaluation, matrix construction, SCF
 procedures, and orbital manipulation. This structure makes the program suitable
 for instructional use as well as for prototyping and method development.
 
-![Visualization of the coefficient matrix from a Hartree–Fock calculation of the CO molecule, obtained using `PyQInt`.\label{fig:co-coefficient}](img/co-coefficient-matrix.jpg)
+![Visualization of the coefficient matrix from a Hartree–Fock calculation of the CO molecule using an STO-3g basis set, obtained using `PyQInt`. The numeric values shown along the x-axis correspond to orbital energies. \label{fig:co-coefficient}](img/figure1-co-coefficient-matrix.pdf)
 
 # Features
 
@@ -100,8 +100,8 @@ to medium-sized systems. This low-level access supports detailed exploration of
 integral evaluation and basis set structure. In addition, PyQInt includes
 higher-level capabilities such as self-consistent field (SCF) Hartree–Fock
 calculations with DIIS acceleration, orbital localization using the Foster–Boys
-method[@boys:1960], Crystal Orbital Hamilton Population (COHP) analysis
-[@dronskowski:1993], and geometry optimization based on analytic energy
+method [@boys:1960], Crystal Orbital Hamilton Population (COHP) analysis
+ [@dronskowski:1993], and geometry optimization based on analytic energy
 gradients.
 
 A key design feature is that all calculations return structured Python
@@ -116,12 +116,12 @@ supports a more detailed understanding of the theoretical framework and
 computational procedures that underpin quantum chemical models.
 
 `PyQInt` also supports molecular orbital visualization through both
-two-dimensional contour plots (\autoref{fig:co-contour}) via
-Matplotlib[@hunter:2007] and three-dimensional isosurface rendering
+two-dimensional contour plots (\autoref{fig:co-contour}) via Matplotlib
+[@hunter:2007] and three-dimensional isosurface rendering
 (\autoref{fig:co-isosurface}). These features aid in connecting computational
 results to chemical concepts and spatial representations. 
 
-![Two-dimensional contour plots of selected molecular orbitals of the CO molecule, visualized using `PyQInt`.\label{fig:co-contour}](img/orbitals-co-contour.jpg)
+![Two-dimensional contour plots of selected molecular orbitals of the CO molecule, visualized using `PyQInt`. The titles of the subplots indicate the corresponding orbital energies.\label{fig:co-contour}](img/figure2-orbitals-co-contour.pdf)
 
 ![Three-dimensional isosurface representations of selected molecular orbitals of the CO molecule, generated with PyQInt and rendered using Blender.\label{fig:co-isosurface}](img/orbitals-co-isosurface.jpg)
 
@@ -182,8 +182,10 @@ installation and integration across a range of computing environments. This
 accessibility ensures that students and instructors can easily incorporate the
 software into classroom exercises, Jupyter Notebooks, or larger Python-based
 projects without the need for complex setup procedures. The ability to install
-`PyQInt` with a single command facilitates its use in teaching environments where
-consistency and ease of deployment are critical, while also making it suitable
-for use in virtual labs, remote instruction, and open science workflows.
+`PyQInt` with a single command facilitates its use in teaching environments
+where consistency and ease of deployment are critical, while also making it
+suitable for use in virtual labs, remote instruction, and open science
+workflows. Detailed documentation, including the installation procedure, are
+available online [@documentation].
 
 # References
