@@ -209,13 +209,13 @@ to be supplied by the user.</p>
 </div>
 <p>GTOs are a fundamental building block of CGF (see below) and typically a user would
 not directly work with them. Nevertheless, GTO objects can be constructed as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span><span class="p">,</span> <span class="n">GTO</span>
 
 <span class="n">coeff</span> <span class="o">=</span> <span class="mf">1.0</span>    <span class="c1"># coefficients only have meaning for GTOs within a CGF</span>
 <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
 <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">gto</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">GTO</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -234,9 +234,9 @@ is esentially a linear combination of GTOs as given by</p>
 \[\phi = \sum_{i} c_{i} \Phi_{i}(\alpha,l,m,n,\vec{R})\]</div>
 <p>To build a CGF, we first have to produce the CGF object and then
 add GTOs to it:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
 
-<span class="n">cgf</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">cgf</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -264,7 +264,7 @@ can be evaluated using <strong class="program">PyQInt</strong>.</p>
 1. In the code snippet below, the overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is
 calculated for a basis set composed of the two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which
 are separated by a distance of 1.4 Bohr.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -272,7 +272,7 @@ are separated by a distance of 1.4 Bohr.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build CGF for a H atom located at the origin</span>
-<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -307,7 +307,7 @@ by</p>
 <p>In the code snippet below, the kinetic energy matrix <span class="math notranslate nohighlight">\(\mathbf{T}\)</span> is
 calculated for a basis set composed of the two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which
 are separated by a distance of 1.4 Bohr.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -315,7 +315,7 @@ are separated by a distance of 1.4 Bohr.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build CGF for a H atom located at the origin</span>
-<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -352,7 +352,7 @@ and <span class="math notranslate nohighlight">\(\mathbf{V}_{2}\)</span> are cal
 two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which are separated by a distance of 1.4 Bohr.
 Due to the symmetry of the system, the nuclear attraction matrices for each of
 the nuclei are the same.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -360,7 +360,7 @@ the nuclei are the same.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build CGF for a H atom located at the origin</span>
-<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -412,7 +412,7 @@ for the efficient evaluation of all the integrals including the two electron int
 due to certain symmetries the number of unique two-electron integrals is smaller.
 In the script below, the six unique two-electron integrals for the H<sub>2</sub>
 system are calculated.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">cgf</span><span class="p">,</span> <span class="n">gto</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -420,7 +420,7 @@ system are calculated.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build CGF for a H atom located at the origin</span>
-<span class="n">cgf1</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+<span class="n">cgf1</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="n">cgf1</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -932,13 +932,13 @@ In the example code shown below, the latter is done.</p>
 
 <span class="n">cgfs</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nuclei</span><span class="p">:</span>
-    <span class="n">_cgf</span> <span class="o">=</span> <span class="n">cgf</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">cgf</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">_cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">cgfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_cgf</span><span class="p">)</span>
+    <span class="n">cgfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cgf</span><span class="p">)</span>
 
 <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">()</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
