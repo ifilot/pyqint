@@ -27,7 +27,7 @@ class GTO:
         self.p = d[1]
         self.alpha = d[2]
         self.l = d[3]
-        self.m = d[3]
+        self.m = d[4]
         self.n = d[5]
         self.gto = PyGTO(self.c, self.p, self.alpha, self.l, self.m, self.n)
 
