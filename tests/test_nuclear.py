@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, gto, Molecule
+from pyqint import PyQInt, GTO, Molecule
 import numpy as np
 
 class TestNuclear(unittest.TestCase):
@@ -15,9 +15,9 @@ class TestNuclear(unittest.TestCase):
         integrator = PyQInt()
 
         # test GTO
-        gto1 = gto(0.154329, [0.0, 0.0, 0.0], 3.425251, 0, 0, 0)
-        gto2 = gto(0.535328, [0.0, 0.0, 0.0], 0.623914, 0, 0, 0)
-        gto3 = gto(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
+        gto1 = GTO(0.154329, [0.0, 0.0, 0.0], 3.425251, 0, 0, 0)
+        gto2 = GTO(0.535328, [0.0, 0.0, 0.0], 0.623914, 0, 0, 0)
+        gto3 = GTO(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         nuclear = integrator.nuclear_gto(gto1, gto1, [0.0, 0.0, 1.0])
         result = -0.31049036979675293
         np.testing.assert_almost_equal(nuclear, result, 4)

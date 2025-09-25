@@ -1,5 +1,5 @@
 import unittest
-from pyqint import Molecule, cgf, HF, MoleculeBuilder
+from pyqint import Molecule, CGF, HF, MoleculeBuilder
 import numpy as np
 
 class TestCustomBasisSet(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestCustomBasisSet(unittest.TestCase):
 
         cgfs = []
         for n in nuclei:
-            _cgf = cgf(n[0])
+            _cgf = CGF(n[0])
 
             _cgf.add_gto(0.154329, 3.425251, 0, 0, 0)
             _cgf.add_gto(0.535328, 0.623914, 0, 0, 0)

@@ -3,7 +3,7 @@
 import json
 import os
 import numpy as np
-from .cgf import cgf
+from .cgf import CGF
 from .element import Element
 
 class Molecule:
@@ -88,47 +88,47 @@ class Molecule:
             for cgf_t in cgfs_template['cgfs']:
                 # s-orbitals
                 if cgf_t['type'] == 'S':
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 0)
 
                 # p-orbitals
                 if cgf_t['type'] == 'P':
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 0)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 0)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 1)
 
                 # d-orbitals
                 if cgf_t['type'] == 'D':
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 2, 0, 0)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 2, 0)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 0, 2)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 1, 0)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 1, 0, 1)
                     
-                    self.__cgfs.append(cgf(atom[1]))
+                    self.__cgfs.append(CGF(atom[1]))
                     for gto in cgf_t['gtos']:
                         self.__cgfs[-1].add_gto(gto['coeff'], gto['alpha'], 0, 1, 1)
 
