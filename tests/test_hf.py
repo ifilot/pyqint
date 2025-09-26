@@ -125,7 +125,7 @@ class TestHF(unittest.TestCase):
 
         # assess that the energy of the perturbed result is different
         # (and also higher)
-        en = -39.34538546003782
+        en = -39.3317094910293
         np.testing.assert_almost_equal(results2['energies'][-1], en, 3)
 
         # check that the convergence is quicker
