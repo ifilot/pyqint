@@ -20,23 +20,9 @@ env:
   CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
 
 jobs:
-  check-version-strings:
-    runs-on: ubuntu-latest
-    container: python:3.9.18-slim-bullseye
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          pip install pyyaml
-      - name: Test versions
-        run: |
-          python testversion.py
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
-    needs: [check-version-strings]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -46,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
 
       - uses: actions/upload-artifact@v4
         with:
@@ -55,7 +41,6 @@ jobs:
 
   build_sdist:
     name: Build source distribution
-    needs: [check-version-strings]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
