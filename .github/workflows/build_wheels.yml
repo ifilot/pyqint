@@ -11,7 +11,7 @@ on:
     types: [published]
 
 env:
-  # macOS universal and arm64 builds
+  # macOS universal and arm64 wheels build on Intel
   CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
   CIBW_SKIP: "cp36-* cp37-*"
   CIBW_BUILD_VERBOSITY: 1
@@ -19,7 +19,7 @@ env:
 jobs:
 
   # --------------------------------------------------------------------------
-  # Build wheels for each OS and Python version
+  # Build wheels for all OS × Python versions
   # --------------------------------------------------------------------------
   build_wheels:
     name: Build wheels (${{ matrix.os }} / Python ${{ matrix.python-version }})
@@ -28,11 +28,78 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          # ---------------- Ubuntu ----------------
+          - os: ubuntu-latest
+            python-version: "3.8"
+            tag: cp38
+          - os: ubuntu-latest
+            python-version: "3.9"
+            tag: cp39
+          - os: ubuntu-latest
+            python-version: "3.10"
+            tag: cp310
+          - os: ubuntu-latest
+            python-version: "3.11"
+            tag: cp311
+          - os: ubuntu-latest
+            python-version: "3.12"
+            tag: cp312
+          - os: ubuntu-latest
+            python-version: "3.13"
+            tag: cp313
+          - os: ubuntu-latest
+            python-version: "3.14"
+            tag: cp314
+
+          # ---------------- Windows ----------------
+          - os: windows-latest
+            python-version: "3.8"
+            tag: cp38
+          - os: windows-latest
+            python-version: "3.9"
+            tag: cp39
+          - os: windows-latest
+            python-version: "3.10"
+            tag: cp310
+          - os: windows-latest
+            python-version: "3.11"
+            tag: cp311
+          - os: windows-latest
+            python-version: "3.12"
+            tag: cp312
+          - os: windows-latest
+            python-version: "3.13"
+            tag: cp313
+          - os: windows-latest
+            python-version: "3.14"
+            tag: cp314
+
+          # ---------------- macOS ----------------
+          - os: macos-latest
+            python-version: "3.8"
+            tag: cp38
+          - os: macos-latest
+            python-version: "3.9"
+            tag: cp39
+          - os: macos-latest
+            python-version: "3.10"
+            tag: cp310
+          - os: macos-latest
+            python-version: "3.11"
+            tag: cp311
+          - os: macos-latest
+            python-version: "3.12"
+            tag: cp312
+          - os: macos-latest
+            python-version: "3.13"
+            tag: cp313
+          - os: macos-latest
+            python-version: "3.14"
+            tag: cp314
 
     env:
-      CIBW_BUILD: cp${{ matrix.python-version.replace('.', '') }}-*
+      CIBW_BUILD: "${{ matrix.tag }}-*"
 
     steps:
       - uses: actions/checkout@v4
@@ -47,11 +114,12 @@ jobs:
           if-no-files-found: error
 
   # --------------------------------------------------------------------------
-  # Build sdist (only once)
+  # Build sdist (once)
   # --------------------------------------------------------------------------
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -64,7 +132,7 @@ jobs:
           path: dist/*.tar.gz
 
   # --------------------------------------------------------------------------
-  # Upload wheels and sdist to PyPI (only for version tags)
+  # Upload all wheels + sdist to PyPI (only on version tags)
   # --------------------------------------------------------------------------
   upload_pypi:
     name: Upload to PyPI
@@ -76,17 +144,11 @@ jobs:
       id-token: write
 
     steps:
-      - name: Download wheel artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-
-      - name: Download sdist
-        uses: actions/download-artifact@v4
-        with:
-          name: sdist
-          path: dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
