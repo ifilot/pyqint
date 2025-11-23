@@ -48,11 +48,7 @@ jobs:
           auto-activate-base: false
           activate-environment: build
           python-version: ${{ matrix.python-version }}
-          channels: conda-forge
-          channel-priority: strict
-          
           environment-file: environment.yml
-          use-mamba: true
 
       - name: Set up MSVC toolchain
         uses: ilammy/msvc-dev-cmd@v1
