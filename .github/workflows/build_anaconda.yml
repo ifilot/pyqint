@@ -1,0 +1,113 @@
+name: Conda Build & Publish
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [master, develop]
+    tags:
+      - "v**"
+  release:
+    types: [published]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Version sanity checks
+  # ---------------------------------------------------------------------------
+  check-version-strings:
+    runs-on: ubuntu-latest
+    container: python:3.12-slim
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Test version strings
+        run: python testversion.py
+
+  # ---------------------------------------------------------------------------
+  # Conda build (Windows only, matrix Python versions)
+  # ---------------------------------------------------------------------------
+  build-conda-windows:
+    needs: check-version-strings
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          activate-environment: build
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge,defaults
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Set up MSVC toolchain
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build conda package
+        shell: bash -l {0}
+        run: |
+          CONDA_BASE=$(conda info --base)
+          mkdir -p build_artifacts
+          conda build . \
+            --no-include-recipe \
+            --output-folder build_artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-windows-py${{ matrix.python-version }}
+          path: build_artifacts/**/*
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Publish (runs only on tagged releases)
+  # ---------------------------------------------------------------------------
+  publish-conda:
+    needs: build-conda-windows
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    environment:
+      name: anaconda
+      url: https://anaconda.org/ifilot/pyqint
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          activate-environment: upload
+          use-mamba: true
+          channels: conda-forge,defaults
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: packages
+
+      - name: Publish to Anaconda
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          echo "Found packages:"
+          ls -R packages
+
+          # Upload everything recursively
+          anaconda upload packages/**/*.tar.bz2
