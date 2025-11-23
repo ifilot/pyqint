@@ -52,9 +52,6 @@ jobs:
 
           # ---------------- Windows ----------------
           - os: windows-latest
-            python-version: "3.8"
-            tag: cp38
-          - os: windows-latest
             python-version: "3.9"
             tag: cp39
           - os: windows-latest
@@ -74,9 +71,6 @@ jobs:
             tag: cp314
 
           # ---------------- macOS ----------------
-          - os: macos-latest
-            python-version: "3.8"
-            tag: cp38
           - os: macos-latest
             python-version: "3.9"
             tag: cp39
