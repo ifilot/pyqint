@@ -5,18 +5,19 @@ package:
 source:
   path: .
 
+build:
+  number: 0
+
 requirements:
   build:
-    - numpy
-    - scipy
-    - python {{ python }}
+    - {{ compiler('c') }}
+    - cython
 
   host:
-    - pip
     - python
+    - pip
     - setuptools
-    - cython
-    - numpy
+    - numpy {{ numpy }}
     - scipy
 
   run:
@@ -27,9 +28,6 @@ requirements:
 
 test:
   requires:
-    - numpy
-    - scipy
-    - setuptools
     - pytest
   source_files:
     - tests/*.py
