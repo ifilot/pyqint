@@ -14,7 +14,7 @@ env:
   # macOS universal and arm64 wheels build on Intel
   CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
   CIBW_ARCHS_WINDOWS: "AMD64"
-  CIBW_SKIP: "cp36-* cp37-*"
+  CIBW_SKIP: "cp36-* cp37-* cp38-*"
   CIBW_BUILD_VERBOSITY: 1
 
 jobs:
@@ -31,9 +31,6 @@ jobs:
       matrix:
         include:
           # ---------------- Ubuntu ----------------
-          - os: ubuntu-latest
-            python-version: "3.8"
-            tag: cp38
           - os: ubuntu-latest
             python-version: "3.9"
             tag: cp39
