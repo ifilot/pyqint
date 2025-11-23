@@ -23,6 +23,7 @@ requirements:
     - numpy
     - scipy
     - {{ blas_impl }}
+    - {{ openmp_impl }}
 
   run:
     - python
@@ -30,12 +31,14 @@ requirements:
     - scipy
     - tqdm
     - {{ blas_impl }}
+    - {{ openmp_impl }}
 
 test:
   requires:
     - numpy
     - scipy
     - {{ blas_impl }}
+    - {{ openmp_impl }}
     - setuptools
     - pytest
   source_files:

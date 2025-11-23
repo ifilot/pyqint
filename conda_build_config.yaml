@@ -1,3 +1,7 @@
+blas_impl:
+  - mkl
+openmp_impl:
+  - llvm-openmp
 python:
   - 3.8
   - 3.9
@@ -15,5 +19,3 @@ numpy:
 zip_keys:
   - python
   - numpy
-blas_impl:
-  - openblas
