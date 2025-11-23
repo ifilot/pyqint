@@ -1,22 +1,23 @@
 package:
   name: "pyqint"
-  version: "1.1.0"
+  version: "1.1.1"
 
 source:
   path: .
 
+build:
+  number: 0
+
 requirements:
   build:
-    - numpy
-    - scipy
-    - python {{ python }}
+    - {{ compiler('c') }}
+    - cython
 
   host:
-    - pip
     - python
+    - pip
     - setuptools
-    - cython
-    - numpy
+    - numpy {{ numpy }}
     - scipy
 
   run:
@@ -27,9 +28,6 @@ requirements:
 
 test:
   requires:
-    - numpy
-    - scipy
-    - setuptools
     - pytest
   source_files:
     - tests/*.py
@@ -43,5 +41,5 @@ about:
   home: https://github.com/ifilot/pyqint
   license: GPL3
   license_family: GPL
-  summary: Python package for evaluating integrals of Gaussian type orbitals in electronic structure calculations
+  summary: "An Educational Hartree-Fock Code in Python: Transparent Implementation of Gaussian-Type Integrals, SCF Procedures, and Geometry Optimization."
   description: See the package README.md for more information.

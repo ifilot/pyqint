@@ -167,7 +167,7 @@ class HF:
             # calculate energy difference between this and the previous
             # iteration; terminate the loop when energy difference is less
             # than threshold
-            if niter > 1:
+            if niter > 4: # require at least 4 steps
                 ediff = np.abs(energies[-2] - energies[-1])
 
                 if ediff < tolerance: # convergence criterion needs to be at least 1e-7!
