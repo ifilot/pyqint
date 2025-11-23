@@ -49,11 +49,13 @@ jobs:
           activate-environment: build
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yml
+          use-mamba: true
 
-      - name: Set up MSVC toolchain
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
+      - name: Install conda-build & compilers
+        run: |
+          mamba install conda-build
+          # Optional: Install compilers if your Cython build requires them
+          mamba install {{ compiler('c') }} {{ compiler('cxx') }} cython
 
       - name: Build conda package
         shell: bash -l {0}
