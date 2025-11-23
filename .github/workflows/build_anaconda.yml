@@ -42,9 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ---------------------- IMPORTANT FIX ----------------------
-      # Never use defaults. Only conda-forge ensures OpenBLAS stack.
-      - name: Set up Miniconda (conda-forge only)
+      - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-activate-base: false
@@ -52,31 +50,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge
           channel-priority: strict
+          
+          environment-file: environment.yml
           use-mamba: true
 
-      # Guarantee no MKL cache in runner
-      - name: Configure clean package cache
-        shell: bash
-        run: |
-          mkdir -p ${GITHUB_WORKSPACE}/conda-pkgs
-          echo "CONDA_PKGS_DIRS=${GITHUB_WORKSPACE}/conda-pkgs" >> $GITHUB_ENV
-
-      # ---------------------- Required for Cython ----------------------
       - name: Set up MSVC toolchain
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
-      # ---------------------- Conda build ----------------------
       - name: Build conda package
         shell: bash -l {0}
         run: |
-          echo "Channels:"
-          conda config --show channels
-          echo "Building package for Python ${{ matrix.python-version }}"
-
+          CONDA_BASE=$(conda info --base)
           mkdir -p build_artifacts
-
           conda build . \
             --no-include-recipe \
             --output-folder build_artifacts
@@ -103,17 +90,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Publishing environment ALSO must be conda-forge-only
-      - name: Set up Miniconda (conda-forge only)
+      - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-activate-base: false
           activate-environment: upload
+          use-mamba: true
           channels: conda-forge
           channel-priority: strict
-          use-mamba: true
 
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: packages
@@ -123,6 +109,8 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
         run: |
-          echo "Packages ready for upload:"
+          echo "Found packages:"
           ls -R packages
-          anaconda upload packages/**/*.tar.bz2 --force
+
+          # Upload everything recursively
+          anaconda upload packages/**/*.tar.bz2
