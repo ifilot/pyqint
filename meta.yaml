@@ -5,6 +5,10 @@ package:
 source:
   path: .
 
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv"
+
 requirements:
   build:
     - numpy
