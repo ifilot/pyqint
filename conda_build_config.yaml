@@ -15,3 +15,5 @@ numpy:
 zip_keys:
   - python
   - numpy
+blas_impl:
+  - openblas

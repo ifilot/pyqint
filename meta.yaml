@@ -22,17 +22,20 @@ requirements:
     - cython
     - numpy
     - scipy
+    - {{ blas_impl }}
 
   run:
     - python
     - numpy
     - scipy
     - tqdm
+    - {{ blas_impl }}
 
 test:
   requires:
     - numpy
     - scipy
+    - {{ blas_impl }}
     - setuptools
     - pytest
   source_files:
