@@ -1,0 +1,25 @@
+{
+    "creators": [
+        {
+            "affiliation": "Eindhoven University of Technology",
+            "name": "Filot, Ivo",
+            "orcid": "0000-0003-1403-8379"
+        }
+    ],
+    "description": "An Educational Hartree-Fock Code in Python: Transparent Implementation of Gaussian-Type Integrals, SCF Procedures, and Geometry Optimization.",
+    "keywords": [
+        "Hartree-Fock",
+        "molecular orbital theory",
+        "molecular integrals",
+        "molecular orbital",
+        "gaussian type orbitals",
+        "computational chemistry",
+        "quantum chemistry",
+        "electronic structure",
+        "electronic structure calculations"
+    ],
+    "license": {
+        "id": "GPL-3.0"
+    },
+    "title": "Xenon"
+}
