@@ -5,17 +5,11 @@ package:
 source:
   path: .
 
-build:
-  number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --no-build-isolation -vv"
-
 requirements:
   build:
     - numpy
     - scipy
     - python {{ python }}
-    - {{ blas_impl }}
-    - {{ openmp_impl }}
 
   host:
     - pip
@@ -24,23 +18,17 @@ requirements:
     - cython
     - numpy
     - scipy
-    - {{ blas_impl }}
-    - {{ openmp_impl }}
 
   run:
     - python
     - numpy
     - scipy
     - tqdm
-    - {{ blas_impl }}
-    - {{ openmp_impl }}
 
 test:
   requires:
     - numpy
     - scipy
-    - {{ blas_impl }}
-    - {{ openmp_impl }}
     - setuptools
     - pytest
   source_files:
