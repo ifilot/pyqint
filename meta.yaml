@@ -43,5 +43,5 @@ about:
   home: https://github.com/ifilot/pyqint
   license: GPL3
   license_family: GPL
-  summary: An Educational Hartree-Fock Code in Python: Transparent Implementation of Gaussian-Type Integrals, SCF Procedures, and Geometry Optimization.
+  summary: "An Educational Hartree-Fock Code in Python: Transparent Implementation of Gaussian-Type Integrals, SCF Procedures, and Geometry Optimization."
   description: See the package README.md for more information.
