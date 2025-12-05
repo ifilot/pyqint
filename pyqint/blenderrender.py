@@ -8,17 +8,6 @@ import shutil
 from sys import platform
 from .element import Element
 
-# try to import PyTessel but do not throw an error if it cannot be loaded
-try:
-    from pytessel import PyTessel
-except ModuleNotFoundError:
-    print('Cannot find module PyTessel')
-
-try:
-    from tqdm import tqdm
-except ModuleNotFoundError:
-    print('Cannot find module tqdm')
-
 class BlenderRender:
     """
     This class leverages blender for rendering molecular orbitals
@@ -46,6 +35,17 @@ class BlenderRender:
         # store .xyz file
         xyzfile = os.path.join(tempdir, 'mol.xyz')
         self.__store_xyz(molecule, xyzfile)
+
+        try:
+            from tqdm import tqdm
+        except ModuleNotFoundError:
+            print('Cannot find module tqdm')
+
+        # try to import PyTessel but do not throw an error if it cannot be loaded
+        try:
+            from pytessel import PyTessel
+        except ModuleNotFoundError:
+            print('Cannot find module PyTessel')
 
         pbar = tqdm(mo_indices)
         for idx in pbar:

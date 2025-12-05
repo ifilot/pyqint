@@ -1,5 +1,0 @@
-FROM conda/miniconda3
-RUN apt update
-RUN apt -y install libeigen3-dev build-essential libboost-all-dev
-RUN conda install -y conda-build
-RUN apt -y install git
