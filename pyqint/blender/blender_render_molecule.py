@@ -17,7 +17,7 @@ with open(os.path.join(os.path.dirname(__file__), 'manifest.json')) as f:
 def main():
     # set the scene
     settings = {
-        'resolution': 512,
+        'resolution': 1024,
         'camera_location': (-10,0,0),
         'camera_rotation': (np.pi/2,0,-np.pi/2),
         'camera_scale' : 10
@@ -35,25 +35,39 @@ def main():
 
     render_scene(manifest['png_output'])
 
+def try_import_ply(filepath):
+    """
+    Try to import a PLY, but do not bail out if there are no vertices present;
+    sometimes there is no negative or positive lobe
+    """
+    try:
+        bpy.ops.wm.ply_import(filepath=filepath)
+        return bpy.context.selected_objects[0]
+    except RuntimeError as e:
+        if "no vertices" in str(e):
+            print(f"Skipping empty PLY: {filepath}")
+            return None
+        raise  # re-raise unexpected errors
+
 def add_isosurface(label, filename_neg, filename_pos):
     """
-    Add the two isosurfaces
+    Add the isosurfaces
     """
-    bpy.ops.import_mesh.ply(
-        filepath=filename_neg
-    )
-    obj = bpy.context.object
-    bpy.ops.object.shade_smooth()
-    obj.data.materials.append(create_material('matneg', manifest['mo_colors']['neg'], alpha=0.5))
-    obj.name = 'isosurface ' + label + '_neg'
+    obj = try_import_ply(filename_neg)
+    if obj:
+        bpy.ops.object.shade_smooth()
+        obj.data.materials.append(
+            create_material('matneg', manifest['mo_colors']['neg'], alpha=0.6)
+        )
+        obj.name = f'isosurface {label}_neg'
 
-    obj = bpy.ops.import_mesh.ply(
-        filepath=filename_pos
-    )
-    bpy.ops.object.shade_smooth()
-    obj = bpy.context.object
-    obj.data.materials.append(create_material('matpos', manifest['mo_colors']['pos'], alpha=0.5))
-    obj.name = 'isosurface ' + label + '_pos'
+    obj = try_import_ply(filename_pos)
+    if obj:
+        bpy.ops.object.shade_smooth()
+        obj.data.materials.append(
+            create_material('matpos', manifest['mo_colors']['pos'], alpha=0.6)
+        )
+        obj.name = f'isosurface {label}_pos'
 
 def create_atoms(mol):
     """
@@ -128,7 +142,7 @@ def set_environment(settings):
     bpy.context.scene.render.resolution_x = settings['resolution']
     bpy.context.scene.render.resolution_y = settings['resolution']
     print('Setting resolution to: ', settings['resolution'])
-    bpy.context.scene.cycles.samples = 1024
+    bpy.context.scene.cycles.samples = 2048
     bpy.context.scene.cycles.tile_size = 2048
 
     # remove cube
@@ -149,7 +163,7 @@ def set_environment(settings):
     bpy.data.objects['Light'].location = (-10,10,10)
     bpy.data.objects['Light'].rotation_euler = tuple(np.radians([55, 0, 225]))
     bpy.data.objects['Light'].data.shape = 'DISK'
-    bpy.data.objects['Light'].data.size = 10
+    bpy.data.objects['Light'].data.size = 2
 
     # set film
     bpy.context.scene.render.film_transparent = True
@@ -169,26 +183,25 @@ def create_material(name, color, alpha=1.0):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
 
-    # set base color
-    mat.node_tree.nodes["Principled BSDF"].inputs[0].default_value = hex2rgbtuple(color)
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
 
-    # subsurface modifier
-    mat.node_tree.nodes["Principled BSDF"].inputs[1].default_value = 0.2
+    # Base Color
+    bsdf.inputs["Base Color"].default_value = hex2rgbtuple(color)
 
-    # set subsurface radii
-    mat.node_tree.nodes["Principled BSDF"].inputs[2].default_value = (0.3,0.3,0.3)
+    # Subsurface Weight
+    bsdf.inputs["Subsurface Weight"].default_value = 0.2
 
-    # set subsurface color
-    mat.node_tree.nodes["Principled BSDF"].inputs[3].default_value = hex2rgbtuple('000000')
+    # Subsurface Radius
+    bsdf.inputs["Subsurface Radius"].default_value = (0.3, 0.3, 0.3)
 
-    # metallic
-    mat.node_tree.nodes["Principled BSDF"].inputs[4].default_value = 0.3
+    # Metallic
+    bsdf.inputs["Metallic"].default_value = 0.1
 
-    # roughness
-    mat.node_tree.nodes["Principled BSDF"].inputs[7].default_value = 0.05
+    # Roughness
+    bsdf.inputs["Roughness"].default_value = 0.2
 
-    # alpha
-    mat.node_tree.nodes["Principled BSDF"].inputs[21].default_value = alpha
+    # Alpha
+    bsdf.inputs["Alpha"].default_value = alpha
 
     return mat
 

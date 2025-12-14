@@ -1,4 +1,4 @@
-from pyqint import Molecule, PyQInt, FosterBoys, GeometryOptimization
+from pyqint import MoleculeBuilder, PyQInt, HF, FosterBoys, GeometryOptimization
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,8 +7,10 @@ import matplotlib.pyplot as plt
 #
 
 def main():   
-    res = optimize_co()
+    mol = MoleculeBuilder().from_name('CO')
+    res = HF().rhf(mol, 'sto3g')
     resfb = FosterBoys(res).run()
+    
     energies = resfb['orbe']
     coeff = resfb['orbc']
     cgfs = res['cgfs']
@@ -29,20 +31,6 @@ def main():
         
     plt.tight_layout()
     plt.savefig('co_fb.jpg')
-
-def optimize_co():
-    """
-    Optimization function for scipy.optimize.minimize
-    """
-    mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -0.6, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  0.6, unit='angstrom')
-    
-    res = GeometryOptimization().run(mol, 'sto3g')
-    
-    print(res['data']['nuclei'])
-    
-    return res['data']
 
 def build_contourplot(cgfs, coeff, sz=2, npts=50, plane='xy'):
     integrator = PyQInt()

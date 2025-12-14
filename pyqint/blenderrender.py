@@ -26,7 +26,7 @@ class BlenderRender:
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
                                   mo_indices=None, sz=5, isovalue=0.03,
                                   prefix='MO', npts=100,
-                                  negcol='E72F65', poscol='3F9EE7'):
+                                  negcol='8f0153', poscol='276419'):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
 
@@ -40,12 +40,6 @@ class BlenderRender:
             from tqdm import tqdm
         except ModuleNotFoundError:
             print('Cannot find module tqdm')
-
-        # try to import PyTessel but do not throw an error if it cannot be loaded
-        try:
-            from pytessel import PyTessel
-        except ModuleNotFoundError:
-            print('Cannot find module PyTessel')
 
         pbar = tqdm(mo_indices)
         for idx in pbar:
@@ -83,13 +77,13 @@ class BlenderRender:
         Find the Blender executable
         """
         if platform == "linux" or platform == "linux2":
-            ex = '/opt/blender-3.3.11-linux-x64/blender' # preferred version and path
+            ex = '/opt/blender-4.5.5-linux-x64/blender' # preferred version and path
             if os.path.exists(ex):
                 return ex
 
-            print('Cannot find proper Blender executable. For Linux, please install Blender LTS 3.3.11 in /opt/blender-3.3.11-linux-x64/.')
-            print('Blender can be obtained via: https://ftp.nluug.nl/pub/graphics/blender/release/Blender3.3/blender-3.3.11-linux-x64.tar.xz')
-            print('For more details on how to install Blender, please consult the instructions in the manual: https://pyqint.imc-tue.nl/')
+            print('Cannot find proper Blender executable. For Linux, please install Blender LTS 4.5.5 in /opt/blender-4.5.5-linux-x64/.')
+            print('Blender can be obtained via:  https://ftp.nluug.nl/pub/graphics/blender/release/Blender4.5/blender-4.5.5-linux-x64.tar.xz')
+            print('For more details on how to install Blender, please consult the instructions in the manual: https://ifilot.github.io/pyqint/')
 
             return None
         elif platform == 'win32':
@@ -101,7 +95,7 @@ class BlenderRender:
                     results.append(os.path.join(root, name))
 
             for res in results:
-                if '3.3' in res:
+                if '4.5' in res:
                     return res
         else:
             raise Exception('Your platform is not supported for Blender')
@@ -161,15 +155,14 @@ class BlenderRender:
         are consistent.
         """
         f = open(filename, 'w')
-        f.write(str(len(mol.atoms)) + '\n')
+        f.write(str(len(mol.get_atoms())) + '\n')
         f.write('\n')
 
         angtobohr = 1.8897259886
         el = Element()
 
-        for a in mol.atoms:
-            elname = getattr(el, a[0]).symbol
-            f.write('%s  %12.6f  %12.6f  %12.6f\n' % (elname, a[1][0] / angtobohr,
+        for a in mol.get_atoms():
+            f.write('%s  %12.6f  %12.6f  %12.6f\n' % (a[0],   a[1][0] / angtobohr,
                                                               a[1][1] / angtobohr,
                                                               a[1][2] / angtobohr))
 
@@ -185,6 +178,12 @@ class BlenderRender:
         grid = integrator.build_rectgrid3d(-sz, sz, npts)
         scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (npts, npts, npts))
         unitcell = np.diag(np.ones(3) * 2 * sz)
+
+        # try to import PyTessel but do not throw an error if it cannot be loaded
+        try:
+            from pytessel import PyTessel
+        except ModuleNotFoundError:
+            print('Cannot find module PyTessel')
 
         pytessel = PyTessel()
         vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)

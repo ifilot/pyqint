@@ -1,8 +1,8 @@
 import unittest
-from pyqint import Molecule, HF, COHP
+from pyqint import Molecule, HF, MOPA
 import numpy as np
 
-class TestCOHP(unittest.TestCase):
+class TestMOPA(unittest.TestCase):
 
     def testCO(self):
         """
@@ -15,9 +15,10 @@ class TestCOHP(unittest.TestCase):
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
         res = HF().rhf(mol, 'sto3g')
-        cohp = COHP(res).run(res['orbc'], 0, 1)
+        mopa = MOPA(res)
+        coeff = mopa.mohp(0, 1)
 
-        cohp_ref = np.array([
+        coeff_ref = np.array([
             0.0399,
             0.0104,
            -0.4365,
@@ -32,8 +33,8 @@ class TestCOHP(unittest.TestCase):
 
         # note that Foster-Boys optimization is somewhat random and thus
         # we use relatively loose testing criteria
-        np.testing.assert_almost_equal(cohp,
-                                       cohp_ref,
+        np.testing.assert_almost_equal(coeff,
+                                       coeff_ref,
                                        decimal=4)
 
 if __name__ == '__main__':

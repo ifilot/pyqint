@@ -6,13 +6,13 @@ from matplotlib.patches import Rectangle
 
 #
 # Perform a (simplified) geometry optimization on the CO molecule and
-# calculate the COHP coefficients for the molecule.
+# calculate the MOHP coefficients for the molecule.
 #
 
 def main():
     # find optimum for CO molecule
-    res = scipy.optimize.minimize(optimize_lih, [1.14], tol=1e-4)
-    print('Optimal distance found at d = %f' % res.x)
+    res = scipy.optimize.minimize(optimize_lih, 1.14, tol=1e-4)
+    print('Optimal distance found at d = %f' % res.x[0])
     
     # calculate sto-3g coefficients for h2o
     result = calculate_lih(res.x)
@@ -21,13 +21,13 @@ def main():
     coeff = result['orbc']
     H = result['fock']
     
-    cohp = np.zeros(len(coeff))
+    mohp = np.zeros(len(coeff))
     for k in range(0, len(coeff)): # loop over molecular orbitals
         for i in range(0,len(coeff)-1): # loop over orbitals on Li
             for j in range(len(coeff)-1,len(coeff)): # loop over orbitals on H
-                cohp[k] += 2.0 * H[i,j] * coeff[i,k] * coeff[j,k]
+                mohp[k] += 2.0 * H[i,j] * coeff[i,k] * coeff[j,k]
                 
-    for i,(chi,e) in enumerate(zip(cohp, energies)):
+    for i,(chi,e) in enumerate(zip(mohp, energies)):
         print('%02i %+8.4f %+8.4f' % (i+1, e, chi))
 
     # labels = [

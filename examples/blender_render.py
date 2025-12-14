@@ -15,10 +15,10 @@ import subprocess
 outpath = os.path.dirname(__file__)
 
 def main():
-    # build_orbitals_co()
+    build_orbitals_co()
     # build_orbitals_ch4()
     # build_orbitals_ethylene()
-    build_orbitals_h2o()
+    # build_orbitals_h2o()
 
 def build_orbitals_co():
     """
@@ -26,13 +26,11 @@ def build_orbitals_co():
     of CO
     """
     molname = 'CO'
-    mol = Molecule('CO')
-    mol.add_atom('C', 0, 0, -1.08232106)
-    mol.add_atom('O', 0, 0, 1.08232106)
+    mol = MoleculeBuilder().from_name(molname)
     res = HF().rhf(mol, 'sto3g')
     resfb = FosterBoys(res).run()
 
-    build(molname, res, resfb, nrows=2)
+    build(molname, res, resfb, nrows=2, npts=151)
 
 def build_orbitals_h2o():
     """
@@ -70,7 +68,7 @@ def build_orbitals_ethylene():
 
     build(molname, res, resfb, nrows=2)
 
-def build(molname, res, resfb, nrows=2):
+def build(molname, res, resfb, nrows=2, npts=100):
     """
     Build isosurfaces, montage and print energies to a file
 
@@ -83,11 +81,11 @@ def build(molname, res, resfb, nrows=2):
     :param      nrows:    Number of rows in the montage
     :type       nrows:    int
     """
-    build_isosurfaces(molname, res, resfb)
+    build_isosurfaces(molname, res, resfb, npts=npts)
     montage(molname, nrows)
     store_energies(os.path.join(os.path.dirname(__file__), 'MO_%s_energies.txt' % molname), res['orbe'], resfb['orbe'])
 
-def build_isosurfaces(molname, res, resfb):
+def build_isosurfaces(molname, res, resfb, npts=100):
     """
     Builds isosurfaces.
 
@@ -100,10 +98,10 @@ def build_isosurfaces(molname, res, resfb):
     """
     br = BlenderRender()
     br.render_molecular_orbitals(res['mol'], res['cgfs'], res['orbc'], outpath,
-        prefix='MO_CAN_%s' % molname)
+        prefix='MO_CAN_%s' % molname, npts=npts)
 
     br.render_molecular_orbitals(resfb['mol'], res['cgfs'], resfb['orbc'], outpath,
-        prefix='MO_FB_%s' % molname)
+        prefix='MO_FB_%s' % molname, npts=npts)
 
 def montage(molname, nrows=2):
     """
@@ -115,12 +113,12 @@ def montage(molname, nrows=2):
     :type       nrows:    int
     """
     out = subprocess.check_output(
-        ['montage', 'MO_CAN_%s_????.png' % molname, '-tile', 'x%i' % nrows, '-geometry', '128x128+2+2', 'MO_%s_CAN.png' % molname],
+        ['montage', 'MO_CAN_%s_????.png' % molname, '-tile', 'x%i' % nrows, '-geometry', '256x256+2+2', 'MO_%s_CAN.png' % molname],
         cwd=os.path.dirname(__file__)
     )
 
     out = subprocess.check_output(
-        ['montage', 'MO_FB_%s_????.png' % molname, '-tile', 'x%i' % nrows, '-geometry', '128x128+2+2', 'MO_%s_FB.png' % molname],
+        ['montage', 'MO_FB_%s_????.png' % molname, '-tile', 'x%i' % nrows, '-geometry', '256x256+2+2', 'MO_%s_FB.png' % molname],
         cwd=os.path.dirname(__file__)
     )
 

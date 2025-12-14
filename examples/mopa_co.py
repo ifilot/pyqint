@@ -1,0 +1,15 @@
+from pyqint import MoleculeBuilder, HF, MOPA
+
+def main():
+    mol = MoleculeBuilder().from_name('CO')
+    res = HF().rhf(mol, 'sto3g')
+    mopa = MOPA(res)
+
+    moop = mopa.moop(0, 1)
+    mohp = mopa.mohp(0, 1)
+                    
+    for i,(e, c1, c2) in enumerate(zip(res['orbe'], moop, mohp)):
+        print('%02i %+8.4f %+8.4f %+8.4f' % (i+1, e, c1, c2))
+
+if __name__ == '__main__':
+    main()
