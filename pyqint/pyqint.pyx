@@ -473,7 +473,7 @@ cdef class PyQInt:
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
-                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
 
         # add nuclei to buffer
         for nucleus in nuclei:
@@ -503,7 +503,7 @@ cdef class PyQInt:
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
-                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
 
         # add nuclei to buffer
         for nucleus in nuclei:
@@ -562,7 +562,7 @@ cdef class PyQInt:
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
-                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
 
         # make list of doubles
         cdef vector[double] c_grid = grid.flatten()
@@ -596,7 +596,7 @@ cdef class PyQInt:
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
-                c_cgfs.back().add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
 
         # make list of doubles
         cdef vector[double] c_grid = grid.flatten()

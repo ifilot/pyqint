@@ -67,8 +67,6 @@ class HF:
         else:
             raise Exception("Invalid orthogonalization option selected: ", ortho)
         
-        
-
         # create empty P matrix as initial guess
         if orbc_init is None:
             P = np.zeros(S.shape)
