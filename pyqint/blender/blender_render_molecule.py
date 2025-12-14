@@ -17,7 +17,7 @@ with open(os.path.join(os.path.dirname(__file__), 'manifest.json')) as f:
 def main():
     # set the scene
     settings = {
-        'resolution': 1024,
+        'resolution': 512,
         'camera_location': (-10,0,0),
         'camera_rotation': (np.pi/2,0,-np.pi/2),
         'camera_scale' : 10
@@ -142,7 +142,7 @@ def set_environment(settings):
     bpy.context.scene.render.resolution_x = settings['resolution']
     bpy.context.scene.render.resolution_y = settings['resolution']
     print('Setting resolution to: ', settings['resolution'])
-    bpy.context.scene.cycles.samples = 2048
+    bpy.context.scene.cycles.samples = 1024
     bpy.context.scene.cycles.tile_size = 2048
 
     # remove cube

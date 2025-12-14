@@ -84,11 +84,14 @@ def main():
 
     overlap = P @ overlap @ P.T
 
-    fig, ax = plt.subplots(1,1, dpi=144, figsize=(7,7))
+    fig, ax = plt.subplots(1,1, dpi=300, figsize=(5,5))
     plot_matrix(ax, P @ B, basislabels, symlabels)
+    plt.tight_layout()
+    plt.savefig('ethylene_symbasis.png')
     plt.show()
 
     # construct new basis
+    integrator = PyQInt()
     B = P @ B
     cgfs_symad = [CGF() for i in range(len(B))]
     for i in range(len(B)): # loop over new basis functions
@@ -96,6 +99,9 @@ def main():
             if abs(B[i,j]) > 0.01:  # verify non-negligble contribution
                 for g in cgfs[j].gtos:
                     cgfs_symad[i].gtos.append(GTO(g.c*B[i,j], g.p, g.alpha, g.l, g.m, g.n))
+        S = integrator.overlap(cgfs_symad[i], cgfs_symad[i])
+        for g in cgfs_symad[i].gtos:
+            g.c /= np.sqrt(S)
 
     # re-perform Hartree-Fock calculation using the symmetry adapted basis
     res = HF().rhf(mol, cgfs_symad, verbose=True)
@@ -111,7 +117,8 @@ def plot_matrix(ax, mat, xlabels, ylabels, xlabelrot = 0):
     """
     Produce plot of matrix
     """
-    mv = np.max(np.abs(mat))
+    #mv = np.max(np.abs(mat))
+    mv = 1
     ax.imshow(mat, vmin=-mv, vmax=mv, cmap='PiYG')
     for i in range(mat.shape[0]):
         for j in range(mat.shape[1]):

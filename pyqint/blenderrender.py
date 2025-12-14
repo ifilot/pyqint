@@ -26,7 +26,7 @@ class BlenderRender:
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
                                   mo_indices=None, sz=5, isovalue=0.03,
                                   prefix='MO', npts=100,
-                                  negcol='8f0153', poscol='276419'):
+                                  negcol='276419', poscol='8f0153'):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
 

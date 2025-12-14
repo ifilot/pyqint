@@ -30,7 +30,7 @@ def build_orbitals_co():
     res = HF().rhf(mol, 'sto3g')
     resfb = FosterBoys(res).run()
 
-    build(molname, res, resfb, nrows=2, npts=151)
+    build(molname, res, resfb, nrows=2, npts=100)
 
 def build_orbitals_h2o():
     """
