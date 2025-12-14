@@ -31,6 +31,7 @@ cdef extern from "cgf.h":
         CGF() except +
         CGF(double, double, double) except +
         void add_gto(double, double, int, int, int) except +
+        void add_gto_with_position(double, double, double, double, double, int, int, int) except +
         double get_amp(double, double, double) except +
         vector[double] get_grad(double, double, double) except +
 

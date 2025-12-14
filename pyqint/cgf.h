@@ -378,7 +378,7 @@ public:
                  double c);
 
     /*
-     * @fn add_GTO
+     * @fn add_gto
      * @brief Add a GTO to the CGF
      *
      * @param double c              coefficient
@@ -390,6 +390,30 @@ public:
      * @return void
      */
     void add_gto(double c,
+                 double alpha,
+                 unsigned int l,
+                 unsigned int m,
+                 unsigned int n);
+
+    /*
+     * @fn add_gto_with_position
+     * @brief Add a GTO to the CGF
+     *
+     * @param double c              coefficient
+     * @param double px             px value
+     * @param double py             px value
+     * @param double pz             px value
+     * @param double alpha          alpha value
+     * @param unsigned int l        l angular momentum x
+     * @param unsigned int m        m angular momentum y
+     * @param unsigned int n        n angular momentum z
+     *
+     * @return void
+     */
+    void add_gto_with_position(double c,
+                 double px,
+                 double py,
+                 double pz,
                  double alpha,
                  unsigned int l,
                  unsigned int m,

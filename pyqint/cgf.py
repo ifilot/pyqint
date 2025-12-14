@@ -46,8 +46,21 @@ class CGF:
         """
         Add Gaussian Type Orbital to Contracted Gaussian Function
         """
+        # add GTO to the Python object
         self.gtos.append(GTO(c, self.p, alpha, l, m, n))
+
+        # also add GTO for the C++ object
         self.cgf.add_gto(c, alpha, l, m, n)
+    
+    def add_gto_with_position(self, c, p, alpha, l, m, n):
+        """
+        Add Gaussian Type Orbital to Contracted Gaussian Function
+        """
+        # add GTO to the Python object
+        self.gtos.append(GTO(c, p, alpha, l, m, n))
+
+        # also add GTO for the C++ object
+        self.cgf.add_gto_with_position(c, p[0], p[1], p[2], alpha, l, m, n)
 
     def add_spherical_gto(self, c, alpha, l, m):
         """

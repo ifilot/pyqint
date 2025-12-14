@@ -263,7 +263,7 @@ void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the 
 }
 
 /*
- * @fn add_GTO
+ * @fn add_gto
  * @brief Add a GTO to the CGF
  *
  * @param double c              coefficient
@@ -280,6 +280,32 @@ void CGF::add_gto(double c,
                   unsigned int m,
                   unsigned int n) {
     this->gtos.push_back(GTO(c, this->r, alpha, l, m, n));
+}
+
+/*
+ * @fn add_gto_with_position
+ * @brief Add a GTO to the CGF
+ *
+ * @param double c              coefficient
+ * @param double px             px value
+ * @param double py             px value
+ * @param double pz             px value
+ * @param double alpha          alpha value
+ * @param unsigned int l        l angular momentum x
+ * @param unsigned int m        m angular momentum y
+ * @param unsigned int n        n angular momentum z
+ *
+ * @return void
+ */
+void CGF::add_gto_with_position(double c,
+                  double px,
+                  double py,
+                  double pz,
+                  double alpha,
+                  unsigned int l,
+                  unsigned int m,
+                  unsigned int n) {
+    this->gtos.push_back(GTO(c, Vec3(px, py, pz), alpha, l, m, n));
 }
 
 /*

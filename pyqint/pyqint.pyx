@@ -40,6 +40,9 @@ cdef class PyCGF:
 
     def add_gto(self, c:float, alpha:float, l:int, m:int, n:int):
         self.cgf.add_gto(c, alpha, l, m, n)
+    
+    def add_gto_with_position(self, c:float, px:float, py:float, pz:float, alpha:float, l:int, m:int, n:int):
+        self.cgf.add_gto_with_position(c, px, py, pz, alpha, l, m, n)
 
     def get_amp_f(self, x:float, y:float, z:float):
         return self.cgf.get_amp(x, y, z)
@@ -89,6 +92,25 @@ cdef class PyQInt:
 
         return compile_info
 
+    @staticmethod
+    cdef CGF build_c_cgf(object cgf):
+        """
+        Helper method to build a CGF object to be used in the Cython
+        back-end; used by all CGF-level molecular integral functions
+        """
+        cdef CGF c_cgf
+        cdef object gto
+
+        c_cgf = CGF(cgf.p[0], cgf.p[1], cgf.p[2])
+        for gto in cgf.gtos:
+            c_cgf.add_gto_with_position(
+                gto.c,
+                gto.p[0], gto.p[1], gto.p[2],
+                gto.alpha,
+                gto.l, gto.m, gto.n
+            )
+        return c_cgf
+
     def get_num_threads(self) -> int:
         """
         Get the number of OpenMP threads
@@ -125,18 +147,8 @@ cdef class PyQInt:
             float: overlap integral
         """
 
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.overlap(c_cgf1, c_cgf2)
 
@@ -174,18 +186,8 @@ cdef class PyQInt:
             float: dipole integral in direction cc
         """
 
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.dipole(c_cgf1, c_cgf2, cc, cref)
 
@@ -202,18 +204,8 @@ cdef class PyQInt:
             float: derivate of overlap integral in cartesian direction coord
         """
 
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.overlap_deriv(c_cgf1, c_cgf2, nuc[0], nuc[1], nuc[2], coord)
 
@@ -247,18 +239,8 @@ cdef class PyQInt:
             float: kinetic integral
         """
 
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.kinetic(c_cgf1, c_cgf2)
 
@@ -274,19 +256,8 @@ cdef class PyQInt:
         Returns:
             float: kinetic integral derivative
         """
-
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.kinetic_deriv(c_cgf1, c_cgf2, nuc[0], nuc[1], nuc[2], coord)
 
@@ -322,19 +293,8 @@ cdef class PyQInt:
         Returns:
             float: nuclear integral
         """
-
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.nuclear(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc)
 
@@ -352,19 +312,8 @@ cdef class PyQInt:
         Returns:
             float: nuclear derivative
         """
-
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.nuclear_deriv(c_cgf1, c_cgf2, rc[0], rc[1], rc[2], zc, rd[0], rd[1], rd[2], coord)
 
@@ -405,21 +354,10 @@ cdef class PyQInt:
         Returns:
             float: repulsion integral
         """
-
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-        cdef CGF c_cgf3
-        cdef CGF c_cgf4
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
+        cdef CGF c_cgf3 = PyQInt.build_c_cgf(cgf3)
+        cdef CGF c_cgf4 = PyQInt.build_c_cgf(cgf4)
 
         # build cgf3
         c_cgf3 = CGF(cgf3.p[0], cgf3.p[1], cgf3.p[2])
@@ -447,21 +385,10 @@ cdef class PyQInt:
         Returns:
             float: nuclear integral derivative
         """
-
-        cdef CGF c_cgf1
-        cdef CGF c_cgf2
-        cdef CGF c_cgf3
-        cdef CGF c_cgf4
-
-        # build cgf1
-        c_cgf1 = CGF(cgf1.p[0], cgf1.p[1], cgf1.p[2])
-        for gto in cgf1.gtos:
-            c_cgf1.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf2
-        c_cgf2 = CGF(cgf2.p[0], cgf2.p[1], cgf2.p[2])
-        for gto in cgf2.gtos:
-            c_cgf2.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+        cdef CGF c_cgf1 = PyQInt.build_c_cgf(cgf1)
+        cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
+        cdef CGF c_cgf3 = PyQInt.build_c_cgf(cgf3)
+        cdef CGF c_cgf4 = PyQInt.build_c_cgf(cgf4)
 
         # build cgf3
         c_cgf3 = CGF(cgf3.p[0], cgf3.p[1], cgf3.p[2])
