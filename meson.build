@@ -13,9 +13,12 @@ openmp = dependency('openmp', required: true)
 
 py.extension_module(
   'pyqint',                 # target name
-  [                         # source files
-    'pyqint/pyqint.pyx',
-    'pyqint/integrals.cpp',
+  [
+        'pyqint/pyqint.pyx',
+        'pyqint/integrals.cpp',
+        'pyqint/plotter.cpp',
+        'pyqint/cgf.cpp',
+        'pyqint/gamma.cpp',
   ],
   override_options: ['cython_language=cpp'],
   dependencies: openmp,

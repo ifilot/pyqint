@@ -4,19 +4,19 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 # Integrals
-cdef extern from "integrals.cpp":
+cdef extern from "integrals.h":
     pass
 
 # Plotter
-cdef extern from "plotter.cpp":
+cdef extern from "plotter.h":
     pass
 
-# contracted and primitive Gaussians
-cdef extern from "cgf.cpp":
+# Contracted and primitive Gaussians
+cdef extern from "cgf.h":
     pass
 
 # Gamma and incomplete Gamma function
-cdef extern from "gamma.cpp":
+cdef extern from "gamma.h":
     pass
 
 # Contracted Gaussian Functions class
