@@ -28,4 +28,5 @@ test-command = "pytest {project}/tests"
 skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp38-*"]
 
 [tool.cibuildwheel.windows]
+before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
