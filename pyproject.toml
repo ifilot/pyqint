@@ -30,7 +30,7 @@ skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp38-*"]
 [tool.cibuildwheel.windows]
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 before-build = [
-  "pip install delvewheel"
+  "pip install delvewheel",
   "call \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64",
   "set PATH=%PATH:C:\\Program Files\\Git\\usr\\bin;=%"
 ]
