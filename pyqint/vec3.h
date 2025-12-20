@@ -1,5 +1,6 @@
-#ifndef _VEC3_H
-#define _VEC3_H
+#pragma once
+
+#include <cmath>
 
 typedef double mat33[3][3];
 
@@ -153,5 +154,3 @@ public:
         return this->x * this->y * this->z;
     }
 };
-
-#endif // _VEC3_H
