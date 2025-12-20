@@ -27,7 +27,6 @@
 #include "factorials.h"
 
 #include "vec3.h"
-#include "gto.h"
 
 /*
  * Gaussian Type Orbital
