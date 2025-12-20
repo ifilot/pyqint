@@ -106,15 +106,9 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          Write-Host "PATH before:"
-          Write-Host $env:PATH
-
           $env:PATH = ($env:PATH.Split(';') |
             Where-Object { $_ -notmatch 'Strawberry' }
           ) -join ';'
-
-          Write-Host "PATH after:"
-          Write-Host $env:PATH
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
