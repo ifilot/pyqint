@@ -92,6 +92,38 @@ jobs:
 
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
+      CIBW_WINDOWS_COMPILER: msvc   # already good
+      CC: cl                        # NEW
+      CXX: cl                       # NEW
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ----------------------------------------------------------
+      # NEW: sanitize PATH on Windows to remove Strawberry Perl
+      # ----------------------------------------------------------
+      - name: Remove Strawberry Perl from PATH
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Write-Host "PATH before:"
+          Write-Host $env:PATH
+
+          $env:PATH = ($env:PATH.Split(';') |
+            Where-Object { $_ -notmatch 'Strawberry' }
+          ) -join ';'
+
+          Write-Host "PATH after:"
+          Write-Host $env:PATH
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.2.1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
 
     steps:
       - uses: actions/checkout@v4
