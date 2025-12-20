@@ -105,8 +105,8 @@ def create_bonds(mol):
             r2 = np.array(at2[1])
             dist = np.linalg.norm(r2 - r1)
 
-            # only create a bond if the distance is less than 1.5 A
-            if dist < 2.5:
+            # only create a bond if the distance is less than 2.5 A
+            if dist < 2.8:
                 axis = np.cross(z,r2-r1)
                 if np.linalg.norm(axis) < 1e-5:
                     axis = np.array([0,0,1])

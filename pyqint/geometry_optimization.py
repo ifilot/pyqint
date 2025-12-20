@@ -3,6 +3,7 @@
 from . import HF, Molecule
 import numpy as np
 import scipy.optimize
+import time
 
 class GeometryOptimization:
     """
@@ -25,6 +26,7 @@ class GeometryOptimization:
         Perform geometry optimization
         """
         x0 = self.__unpack(mol) # unpack coordinates from molecule class
+        self.mol = mol
         self.iter = 0
 
         # reset arrays
@@ -33,10 +35,9 @@ class GeometryOptimization:
         self.coordinates_history = []
 
         if self.verbose:
-            self.__print_break(newline=False)
-            print("START GEOMETRY OPTIMIZATION")
-            print("USING CONJUGATE GRADIENT PROCEDURE")
-            self.__print_break(newline=True)
+            self.__print_break(ch='#', newline=False)
+            print(" START GEOMETRY OPTIMIZATION: USING CONJUGATE GRADIENT PROCEDURE")
+            self.__print_break(ch='#', newline=True)
 
         res_opt = scipy.optimize.minimize(self.energy, x0, args=(mol, basis), method='CG',
                                           jac=self.jacobian, options={'gtol':gtol})
@@ -46,22 +47,21 @@ class GeometryOptimization:
             'energies': self.energies_history,
             'forces': self.forces_history,
             'coordinates': self.coordinates_history,
-            'data': self.last_energy_run
+            'data': self.last_energy_run,
+            'mol': self.mol
         }
 
         return res
 
     def energy(self, x, mol, basis):
+        st = time.perf_counter()
         self.iter += 1
-
         mol = self.__pack(mol, x) # pack positions into new molecule class
 
         if self.verbose:
-            self.__print_break(newline=False)
+            self.__print_break(ch='=', newline=False)
             print('  START GEOMETRY OPTIMIZATION STEP %03i' % self.iter)
-            self.__print_break()
-            self.__print_positions(mol)
-            print() # newline
+            self.__print_break(ch='=')
 
         res = HF().rhf(mol, basis, orbc_init=self.cinit, calc_forces=True)
 
@@ -82,9 +82,14 @@ class GeometryOptimization:
         self.coordinates_history.append(self.coord.reshape(len(mol.get_atoms()),3))
         self.energies_history.append(res['energies'][-1])
 
+        # keep track of time
+        elapsed = (time.perf_counter() - st)
+
         if self.verbose:
-            self.__print_forces(mol, self.forces)
-            print() # print newline
+            self.__print_atoms(mol, self.forces)
+            print()
+            print('Elapsed time: %.4f seconds' % elapsed)
+            print()
             self.__print_break(newline=False)
             print('  END GEOMETRY OPTIMIZATION STEP %03i' % self.iter)
             self.__print_break(newline=True)
@@ -134,40 +139,25 @@ class GeometryOptimization:
 
         return newmol
 
-    def __print_positions(self, mol):
+    def __print_atoms(self, mol, forces):
         """
         Print atomic positions in nice formatting
         """
-        print('-------------')
-        print('  POSITIONS  ')
-        print('-------------')
-        for atom in mol.get_atoms():
-            print('  %2s %12.8f %12.8f %12.8f' % (atom[0],
-                                                  atom[1][0],
-                                                  atom[1][1],
-                                                  atom[1][2]))
-
-    def __print_forces(self, mol, forces):
-        """
-        Print forces using nice formatting
-        """
-        print('----------')
-        print('  FORCES  ')
-        print('----------')
-
+        self.__print_break(ch='-', n=80, newline=False)
+        print('    POSITIONS AND FORCES')
+        self.__print_break(ch='-', n=80, newline=False)
         for atom,force in zip(mol.get_atoms(), forces):
-            print('  %2s %12.4e %12.4e %12.4e' % (atom[0],
-                                                  force[0],
-                                                  force[1],
-                                                  force[2]))
+            print('  %2s | %10.6f %10.6f %10.6f | %+10.4e %+10.4e %+10.4e' % 
+                  (atom[0], atom[1][0], atom[1][1], atom[1][2],
+                   force[0], force[1], force[2]))
 
     def __print_energies(self, res):
         """
         Print the energy terms in each iteration
         """
-        print('------------')
-        print('  ENERGIES  ')
-        print('------------')
+        self.__print_break(ch='-', n=80, newline=False)
+        print('    ENERGIES')
+        self.__print_break(ch='-', n=80, newline=False)
 
         print('  Kinetic:                     %12.8f' % res['ekin'])
         print('  Nuclear:                     %12.8f' % res['enuc'])
@@ -176,7 +166,50 @@ class GeometryOptimization:
         print('  Nuclear repulsion:           %12.8f' % res['enucrep'])
         print('  TOTAL:                       %12.8f' % res['energies'][-1])
 
-    def __print_break(self, newline=True):
-        print('=' * 80)
+    def __print_break(self, ch='=', n = 80, newline=True):
+        print(ch * n)
         if newline:
             print()
+
+    def write_multiframe_xyz(self, filename, comment_fmt=None):
+        """
+        Write a multi-frame XYZ file from a list of coordinate arrays.
+
+        Parameters
+        ----------
+        filename : str
+            Output XYZ file name.
+        comment_fmt : callable, optional
+            Function that takes (frame_index, coords) and returns a comment string
+            for the XYZ frame header.
+            Example:
+                lambda i, c: f"step={i}"
+        """
+
+        BOHR_TO_ANGSTROM = 0.52917721092
+
+        atoms = self.mol.get_atoms()
+        symbols = [atom[0] for atom in atoms]
+        natoms = len(symbols)
+        coords_list = self.coordinates_history
+
+        # Basic validation
+        for i, coords in enumerate(coords_list):
+            if coords.shape != (natoms, 3):
+                raise ValueError(
+                    f"Frame {i} has shape {coords.shape}, expected ({natoms}, 3)"
+                )
+
+        with open(filename, "w") as f:
+            for iframe, coords in enumerate(coords_list):
+                coords = coords * BOHR_TO_ANGSTROM
+                f.write(f"{natoms}\n")
+
+                if comment_fmt is None:
+                    f.write(f"frame={iframe}\n")
+                else:
+                    f.write(comment_fmt(iframe, coords) + "\n")
+
+                # Atomic coordinates
+                for sym, (x, y, z) in zip(symbols, coords):
+                    f.write(f"{sym:2s} {x:16.8f} {y:16.8f} {z:16.8f}\n")

@@ -1,10 +1,5 @@
-from pyqint import Molecule, PyQInt, FosterBoys, GeometryOptimization, HF
-from pyqint import MoleculeBuilder, BlenderRender
-import pyqint
-import numpy as np
-import matplotlib.pyplot as plt
+from pyqint import FosterBoys, GeometryOptimization, HF, BlenderRender
 import os
-import subprocess
 
 #
 # Plot the isosurfaces for a number of molecules, prior and after

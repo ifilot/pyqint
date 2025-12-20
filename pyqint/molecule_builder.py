@@ -32,6 +32,9 @@ class MoleculeBuilder:
             return mol
 
     def build_complex_td(self, r, at1, at2, unit='bohr'):
+        """
+        Build a tetrahedral complex
+        """
         mol = Molecule()
         mol.add_atom(at1,  0,  0,  0, unit=unit)
         mol.add_atom(at2,  1,  1,  1, unit=unit)
@@ -40,3 +43,32 @@ class MoleculeBuilder:
         mol.add_atom(at2, -1,  1,  1, unit=unit)
 
         return mol
+    
+    def list_molecules(self):
+        """
+        Print all available molecule names found in the molecules folder.
+
+        Molecule names are derived from .xyz filenames and can be
+        passed directly to from_name().
+        """
+        mol_dir = os.path.join(
+            os.path.dirname(__file__),
+            "molecules"
+        )
+
+        if not os.path.isdir(mol_dir):
+            print("No molecules directory found.")
+            return
+
+        xyz_files = sorted(
+            f for f in os.listdir(mol_dir)
+            if f.lower().endswith(".xyz")
+        )
+
+        if not xyz_files:
+            print("No .xyz molecules found.")
+            return
+
+        print("Available molecules:")
+        for fname in xyz_files:
+            print(f"  - {os.path.splitext(fname)[0]}")
