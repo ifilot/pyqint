@@ -12,6 +12,7 @@ on:
 
 env:
   CIBW_WINDOWS_COMPILER: msvc
+  CIBW_ARCHS_WINDOWS: AMD64
   CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
   CIBW_ARCHS_WINDOWS: "AMD64"
   CIBW_SKIP: "cp38-*"
@@ -92,26 +93,12 @@ jobs:
 
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
-      CIBW_WINDOWS_COMPILER: msvc   # already good
-      CC: cl                        # NEW
-      CXX: cl                       # NEW
 
     steps:
       - uses: actions/checkout@v4
 
-      # ----------------------------------------------------------
-      # NEW: sanitize PATH on Windows to remove Strawberry Perl
-      # ----------------------------------------------------------
-      - name: Remove Strawberry Perl from PATH
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          $env:PATH = ($env:PATH.Split(';') |
-            Where-Object { $_ -notmatch 'Strawberry' }
-          ) -join ';'
-
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.3.0
 
       - uses: actions/upload-artifact@v4
         with:
