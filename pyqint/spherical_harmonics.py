@@ -1,9 +1,20 @@
 """
-coeffecients of spherical harmonics up to l=6 for cartesian gaussian orbitals.
-The format is:
-spherical_harmonics[l][m] = [[c, [l_x, l_y, l_z], ...]
-where l and m are the spherical harmonic coefficents, c is the weight
-and [l_x, l_y, l_z] are the cartesian exponents.
+Coefficients of real spherical harmonics (up to l = 6) expressed in terms of
+Cartesian Gaussian orbitals.
+
+Data format:
+    spherical_harmonics[l][m] = [
+        (c, (l_x, l_y, l_z)),
+        ...
+    ]
+
+Where:
+    l   : angular momentum quantum number
+    m   : magnetic quantum number
+    c   : coefficient (float)
+    l_x : Cartesian exponent in x
+    l_y : Cartesian exponent in y
+    l_z : Cartesian exponent in z
 """
 
 spherical_harmonics = {
