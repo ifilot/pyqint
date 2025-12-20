@@ -15,6 +15,7 @@ class FosterBoys:
         self.orbc_canonical = res['orbc']
         self.orbe_canonical = res['orbe']
         self.mol = res['mol']
+        self.nuclei = res['nuclei']
         self.nelec = res['nelec']
         self.H = res['fock']
         self.cgfs = res['cgfs']
@@ -75,6 +76,7 @@ class FosterBoys:
             'r2final': self.__calculate_r2(orbc),
             'nelec': self.nelec,
             'cgfs': self.cgfs,
+            'nuclei': self.nuclei,
         }
 
         return result
