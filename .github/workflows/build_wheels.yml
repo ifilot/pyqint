@@ -92,8 +92,6 @@ jobs:
 
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
-      CIBW_ENVIRONMENT_WINDOWS: >
-        PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\Hostx64\x64\bin\Hostx64\x64;${PATH}
 
     steps:
       - uses: actions/checkout@v4
