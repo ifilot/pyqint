@@ -1,6 +1,6 @@
 # cython: language_level=3
 # cython: language=c++
-# cython: module_name=_pyqint
+# cython: module_name=pyqint_core
 
 from libcpp.vector cimport vector
 from libcpp.string cimport string

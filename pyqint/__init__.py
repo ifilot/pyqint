@@ -1,4 +1,4 @@
-from ._pyqint import PyQInt, PyGTO, PyCGF
+from .pyqint_core import PyQInt, PyGTO, PyCGF
 
 from .molecule import Molecule
 from .cgf import CGF

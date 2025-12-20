@@ -32,9 +32,9 @@ inc = include_directories('pyqint')
 # Python extension module
 # -----------------------------
 py.extension_module(
-    '_pyqint',
+    'pyqint_core',
     [
-        'pyqint/pyqint.pyx',
+        'pyqint/pyqint_core.pyx',
         'pyqint/integrals.cpp',
         'pyqint/plotter.cpp',
         'pyqint/cgf.cpp',
