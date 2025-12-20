@@ -96,10 +96,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up MSVC
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
 
