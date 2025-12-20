@@ -92,6 +92,8 @@ jobs:
 
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
+      CIBW_ENVIRONMENT_WINDOWS: >
+        PATH=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\Hostx64\x64\bin\Hostx64\x64;${PATH}
 
     steps:
       - uses: actions/checkout@v4
@@ -99,14 +101,6 @@ jobs:
       - name: Set up MSVC
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Remove Git usr/bin from PATH
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $bad = "C:\Program Files\Git\usr\bin"
-          $env:PATH = ($env:PATH.Split(';') | Where-Object { $_ -ne $bad }) -join ';'
-          echo "PATH=$env:PATH" >> $env:GITHUB_ENV
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
