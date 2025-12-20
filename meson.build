@@ -13,6 +13,10 @@ py = import('python').find_installation(pure: false)
 # Optional OpenMP (recommended for portability)
 openmp = dependency('openmp', required: false)
 
+if host_machine.system() != 'windows'
+  add_project_arguments('-fopenmp', language: 'cpp')
+endif
+
 # Headers live inside the Python package
 inc = include_directories('pyqint')
 
