@@ -125,18 +125,6 @@ jobs:
           path: wheelhouse/*.whl
           if-no-files-found: error
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.1
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: wheelhouse/*.whl
-          if-no-files-found: error
-
   # --------------------------------------------------------------------------
   # Build sdist (once)
   # --------------------------------------------------------------------------
