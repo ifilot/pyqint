@@ -150,6 +150,7 @@ py.install_sources(
 
     'pyqint/blenderrender.py',
     'pyqint/cgf.py',
+    'pyqint/contour.py',
     'pyqint/element.py',
     'pyqint/foster_boys.py',
     'pyqint/geometry_optimization.py',

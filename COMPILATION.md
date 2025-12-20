@@ -43,12 +43,12 @@ python -m twine upload wheelhouse/*
 
 ## Editable install
 
-```bash
-pip install -e .
+Make sure `methon-python` is installed:
+
+```
+pip install meson-python
 ```
 
-If the `.pyx` files have changed, you do need to recopmile with
-
 ```bash
-python setup.py build_ext --inplace
+pip install -e .
 ```

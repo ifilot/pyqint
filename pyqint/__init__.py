@@ -9,5 +9,6 @@ from .mopa import MOPA
 from .molecule_builder import MoleculeBuilder
 from .geometry_optimization import GeometryOptimization
 from .blenderrender import BlenderRender
+from .contour import ContourPlotter
 
 from ._version import __version__
