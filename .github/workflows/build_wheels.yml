@@ -92,6 +92,10 @@ jobs:
 
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
+      CIBW_BEFORE_BUILD_WINDOWS: |
+        call "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x64
+        where cl
+        cl /?
 
     steps:
       - uses: actions/checkout@v4
