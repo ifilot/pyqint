@@ -22,7 +22,7 @@ inc = include_directories('pyqint')
 
 # Python extension module
 py.extension_module(
-    'pyqint',
+    '_pyqint',
     [
         'pyqint/pyqint.pyx',
         'pyqint/integrals.cpp',

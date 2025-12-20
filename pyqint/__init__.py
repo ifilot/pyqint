@@ -1,5 +1,6 @@
+from ._pyqint import PyQInt, PyGTO, PyCGF
+
 from .molecule import Molecule
-from .pyqint import PyQInt
 from .cgf import CGF
 from .gto import GTO
 from .hf import HF
