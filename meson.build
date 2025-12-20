@@ -10,6 +10,7 @@ project(
 
 py = import('python').find_installation()
 openmp = dependency('openmp', required: true)
+inc = include_directories('pyqint')
 
 py.extension_module(
   'pyqint',                 # target name
@@ -20,6 +21,7 @@ py.extension_module(
         'pyqint/cgf.cpp',
         'pyqint/gamma.cpp',
   ],
+  include_directories: inc,
   override_options: ['cython_language=cpp'],
   dependencies: openmp,
   install: true,
