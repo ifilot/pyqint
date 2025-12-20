@@ -8,7 +8,7 @@ build-backend = "mesonpy"
 
 [project]
 name = "pyqint"
-version = "0.1.0"  # temporary; we'll improve this later
+version = "1.2.0"
 description = "Python package for evaluating integrals of Gaussian type orbitals"
 readme = "README.md"
 license = { text = "GPL-3.0-only" }
