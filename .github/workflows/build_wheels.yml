@@ -11,7 +11,7 @@ on:
     types: [published]
 
 env:
-  # macOS universal and arm64 wheels build on Intel
+  CIBW_WINDOWS_COMPILER: msvc
   CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
   CIBW_ARCHS_WINDOWS: "AMD64"
   CIBW_SKIP: "cp38-*"
