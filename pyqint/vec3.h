@@ -1,5 +1,6 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 typedef double mat33[3][3];
