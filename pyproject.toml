@@ -1,15 +1,27 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel",
+    "meson-python",
     "Cython",
     "numpy",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "mesonpy"
+
+[project]
+name = "pyqint"
+version = "0.1.0"  # temporary; we'll improve this later
+description = "Python package for evaluating integrals of Gaussian type orbitals"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+authors = [
+    { name = "Ivo Filot", email = "ivo@ivofilot.nl" }
+]
+requires-python = ">=3.9"
+dependencies = ["numpy", "scipy"]
+
+[project.urls]
+Homepage = "https://github.com/ifilot/pyqint"
 
 [tool.cibuildwheel]
 test-requires = "pytest"
 test-command = "pytest {project}/tests"
-
-# skip PyPy wheels and 32 bit builds
-skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp36-*", "cp37-*"]
+skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp36-*", "cp37-*", "cp38-*"]
