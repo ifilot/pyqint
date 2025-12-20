@@ -1,4 +1,5 @@
-# distutils: language = c++
+# cython: language_level=3
+# cython: language=c++
 
 from .pyqint cimport Integrator, GTO, CGF
 import numpy as np
