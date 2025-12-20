@@ -93,7 +93,15 @@ jobs:
     env:
       CIBW_BUILD: "${{ matrix.tag }}-*"
       CIBW_BEFORE_BUILD_WINDOWS: |
-        call "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat" -arch=x64
+        for /f "usebackq delims=" %%i in (`
+          "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" ^
+            -latest ^
+            -products * ^
+            -requires Microsoft.Component.MSBuild ^
+            -property installationPath
+        `) do (
+          call "%%i\Common7\Tools\VsDevCmd.bat" -arch=x64
+        )
         where cl
         cl /?
 
