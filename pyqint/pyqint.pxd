@@ -1,4 +1,6 @@
-# distutils: language = c++
+# cython: language_level=3
+# cython: language=c++
+# cython: module_name=_pyqint
 
 from libcpp.vector cimport vector
 from libcpp.string cimport string

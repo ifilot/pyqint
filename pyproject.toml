@@ -23,5 +23,5 @@ Homepage = "https://github.com/ifilot/pyqint"
 
 [tool.cibuildwheel]
 test-requires = "pytest"
-test-command = "python -m pytest"
+test-command = "pytest {project}/tests"
 skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp38-*"]
