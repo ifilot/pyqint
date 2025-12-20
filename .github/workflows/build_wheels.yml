@@ -108,12 +108,6 @@ jobs:
           $env:PATH = ($env:PATH.Split(';') | Where-Object { $_ -ne $bad }) -join ';'
           echo "PATH=$env:PATH" >> $env:GITHUB_ENV
 
-      - name: Verify MSVC linker
-        if: runner.os == 'Windows'
-        run: |
-          where link
-          link
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
 
