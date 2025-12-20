@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from . import PyQInt
+from .pyqint_core import PyQInt
 import numpy as np
 
 class ContourPlotter:

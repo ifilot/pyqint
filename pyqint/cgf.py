@@ -1,5 +1,5 @@
 from .gto import GTO
-from . import PyCGF
+from .pyqint_core import PyCGF
 from . import spherical_harmonics as sh
 
 class CGF:

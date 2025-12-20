@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from . import PyQInt
+from .pyqint_core import PyQInt
 import time
 
 # couple of hardcoded variables for the DIIS algorithm

@@ -1,5 +1,5 @@
 from pytessel import PyTessel
-from . import PyQInt
+from .pyqint_core import PyQInt
 import numpy as np
 
 def build_isosurface(filename, mol, basis, coeff, isovalue, dim = 5.0):

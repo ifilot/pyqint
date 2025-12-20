@@ -2,7 +2,7 @@
 # cython: language=c++
 # cython: module_name=pyqint_core
 
-from .pyqint cimport Integrator, GTO, CGF
+from .pyqint_core cimport Integrator, GTO, CGF
 import numpy as np
 from collections.abc import Iterable
 from . import gto

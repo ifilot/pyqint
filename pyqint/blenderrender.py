@@ -1,6 +1,6 @@
 import os
 import tempfile
-from pyqint import PyQInt
+from .pyqint_core import PyQInt
 import numpy as np
 import json
 import subprocess
