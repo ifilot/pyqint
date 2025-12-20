@@ -1,3 +1,0 @@
-include pyqint/basissets/*.json
-include pyqint/molecules/*.xyz
-recursive-include pyqint *.pyx
