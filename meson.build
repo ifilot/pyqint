@@ -84,8 +84,3 @@ py.install_sources(
 
     subdir: 'pyqint',
 )
-
-[tool.meson-python.args]
-setup = [
-  "--native-file=msvc-native.ini"
-]

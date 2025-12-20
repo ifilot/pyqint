@@ -36,3 +36,8 @@ before-build = [
   "call \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64",
   "where link"
 ]
+
+[tool.meson-python.args]
+setup = [
+  "--native-file=msvc-native.ini"
+]
