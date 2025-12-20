@@ -3,6 +3,7 @@ requires = [
     "meson-python",
     "Cython",
     "numpy",
+    "delvewheel"
 ]
 build-backend = "mesonpy"
 
@@ -25,3 +26,4 @@ Homepage = "https://github.com/ifilot/pyqint"
 test-requires = "pytest"
 test-command = "pytest {project}/tests"
 skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp38-*"]
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
