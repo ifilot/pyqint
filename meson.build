@@ -9,18 +9,28 @@ project(
 )
 
 py = import('python').find_installation(pure: false)
+cpp = meson.get_compiler('cpp')
 
-# Optional OpenMP (recommended for portability)
-openmp = dependency('openmp', required: false)
+# -----------------------------
+# OpenMP (Linux only)
+# -----------------------------
+openmp_dep = []
 
-if host_machine.system() != 'windows'
-  add_project_arguments('-fopenmp', language: 'cpp')
+if host_machine.system() == 'linux'
+    openmp = dependency('openmp', required: false)
+    if openmp.found()
+        openmp_dep = [openmp]
+    endif
 endif
 
-# Headers live inside the Python package
+# -----------------------------
+# Headers live inside package
+# -----------------------------
 inc = include_directories('pyqint')
 
+# -----------------------------
 # Python extension module
+# -----------------------------
 py.extension_module(
     '_pyqint',
     [
@@ -33,10 +43,13 @@ py.extension_module(
     subdir: 'pyqint',
     include_directories: inc,
     override_options: ['cython_language=cpp'],
-    dependencies: openmp,
+    dependencies: openmp_dep,
     install: true,
 )
 
+# -----------------------------
+# Data directories
+# -----------------------------
 install_subdir(
     'pyqint/basissets',
     install_dir: py.get_install_dir() / 'pyqint'
@@ -47,12 +60,13 @@ install_subdir(
     install_dir: py.get_install_dir() / 'pyqint'
 )
 
+# -----------------------------
+# Pure Python sources
+# -----------------------------
 py.install_sources(
-    # package init + version
     'pyqint/__init__.py',
     'pyqint/_version.py',
 
-    # core Python modules
     'pyqint/blenderrender.py',
     'pyqint/cgf.py',
     'pyqint/element.py',
@@ -66,7 +80,6 @@ py.install_sources(
     'pyqint/mopa.py',
     'pyqint/spherical_harmonics.py',
 
-    # blender subpackage
     'pyqint/blender/blender_render_molecule.py',
 
     subdir: 'pyqint',

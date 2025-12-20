@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .pyqint import PyQInt
+from . import PyQInt
 import numpy as np
 import random
 import scipy.optimize
