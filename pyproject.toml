@@ -38,6 +38,9 @@ before-build = [
 ]
 
 [tool.meson-python.args]
+setup = []
+
+[tool.meson-python.args.windows]
 setup = [
-  "--native-file=msvc-native.ini"
+  "--native-file={project_dir}/msvc-native.ini"
 ]
