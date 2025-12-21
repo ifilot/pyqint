@@ -43,6 +43,7 @@ cdef extern from "plotter.h":
         Plotter() except +
         vector[double] plot_wavefunction(vector[double], vector[double], vector[CGF]) except+
         vector[double] plot_gradient(vector[double], vector[double], vector[CGF]) except+
+        vector[double] plot_basis_function(vector[double], CGF) except+
 
 # Integrator class
 cdef extern from "integrals.h":

@@ -28,11 +28,23 @@ std::vector<double> Plotter::plot_wavefunction(const std::vector<double>& grid,
                                                const std::vector<CGF>& cgfs) const {
     std::vector<double> results(grid.size() / 3, 0.0);
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic, 64)
     for(int i=0; i<(int)grid.size(); i+=3) { // have to use signed int for MSVC OpenMP here
         for(unsigned int j=0; j<coeff.size(); j++) {
             results[i/3] += coeff[j] * cgfs[j].get_amp(grid[i], grid[i+1], grid[i+2]);
         }
+    }
+
+    return results;
+}
+
+std::vector<double> Plotter::plot_basis_function(const std::vector<double>& grid, 
+                                                 const CGF& cgf) const {
+    std::vector<double> results(grid.size() / 3, 0.0);
+
+    #pragma omp parallel for schedule(dynamic, 64)
+    for(int i=0; i<(int)grid.size(); i+=3) { // have to use signed int for MSVC OpenMP here
+        results[i/3] = cgf.get_amp(grid[i], grid[i+1], grid[i+2]);
     }
 
     return results;
@@ -43,7 +55,7 @@ std::vector<double> Plotter::plot_gradient(const std::vector<double>& grid,
                                            const std::vector<CGF>& cgfs) const {
     std::vector<double> results(grid.size(), 0.0);
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic, 64)
     for(int i=0; i<(int)grid.size(); i+=3) { // have to use signed int for MSVC OpenMP here
         for(unsigned int j=0; j<coeff.size(); j++) {
             const auto grad = cgfs[j].get_grad(grid[i], grid[i+1], grid[i+2]);

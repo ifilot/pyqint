@@ -8,6 +8,11 @@ import shutil
 from sys import platform
 from .element import Element
 
+try:
+    from tqdm import tqdm
+except ModuleNotFoundError:
+    print('Cannot find module tqdm')
+
 class BlenderRender:
     """
     This class leverages blender for rendering molecular orbitals
@@ -37,17 +42,17 @@ class BlenderRender:
         xyzfile = os.path.join(tempdir, 'mol.xyz')
         self.__store_xyz(molecule, xyzfile)
 
-        try:
-            from tqdm import tqdm
-        except ModuleNotFoundError:
-            print('Cannot find module tqdm')
+        # pre-built all scalar fields
+        print('Constructing scalar fields for basis functions')
+        scalarfields = self.__build_scalar_fields(cgfs, sz, npts)
 
         pbar = tqdm(mo_indices)
         for idx in pbar:
             # build isosurfaces
             pbar.set_description('Producing isosurfaces (#%i)' % (idx+1))
             plyfile = os.path.join(tempdir, '%s_%04i' % (prefix,idx+1))
-            plypos, plyneg = self.__build_isosurface(plyfile, cgfs, orbc[:,idx], isovalue, sz, npts)
+            scalarfield = np.einsum('ijkl,i->jkl', scalarfields, orbc[:,idx])
+            plypos, plyneg = self.__build_isosurface(plyfile, scalarfield, isovalue, sz)
 
             # execute blender
             pbar.set_description('Producing molecular orbital (#%i)' % (idx+1))
@@ -207,15 +212,29 @@ class BlenderRender:
 
         f.close()
 
-    def __build_isosurface(self, filename, cgfs, coeff, isovalue, sz=5, npts=100):
+    def __build_scalar_fields(self, cgfs, sz=5, npts=100):
+        """
+        Build the scalar fields for the basis functions
+        """
+        integrator = PyQInt()
+        grid = integrator.build_rectgrid3d(-sz, sz, npts)
+
+        scalarfields = np.empty((len(cgfs), npts, npts, npts))
+
+        for i, cgf in enumerate(tqdm(cgfs, desc="Building scalar fields")):
+            scalarfields[i, :, :, :] = np.reshape(
+                integrator.plot_basis_function(grid, cgf),
+                (npts, npts, npts),
+            )
+
+        return scalarfields
+
+    def __build_isosurface(self, filename, scalarfield, isovalue, sz=5):
         """
         Construct isosurfaces from PyQInt output
         """
         # generate some data
         isovalue = np.abs(isovalue)
-        integrator = PyQInt()
-        grid = integrator.build_rectgrid3d(-sz, sz, npts)
-        scalarfield = np.reshape(integrator.plot_wavefunction(grid, coeff, cgfs), (npts, npts, npts))
         unitcell = np.diag(np.ones(3) * 2 * sz)
 
         # try to import PyTessel but do not throw an error if it cannot be loaded

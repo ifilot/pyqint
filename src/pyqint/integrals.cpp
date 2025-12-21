@@ -995,7 +995,7 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
     for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
         sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
                      (i == 0 ? 1 : double_factorial(2 * i - 1) ) /
-                     std::pow(2 * gamma, i);
+                     ipow(2 * gamma, i);
     }
 
     return sum;
@@ -1025,8 +1025,8 @@ double Integrator::binomial_prefactor(int s, int ia, int ib,
         if ((s-ia <= t) && (t <= ib)) {
             sum += this->binomial(ia, s-t)   *
                    this->binomial(ib, t)     *
-                   std::pow(xpa, ia - s + t) *
-                   std::pow(xpb, ib - t);
+                   ipow(xpa, ia - s + t) *
+                   ipow(xpb, ib - t);
         }
     }
 
@@ -1085,9 +1085,9 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
 }
 
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
-    return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
-            std::pow(-1,u) * factorial(i)*std::pow(cpx,i-2*r-2*u)*
-            std::pow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
+    return  ipow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
+            ipow(-1,u) * factorial(i)*ipow(cpx,i-2*r-2*u)*
+            ipow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
 }
 
 /**

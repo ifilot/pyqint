@@ -50,11 +50,10 @@ authors = [
 requires-python = ">=3.9"
 
 # Runtime Python dependencies (independent of build backend)
-dependencies = ["numpy", "scipy", "matplotlib"]
+dependencies = ["numpy", "scipy", "matplotlib", "tqdm"]
 
 [project.urls]
 Homepage = "https://github.com/ifilot/pyqint"
-
 
 # ---------------------------------------------------------------------------
 # cibuildwheel configuration

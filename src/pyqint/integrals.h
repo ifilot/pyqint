@@ -33,6 +33,7 @@
 #include "gamma.h"
 #include "cgf.h"
 #include "factorials.h"
+#include "math.h"
 
 #ifdef _OPENMP
 #include <omp.h>

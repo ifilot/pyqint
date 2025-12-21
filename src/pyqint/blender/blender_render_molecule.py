@@ -150,7 +150,7 @@ def set_environment(settings):
     bpy.context.scene.render.resolution_x = settings['resolution']
     bpy.context.scene.render.resolution_y = settings['resolution']
     print('Setting resolution to: ', settings['resolution'])
-    bpy.context.scene.cycles.samples = 1024
+    bpy.context.scene.cycles.samples = 4096
     bpy.context.scene.cycles.tile_size = 2048
 
     # remove cube
@@ -172,19 +172,25 @@ def set_environment(settings):
     light.data.type = 'AREA'
     light.data.energy = 1e4
     light.data.shape = 'DISK'
-    light.data.size = 2
+    light.data.size = 3
+
+    # let the camera look at the origin
+    target = mathutils.Vector([0,0,0])
+    direction = target - camera.location
+    rot_quat = direction.to_track_quat('-Z', 'Y')
+    camera.rotation_euler = rot_quat.to_euler()
+    bpy.context.view_layer.update()
 
     # position light relative to camera
-    light_offset_cam = mathutils.Vector((3.0, 0.0, 10.0))
-
-    # convert to world space
+    light_offset_cam = mathutils.Vector((10, 10, 10))
     light.location = camera.matrix_world @ light_offset_cam
-
-    # aim the light at center
-    target = mathutils.Vector((0.0, 0.0, 0.0))
     direction = target - light.location
     rotation = direction.to_track_quat('-Z', 'Y')
     light.rotation_euler = rotation.to_euler()
+
+    # output camera and light positions
+    print("Camera world position:", camera.location.copy())
+    print("Light  world position:", light.location.copy())
 
     # set film
     bpy.context.scene.render.film_transparent = True

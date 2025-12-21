@@ -21,21 +21,36 @@
 
 #pragma once
 
-#include "cgf.h"
-
-class Plotter {
-private:
-
-public:
-    Plotter();
-
-    std::vector<double> plot_wavefunction(const std::vector<double>& grid, 
-                                          const std::vector<double>& coeff, 
-                                          const std::vector<CGF>& cgfs) const;
-
-    std::vector<double> plot_gradient(const std::vector<double>& grid, 
-                                      const std::vector<double>& coeff, 
-                                      const std::vector<CGF>& cgfs) const;
-
-private:
-};
+/*
+ * @fn ipow
+ * @brief Fast integer power for small non-negative exponents
+ *
+ * Computes x^n for integer n using explicit multiplication instead of std::pow.
+ * This is intended for small angular momentum exponents (l, m, n) in GTO
+ * evaluation, where std::pow(double, int) is prohibitively expensive and
+ * inhibits inlining and vectorization.
+ *
+ * For n = 0..4, the result is fully unrolled. For larger n, a simple
+ * multiplication loop is used.
+ *
+ * @param x   Base value
+ * @param n   Non-negative integer exponent
+ *
+ * @return x raised to the power n
+ *
+ * @note This function assumes n >= 0. Behavior is undefined for negative n.
+ * @note Marked noexcept and inline to enable aggressive optimization.
+ */
+inline double ipow(double x, int n) noexcept {
+    switch (n) {
+        case 0: return 1.0;
+        case 1: return x;
+        case 2: return x * x;
+        case 3: return x * x * x;
+        case 4: { double x2 = x * x; return x2 * x2; }
+        default:
+            double r = 1.0;
+            for (int i = 0; i < n; ++i) r *= x;
+            return r;
+    }
+}

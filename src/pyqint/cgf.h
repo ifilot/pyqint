@@ -27,8 +27,9 @@
 #include <iostream>
 #include <vector>
 #include <cstddef>
-#include "factorials.h"
 
+#include "factorials.h"
+#include "math.h"
 #include "vec3.h"
 
 /*

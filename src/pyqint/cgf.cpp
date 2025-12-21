@@ -66,13 +66,16 @@ GTO::GTO(double _c,
  * @return const double amplitude
  */
 const double GTO::get_amp(const Vec3& r) const {
-    double r2 = (r - this->position).norm2();
+    const double dx = r[0] - this->position[0];
+    const double dy = r[1] - this->position[1];
+    const double dz = r[2] - this->position[2];
+    const double r2 = dx*dx + dy*dy + dz*dz;
 
     return this->norm *
-           std::pow(r[0]-this->position[0], l) *
-           std::pow(r[1]-this->position[1], m) *
-           std::pow(r[2]-this->position[2], n) *
-           std::exp(- this->alpha * r2);
+        ipow(dx, this->l) *
+        ipow(dy, this->m) *
+        ipow(dz, this->n) *
+        std::exp(-alpha * r2);
 }
 
 /*
@@ -186,7 +189,7 @@ const double CGF::get_amp(const Vec3& r) const {
 }
 
 /*
- * @fn get_amp
+ * @fn get_grad
  * @brief Gets the gradient of the CGF
  *
  * @param Vec3 r    coordinates

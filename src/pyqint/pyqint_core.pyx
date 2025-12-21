@@ -578,6 +578,32 @@ cdef class PyQInt:
 
         return np.array(res)
     
+    def plot_basis_function(self, grid:npt.NDArray[np.float64], cgf) -> npt.NDArray[np.float64]:
+        """Calculates the basis function on a grid
+
+        Args:
+            grid (npt.NDArray[np.float64]): grid coordinates
+            cgf: CGF
+
+        Returns:
+            npt.NDArray[np.float64]: wave function values on grid
+        """
+        cdef CGF c_cgf
+
+        # build objects
+        c_cgf = CGF(cgf.p[0], cgf.p[1], cgf.p[2])
+        for gto in cgf.gtos:
+                c_cgf.add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+
+        # make list of doubles
+        cdef vector[double] c_grid = grid.flatten()
+
+        # build plotter and plot grid
+        cdef Plotter plotter = Plotter()
+        res = plotter.plot_basis_function(c_grid, c_cgf)
+
+        return np.array(res)
+    
     def plot_gradient(self, grid:npt.NDArray[np.float64], coeff:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
         """Build the gradient on the grid
 
