@@ -15,9 +15,10 @@
 #
 [build-system]
 requires = [
-    "meson-python",
     "Cython",
     "numpy",
+    "meson-python>=0.15",
+    "pybind11>=2.11",
 
     # Required only for Windows wheels when building with MinGW.
     # delvewheel is used to bundle MinGW runtime DLLs into the wheel.
@@ -34,6 +35,8 @@ requires = [
 ]
 build-backend = "mesonpy"
 
+[tool.mesonpy]
+module-path = "src"
 
 # ---------------------------------------------------------------------------
 # Project metadata

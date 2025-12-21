@@ -26,6 +26,7 @@ py.extension_module(
     override_options: ['cython_language=cpp'],
     dependencies: openmp_dep,
     install: true,
+    subdir: 'pyqint'
 )
 
 # Package data
@@ -53,4 +54,6 @@ py.install_sources(
     'spherical_harmonics.py',
 
     'blender/blender_render_molecule.py',
+
+    subdir: 'pyqint'
 )

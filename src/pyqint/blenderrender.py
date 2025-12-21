@@ -221,7 +221,7 @@ class BlenderRender:
 
         scalarfields = np.empty((len(cgfs), npts, npts, npts))
 
-        for i, cgf in enumerate(tqdm(cgfs, desc="Building scalar fields")):
+        for i, cgf in enumerate(tqdm(cgfs, desc="Building scalar fields of basis functions")):
             scalarfields[i, :, :, :] = np.reshape(
                 integrator.plot_basis_function(grid, cgf),
                 (npts, npts, npts),
