@@ -29,7 +29,7 @@
 #include <cstddef>
 
 #include "factorials.h"
-#include "math.h"
+#include "mathfuncs.h"
 #include "vec3.h"
 
 /*
