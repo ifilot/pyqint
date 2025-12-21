@@ -136,8 +136,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-*.xyz
-!pyqint/molecules/*.xyz
+!src/pyqint/molecules/*.xyz
 
 # Spynx documentation
 docs/build/*
