@@ -51,7 +51,7 @@ class BlenderRender:
             # execute blender
             pbar.set_description('Producing molecular orbital (#%i)' % (idx+1))
             outfile = os.path.join(outpath, '%s_%04i.png' % (prefix,idx+1))
-            logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir, negcol, poscol)
+            logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir, negcol, poscol, sz*2)
 
             self.log.append("### START LOG: MOLECULAR ORBITAL %i ###" % (idx+1))
             for line in logoutput.splitlines():
@@ -102,7 +102,7 @@ class BlenderRender:
 
         return None
 
-    def __run_blender(self, negfile, posfile, xyzfile, pngfile, cwd, negcol, poscol):
+    def __run_blender(self, negfile, posfile, xyzfile, pngfile, cwd, negcol, poscol, camera_x=10):
         # set path to xyz file
         blendpysrc = os.path.join(os.path.dirname(__file__), 'blender', 'blender_render_molecule.py')
         blendpydst = os.path.join(cwd, 'blender_render_molecule.py')
@@ -119,6 +119,7 @@ class BlenderRender:
             'mo_pos_path' : posfile,
             'png_output': pngfile,
             'bond_thickness': 0.2,
+            'camera_x': camera_x,
             'atom_radii' : {
                 'H': 0.4,
                 'N': 0.6,

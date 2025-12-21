@@ -5,6 +5,8 @@ import numpy as np
 import scipy.optimize
 import time
 
+BOHR_TO_ANGSTROM = 0.52917721092
+
 class GeometryOptimization:
     """
     Class to perform geometry optimizaton using the Conjugate Gradient algorithm
@@ -147,6 +149,8 @@ class GeometryOptimization:
         print('    POSITIONS AND FORCES')
         self.__print_break(ch='-', n=80, newline=False)
         for atom,force in zip(mol.get_atoms(), forces):
+            atom[1] *= BOHR_TO_ANGSTROM
+            force *= BOHR_TO_ANGSTROM
             print('  %2s | %10.6f %10.6f %10.6f | %+10.4e %+10.4e %+10.4e' % 
                   (atom[0], atom[1][0], atom[1][1], atom[1][2],
                    force[0], force[1], force[2]))
@@ -186,8 +190,6 @@ class GeometryOptimization:
                 lambda i, c: f"step={i}"
         """
 
-        BOHR_TO_ANGSTROM = 0.52917721092
-
         atoms = self.mol.get_atoms()
         symbols = [atom[0] for atom in atoms]
         natoms = len(symbols)
@@ -202,7 +204,7 @@ class GeometryOptimization:
 
         with open(filename, "w") as f:
             for iframe, coords in enumerate(coords_list):
-                coords = coords * BOHR_TO_ANGSTROM
+                coords *= BOHR_TO_ANGSTROM
                 f.write(f"{natoms}\n")
 
                 if comment_fmt is None:

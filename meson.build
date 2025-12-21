@@ -132,6 +132,11 @@ install_subdir(
     install_dir: py.get_install_dir() / 'pyqint'
 )
 
+install_subdir(
+    'pyqint/blender',
+    install_dir: py.get_install_dir() / 'pyqint'
+)
+
 
 # ---------------------------------------------------------------------------
 # Pure-Python source files
