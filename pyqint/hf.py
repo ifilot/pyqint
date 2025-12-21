@@ -103,12 +103,7 @@ class HF:
                 P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
-            G = np.zeros_like(S)
-            for i in range(N):
-                for j in range(N):
-                    for k in range(N):
-                        for l in range(N):
-                            G[i,j] += P[k,l] * (tetensor[i,j,l,k] - 0.5 * tetensor[i,k,l,j])
+            G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
 
             # build Fock matrix
             F = T + V + G

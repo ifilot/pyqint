@@ -59,6 +59,9 @@ class BlenderRender:
             elif orientation == 'camz':
                 camera_loc = (0,0,camera_scale)
                 camera_rot = (0,0,0)
+            elif orientation == 'default':
+                camera_loc = (7.35889,-6.92579,4.95831)
+                camera_rot = (np.radians(63.5593),0,np.radians(46.6919))
             else:
                 raise Exception('Invalid camera location')
 
