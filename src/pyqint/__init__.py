@@ -6,6 +6,7 @@ from .gto import GTO
 from .hf import HF
 from .foster_boys import FosterBoys
 from .mopa import MOPA
+from .population_analysis import PA
 from .molecule_builder import MoleculeBuilder
 from .geometry_optimization import GeometryOptimization
 from .blenderrender import BlenderRender
