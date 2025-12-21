@@ -6,10 +6,10 @@ import numpy as np
 from copy import deepcopy
 
 def main():
-    mol = MoleculeBuilder().from_name('ethylene')
+    mol = MoleculeBuilder.from_name('ethylene')
     cgfs, nuclei = mol.build_basis('sto3g')
     from pyqint import CGF, GTO
-    res = HF().rhf(mol, 'sto3g')
+    res = HF(mol, 'sto3g').rhf()
     
     # build transformation matrix that casts the original basis onto a
     # symmetry adapted basis; no normalization is applied

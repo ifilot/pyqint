@@ -13,7 +13,7 @@ class TestHF(unittest.TestCase):
         mol.add_atom('H', 0.7570, 0.5860, 0.0)
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -73.21447132, 4)
@@ -34,7 +34,7 @@ class TestHF(unittest.TestCase):
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that orbital energies are correctly approximated
         ans = np.array([-11.0707,
@@ -64,7 +64,7 @@ class TestHF(unittest.TestCase):
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g', ortho='symmetric')
+        results = HF(mol, 'sto3g').rhf(ortho='symmetric')
 
         # check that orbital energies are correctly approximated
         ans = np.array([-11.0707,
@@ -92,7 +92,7 @@ class TestHF(unittest.TestCase):
         mol.add_atom('H', -dist, -dist, dist, unit='angstrom')
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
-        results1 = HF().rhf(mol, 'sto3g')
+        results1 = HF(mol, 'sto3g').rhf()
 
         # check that orbital energies are correctly approximated
         ans = np.array([-11.0707,
@@ -121,7 +121,7 @@ class TestHF(unittest.TestCase):
 
         # perform HF calculation with coefficient matrix from previous
         # calculation to speed up the convergence
-        results2 = HF().rhf(mol, 'sto3g', orbc_init=results1['orbc'])
+        results2 = HF(mol, 'sto3g').rhf(orbc_init=results1['orbc'])
 
         # assess that the energy of the perturbed result is different
         # (and also higher)

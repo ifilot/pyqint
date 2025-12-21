@@ -1,8 +1,8 @@
 from pyqint import MoleculeBuilder, HF, MOPA
 
 def main():
-    mol = MoleculeBuilder().from_name('CO')
-    res = HF().rhf(mol, 'sto3g')
+    mol = MoleculeBuilder.from_name('CO')
+    res = HF(mol, 'sto3g').rhf()
     mopa = MOPA(res)
 
     moop = mopa.moop(0, 1)

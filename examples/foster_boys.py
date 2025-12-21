@@ -1,4 +1,4 @@
-from pyqint import MoleculeBuilder, PyQInt, HF, FosterBoys, GeometryOptimization
+from pyqint import MoleculeBuilder, PyQInt, HF, FosterBoys
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 #
 
 def main():   
-    mol = MoleculeBuilder().from_name('CO')
-    res = HF().rhf(mol, 'sto3g')
+    mol = MoleculeBuilder.from_name('CO')
+    res = HF(mol, 'sto3g').rhf()
     resfb = FosterBoys(res).run()
     
     energies = resfb['orbe']

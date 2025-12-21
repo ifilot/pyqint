@@ -1,4 +1,4 @@
-from pyqint import FosterBoys, GeometryOptimization, HF, BlenderRender
+from pyqint import MoleculeBuilder, FosterBoys, GeometryOptimization, HF, BlenderRender
 import os
 
 #
@@ -21,8 +21,8 @@ def build_orbitals_co():
     of CO
     """
     molname = 'CO'
-    mol = MoleculeBuilder().from_name(molname)
-    res = HF().rhf(mol, 'sto3g')
+    mol = MoleculeBuilder.from_name(molname)
+    res = HF(mol, 'sto3g').rhf()
     resfb = FosterBoys(res).run()
 
     build(molname, res, resfb, nrows=2, npts=100)
@@ -33,8 +33,8 @@ def build_orbitals_h2o():
     of H2O
     """
     molname = 'H2O'
-    mol = MoleculeBuilder().from_name('h2o')
-    res = GeometryOptimization().run(mol, 'sto3g')['data']
+    mol = MoleculeBuilder.from_name('h2o')
+    res = GeometryOptimization(mol, 'sto3g').run()['data']
     resfb = FosterBoys(res).run()
 
     build(molname, res, resfb, nrows=1)
@@ -45,8 +45,8 @@ def build_orbitals_ch4():
     of CH4
     """
     molname = 'CH4'
-    mol = MoleculeBuilder().from_name('ch4')
-    res = GeometryOptimization().run(mol, 'sto3g')['data']
+    mol = MoleculeBuilder.from_name('ch4')
+    res = GeometryOptimization(mol, 'sto3g').run()['data']
     resfb = FosterBoys(res).run()
 
     build(molname, res, resfb, nrows=3)
@@ -57,8 +57,8 @@ def build_orbitals_ethylene():
     of CH4
     """
     molname = 'ethylene'
-    mol = MoleculeBuilder().from_name('ethylene')
-    res = GeometryOptimization().run(mol, 'sto3g')['data']
+    mol = MoleculeBuilder.from_name('ethylene')
+    res = GeometryOptimization(mol, 'sto3g').run()['data']
     resfb = FosterBoys(res).run()
 
     build(molname, res, resfb, nrows=2)

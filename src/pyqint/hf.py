@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
-from .pyqint_core import PyQInt
+from __future__ import annotations
+
 import time
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+
+import numpy as np
+import numpy.typing as npt
+
+from .pyqint_core import PyQInt
+from .molecule import Molecule
+
+# These are assumed to exist elsewhere in your module
+SUBSPACE_START: int
+SUBSPACE_LENGTH: int
+
+
+Vec = npt.NDArray[np.float64]
+Mat = npt.NDArray[np.float64]
+
+# nucleus entry: (position, charge)
+Nucleus = Tuple[Vec, int]
 
 # couple of hardcoded variables for the DIIS algorithm
 SUBSPACE_LENGTH = 4
@@ -10,18 +28,65 @@ SUBSPACE_START = 1
 
 class HF:
     """
-    Routines to perform a restricted Hartree-Fock calculations
+    Perform Hartree-Fock calculations
     """
-    def rhf(self, mol, basis, calc_forces=False, itermax=100,
-            use_diis=True, verbose=False, tolerance=1e-9,
-            orbc_init=None, ortho='canonical'):
+    def __init__(self, mol: Molecule, basis: Union[str, Sequence[Any]]) -> None:
         """
-        Performs a Hartree-Fock type calculation
+        Initialize the Hartree-Fock solver.
 
-        mol:            molecule
-        basis:          basis set; either list of CGFs or string
-        calc_forces:    whether first derivatives need to be calculed
-        verbose:        whether verbose output is given
+        Parameters
+        ----------
+        mol
+            Molecule object.
+        basis
+            Basis set name or a list of CGF objects.
+        """
+        self._mol: Molecule = mol
+        self._basis: Union[str, Sequence[Any]] = basis
+
+        # build cgfs, nuclei and calculate nr of electrons
+        if issubclass(type(basis), str): # if a basis set name is given
+            self._cgfs, self._nuclei = self._mol.build_basis(basis)
+        else: # either assume a list of CGFs objects is given
+            self._cgfs = basis
+            self._nuclei = mol.get_nuclei()
+            
+        self._nelec = mol.get_nelec()
+
+    def rhf(
+        self,
+        calc_forces: bool = False,
+        itermax: int = 100,
+        use_diis: bool = True,
+        verbose: bool = False,
+        tolerance: float = 1e-9,
+        orbc_init: Optional[Mat] = None,
+        ortho: str = "canonical",
+    ) -> Dict[str, Any]:
+        """
+        Perform a restricted Hartree-Fock calculation.
+
+        Parameters
+        ----------
+        calc_forces
+            Whether analytic nuclear forces are computed.
+        itermax
+            Maximum number of SCF iterations.
+        use_diis
+            Enable DIIS acceleration.
+        verbose
+            Print per-iteration diagnostics.
+        tolerance
+            Energy convergence threshold.
+        orbc_init
+            Optional initial MO coefficient matrix.
+        ortho
+            Orthogonalization scheme ("canonical" or "symmetric").
+
+        Returns
+        -------
+        dict
+            Result dictionary containing energies, orbitals, matrices, etc.
         """
 
         # crank up the tolerance when calculating forces
@@ -30,31 +95,22 @@ class HF:
 
         # create empty dictionary for time tracking statistics
         time_stats = {}
-
-        # build cgfs, nuclei and calculate nr of electrons
-        if issubclass(type(basis), str): # if a basis set name is given
-            cgfs, nuclei = mol.build_basis(basis)
-        else: # either assume a list of CGFs objects is given
-            cgfs = basis
-            nuclei = mol.get_nuclei()
-            
-        nelec = mol.get_nelec()
-        N = len(cgfs)
-        occ = [2 if i < nelec//2 else 0 for i in range(N)]
+        N = len(self._cgfs)
+        occ = [2 if i < self._nelec//2 else 0 for i in range(N)]
 
         # build integrals
         integrator = PyQInt()
         start = time.time()
-        S, T, V, tetensor = integrator.build_integrals_openmp(cgfs, nuclei)
+        S, T, V, tetensor = integrator.build_integrals_openmp(self._cgfs, self._nuclei)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 
         # calculate nuclear repulsion
         nuc_rep = 0.0
-        for i in range(0, len(nuclei)):
-            for j in range(i+1, len(nuclei)):
-                r = np.linalg.norm(np.array(nuclei[i][0]) - np.array(nuclei[j][0]))
-                nuc_rep += nuclei[i][1] * nuclei[j][1] / r
+        for i in range(0, len(self._nuclei)):
+            for j in range(i+1, len(self._nuclei)):
+                r = np.linalg.norm(np.array(self._nuclei[i][0]) - np.array(self._nuclei[j][0]))
+                nuc_rep += self._nuclei[i][1] * self._nuclei[j][1] / r
 
         # diagonalize S
         s, U = np.linalg.eigh(S)
@@ -90,13 +146,13 @@ class HF:
 
             if niter > SUBSPACE_START and use_diis:
                 try:
-                    diis_coeff = self.calculate_diis_coefficients(evs_diis)
+                    diis_coeff = self.__calculate_diis_coefficients(evs_diis)
                 except np.linalg.LinAlgError:
                     # stop diis procedure and revert to linear stepping
                     use_diis = False
                     continue
 
-                F = self.extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
+                F = self.__extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
                 Fprime = X.transpose() @ F @ X
                 e, Cprime = np.linalg.eigh(Fprime)
                 C = X @ Cprime
@@ -184,8 +240,8 @@ class HF:
         # build solution dictionary
         sol = {
             "energy": energies[-1],
-            "nuclei" : nuclei,
-            "cgfs": cgfs,
+            "nuclei" : self._nuclei,
+            "cgfs": self._cgfs,
             "energies": energies,
             "orbe": orbe,
             "orbc": C,
@@ -204,14 +260,14 @@ class HF:
             "erep": 0.5 * np.einsum('ijlk,ij,kl', tetensor, P, P),
             "ex": -0.25 * np.einsum('iklj,ij,kl', tetensor, P, P),
             "enucrep": nuc_rep,
-            "nelec": nelec,
-            "mol": mol,
-            "forces": self.rhf_forces(mol, basis, C, P, orbe) if calc_forces else None
+            "nelec": self._nelec,
+            "mol": self._mol,
+            "forces": self.__rhf_forces(self._mol, self._basis, C, P, orbe) if calc_forces else None
         }
 
         return sol
 
-    def calculate_diis_coefficients(self, evs_diis):
+    def __calculate_diis_coefficients(self, evs_diis):
         """
         Calculate the DIIS coefficients
         """
@@ -232,7 +288,7 @@ class HF:
 
         return diis_coeff
 
-    def extrapolate_fock_from_diis_coefficients(self, fmats_diis, diis_coeff):
+    def __extrapolate_fock_from_diis_coefficients(self, fmats_diis, diis_coeff):
         """
         Extrapolate the Fock matrix from the DIIS coefficients
         """
@@ -244,7 +300,7 @@ class HF:
 
         return fguess
 
-    def rhf_forces(self, mol, basis, C, P, e):
+    def __rhf_forces(self, mol, basis, C, P, e):
         """
         Calculate derivatives of nuclear coordinates to obtain forces.
         

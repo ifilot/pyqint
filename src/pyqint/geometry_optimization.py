@@ -1,217 +1,280 @@
 # -*- coding: utf-8 -*-
 
-from . import HF, Molecule
-import numpy as np
-import scipy.optimize
-import time
+"""
+Geometry optimization using Hartree–Fock energies and forces.
 
-BOHR_TO_ANGSTROM = 0.52917721092
+This module defines a stateful geometry optimizer that operates on
+a single Molecule and basis set, using SciPy's conjugate-gradient
+minimizer.
+"""
+
+from __future__ import annotations
+
+import time
+from typing import Any, Callable, Dict, List, Optional
+
+import numpy as np
+import numpy.typing as npt
+import scipy.optimize
+
+from . import HF, Molecule
+
+
+BOHR_TO_ANGSTROM: float = 0.52917721092
+
+Vec = npt.NDArray[np.float64]
+Coords = npt.NDArray[np.float64]
+
 
 class GeometryOptimization:
     """
-    Class to perform geometry optimizaton using the Conjugate Gradient algorithm
-    as implemented in the scipy library
+    Perform geometry optimization for a single molecule.
+
+    The optimizer owns:
+      - the molecule being optimized
+      - the basis set
+      - cached SCF quantities used for acceleration
+      - histories of energies, forces, and coordinates
+
+    A GeometryOptimization instance is intended to be used for
+    *one molecule only*.
     """
-    def __init__(self, verbose=False):
-        self.cinit = None
-        self.P = None
-        self.orbe = None
-        self.verbose = verbose
-        self.iter = 0
-        self.energies_history = []
-        self.forces_history = []
-        self.coordinates_history = []
-        self.coord = None
 
-    def run(self, mol, basis, gtol=1e-5):
+    def __init__(
+        self,
+        mol: Molecule,
+        basis: str,
+        *,
+        verbose: bool = False,
+    ) -> None:
+        self.mol: Molecule = mol
+        self.basis: str = basis
+        self.verbose: bool = verbose
+
+        # SCF cache (used to accelerate convergence)
+        self.cinit: Optional[Vec] = None
+        self.P: Optional[Vec] = None
+        self.orbe: Optional[Vec] = None
+
+        # Optimization bookkeeping
+        self.iter: int = 0
+        self.coord: Optional[Vec] = None
+        self.forces: Optional[Coords] = None
+        self.last_energy_run: Optional[Dict[str, Any]] = None
+
+        # History tracking
+        self.energies_history: List[float] = []
+        self.forces_history: List[Coords] = []
+        self.coordinates_history: List[Coords] = []
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def run(self, gtol: float = 1e-5) -> Dict[str, Any]:
         """
-        Perform geometry optimization
-        """
-        x0 = self.__unpack(mol) # unpack coordinates from molecule class
-        self.mol = mol
-        self.iter = 0
-
-        # reset arrays
-        self.energies_history = []
-        self.forces_history = []
-        self.coordinates_history = []
-
-        if self.verbose:
-            self.__print_break(ch='#', newline=False)
-            print(" START GEOMETRY OPTIMIZATION: USING CONJUGATE GRADIENT PROCEDURE")
-            self.__print_break(ch='#', newline=True)
-
-        res_opt = scipy.optimize.minimize(self.energy, x0, args=(mol, basis), method='CG',
-                                          jac=self.jacobian, options={'gtol':gtol})
-
-        res = {
-            'opt': res_opt,
-            'energies': self.energies_history,
-            'forces': self.forces_history,
-            'coordinates': self.coordinates_history,
-            'data': self.last_energy_run,
-            'mol': self.mol
-        }
-
-        return res
-
-    def energy(self, x, mol, basis):
-        st = time.perf_counter()
-        self.iter += 1
-        mol = self.__pack(mol, x) # pack positions into new molecule class
-
-        if self.verbose:
-            self.__print_break(ch='=', newline=False)
-            print('  START GEOMETRY OPTIMIZATION STEP %03i' % self.iter)
-            self.__print_break(ch='=')
-
-        res = HF().rhf(mol, basis, orbc_init=self.cinit, calc_forces=True)
-
-        if self.verbose:
-            self.__print_energies(res)
-            print() # print newline
-
-        # cache matrices
-        self.cinit = res['orbc']
-        self.P = res['density']
-        self.orbe = res['orbe']
-        self.forces = res['forces']
-        self.coord = x
-        self.last_energy_run = res
-
-        # append history
-        self.forces_history.append(self.forces)
-        self.coordinates_history.append(self.coord.reshape(len(mol.get_atoms()),3))
-        self.energies_history.append(res['energies'][-1])
-
-        # keep track of time
-        elapsed = (time.perf_counter() - st)
-
-        if self.verbose:
-            self.__print_atoms(mol, self.forces)
-            print()
-            print('Elapsed time: %.4f seconds' % elapsed)
-            print()
-            self.__print_break(newline=False)
-            print('  END GEOMETRY OPTIMIZATION STEP %03i' % self.iter)
-            self.__print_break(newline=True)
-
-        return res['energies'][-1]
-
-    def jacobian(self, x, mol, basis):
-        """
-        Calculate the forces. Note that the forces are typically already
-        calculated in the energy step so here only a simple check is done
-        to see if the coordinates match. If so, the forces are simply returned.
-        """
-        # check if forces are already calculated
-        if self.coord is not None and np.max(x - self.coord) < 1e-5:
-            return self.forces.flatten()
-        else:
-            # no forces have yet been calculated, indicative that no energy run has
-            # yet been done
-            res = HF().rhf(mol, basis, orbc_init=self.cinit, calc_forces=True)
-            self.cinit = res['orbc']
-            self.P = res['density']
-            self.orbe = res['orbe']
-            self.forces = res['forces']
-            self.coord = x
-            return res['forces'].flatten()
-
-    def __unpack(self, mol):
-        """
-        Unpack coordinates from molecule class
-        """
-        coords = []
-        for atom in mol.get_atoms():
-            coords.append(atom[1])
-
-        return np.array(coords).flatten()
-
-    def __pack(self, mol, coords):
-        """
-        Pack coordinates into new molecule class
-        """
-
-        newmol = Molecule(mol.name)
-        newmol.set_charge(mol.get_charge())
-        coords = coords.reshape((len(mol.get_atoms()), 3))
-        for i,atom in enumerate(mol.get_atoms()):
-            newmol.add_atom(mol.get_atoms()[i][0], coords[i][0], coords[i][1], coords[i][2])
-
-        return newmol
-
-    def __print_atoms(self, mol, forces):
-        """
-        Print atomic positions in nice formatting
-        """
-        self.__print_break(ch='-', n=80, newline=False)
-        print('    POSITIONS AND FORCES')
-        self.__print_break(ch='-', n=80, newline=False)
-        for atom,force in zip(mol.get_atoms(), forces):
-            atom[1] *= BOHR_TO_ANGSTROM
-            force *= BOHR_TO_ANGSTROM
-            print('  %2s | %10.6f %10.6f %10.6f | %+10.4e %+10.4e %+10.4e' % 
-                  (atom[0], atom[1][0], atom[1][1], atom[1][2],
-                   force[0], force[1], force[2]))
-
-    def __print_energies(self, res):
-        """
-        Print the energy terms in each iteration
-        """
-        self.__print_break(ch='-', n=80, newline=False)
-        print('    ENERGIES')
-        self.__print_break(ch='-', n=80, newline=False)
-
-        print('  Kinetic:                     %12.8f' % res['ekin'])
-        print('  Nuclear:                     %12.8f' % res['enuc'])
-        print('  Electron-electron repulsion: %12.8f' % res['erep'])
-        print('  Exchange:                    %12.8f' % res['ex'])
-        print('  Nuclear repulsion:           %12.8f' % res['enucrep'])
-        print('  TOTAL:                       %12.8f' % res['energies'][-1])
-
-    def __print_break(self, ch='=', n = 80, newline=True):
-        print(ch * n)
-        if newline:
-            print()
-
-    def write_multiframe_xyz(self, filename, comment_fmt=None):
-        """
-        Write a multi-frame XYZ file from a list of coordinate arrays.
+        Run the geometry optimization.
 
         Parameters
         ----------
-        filename : str
-            Output XYZ file name.
-        comment_fmt : callable, optional
-            Function that takes (frame_index, coords) and returns a comment string
-            for the XYZ frame header.
-            Example:
-                lambda i, c: f"step={i}"
+        gtol : float
+            Gradient convergence threshold passed to SciPy.
+
+        Returns
+        -------
+        dict
+            Optimization results and history.
         """
+        x0 = self._unpack_coords(self.mol)
+        self.iter = 0
 
+        # Reset histories
+        self.energies_history.clear()
+        self.forces_history.clear()
+        self.coordinates_history.clear()
+
+        if self.verbose:
+            self._print_break("#", newline=False)
+            print(" START GEOMETRY OPTIMIZATION (CONJUGATE GRADIENT)")
+            self._print_break("#")
+
+        res_opt = scipy.optimize.minimize(
+            self._energy,
+            x0,
+            method="CG",
+            jac=self._jacobian,
+            options={"gtol": gtol},
+        )
+
+        return {
+            "opt": res_opt,
+            "energies": self.energies_history,
+            "forces": self.forces_history,
+            "coordinates": self.coordinates_history,
+            "data": self.last_energy_run,
+            "mol": self.mol,
+        }
+
+    # ------------------------------------------------------------------
+    # SciPy callbacks
+    # ------------------------------------------------------------------
+
+    def _energy(self, x: Vec) -> float:
+        """
+        Compute total electronic energy for the given coordinates.
+
+        This function is called repeatedly by SciPy.
+        """
+        start = time.perf_counter()
+        self.iter += 1
+
+        # Build updated molecule geometry
+        mol = self._pack_coords(self.mol, x)
+
+        if self.verbose:
+            self._print_break("=", newline=False)
+            print(f"  GEOMETRY OPTIMIZATION STEP {self.iter:03d}")
+            self._print_break("=")
+
+        res = HF(mol,self.basis,).rhf(
+            orbc_init=self.cinit,
+            calc_forces=True,
+        )
+
+        # Cache SCF results
+        self.cinit = res["orbc"]
+        self.P = res["density"]
+        self.orbe = res["orbe"]
+        self.forces = res["forces"]
+        self.coord = x.copy()
+        self.last_energy_run = res
+
+        # Record history
+        self.energies_history.append(res["energies"][-1])
+        self.forces_history.append(self.forces)
+        self.coordinates_history.append(
+            x.reshape(len(mol.get_atoms()), 3)
+        )
+
+        if self.verbose:
+            self._print_energies(res)
+            self._print_atoms(mol, self.forces)
+            elapsed = time.perf_counter() - start
+            print(f"\nElapsed time: {elapsed:.4f} s\n")
+            self._print_break()
+
+        return res["energies"][-1]
+
+    def _jacobian(self, x: Vec) -> Vec:
+        """
+        Return forces (negative gradient) for the optimizer.
+
+        If forces were already computed at these coordinates,
+        they are reused to avoid an extra SCF call.
+        """
+        if self.coord is not None and np.max(np.abs(x - self.coord)) < 1e-5:
+            assert self.forces is not None
+            return self.forces.flatten()
+
+        # Fallback: compute energy + forces explicitly
+        mol = self._pack_coords(self.mol, x)
+        res = HF(mol, self.basis,).rhf(
+            orbc_init=self.cinit,
+            calc_forces=True,
+        )
+
+        self.cinit = res["orbc"]
+        self.P = res["density"]
+        self.orbe = res["orbe"]
+        self.forces = res["forces"]
+        self.coord = x.copy()
+
+        return self.forces.flatten()
+
+    # ------------------------------------------------------------------
+    # Coordinate handling
+    # ------------------------------------------------------------------
+
+    def _unpack_coords(self, mol: Molecule) -> Vec:
+        """
+        Extract Cartesian coordinates from a Molecule into a flat array.
+        """
+        coords = [pos for _, pos in mol.get_atoms()]
+        return np.asarray(coords, dtype=np.float64).flatten()
+
+    def _pack_coords(self, mol: Molecule, coords: Vec) -> Molecule:
+        """
+        Create a new Molecule with updated Cartesian coordinates.
+        """
+        newmol = Molecule(mol.get_name())
+        newmol.set_charge(mol.get_charge())
+
+        coords = coords.reshape(len(mol.get_atoms()), 3)
+        for (symbol, _), (x, y, z) in zip(mol.get_atoms(), coords):
+            newmol.add_atom(symbol, x, y, z)
+
+        return newmol
+
+    # ------------------------------------------------------------------
+    # Output helpers
+    # ------------------------------------------------------------------
+
+    def write_multiframe_xyz(
+        self,
+        filename: str,
+        comment_fmt: Optional[Callable[[int, Coords], str]] = None,
+    ) -> None:
+        """
+        Write the optimization trajectory to a multi-frame XYZ file.
+        """
         atoms = self.mol.get_atoms()
-        symbols = [atom[0] for atom in atoms]
+        symbols = [sym for sym, _ in atoms]
         natoms = len(symbols)
-        coords_list = self.coordinates_history
-
-        # Basic validation
-        for i, coords in enumerate(coords_list):
-            if coords.shape != (natoms, 3):
-                raise ValueError(
-                    f"Frame {i} has shape {coords.shape}, expected ({natoms}, 3)"
-                )
 
         with open(filename, "w") as f:
-            for iframe, coords in enumerate(coords_list):
-                coords *= BOHR_TO_ANGSTROM
+            for iframe, coords in enumerate(self.coordinates_history):
+                coords_ang = coords * BOHR_TO_ANGSTROM
                 f.write(f"{natoms}\n")
+                comment = (
+                    comment_fmt(iframe, coords_ang)
+                    if comment_fmt
+                    else f"frame={iframe}"
+                )
+                f.write(comment + "\n")
 
-                if comment_fmt is None:
-                    f.write(f"frame={iframe}\n")
-                else:
-                    f.write(comment_fmt(iframe, coords) + "\n")
-
-                # Atomic coordinates
-                for sym, (x, y, z) in zip(symbols, coords):
+                for sym, (x, y, z) in zip(symbols, coords_ang):
                     f.write(f"{sym:2s} {x:16.8f} {y:16.8f} {z:16.8f}\n")
+
+    # ------------------------------------------------------------------
+    # Pretty-printing helpers
+    # ------------------------------------------------------------------
+
+    def _print_atoms(self, mol: Molecule, forces: Coords) -> None:
+        self._print_break("-", n=80, newline=False)
+        print("    POSITIONS AND FORCES")
+        self._print_break("-", n=80)
+
+        for (sym, pos), force in zip(mol.get_atoms(), forces):
+            pos_ang = pos * BOHR_TO_ANGSTROM
+            force_ang = force * BOHR_TO_ANGSTROM
+            print(
+                f"  {sym:2s} | "
+                f"{pos_ang[0]:10.6f} {pos_ang[1]:10.6f} {pos_ang[2]:10.6f} | "
+                f"{force_ang[0]:+10.4e} {force_ang[1]:+10.4e} {force_ang[2]:+10.4e}"
+            )
+
+    def _print_energies(self, res: Dict[str, Any]) -> None:
+        self._print_break("-", n=80, newline=False)
+        print("    ENERGIES")
+        self._print_break("-", n=80)
+        print(f"  Kinetic:                     {res['ekin']:12.8f}")
+        print(f"  Nuclear:                     {res['enuc']:12.8f}")
+        print(f"  Electron-electron repulsion: {res['erep']:12.8f}")
+        print(f"  Exchange:                    {res['ex']:12.8f}")
+        print(f"  Nuclear repulsion:           {res['enucrep']:12.8f}")
+        print(f"  TOTAL:                       {res['energies'][-1]:12.8f}")
+
+    def _print_break(self, ch: str = "=", n: int = 80, newline: bool = True) -> None:
+        print(ch * n)
+        if newline:
+            print()

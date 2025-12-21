@@ -15,8 +15,7 @@ class TestHFDeriv(unittest.TestCase):
             mol.add_atom('H', 0.0000, 0.0000, -0.30 - i * 0.50, unit='angstrom')
 
             # calculate forces using analytical derivatives
-            solver = HF()
-            res = solver.rhf(mol, 'sto3g', calc_forces=True)
+            res = HF(mol, 'sto3g').rhf(calc_forces=True)
 
             # calculate forces using finite difference
             forces = calculate_forces_finite_difference(mol)
@@ -33,8 +32,7 @@ class TestHFDeriv(unittest.TestCase):
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
 
         # calculate forces using analytical derivatives
-        solver = HF()
-        res = solver.rhf(mol, 'sto3g', calc_forces=True)
+        res = HF(mol, 'sto3g').rhf(calc_forces=True)
 
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
@@ -55,8 +53,7 @@ class TestHFDeriv(unittest.TestCase):
         mol.add_atom('H', 0.8842738117,  0.5105357203, -0.3610032651, unit='angstrom')
 
         # calculate forces using analytical derivatives
-        solver = HF()
-        res = solver.rhf(mol, 'sto3g', calc_forces=True, tolerance=1e-12)
+        res = HF(mol, 'sto3g').rhf(calc_forces=True, tolerance=1e-12)
 
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
@@ -75,8 +72,7 @@ class TestHFDeriv(unittest.TestCase):
         mol.add_atom('O', 0.0,  0.0, -1.2879700928, unit='angstrom')
 
         # calculate forces using analytical derivatives
-        solver = HF()
-        res = solver.rhf(mol, 'sto3g', calc_forces=True)
+        res = HF(mol, 'sto3g').rhf(calc_forces=True)
 
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
@@ -84,7 +80,7 @@ class TestHFDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
 def perform_hf(mol):
-    sol = HF().rhf(mol, 'sto3g', tolerance=1e-12)
+    sol = HF(mol, 'sto3g').rhf(tolerance=1e-12)
     return sol
 
 def calculate_forces_finite_difference(mol):

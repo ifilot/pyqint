@@ -8,9 +8,9 @@ class TestEnergyDecomposition(unittest.TestCase):
         """
         Test Hartree-Fock calculation on water using STO-3G basis set
         """
-        mol = MoleculeBuilder().from_name("h2o")
+        mol = MoleculeBuilder.from_name("h2o")
 
-        res = HF().rhf(mol, 'sto3g')
+        res = HF(mol, 'sto3g').rhf()
         P = res['density']
         T = res['kinetic']
         V = res['nuclear']

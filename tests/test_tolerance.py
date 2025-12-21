@@ -19,7 +19,7 @@ class TestHF(unittest.TestCase):
         np.testing.assert_almost_equal(results['energy'], -73.21447132, 4)
 
 def perform_hf(mol):
-    results = HF().rhf(mol, 'sto3g', tolerance=1e-9)
+    results = HF(mol, 'sto3g').rhf(tolerance=1e-9)
     return results
 
 if __name__ == '__main__':
