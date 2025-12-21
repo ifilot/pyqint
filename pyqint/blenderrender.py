@@ -26,7 +26,8 @@ class BlenderRender:
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
                                   mo_indices=None, sz=5, isovalue=0.03,
                                   prefix='MO', npts=100,
-                                  negcol='276419', poscol='8f0153'):
+                                  negcol='276419', poscol='8f0153',
+                                  orientation='camx', camera_scale=10):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
 
@@ -51,7 +52,21 @@ class BlenderRender:
             # execute blender
             pbar.set_description('Producing molecular orbital (#%i)' % (idx+1))
             outfile = os.path.join(outpath, '%s_%04i.png' % (prefix,idx+1))
-            logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, tempdir, negcol, poscol, sz*2)
+
+            if orientation == 'camx':
+                camera_loc = (-camera_scale,0,0)
+                camera_rot = (np.pi/2,0,-np.pi/2)
+            elif orientation == 'camz':
+                camera_loc = (0,0,camera_scale)
+                camera_rot = (0,0,0)
+            else:
+                raise Exception('Invalid camera location')
+
+            logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, 
+                                           tempdir, negcol, poscol, 
+                                           camera_loc = camera_loc,
+                                           camera_rot = camera_rot,
+                                           camera_scale = camera_scale)
 
             self.log.append("### START LOG: MOLECULAR ORBITAL %i ###" % (idx+1))
             for line in logoutput.splitlines():
@@ -102,7 +117,17 @@ class BlenderRender:
 
         return None
 
-    def __run_blender(self, negfile, posfile, xyzfile, pngfile, cwd, negcol, poscol, camera_x=10):
+    def __run_blender(self, 
+                      negfile, 
+                      posfile, 
+                      xyzfile, 
+                      pngfile, 
+                      cwd, 
+                      negcol, 
+                      poscol, 
+                      camera_loc = (-10,0,0), 
+                      camera_rot = (np.pi/2,0,-np.pi/2),
+                      camera_scale = 10):
         # set path to xyz file
         blendpysrc = os.path.join(os.path.dirname(__file__), 'blender', 'blender_render_molecule.py')
         blendpydst = os.path.join(cwd, 'blender_render_molecule.py')
@@ -119,7 +144,17 @@ class BlenderRender:
             'mo_pos_path' : posfile,
             'png_output': pngfile,
             'bond_thickness': 0.2,
-            'camera_x': camera_x,
+            'camera_loc': {
+                'x': camera_loc[0], 
+                'y': camera_loc[1], 
+                'z': camera_loc[2]
+            },
+            'camera_rot': {
+                'x': camera_rot[0], 
+                'y': camera_rot[1], 
+                'z': camera_rot[2]
+            },
+            'camera_scale': camera_scale,
             'atom_radii' : {
                 'H': 0.4,
                 'N': 0.6,

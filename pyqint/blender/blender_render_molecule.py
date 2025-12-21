@@ -18,9 +18,17 @@ def main():
     # set the scene
     settings = {
         'resolution': 512,
-        'camera_location': (-manifest['camera_x'],0,0),
-        'camera_rotation': (np.pi/2,0,-np.pi/2),
-        'camera_scale' : manifest['camera_x']
+        'camera_location': (
+            manifest['camera_loc']['x'],
+            manifest['camera_loc']['y'],
+            manifest['camera_loc']['z']
+        ),
+        'camera_rotation': (
+            manifest['camera_rot']['x'],
+            manifest['camera_rot']['y'],
+            manifest['camera_rot']['z']
+        ),
+        'camera_scale' : manifest['camera_scale']
     }
     set_environment(settings)
 
