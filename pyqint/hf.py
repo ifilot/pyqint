@@ -155,7 +155,7 @@ class HF:
 
             # print info for this iteration
             if verbose:
-                print("Iteration: %i Energy: %f Time: %f" % (niter, energy, time_stats['iterations'][-1]))
+                print("Iteration: %2i | Energy: %12.6f Ht | Time: %6.4f s" % (niter, energy, time_stats['iterations'][-1]))
 
             # calculate energy difference between this and the previous
             # iteration; terminate the loop when energy difference is less

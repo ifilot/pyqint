@@ -3,6 +3,7 @@ import numpy as np
 import os
 import time
 import json
+import mathutils
 
 #
 # IMPORTANT
@@ -157,20 +158,33 @@ def set_environment(settings):
         o = bpy.data.objects['Cube']
         bpy.data.objects.remove(o, do_unlink=True)
 
-    # set camera into default position
-    bpy.data.objects['Camera'].location = tuple(settings['camera_location'])
-    bpy.data.objects['Camera'].rotation_euler = tuple(settings['camera_rotation'])
-    bpy.data.objects['Camera'].data.clip_end = 1000
-    bpy.data.objects['Camera'].data.type = 'ORTHO'
-    bpy.data.objects['Camera'].data.ortho_scale = settings['camera_scale']
+    camera = bpy.data.objects['Camera']
+    light = bpy.data.objects['Light']
 
-    # set lights
-    bpy.data.objects['Light'].data.type = 'AREA'
-    bpy.data.objects['Light'].data.energy = 1e4
-    bpy.data.objects['Light'].location = (-10,10,10)
-    bpy.data.objects['Light'].rotation_euler = tuple(np.radians([55, 0, 225]))
-    bpy.data.objects['Light'].data.shape = 'DISK'
-    bpy.data.objects['Light'].data.size = 2
+    # set camera
+    camera.location = tuple(settings['camera_location'])
+    camera.rotation_euler = tuple(settings['camera_rotation'])
+    camera.data.clip_end = 1000
+    camera.data.type = 'ORTHO'
+    camera.data.ortho_scale = settings['camera_scale']
+
+    # configure lights
+    light.data.type = 'AREA'
+    light.data.energy = 1e4
+    light.data.shape = 'DISK'
+    light.data.size = 2
+
+    # position light relative to camera
+    light_offset_cam = mathutils.Vector((3.0, 0.0, 10.0))
+
+    # convert to world space
+    light.location = camera.matrix_world @ light_offset_cam
+
+    # aim the light at center
+    target = mathutils.Vector((0.0, 0.0, 0.0))
+    direction = target - light.location
+    rotation = direction.to_track_quat('-Z', 'Y')
+    light.rotation_euler = rotation.to_euler()
 
     # set film
     bpy.context.scene.render.film_transparent = True
