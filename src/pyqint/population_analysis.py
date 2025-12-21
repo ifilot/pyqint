@@ -40,8 +40,6 @@ class PA:
 
         atomic_charge = self.nuclei[n][1] - mulliken
 
-        print("Mulliken", np.trace(overlap_density))
-
         return atomic_charge
     
     def lowdin(self, n):
@@ -74,7 +72,5 @@ class PA:
             lowdin += P_prime[i,i]
 
         atomic_charge = self.nuclei[n][1] - lowdin
-
-        print("Lowdin",np.trace(P_prime))
 
         return atomic_charge
