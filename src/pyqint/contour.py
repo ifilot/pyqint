@@ -11,9 +11,8 @@ class ContourPlotter:
     The class is intentionally state-free: all required data is
     passed explicitly to the plotting routines.
     """
-
+    @staticmethod
     def build_contourplot(
-        self,
         res,
         filename: str,
         plane,
@@ -21,6 +20,7 @@ class ContourPlotter:
         npts: int,
         nrows: int,
         ncols: int,
+        levels:int = 9,
         dpi: int = 144,
         ngrid: int = 5,
         labels=None,
@@ -77,10 +77,10 @@ class ContourPlotter:
                 # --------------------------------------------------
                 if isinstance(plane, str):
                     # Cartesian-aligned plane
-                    grid = self.__create_cartesian_grid(sz, npts, plane)
+                    grid = ContourPlotter.__create_cartesian_grid(sz, npts, plane)
                 else:
                     # Arbitrary plane defined by three atoms
-                    grid = self.__build_plane_from_atoms(
+                    grid = ContourPlotter.__build_plane_from_atoms(
                         res["nuclei"][plane[0]][0],
                         res["nuclei"][plane[1]][0],
                         res["nuclei"][plane[2]][0],
@@ -92,7 +92,7 @@ class ContourPlotter:
                 # --------------------------------------------------
                 # Evaluate wavefunction on grid
                 # --------------------------------------------------
-                dens = self.__plot_wavefunction(
+                dens = ContourPlotter.__plot_wavefunction(
                     res["cgfs"],
                     res["orbc"][:, orb_idx],
                     grid,
@@ -111,7 +111,7 @@ class ContourPlotter:
                     cmap="PiYG",
                     vmin=-limit,
                     vmax=limit,
-                    levels=9,
+                    levels=levels,
                 )
 
                 ax[i, j].contour(
@@ -121,7 +121,7 @@ class ContourPlotter:
                     extent=[-sz, sz, -sz, sz],
                     vmin=-limit,
                     vmax=limit,
-                    levels=9,
+                    levels=levels,
                 )
 
                 # Axis formatting
@@ -137,12 +137,13 @@ class ContourPlotter:
                         % (labels[orb_idx], res["orbe"][orb_idx])
                     )
                 else:
-                    ax[i, j].set_title(r"$\psi_{%i}$" % (orb_idx + 1))
+                    ax[i, j].set_title(r"$\psi_{%i}$ (%.4f Ht)" % (orb_idx + 1, res["orbe"][orb_idx]))
 
         plt.tight_layout()
         plt.savefig(filename)
 
-    def __plot_wavefunction(self, cgfs, coeff, grid):
+    @staticmethod
+    def __plot_wavefunction(cgfs, coeff, grid):
         """
         Evaluate a molecular orbital on a 2D grid embedded in 3D space.
 
@@ -172,7 +173,8 @@ class ContourPlotter:
 
         return field
 
-    def __create_cartesian_grid(self, sz: float, npts: int, plane: str = "xy"):
+    @staticmethod
+    def __create_cartesian_grid(sz: float, npts: int, plane: str = "xy"):
         """
         Create a Cartesian-aligned planar grid centered at the origin.
 
@@ -211,8 +213,8 @@ class ContourPlotter:
         grid = np.vstack(order).reshape(3, -1).T
         return grid
 
+    @staticmethod
     def __build_plane_from_atoms(
-        self,
         atom1,
         atom2,
         atom3,

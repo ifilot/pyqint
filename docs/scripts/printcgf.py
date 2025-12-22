@@ -12,3 +12,6 @@ cgfs, nuclei = mol.build_basis('sto3g')
 
 for cgf in cgfs:
     print(cgfs)
+
+for nucleus in nuclei:
+    print(nucleus)

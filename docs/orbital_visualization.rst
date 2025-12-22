@@ -50,6 +50,127 @@ Contour plots
     plt.colorbar()
     plt.title('1b$_{2}$ Molecular orbital of H$_{2}$O')
 
+.. figure:: _static/img/h2o_contour_manual.jpg
+
+ContourPlotter helper class
+---------------------------
+
+While contour plots can be constructed manually by explicitly building grids and
+evaluating molecular orbitals, :program:`PyQInt` provides the
+:code:`ContourPlotter` helper class to streamline this process.
+
+The :code:`ContourPlotter` class offers a single high-level interface for
+generating grids of contour plots for molecular orbitals obtained from a
+Hartree-Fock calculation. The class itself is intentionally stateless: all
+required information is passed explicitly via the Hartree-Fock results object.
+
+Cartesian-aligned contour plots
+*******************************
+
+The simplest usage corresponds to contour plots aligned with one of the
+Cartesian coordinate planes (:math:`xy`, :math:`xz`, or :math:`yz`). The plane
+is specified using a string identifier.
+
+The following example visualizes the molecular orbitals of carbon monoxide
+(CO) in the :math:`yz` plane:
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder, HF, ContourPlotter
+
+    mol = MoleculeBuilder.from_name('CO')
+    res = HF(mol, 'sto3g').rhf(verbose=True)
+
+    ContourPlotter.build_contourplot(
+        res,
+        'co.png',
+        plane='yz',
+        sz=3.0,
+        npts=101,
+        nrows=2,
+        ncols=5
+    )
+
+In this example, the contour plots are centered at the origin, span a square
+region of width :math:`2 \times \text{sz}`, and display the lowest ten molecular
+orbitals in a :math:`2 \times 5` grid.
+
+.. figure:: _static/img/co_contour.png
+
+.. tip::
+    Want more contour levels? Simply adjust the :code:`levels` argument.
+
+    .. code-block:: python
+
+        ContourPlotter.build_contourplot(
+            res,
+            'co.png',
+            plane='yz',
+            sz=3.0,
+            npts=101,
+            nrows=2,
+            ncols=5,
+            levels=15 # adjust this value
+        )
+
+    .. figure:: _static/img/co_contour_level15.png
+
+Arbitrary planar contour plots
+******************************
+
+In many situations, it is desirable to visualize molecular orbitals in planes
+that are *not* aligned with the Cartesian axes. Typical examples include planes
+defined by three atoms or planes aligned with molecular symmetry elements. The
+:code:`ContourPlotter` supports such cases by allowing the plane to be defined
+using three atoms and an explicit *up direction*. The three atoms uniquely
+define the plane, while the up direction removes the sign ambiguity of the plane
+normal.
+
+The plane specification is given as a list:
+
+.. math::
+
+    [i, j, k, \vec{u}]
+
+where:
+
+- :math:`i`, :math:`j`, and :math:`k` are atom indices defining the plane
+- :math:`\vec{u}` is a reference vector that orients the plane normal
+
+The following example visualizes molecular orbitals of methane (CH\ :sub:`4`)
+in a plane defined by three hydrogen atoms, with the :math:`z` axis chosen as
+the up direction:
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder, HF, ContourPlotter
+
+    mol = MoleculeBuilder.from_name('CH4')
+    res = HF(mol, 'sto3g').rhf(verbose=True)
+
+    up = [0, 0, 1]
+    ContourPlotter.build_contourplot(
+        res,
+        'ch4.png',
+        plane=[0, 1, 2, up],
+        sz=3.0,
+        npts=101,
+        nrows=3,
+        ncols=3
+    )
+
+In this case, the plotting plane is constructed as follows:
+
+1. The three selected atoms define a geometric plane.
+2. The plane normal is computed from the atomic positions.
+3. The normal is oriented consistently with the supplied up direction.
+4. A local orthonormal coordinate system is constructed within the plane.
+5. A two-dimensional grid is embedded into three-dimensional space.
+
+This approach makes it possible to visualize molecular orbitals in *any*
+chemically meaningful plane, independent of the global coordinate system.
+
+.. figure:: _static/img/ch4_contour.png
 
 Constructing isosurfaces
 ------------------------
