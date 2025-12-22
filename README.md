@@ -65,12 +65,15 @@ as well as the following geometric derivatives
 PyQInt offers additional features such as
 * Performing [restricted
   Hartree-Fock](https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method)
-  calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS)
-* Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/)
-  coefficients
+  calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS) 
+* Population and bonding analysis methods, including:
+    - Mulliken and Löwdin atomic charge analysis  
+    - Molecular Orbital Hamilton Population (MOHP)  
+    - Molecular Orbital Overlap Population (MOOP)  
+    - Molecular Orbital Bond Index (MOBI)  
 * Construction of localized orbitals using the [Foster-Boys
   method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
-* Geometry optimization using Conjugate Gradient
+* Geometry optimization using the Conjugate Gradient algorithm  
 * Visualization of molecular orbitals
 
 All routines are (automatically) tested and verified against several open-source

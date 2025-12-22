@@ -57,6 +57,7 @@ class FosterBoys:
         self._cgfs = hf_result["cgfs"]
         self._overlap = hf_result["overlap"]
         self._fock = hf_result["fock"]
+        self.__density = hf_result["density"]
 
         # Algorithm parameters
         self._maxiter: int = maxiter
@@ -137,6 +138,7 @@ class FosterBoys:
             "nelec": self._nelec,
             "cgfs": self._cgfs,
             "nuclei": self._nuclei,
+            "density": self.__density,
         }
 
     # ------------------------------------------------------------------
