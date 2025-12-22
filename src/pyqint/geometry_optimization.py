@@ -273,6 +273,7 @@ class GeometryOptimization:
         print(f"  Exchange:                    {res['ex']:12.8f}")
         print(f"  Nuclear repulsion:           {res['enucrep']:12.8f}")
         print(f"  TOTAL:                       {res['energies'][-1]:12.8f}")
+        print() # add newline
 
     def _print_break(self, ch: str = "=", n: int = 80, newline: bool = True) -> None:
         print(ch * n)

@@ -1,9 +1,9 @@
-from pyqint import MoleculeBuilder, HF, MOPA
+from pyqint import MoleculeBuilder, HF, PopulationAnalysis
 
 def main():
     mol = MoleculeBuilder.from_name('CO')
     res = HF(mol, 'sto3g').rhf()
-    mopa = MOPA(res)
+    mopa = PopulationAnalysis(res)
 
     moop = mopa.moop(0, 1)
     mohp = mopa.mohp(0, 1)

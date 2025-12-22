@@ -1,13 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Molecular Orbital Population Analysis (MOPA).
-
-This module provides Molecular Orbital Hamilton Population (MOHP) and
-Molecular Orbital Overlap Population (MOOP) analyses for finite,
-non-periodic systems described in a localized basis.
-"""
-
 from __future__ import annotations
 
 from typing import Dict, Any, List
@@ -15,18 +7,16 @@ from typing import Dict, Any, List
 import numpy as np
 import numpy.typing as npt
 
-from . import PyQInt
-
-
 Vec = npt.NDArray[np.float64]
 Mat = npt.NDArray[np.float64]
 
-
-class MOPA:
+class PopulationAnalysis:
     """
-    Molecular Orbital Population Analysis.
+    Population Analysis class
 
     This class implements:
+      - Mulliken population analysis
+      - Lowkin population analysis
       - MOOP: Molecular Orbital Overlap Population
       - MOHP: Molecular Orbital Hamilton Population
 
@@ -50,6 +40,12 @@ class MOPA:
         # Orbital energies
         self.orbe: Vec = res["orbe"]
 
+        # Density matrix
+        self.P: Mat = res["density"]
+
+        # Overlap matrix
+        self.S: Mat = res["overlap"]
+
         # Number of electrons (restricted, closed-shell assumed)
         self.nelec: int = res["nelec"]
 
@@ -71,6 +67,64 @@ class MOPA:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+
+    def mulliken(self, n: int):
+        """
+        Perform Mulliken Population Analysis
+
+        n: index of nucleus
+        """
+
+        # figure out which basis functions belongs to the nucleus
+        cgfs_n = []
+        nuc = self.nuclei[n][0]
+        for i,cgf in enumerate(self.cgfs):
+            if np.linalg.norm(cgf.p - nuc) < 1e-3:
+                cgfs_n.append(i)
+
+        # detemrine the overlap weighted density matrix
+        overlap_density = self.P @ self.S
+
+        # add up electrons in basis functions localized on nucleus
+        mulliken = 0
+        for i in cgfs_n: # loop over atom cgfs
+            mulliken += overlap_density[i,i]
+
+        atomic_charge = self.nuclei[n][1] - mulliken
+
+        return atomic_charge
+    
+    def lowdin(self, n: int):
+        """
+        Perform Löwdin Population Analysis
+
+        n: index of nucleus
+        """
+
+        # diagonalize S
+        s, U = np.linalg.eigh(self.S)
+
+        # construct transformation matrix X, using Löwdin orthogonalization
+        X = U @ np.diag(np.sqrt(s)) @ U.transpose()
+
+        # figure out which basis functions belongs to the nucleus
+        cgfs_n = []
+        nuc = self.nuclei[n][0]
+        for i,cgf in enumerate(self.cgfs):
+            if np.linalg.norm(cgf.p - nuc) < 1e-3:
+                cgfs_n.append(i)
+
+        # determine P in (local) orthonormalized basis
+        P_prime = X @ self.P @ X
+
+        # add up electrons in basis functions localized on nucleus
+        lowdin = 0
+        for i in cgfs_n: # loop over atoms cgfs
+            lowdin += P_prime[i,i]
+
+        atomic_charge = self.nuclei[n][1] - lowdin
+
+        return atomic_charge
 
     def moop(self, n1: int, n2: int) -> Vec:
         """

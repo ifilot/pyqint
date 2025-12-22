@@ -41,6 +41,9 @@ class CGF:
         for i,gto in enumerate(self.gtos):
             res += " %02i | %s" % (i+1, str(gto))
         return res
+    
+    def __repr__(self):
+        return self.__str__()
 
     def add_gto(self, c, alpha, l, m, n):
         """

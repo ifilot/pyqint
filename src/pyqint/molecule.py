@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Iterator
 
 import numpy as np
 import numpy.typing as npt
@@ -69,7 +69,7 @@ class Molecule:
         """
         res = f"Molecule: {self.__name}\n"
         for symbol, pos in self.__atoms:
-            res += f" {symbol} ({pos[0]:.6f},{pos[1]:.6f},{pos[2]:.6f})\n"
+            res += f" {symbol} {pos[0]:12.6f}  {pos[1]:12.6f}  {pos[2]:12.6f}\n"
         return res
 
     def __len__(self) -> int:
@@ -77,6 +77,18 @@ class Molecule:
         Number of atoms in the molecule.
         """
         return len(self.__atoms)
+    
+    def __iter__(self) -> Iterator[AtomEntry]:
+        """
+        Iterator to loop over the atoms
+        """
+        return iter(self.__atoms)
+
+    def __getitem__(self, idx: int) -> AtomEntry:
+        """
+        Access method for a single atom
+        """
+        return self.__atoms[idx]
 
     # --- Basic properties ----------------------------------------------------
 

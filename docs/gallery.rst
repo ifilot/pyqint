@@ -1,0 +1,5 @@
+.. index:: gallery
+
+Gallery
+=======
+
