@@ -14,7 +14,7 @@ class TestMOPA(unittest.TestCase):
         mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
-        res = HF().rhf(mol, 'sto3g')
+        res = HF(mol, 'sto3g').rhf()
         mopa = MOPA(res)
         coeff = mopa.mohp(0, 1)
 

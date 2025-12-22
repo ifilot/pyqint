@@ -1,4 +1,4 @@
-from pyqint import Molecule, HF, PyQInt, GeometryOptimization
+from pyqint import Molecule, PyQInt, GeometryOptimization
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -43,7 +43,7 @@ def optimize_hco():
     mol.add_atom('H',  1.57882331,  -0.00000000,  -2.06681794)
     mol.set_charge(-1)
     
-    res = GeometryOptimization().run(mol, 'p321')
+    res = GeometryOptimization(mol, 'p321').run()
     
     return res['data']
 

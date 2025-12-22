@@ -53,7 +53,7 @@ def optimize_lih(d):
     mol.add_atom('Li', 0.0, 0.0, -d[0]/2, unit='angstrom')
     mol.add_atom('H', 0.0, 0.0,  d[0]/2, unit='angstrom')
     
-    result = HF().rhf(mol, 'sto3g')
+    result = HF(mol, 'sto3g').rhf()
     
     return result['energy']
 
@@ -65,7 +65,7 @@ def calculate_lih(d):
     mol.add_atom('Li', 0.0, 0.0, -d[0]/2, unit='angstrom')
     mol.add_atom('H', 0.0, 0.0,  d[0]/2, unit='angstrom')
     
-    result = HF().rhf(mol, 'sto3g')
+    result = HF(mol, 'sto3g').rhf()
     
     return result
 

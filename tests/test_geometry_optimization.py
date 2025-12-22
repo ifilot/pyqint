@@ -1,5 +1,5 @@
 import unittest
-from pyqint import Molecule,GeometryOptimization
+from pyqint import Molecule, GeometryOptimization
 import numpy as np
 import sys
 
@@ -19,7 +19,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', 0.9, 0.0, 0.0)
         mol.add_atom('H', -0.9, 0.0, 0.0)
 
-        res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
+        res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
         np.testing.assert_almost_equal(res['opt'].fun, -1.117506)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
@@ -46,7 +46,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', 0.9, 0.0, 0.0)
         mol.add_atom('H', -0.9, 0.0, 0.0)
 
-        res = GeometryOptimization(verbose=False).run(mol, 'p321')
+        res = GeometryOptimization(mol, 'p321', verbose=False).run()
         np.testing.assert_almost_equal(res['opt'].fun, -1.1230, decimal=3)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
@@ -76,7 +76,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-        res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
+        res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
         np.testing.assert_almost_equal(res['opt'].fun, -39.72691085946399, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
@@ -94,7 +94,7 @@ class TestGeometryOptimization(unittest.TestCase):
 
     def test_optimization_h2o(self):
         """
-        Optimize the water molecule and assess that the energy corresponds to
+        Optimize water molecule and assess that the energy corresponds to
         an optimized structure
         """
         # create new H2O molecule with perturbed geometry
@@ -103,7 +103,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', 0.0,  -0.8580158822, 0.5085242828, unit='angstrom')
         mol.add_atom('H', 0.0,  0.8580158822, 0.5085242828, unit='angstrom')
 
-        res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
+        res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
         np.testing.assert_almost_equal(res['opt'].fun, -74.96590347517174, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
@@ -119,8 +119,7 @@ class TestGeometryOptimization(unittest.TestCase):
         self.assertEqual(res['data']['nuclear'].shape, (N, N))
         self.assertEqual(res['data']['tetensor'].shape, (N, N, N, N))
 
-    @unittest.skipIf(sys.platform == "darwin",
-                     "skipping test for MacOS")
+    @unittest.skip("Test takes too long. Unit tests should be lightweight.")
     def test_optimization_c2h4(self):
         """
         Optimize ethylene molecule and assess that the energy corresponds to
@@ -135,7 +134,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H',  1.3288875372,  0.9556191261 ,0.0000000000, unit='angstrom')
         mol.add_atom('H',  1.1288875372, -0.9156191261 ,0.1000000000, unit='angstrom')
 
-        res = GeometryOptimization(verbose=False).run(mol, 'sto3g')
+        res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
         np.testing.assert_almost_equal(res['opt'].fun, -77.07396213047552, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))

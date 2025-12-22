@@ -470,7 +470,7 @@ as shown in the script below
 
     from pyqint import MoleculeBuilder
 
-    mol = MoleculeBuilder().from_name('ch4')
+    mol = MoleculeBuilder.from_name('ch4')
     mol.name = 'CH4'
 
     print(mol)
@@ -494,7 +494,7 @@ Alternatively, one can load molecules from a :code:`.xyz` file via the
 
 .. code-block:: python
 
-    mol = MoleculeBuilder().from_file('ch4.xyz')
+    mol = MoleculeBuilder.from_file('ch4.xyz')
 
 .. warning::
     It is assumed that the positions inside the `.xyz` file are stored in
@@ -629,9 +629,9 @@ the Hartree-Fock coefficient optimization procedure in detail.
         plt.show()
 
     def calculate_co():
-        mol = MoleculeBuilder().from_name('CO')
+        mol = MoleculeBuilder.from_name('CO')
 
-        result = HF().rhf(mol, 'sto3g')
+        result = HF(mol, 'sto3g').rhf()
 
         return result['cgfs'], result['orbc']
 
@@ -712,6 +712,8 @@ object. This dictionary objects contains the following keys
      - Electrostatic repulsion energy of the nuclei
    * - :code:`nelec`
      - Total number of electrons
+   * - :code:`mol`
+     - Molecule class
    * - :code:`forces`
      - Forces on the atoms (if calculated, else :code:`None`)
 
@@ -732,10 +734,10 @@ Hartree-Fock calculation.
 
     from pyqint import MoleculeBuilder,HF
 
-    mol = MoleculeBuilder().from_name('ch4')
+    mol = MoleculeBuilder.from_name('ch4')
     mol.name = 'CH4'
 
-    res = HF().rhf(mol, 'sto3g')
+    res = HF(mol, 'sto3g').rhf()
     print()
     print('Kinetic energy: ', res['ekin'])
     print('Nuclear attraction energy: ', res['enuc'])
@@ -784,7 +786,7 @@ In the example code shown below, the latter is done.
 
         cgfs.append(cgf)
 
-    res = HF().rhf(mol, basis=cgfs, verbose=True)
+    res = HF(mol, basis=cgfs).rhf(verbose=True)
 
 .. hint::
 
@@ -880,7 +882,7 @@ Constructing isosurfaces
         mol.add_atom('C', 0.0, -0.5, 0.0)
         mol.add_atom('O', 0.0, 0.5, 0.0)
 
-        result = HF().rhf(mol, 'sto3g')
+        result = HF(mol, 'sto3g').rhf()
 
         return result['cgfs'], result['orbc']
 
@@ -957,7 +959,7 @@ as its input.
         mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
-        result = HF().rhf(mol, 'sto3g')
+        result = HF(mol, 'sto3g').rhf()
 
         return result
 
@@ -1058,7 +1060,7 @@ and does not yield any output.
     mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
     mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-    res = GeometryOptimization(verbose=True).run(mol, 'sto3g')
+    res = GeometryOptimization(mol, 'sto3g', verbose=True).run()
 
 The output of the above script (condensed) is::
 
@@ -1199,6 +1201,8 @@ object. This dictionary objects contains the following keys
      - Coordinates of the atoms at each ionic step.
    * - :code:`data`
      - Result dictionary of the Hartree-Fock calculation **last** ionic step.
+   * - :code:`mol`
+     - Molecule on which the geometry optimization acted.
 
 To demonstrate the use of the above data, consider the script as shown below.
 In this script, we generate a CH\ :sub:`4` in a (highly) perturbed configuration.
@@ -1317,148 +1321,149 @@ to the same value, as expected for the highly symmetric CH\ :sub:`4` molecule.
     **Always verify that a calculation is properly converged before using
     its output.**
 
-Crystal Orbital Hamilton Population Analysis
-============================================
+Molecular Orbital Hamilton and Overlap Population Analysis
+==========================================================
 
-Background of COHP
-------------------
+.. note::
 
-Within the scope of chemical bonding, we can classify molecular orbitals to be
-bonding, anti-bonding or non-bonding with respect to any pair of atoms. When
-working with localized basis functions, the process of capturing the bonding
-character of the molecular orbitals is relatively straightforward as we can
-assign the basis functions constituting the molecular orbitals to an atom.
+    In earlier versions of :program:`PyQInt`, this functionality was
+    erroneously referred to as *Crystal Orbital Hamilton Population* (COHP).
+    While the underlying idea is closely related, COHP is formally defined
+    for *crystal orbitals* (Bloch functions) in periodic systems.
 
-Within the framework of localized orbitals, the COHP coefficient of a given
-molecular orbital (:math:`\chi`) is therefore defined as
+Background of MOHP and MOOP
+---------------------------
+
+Within the scope of chemical bonding analysis, molecular orbitals can be
+classified as bonding, antibonding, or non-bonding with respect to any given
+pair of atoms. When working with localized basis functions, this classification
+can be made explicit by projecting molecular orbitals onto atomic subspaces.
+
+Two closely related population analysis techniques are implemented in *pyqint*:
+
+* **MOHP** – Molecular Orbital *Hamilton* Population
+* **MOOP** – Molecular Orbital *Overlap* Population
+
+Both analyses quantify the contribution of a given molecular orbital to the
+interaction between two atoms.
+
+In a localized basis representation, the **MOHP coefficient** of molecular
+orbital :math:`k` with respect to atoms :math:`A` and :math:`B` is defined as
 
 .. math::
 
-    \chi_{} = \eta_{k} \sum_{i \in A} \sum_{j \in B} C_{ki} C_{kj} H_{ij}
+    \mathrm{MOHP}_k =
+    2 \sum_{i \in A} \sum_{j \in B}
+    C_{ik} \, H_{ij} \, C_{jk}
 
-where :math:`C_{ki}` and :math:`C_{kj}` are elements of the coefficient matrix
-:math:`\mathbf{C}`, :math:`H_{ij}` an element of the Hamiltonian (Fock)
-matrix :math:`\mathbf{H}` and :math:`\eta_{k}` is the occupancy factor of
-molecular orbital :math:`k` which is always 2 within a restricted Hartree-Fock
-calculation.
+where:
 
-.. note ::
+- :math:`C_{ik}` and :math:`C_{jk}` are elements of the molecular orbital
+  coefficient matrix :math:`\mathbf{C}`
+- :math:`H_{ij}` is an element of the Fock (Hamiltonian) matrix
+- the factor of 2 accounts for spin degeneracy in restricted Hartree–Fock theory
 
-    It is perfectly possible to apply the above equation for unoccupied (virtual)
-    orbitals, however the result should be interpreted from the perspective that
-    such orbitals are merely artifacts of the diagonalization process as these
-    orbitals do not correspond to any electron of the system.
+Analogously, the **MOOP coefficient** is defined as
 
-Procedure of COHP
------------------
+.. math::
 
-To perform a COHP calculation, one can direct the output of a Hartree-Fock
-calculation directly to the COHP class as demonstrated using the script below.
+    \mathrm{MOOP}_k =
+    2 \sum_{i \in A} \sum_{j \in B}
+    C_{ik} \, S_{ij} \, C_{jk}
 
-.. code-block:: python
+where :math:`S_{ij}` is an element of the overlap matrix :math:`\mathbf{S}`.
 
-    from pyqint import Molecule, HF, COHP, FosterBoys
+.. note::
 
-    d = 1.145414
-    mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
+    Both MOHP and MOOP can be evaluated for virtual (unoccupied) orbitals.
+    However, the interpretation of such values should be made with caution,
+    as virtual orbitals do not correspond to occupied electronic states.
 
-    res = HF().rhf(mol, 'sto3g')
-    cohp = COHP(res).run(res['orbc'], 0, 1)
+Procedure of MOHP and MOOP
+--------------------------
 
-    print('COHP values of canonical Hartree-Fock orbitals')
-    for i,(e,chi) in enumerate(zip(res['orbe'], cohp)):
-        print('%3i %12.4f %12.4f' % (i+1,e,chi))
-    print()
+MOHP and MOOP calculations are performed using the `MOPA` class, which
+takes the output of a Hartree–Fock calculation as input.
 
-The output of the above script is::
-
-    COHP values of canonical Hartree-Fock orbitals
-      1     -20.4156       0.0399
-      2     -11.0922       0.0104
-      3      -1.4453      -0.4365
-      4      -0.6968       0.2051
-      5      -0.5400      -0.2918
-      6      -0.5400      -0.2918
-      7      -0.4451       0.1098
-      8       0.3062       0.5029
-      9       0.3062       0.5029
-     10       1.0092       6.4828
-
-COHP analysis of the Foster-Boys localized orbitals
----------------------------------------------------
-
-It can be quite interesting to perform the COHP analysis on the Foster-Boys
-localized orbitals. The procedure is remarkably simple as the output of a
-Foster-Boys localization is very similar to the output of a Hartree-Fock
-calculation and one can direct the output of the former to the COHP class
-in the same manner.
-
-In the script below, a Foster-Boys localization procedure is performed on the
-canonical Hartree-Fock orbitals of CO and on both results, a COHP analysis
-is performed, which can be readily compared.
+The example below demonstrates MOHP and MOOP analysis for the CO molecule.
 
 .. code-block:: python
 
-    from pyqint import Molecule, HF, COHP, FosterBoys
+    from pyqint import MoleculeBuilder, HF, MOPA
+
+    mol = MoleculeBuilder.from_name('CO')
+    res = HF(mol, 'sto3g').rhf()
+    mopa = MOPA(res)
+
+    mohp = mopa.mohp(0, 1)
+    moop = mopa.moop(0, 1)
+
+    print('MOHP and MOOP values of canonical Hartree–Fock orbitals')
+    for i, (e, h, o) in enumerate(zip(res['orbe'], mohp, moop)):
+        print('%3i %12.4f %12.4f %12.4f' % (i+1, e, h, o))
+
+Example output::
+
+  MOHP and MOOP values of canonical Hartree–Fock orbitals
+    1     -20.3914       0.0319      -0.0017
+    2     -11.0902       0.0094      -0.0009
+    3      -1.4047      -0.4347       0.2937
+    4      -0.6899       0.1977      -0.0663
+    5      -0.5094      -0.2736       0.1562
+    6      -0.5094      -0.2736       0.1562
+    7      -0.4409       0.0813      -0.0375
+    8       0.2865       0.4489      -0.2562
+    9       0.2865       0.4489      -0.2562
+   10       0.9253       5.1204      -2.6744
+
+MOHP and MOOP analysis of Foster-oys localized orbitals
+--------------------------------------------------------
+
+It is often insightful to perform population analysis on *localized*
+molecular orbitals. Since Foster-Boys localization corresponds to a unitary
+transformation of the occupied orbital subspace, the output of a
+Foster-oys localization can be passed directly to the `MOPA` class.
+
+The example below compares MOHP values obtained from canonical and
+Foster-oys localized orbitals.
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder, HF, FosterBoys, MOPA
     import numpy as np
 
-    d = 1.145414
-    mol = Molecule()
-    mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
-    mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
+    mol = MoleculeBuilder.from_name('CO')
+    res = HF(mol, 'sto3g').rhf()
+    mopa = MOPA(res)
+    mohp = mopa.mohp(0, 1)
+    moop = mopa.moop(0, 1)
 
-    res = HF().rhf(mol, 'sto3g')
-    cohp = COHP(res).run(res['orbc'], 0, 1)
+    res_fb = FosterBoys(res).run()
+    mopa_fb = MOPA(res_fb)
+    mohp_fb = mopa_fb.mohp(0, 1)
+    moop_fb = mopa_fb.moop(0, 1)
 
-    resfb = FosterBoys(res).run()
-    cohp_fb = COHP(res).run(resfb['orbc'], 0, 1)
+    print('Sum of MOHP (canonical orbitals):',
+          np.sum(mohp[:7]))
+    print('Sum of MOHP (Foster-Boys orbitals):',
+          np.sum(mohp_fb[:7]))
 
-    print('COHP values of canonical Hartree-Fock orbitals')
-    for i,(e,chi) in enumerate(zip(res['orbe'], cohp)):
-        print('%3i %12.4f %12.4f' % (i+1,e,chi))
-    print()
+    print('Sum of MOOP (canonical orbitals):',
+          np.sum(moop[:7]))
+    print('Sum of MOOP (Foster-Boys orbitals):',
+          np.sum(moop_fb[:7]))
 
-    print('COHP values after Foster-Boys localization')
-    for i,(e,chi) in enumerate(zip(resfb['orbe'], cohp_fb)):
-        print('%3i %12.4f %12.4f' % (i+1,e,chi))
-    print()
+Example output::
 
-    print('Sum of COHP coefficient canonical orbitals: ', np.sum(cohp[:7]))
-    print('Sum of COHP coefficient Foster-Boys orbitals: ', np.sum(cohp_fb[:7]))
+    Sum of MOHP (canonical orbitals): -0.6617486641766972
+    Sum of MOHP (Foster-Boys orbitals): -0.6617486641766972
+    Sum of MOOP (canonical orbitals): 0.49960515685531653
+    Sum of MOOP (Foster-Boys orbitals): 0.49960515685531626
 
-The output of the above script is::
+The results demonstrate that while individual MOHP and MOOP contributions
+may differ significantly between canonical and localized orbitals, the **sum
+over the occupied subspace is invariant under unitary transformations**.
 
-    COHP values of canonical Hartree-Fock orbitals
-      1     -20.4156       0.0399
-      2     -11.0922       0.0104
-      3      -1.4453      -0.4365
-      4      -0.6968       0.2051
-      5      -0.5400      -0.2918
-      6      -0.5400      -0.2918
-      7      -0.4451       0.1098
-      8       0.3062       0.5029
-      9       0.3062       0.5029
-     10       1.0092       6.4828
-
-    COHP values after Foster-Boys localization
-      1     -20.3075       0.0701
-      2     -11.0370       0.0450
-      3      -0.8309      -0.4092
-      4      -0.8309      -0.4092
-      5      -0.8309      -0.4092
-      6      -0.8137       0.2783
-      7      -0.5241       0.1792
-      8       0.3062       0.5029
-      9       0.3062       0.5029
-     10       1.0092       6.4828
-
-    Sum of COHP coefficient canonical orbitals:  -0.6549007057824876
-    Sum of COHP coefficient Foster-Boys orbitals:  -0.654900705782488
-
-The results as shown above clearly demonstrate that not only the total energy
-and the electron density is invariant under a unitary transformation of the
-occupied molecular orbitals, also the sum of the COHP coefficient is an
-invariant. In other words, the (overall) bonding characteristics of the molecule
-remain the same under a unitary transformation.
+This invariance reflects the fact that the total bonding character, electron
+density, and total energy of the system are preserved under orbital
+localization procedures.

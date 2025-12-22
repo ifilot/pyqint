@@ -1,208 +1,237 @@
 # -*- coding: utf-8 -*-
 
-from .pyqint_core import PyQInt
+"""
+Foster–Boys orbital localization.
+
+This module implements the Foster–Boys procedure for constructing
+localized molecular orbitals from canonical Hartree–Fock orbitals.
+"""
+
+from __future__ import annotations
+
+from typing import Dict, Any, List, Optional
+
 import numpy as np
-import random
+import numpy.typing as npt
 import scipy.optimize
-from scipy.stats import ortho_group
+
+from .pyqint_core import PyQInt
+
+
+Vec = npt.NDArray[np.float64]
+Mat = npt.NDArray[np.float64]
+
 
 class FosterBoys:
     """
-    Routine for constructing localized orbitals using Foster-Boys procedure
+    Foster–Boys orbital localization procedure.
+
+    This class is *stateful* and intended for one localization task.
+    Users should interact only via `run()`.
     """
-    def __init__(self, res, seed=None):
-        # copy objects from Hartree-Fock result dictionary
-        self.orbc_canonical = res['orbc']
-        self.orbe_canonical = res['orbe']
-        self.mol = res['mol']
-        self.nuclei = res['nuclei']
-        self.nelec = res['nelec']
-        self.H = res['fock']
-        self.cgfs = res['cgfs']
-        self.maxiter = 1000
-        self.occ = [1 if i < self.nelec//2 else 0 for i in range(0, len(self.cgfs))]
-        self.rngseed = seed
-        self.rng = np.random.default_rng(seed=self.rngseed)
-        
-        # construct dipole tensor
-        self.dipol = self.__build_dipole_tensor(self.cgfs)
-    
-    def run(self, nr_runners=1):
+
+    def __init__(
+        self,
+        hf_result: Dict[str, Any],
+        *,
+        seed: Optional[int] = None,
+        maxiter: int = 1000,
+    ) -> None:
         """
-        Perform the Foster-Boys localization procedure
-
-        Because the Foster-Boys procedure uses random initialization, it is possible that
-        the algorithm ends up in a local minima. To circumvent this, the user can use
-        a number of runners and automatically use the best result found.
+        Parameters
+        ----------
+        hf_result
+            Result dictionary returned by the Hartree–Fock procedure.
+        seed
+            Random seed for reproducibility.
+        maxiter
+            Maximum number of Foster–Boys iterations.
         """
-        bestres = None
-        bestr2 = 0.0
+        # Canonical HF quantities (read-only)
+        self._orbc_canonical: Mat = hf_result["orbc"]
+        self._orbe_canonical: Vec = hf_result["orbe"]
+        self._mol = hf_result["mol"]
+        self._nuclei = hf_result["nuclei"]
+        self._nelec: int = hf_result["nelec"]
+        self._H: Mat = hf_result["fock"]
+        self._cgfs = hf_result["cgfs"]
+        self._overlap = hf_result["overlap"]
+        self._fock = hf_result["fock"]
 
-        for i in range(0, nr_runners):
-            res = self.__single_runner()
-            if res['r2final'] > bestr2:
-                bestres = res
+        # Algorithm parameters
+        self._maxiter: int = maxiter
+        self._rng = np.random.default_rng(seed)
 
-        return bestres
+        # Occupation mask (restricted closed-shell)
+        nocc = self._nelec // 2
+        self._occ: Vec = np.array(
+            [1.0 if i < nocc else 0.0 for i in range(len(self._cgfs))]
+        )
 
-    def __single_runner(self):
+        # Precompute dipole tensor (dominant cost)
+        self._dipole_tensor: Mat = self._build_dipole_tensor(self._cgfs)
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def run(self, nr_runners: int = 1) -> Dict[str, Any]:
         """
-        Perform the Foster-Boys optimization routine
+        Run the Foster–Boys localization.
+
+        Multiple random initializations can be used to reduce the
+        probability of converging to a local minimum.
+
+        Parameters
+        ----------
+        nr_runners
+            Number of independent random initializations.
+
+        Returns
+        -------
+        dict
+            Localization result.
         """
-        # start with a random unitary transformation
-        C = self.__construct_random_orthogonal_transformation(self.orbc_canonical,
-                                                              self.nelec)
+        best_result: Optional[Dict[str, Any]] = None
+        best_r2: float = -np.inf
 
-        old_r2 = 0.0 # start assuming orbital centroids lie at origin
-        diff = 1
-        nriter = 0
-        while diff > 1e-7 and nriter < self.maxiter:
-            C, r2 = self.__perform_foster_boys_mixing_scipy(C)
-            diff = np.abs(r2 - old_r2)
-            old_r2 = r2
-            nriter += 1
-        
-        if nriter == self.maxiter:
-            raise Exception('Foster-Boys procedure did not converge.')
+        for _ in range(nr_runners):
+            result = self._single_runner()
+            if result["r2final"] > best_r2:
+                best_r2 = result["r2final"]
+                best_result = result
 
-        orbe, orbc = self.__calculate_molecular_orbital_energies(C)
+        assert best_result is not None
+        return best_result
 
-        result = {
-            'orbe': orbe,
-            'orbc': orbc,
-            'nriter': nriter,
-            'mol': self.mol,
-            'r2start': self.__calculate_r2(self.orbc_canonical),
-            'r2final': self.__calculate_r2(orbc),
-            'nelec': self.nelec,
-            'cgfs': self.cgfs,
-            'nuclei': self.nuclei,
+    # ------------------------------------------------------------------
+    # Core algorithm
+    # ------------------------------------------------------------------
+
+    def _single_runner(self) -> Dict[str, Any]:
+        """
+        Execute one Foster–Boys optimization run.
+        """
+        C = self._random_orthogonal_initial_guess(self._orbc_canonical)
+
+        r2_old = 0.0
+        for niter in range(self._maxiter):
+            C, r2_new = self._mix_orbitals(C)
+            if abs(r2_new - r2_old) < 1e-7:
+                break
+            r2_old = r2_new
+        else:
+            raise RuntimeError("Foster–Boys localization did not converge.")
+
+        orbe, orbc = self._compute_orbital_energies(C)
+
+        return {
+            "orbe": orbe,
+            "orbc": orbc,
+            "overlap": self._overlap,
+            "fock": self._fock,
+            "nriter": niter + 1,
+            "mol": self._mol,
+            "r2start": self._compute_r2(self._orbc_canonical),
+            "r2final": self._compute_r2(orbc),
+            "nelec": self._nelec,
+            "cgfs": self._cgfs,
+            "nuclei": self._nuclei,
         }
 
-        return result
-    
-    def __perform_foster_boys_mixing_scipy(self, C):
+    # ------------------------------------------------------------------
+    # Foster–Boys mechanics
+    # ------------------------------------------------------------------
+
+    def _mix_orbitals(self, C: Mat) -> tuple[Mat, float]:
         """
-        Successively perform n(n-1)/2 optimization among the occupied
-        molecular orbitals using the scipy minimize function
+        Perform pairwise orbital rotations to maximize the Boys functional.
         """
-        r2start = self.__calculate_r2(C)
-        r2final = r2start
-        
-        N = self.nelec // 2
-        for i in range(N):
-            for j in range(i+1, N):
-                
-                # optimize local pair of MOs on the interval -(pi,pi)
-                res = scipy.optimize.minimize(self.__evaluate_orbital_centroids, 
-                                              0.0,
-                                              args=(C, i, j),
-                                              bounds=[(-np.pi, np.pi)],
-                                              tol=1e-12)
-                
+        nocc = self._nelec // 2
+        r2_start = self._compute_r2(C)
+        r2_best = r2_start
+
+        for i in range(nocc):
+            for j in range(i + 1, nocc):
+                res = scipy.optimize.minimize(
+                    self._evaluate_rotation,
+                    0.0,
+                    args=(C, i, j),
+                    bounds=[(-np.pi, np.pi)],
+                    tol=1e-12,
+                )
+
                 alpha = res.x[0]
-                Cnew = C.copy()
-                Cnew[:,i] = np.cos(alpha) * C[:,i] + np.sin(alpha) * C[:,j]
-                Cnew[:,j] = -np.sin(alpha) * C[:,i] + np.cos(alpha) * C[:,j]
-                
-                r2 = self.__calculate_r2(Cnew)
-                if(r2 > r2start):
-                    C = Cnew.copy()
-                    r2final = r2start
-        
-        return C, r2final
-    
-    def __evaluate_orbital_centroids(self, alpha, C, i, j):
-        """
-        Evaluate the result of r2 after a 2x2 rotation
-        between solutions i and j
-        """
-        
-        Cnew = C.copy()
-        Cnew[:,i] = np.cos(alpha) * C[:,i] + np.sin(alpha) * C[:,j]
-        Cnew[:,j] = -np.sin(alpha) * C[:,i] + np.cos(alpha) * C[:,j]
-        r2 = self.__calculate_r2(Cnew)
-        
-        return -r2
-    
-    def __calculate_r2(self, C):
-        """
-        Calculate r2 from coefficient matrix
-        """
-        # use efficient Einstein summation
-        # i -> molecular orbitals
-        # j -> basis functions 1
-        # k -> basis functions 2
-        # l -> cartesian directions dipole moment
-        dipolest = np.einsum('ji,ki,jkl->il', C, C, self.dipol)
-        r2 = np.einsum('ij,i->', dipolest**2, self.occ)
-        
-        return r2
-    
-    def __construct_random_orthogonal_transformation(self, C, nelec, nops=100):
-        """
-        Construct unitary transformation matrix via a series of two-dimensional
-        unitary transformations among the occupied molecular orbitals
-        """
-        for i in range(0,nops):
-            Cnew = C.copy()
+                C_new = self._rotate_pair(C, i, j, alpha)
 
-            # randomly pick two numbers among the occupied orbitals
-            n = self.rng.choice(range(nelec//2), size=2, replace=False)
-            
-            # and mix them by a random angle
-            gamma = self.rng.uniform() * 2.0 * np.pi
-            
-            for j in range(0,len(C)):
-                Cnew[j,n[0]] = np.cos(gamma) * C[j,n[0]] + np.sin(gamma) * C[j,n[1]]
-                Cnew[j,n[1]] = -np.sin(gamma) * C[j,n[0]] + np.cos(gamma) * C[j,n[1]]
+                r2 = self._compute_r2(C_new)
+                if r2 > r2_best:
+                    C = C_new
+                    r2_best = r2
 
-            C = Cnew.copy()
+        return C, r2_best
 
-        return Cnew
-
-    def __construct_random_orthogonal_transformation_from_orthogroup(self, C, nelec, nops=100):
+    def _evaluate_rotation(self, alpha: float, C: Mat, i: int, j: int) -> float:
         """
-        Create orthogonal transformation usign the scipy ortho_group function
+        Objective function for a 2×2 orbital rotation.
+        """
+        C_new = self._rotate_pair(C, i, j, alpha)
+        return -self._compute_r2(C_new)
 
-        This routine should in theory act as a substitute for the
-        __construct_random_orthogonal_transformation() routine, but it is not working
-        appropriately. Leaving it here for potential future development.
+    def _compute_r2(self, C: Mat) -> float:
         """
-        N = nelec//2
-        orthomat = ortho_group.rvs(N)
-        identitymat = np.identity(len(C) - N)
-        T = scipy.linalg.block_diag(orthomat, identitymat)
+        Compute the Foster–Boys localization functional.
+        """
+        dip = np.einsum("ji,ki,jkl->il", C, C, self._dipole_tensor)
+        return float(np.einsum("ij,i->", dip**2, self._occ))
 
-        return T @ C @ T.transpose()
-    
-    def __build_dipole_tensor(self, cgfs):
+    # ------------------------------------------------------------------
+    # Linear algebra helpers
+    # ------------------------------------------------------------------
+
+    def _rotate_pair(self, C: Mat, i: int, j: int, alpha: float) -> Mat:
         """
-        Build a dipole tensor
+        Apply a 2×2 unitary rotation to orbitals i and j.
         """
-        # create new cgfs
-        N = len(cgfs)
-        mat = np.zeros((N,N,3))
+        C_new = C.copy()
+        C_new[:, i] = np.cos(alpha) * C[:, i] + np.sin(alpha) * C[:, j]
+        C_new[:, j] = -np.sin(alpha) * C[:, i] + np.cos(alpha) * C[:, j]
+        return C_new
+
+    def _random_orthogonal_initial_guess(self, C: Mat, nops: int = 100) -> Mat:
+        """
+        Generate a randomized orthogonal transformation of occupied orbitals.
+        """
+        nocc = self._nelec // 2
+        for _ in range(nops):
+            i, j = self._rng.choice(nocc, size=2, replace=False)
+            angle = self._rng.uniform(0.0, 2.0 * np.pi)
+            C = self._rotate_pair(C, i, j, angle)
+        return C
+
+    # ------------------------------------------------------------------
+    # Precomputation
+    # ------------------------------------------------------------------
+
+    def _build_dipole_tensor(self, cgfs: list) -> Mat:
+        """
+        Precompute the dipole integral tensor ⟨χ_i | r_k | χ_j⟩.
+        """
+        n = len(cgfs)
+        tensor = np.zeros((n, n, 3))
         integrator = PyQInt()
-        for i,cgf1 in enumerate(cgfs):
-            for j,cgf2 in enumerate(cgfs):
-                for k in range(0,3):
-                    mat[i,j,k] = integrator.dipole(cgf1, cgf2, k, 0.0)
-        
-        return mat
 
-    def __calculate_molecular_orbital_energies(self, C):
+        for i, c1 in enumerate(cgfs):
+            for j, c2 in enumerate(cgfs):
+                for k in range(3):
+                    tensor[i, j, k] = integrator.dipole(c1, c2, k, 0.0)
+
+        return tensor
+
+    def _compute_orbital_energies(self, C: Mat) -> tuple[Vec, Mat]:
         """
-        Calculate the one-electron MO energies from the Hamiltonian matrix
-        and the coefficient matrix, both in their original basis
-
-        Return *ordered* list of eigenvalue and -vector pairs
+        Compute MO energies in the localized basis.
         """
-        orbe = np.zeros(len(C))
-        for i in range(len(C)):
-            orbe[i] = C[:,i].dot(self.H.dot(C[:,i]))
-
-        # produce list of indices for eigenvalues in ascending order
-        oidx = np.argsort(orbe)
-
-        return orbe[oidx], C[:,oidx]
+        energies = np.array([C[:, i] @ self._H @ C[:, i] for i in range(C.shape[1])])
+        idx = np.argsort(energies)
+        return energies[idx], C[:, idx]

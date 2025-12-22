@@ -14,7 +14,7 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
         mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
-        res = HF().rhf(mol, 'sto3g')
+        res = HF(mol, 'sto3g').rhf()
 
         # note that a seed is given here for reproducibility purposes
         res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
@@ -51,7 +51,7 @@ class TestFosterBoys(unittest.TestCase):
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-        res = HF().rhf(mol, 'sto3g')
+        res = HF(mol, 'sto3g').rhf()
 
         # note that a seed is given here for reproducibility purposes
         res_fb = FosterBoys(res, seed=0).run(nr_runners=5)
