@@ -48,6 +48,7 @@ py.install_sources(
     'gto.py',
     'hf.py',
     'isosurface.py',
+    'matrix_plotter.py',
     'molecule.py',
     'molecule_builder.py',
     'population_analysis.py',

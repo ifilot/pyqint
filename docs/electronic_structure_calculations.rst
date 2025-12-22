@@ -74,6 +74,15 @@ the Hartree-Fock coefficient optimization procedure in detail.
 
     Canonical molecular orbitals of CO visualized using contour plots.
 
+.. hint::
+
+   The manual construction of contour plots shown above provides full control
+   over grid generation and visualization. For convenience, :program:`PyQInt`
+   also provides the :code:`ContourPlotter` helper class (see
+   :ref:`contourplotter_helper`) which encapsulates this workflow and allows
+   rapid generation of grids of molecular orbital contour plots with minimal
+   boilerplate code.
+
 Result dictionary
 -----------------
 

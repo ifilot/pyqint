@@ -10,5 +10,6 @@ from .molecule_builder import MoleculeBuilder
 from .geometry_optimization import GeometryOptimization
 from .blenderrender import BlenderRender
 from .contour import ContourPlotter
+from .matrix_plotter import MatrixPlotter
 
 from ._version import __version__

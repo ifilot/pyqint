@@ -52,6 +52,8 @@ Contour plots
 
 .. figure:: _static/img/h2o_contour_manual.jpg
 
+.. _contourplotter_helper:
+
 ContourPlotter helper class
 ---------------------------
 

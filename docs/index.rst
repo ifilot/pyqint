@@ -77,6 +77,7 @@ requests are ideally submitted via the `github issue tracker
    molecular_orbital_diagrams
    orbital_visualization
    orbital_localization
+   matrix_visualization
    geometry_optimization
    population_analysis
    gallery
