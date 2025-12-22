@@ -25,8 +25,8 @@ class TestString(unittest.TestCase):
         self.assertEqual(str(cgfs[0]), ans)
 
         ans = "Molecule: H2\n"
-        ans += " H (0.000000,0.000000,0.000000)\n"
-        ans += " H (0.000000,0.000000,1.400000)\n"
+        ans += " H     0.000000      0.000000      0.000000\n"
+        ans += " H     0.000000      0.000000      1.400000\n"
         self.assertEqual(str(mol), ans)
 
     def test_version(self):
