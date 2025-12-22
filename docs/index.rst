@@ -74,6 +74,7 @@ requests are ideally submitted via the `github issue tracker
    integral_evaluation
    basis_sets_and_molecules
    electronic_structure_calculations
+   molecular_orbital_diagrams
    orbital_visualization
    orbital_localization
    geometry_optimization
