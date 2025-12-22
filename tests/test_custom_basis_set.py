@@ -20,14 +20,14 @@ class TestCustomBasisSet(unittest.TestCase):
 
             cgfs.append(_cgf)
 
-        res = HF().rhf(mol, basis=cgfs)
+        res = HF(mol, basis=cgfs).rhf()
         np.testing.assert_almost_equal(res['energy'], -1.1175059, 5)
 
     def test_custom_basis_set_co(self):
-        mol = MoleculeBuilder().from_name('CO')
+        mol = MoleculeBuilder.from_name('CO')
         cgfs, nuclei = mol.build_basis('sto3g')
 
-        res = HF().rhf(mol, basis=cgfs)
+        res = HF(mol, basis=cgfs).rhf()
         np.testing.assert_almost_equal(res['energy'], -111.2192571, 4)
 
 if __name__ == '__main__':

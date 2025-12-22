@@ -1,4 +1,4 @@
-from pyqint import Molecule, HF, PyQInt, GeometryOptimization
+from pyqint import Molecule, PyQInt, GeometryOptimization
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -37,7 +37,7 @@ def optimize_co():
     mol.add_atom('C', 0.0, 0.0, -0.6, unit='angstrom')
     mol.add_atom('O', 0.0, 0.0,  0.6, unit='angstrom')
     
-    res = GeometryOptimization().run(mol, 'sto3g')
+    res = GeometryOptimization(mol, 'sto3g').run()
     
     return res['data']
 

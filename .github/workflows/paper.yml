@@ -1,6 +1,10 @@
 name: paper
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+      - paper
 
 jobs:
   paper:

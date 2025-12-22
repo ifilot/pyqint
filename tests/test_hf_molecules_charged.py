@@ -16,7 +16,7 @@ class TestHFMoleculeCharged(unittest.TestCase):
         mol.add_atom('H',  1.57882331,  -0.00000000,  -2.06681794)
         mol.set_charge(-1)
 
-        results = GeometryOptimization().run(mol, 'sto3g')
+        results = GeometryOptimization(mol, 'sto3g').run()
 
         # check that energy matches
         self.assertEqual(results['data']['nelec'], 16)    

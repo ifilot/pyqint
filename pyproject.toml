@@ -1,15 +1,133 @@
+# ---------------------------------------------------------------------------
+# Build system configuration
+# ---------------------------------------------------------------------------
+#
+# We use meson-python (PEP 517 backend) to build the C/C++ extension.
+# In principle this works well across platforms, but Windows deserves
+# special attention (see cibuildwheel.windows below).
+#
+# NOTE:
+#   - meson-python runs builds in a fully isolated PEP 517 environment.
+#   - Environment setup done in GitHub Actions (PATH, vcvarsall, etc.)
+#     does NOT reliably propagate into the actual Meson invocation.
+#
+# This isolation is the root cause of most Windows-specific complexity.
+#
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel",
     "Cython",
     "numpy",
-]
-build-backend = "setuptools.build_meta"
+    "meson-python>=0.15",
+    "pybind11>=2.11",
 
+    # Required only for Windows wheels when building with MinGW.
+    # delvewheel is used to bundle MinGW runtime DLLs into the wheel.
+    #
+    # IMPORTANT:
+    #   We intentionally do NOT rely on MSVC here, because:
+    #     - MSVC + Meson + meson-python + cibuildwheel is currently brittle
+    #       in CI due to PATH/link.exe collisions with Git for Windows.
+    #     - meson-python does not support platform-scoped arguments, making
+    #       it impossible to reliably force MSVC via Meson native files
+    #       without breaking Linux/macOS builds.
+    #
+    "delvewheel"
+]
+build-backend = "mesonpy"
+
+[tool.mesonpy]
+module-path = "src"
+
+# ---------------------------------------------------------------------------
+# Project metadata
+# ---------------------------------------------------------------------------
+[project]
+name = "pyqint"
+version = "1.2.0"
+description = "Python package for evaluating integrals of Gaussian type orbitals"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+authors = [
+    { name = "Ivo Filot", email = "ivo@ivofilot.nl" }
+]
+requires-python = ">=3.9"
+
+# Runtime Python dependencies (independent of build backend)
+dependencies = ["numpy", "scipy", "matplotlib", "tqdm"]
+
+[project.urls]
+Homepage = "https://github.com/ifilot/pyqint"
+
+# ---------------------------------------------------------------------------
+# cibuildwheel configuration
+# ---------------------------------------------------------------------------
+#
+# cibuildwheel is used to build wheels for Linux, macOS, and Windows.
+#
+# IMPORTANT DESIGN DECISION (Windows):
+#
+#   We intentionally build Windows wheels using MinGW rather than MSVC.
+#
+#   Why?
+#   ----
+#   Using MSVC with Meson in CI looks appealing, but in practice it is
+#   extremely fragile due to:
+#
+#     - MSVC tool names (link.exe, lib.exe) colliding with Git for Windows
+#     - PATH ordering being rebuilt inside PEP 517 isolation
+#     - meson-python lacking platform-scoped configuration hooks
+#     - Meson correctly refusing mixed toolchains
+#
+#   After extensive attempts, the MinGW + delvewheel approach proved to be:
+#     - deterministic
+#     - CI-stable
+#     - well-supported by cibuildwheel
+#     - transparent to end users
+#
+#   The cost is a small number of bundled runtime DLLs, which delvewheel
+#   handles automatically.
+#
 [tool.cibuildwheel]
+
+# pytest is used to validate the built wheel after installation
 test-requires = "pytest"
 test-command = "pytest {project}/tests"
 
-# skip PyPy wheels and 32 bit builds
-skip = ["pp*", "*-win32", "*-manylinux_i686", "cp*-musllinux_*", "cp36-*", "cp37-*"]
+# Skip configurations we do not support or do not need
+skip = [
+    "pp*",                 # PyPy not supported
+    "*-win32",             # 32-bit Windows not supported
+    "*-manylinux_i686",    # 32-bit Linux not supported
+    "cp*-musllinux_*",     # musllinux not supported
+    "cp38-*",              # Python < 3.9 not supported
+]
+
+
+# ---------------------------------------------------------------------------
+# Windows-specific wheel repair
+# ---------------------------------------------------------------------------
+#
+# MinGW-built extensions depend on runtime DLLs such as:
+#   - libstdc++-6.dll
+#   - libgcc_s_seh-1.dll
+#   - libwinpthread-1.dll
+#
+# These DLLs are NOT present on a default Windows system.
+#
+# delvewheel:
+#   - scans the built .pyd file
+#   - finds MinGW runtime dependencies
+#   - bundles them into the wheel
+#   - patches the loader so imports work out-of-the-box
+#
+# This step is REQUIRED for functional Windows wheels when using MinGW.
+#
+[tool.cibuildwheel.windows]
+
+# Install delvewheel into the isolated cibuildwheel environment
+before-build = [
+  "pip install delvewheel",
+]
+
+# Repair the wheel after build by bundling MinGW runtime DLLs
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

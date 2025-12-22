@@ -14,7 +14,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
         mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -1.1175059, 5)
@@ -33,7 +33,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H',  1.2288875372,  0.9156191261 ,0.0000000000, unit='angstrom')
         mol.add_atom('H',  1.2288875372, -0.9156191261 ,0.0000000000, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -77.0739726, 4)
@@ -50,7 +50,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('F', 1.1334295832,  0.654385875, 0.0, unit='angstrom')
         mol.add_atom('F', 0.0,  -1.3087717499, 0.0, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -318.6619373, 4)
@@ -68,7 +68,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', -0.8842738057,  0.5105357237, -0.3610032748, unit='angstrom')
         mol.add_atom('H', 0.8842738117,  0.5105357203, -0.3610032651, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -39.7268637, 1)
@@ -83,7 +83,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('O', 0.0,  0.0, 0.4909201273, unit='angstrom')
         mol.add_atom('C', 0.0,  0.0, -0.6545601698, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -111.2254495, 4)
@@ -99,7 +99,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('O', 0.0,  0.0, 1.1879700928, unit='angstrom')
         mol.add_atom('O', 0.0,  0.0, -1.1879700928, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -185.0683906, 5)
@@ -115,7 +115,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', 0.0,  -0.7580158822, 0.5085242828, unit='angstrom')
         mol.add_atom('H', 0.0,  0.7580158822, 0.5085242828, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -74.9659012, 4)
@@ -130,7 +130,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('Li', 0.0,  0.0, 0.377702853, unit='angstrom')
         mol.add_atom('H', 0.0,  0.0, -1.1331085589, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -7.8633821, 5)
@@ -150,7 +150,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', 0.9752586299,  0.5630658315, -0.3981476637, unit='angstrom')
         mol.add_atom('N', 0.0,  0.0, 0.0, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -55.7998313, 5)
@@ -175,7 +175,7 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', -2.1385809117,  1.2347102619, 0.0000000000, unit='angstrom')
         mol.add_atom('H', -2.1385809090, -1.2347102666, 0.0000000000, unit='angstrom')
 
-        results = HF().rhf(mol, 'sto3g')
+        results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
         np.testing.assert_almost_equal(results['energy'], -227.8913603, 5)

@@ -6,7 +6,7 @@ mol = Molecule()
 mol.add_atom('C', 0.0, 0.0, -d/2, unit='angstrom')
 mol.add_atom('O', 0.0, 0.0,  d/2, unit='angstrom')
 
-res = HF().rhf(mol, 'sto3g')
+res = HF(mol, 'sto3g').rhf()
 cohp = COHP(res).run(res['orbc'], 0, 1)
 
 resfb = FosterBoys(res).run(nr_runners=10)

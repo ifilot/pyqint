@@ -40,3 +40,15 @@ To upload, run
 ```bash
 python -m twine upload wheelhouse/*
 ```
+
+## Editable install
+
+Make sure `methon-python` is installed:
+
+```
+pip install meson-python
+```
+
+```bash
+pip install -e .
+```

@@ -1,0 +1,288 @@
+import bpy
+import numpy as np
+import os
+import time
+import json
+import mathutils
+
+#
+# IMPORTANT
+#
+# Do not run this script natively. This script is meant to be run in Blender
+# via one of the call routines
+#
+
+with open(os.path.join(os.path.dirname(__file__), 'manifest.json')) as f:
+    manifest = json.load(f)
+
+def main():
+    # set the scene
+    settings = {
+        'resolution': 512,
+        'camera_location': (
+            manifest['camera_loc']['x'],
+            manifest['camera_loc']['y'],
+            manifest['camera_loc']['z']
+        ),
+        'camera_rotation': (
+            manifest['camera_rot']['x'],
+            manifest['camera_rot']['y'],
+            manifest['camera_rot']['z']
+        ),
+        'camera_scale' : manifest['camera_scale']
+    }
+    set_environment(settings)
+
+    # read molecule file and load it
+    mol = read_xyz(manifest['xyzfile'])
+    create_atoms(mol)
+    create_bonds(mol)
+
+    add_isosurface(manifest['mo_name'],
+                   manifest['mo_neg_path'],
+                   manifest['mo_pos_path'])
+
+    render_scene(manifest['png_output'])
+
+def try_import_ply(filepath):
+    """
+    Try to import a PLY, but do not bail out if there are no vertices present;
+    sometimes there is no negative or positive lobe
+    """
+    try:
+        bpy.ops.wm.ply_import(filepath=filepath)
+        return bpy.context.selected_objects[0]
+    except RuntimeError as e:
+        if "no vertices" in str(e):
+            print(f"Skipping empty PLY: {filepath}")
+            return None
+        raise  # re-raise unexpected errors
+
+def add_isosurface(label, filename_neg, filename_pos):
+    """
+    Add the isosurfaces
+    """
+    obj = try_import_ply(filename_neg)
+    if obj:
+        bpy.ops.object.shade_smooth()
+        obj.data.materials.append(
+            create_material('matneg', manifest['mo_colors']['neg'], alpha=0.6)
+        )
+        obj.name = f'isosurface {label}_neg'
+
+    obj = try_import_ply(filename_pos)
+    if obj:
+        bpy.ops.object.shade_smooth()
+        obj.data.materials.append(
+            create_material('matpos', manifest['mo_colors']['pos'], alpha=0.6)
+        )
+        obj.name = f'isosurface {label}_pos'
+
+def create_atoms(mol):
+    """
+    Create atoms
+    """
+    for i,at in enumerate(mol):
+        scale = manifest['atom_radii'][at[0]]
+        bpy.ops.surface.primitive_nurbs_surface_sphere_add(
+            radius=scale,
+            enter_editmode=False,
+            align='WORLD',
+            location=at[1])
+        obj = bpy.context.view_layer.objects.active
+        obj.name = "atom-%s-%03i" % (at[0],i)
+        bpy.ops.object.shade_smooth()
+
+        # set a material
+        mat = create_material(at[0], manifest['atom_colors'][at[0]])
+        print(mat)
+        obj.data.materials.append(mat)
+
+def create_bonds(mol):
+    """
+    Create bonds between atoms
+    """
+    # set default orientation of bonds (fixed!)
+    z = np.array([0,0,1])
+
+    # add new bonds material if it does not yet exist
+    matbond = create_material('bond', '222222')
+
+    for i,at1 in enumerate(mol):
+        r1 = np.array(at1[1])
+        for j,at2 in enumerate(mol[i+1:]):
+            r2 = np.array(at2[1])
+            dist = np.linalg.norm(r2 - r1)
+
+            if dist < 3.0: # ~1.5 A
+                axis = np.cross(z,r2-r1)
+                if np.linalg.norm(axis) < 1e-5:
+                    axis = np.array([0,0,1])
+                    angle = 0.0
+                else:
+                    axis /= np.linalg.norm(axis)
+                    angle = np.arccos(np.dot(r2-r1,z)/dist)
+
+                bpy.ops.surface.primitive_nurbs_surface_cylinder_add(
+                    enter_editmode=False,
+                    align='WORLD',
+                    location=tuple((r1 + r2) / 2)
+                )
+
+                obj = bpy.context.view_layer.objects.active
+                obj.scale = (manifest['bond_thickness'], manifest['bond_thickness'], dist/2)
+                obj.rotation_mode = 'AXIS_ANGLE'
+                obj.rotation_axis_angle = (angle, axis[0], axis[1], axis[2])
+
+                obj.name = "bond-%s-%03i-%s-%03i" % (at1[0],i,at2[0],j)
+                bpy.ops.object.shade_smooth()
+                obj.data.materials.append(matbond)
+
+def set_environment(settings):
+    """
+    Specify canvas size, remove default objects, reset positions of
+    camera and light, define film and set background
+    """
+    print('Set render engine to: CYCLES')
+    bpy.context.scene.render.engine = 'CYCLES'
+    print('Set rendering device to GPU')
+    bpy.context.scene.cycles.device = 'GPU'
+    bpy.context.scene.render.resolution_x = settings['resolution']
+    bpy.context.scene.render.resolution_y = settings['resolution']
+    print('Setting resolution to: ', settings['resolution'])
+    bpy.context.scene.cycles.samples = 4096
+    bpy.context.scene.cycles.tile_size = 2048
+
+    # remove cube
+    if 'Cube' in bpy.data.objects:
+        o = bpy.data.objects['Cube']
+        bpy.data.objects.remove(o, do_unlink=True)
+
+    camera = bpy.data.objects['Camera']
+    light = bpy.data.objects['Light']
+
+    # set camera
+    camera.location = tuple(settings['camera_location'])
+    camera.rotation_euler = tuple(settings['camera_rotation'])
+    camera.data.clip_end = 1000
+    camera.data.type = 'ORTHO'
+    camera.data.ortho_scale = settings['camera_scale']
+
+    # configure lights
+    light.data.type = 'AREA'
+    light.data.energy = 1e4
+    light.data.shape = 'DISK'
+    light.data.size = 3
+
+    # let the camera look at the origin
+    target = mathutils.Vector([0,0,0])
+    direction = target - camera.location
+    rot_quat = direction.to_track_quat('-Z', 'Y')
+    camera.rotation_euler = rot_quat.to_euler()
+    bpy.context.view_layer.update()
+
+    # position light relative to camera
+    light_offset_cam = mathutils.Vector((10, 10, 10))
+    light.location = camera.matrix_world @ light_offset_cam
+    direction = target - light.location
+    rotation = direction.to_track_quat('-Z', 'Y')
+    light.rotation_euler = rotation.to_euler()
+
+    # output camera and light positions
+    print("Camera world position:", camera.location.copy())
+    print("Light  world position:", light.location.copy())
+
+    # set film
+    bpy.context.scene.render.film_transparent = True
+
+    # set background
+    bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[0].default_value = (1,1,1,1)
+    bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[1].default_value = 1
+
+def create_material(name, color, alpha=1.0):
+    """
+    Build a new material
+    """
+    # early exit if material already exists
+    if name in bpy.data.materials:
+        return bpy.data.materials[name]
+
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+
+    # Base Color
+    bsdf.inputs["Base Color"].default_value = hex2rgbtuple(color)
+
+    # Subsurface Weight
+    bsdf.inputs["Subsurface Weight"].default_value = 0.2
+
+    # Subsurface Radius
+    bsdf.inputs["Subsurface Radius"].default_value = (0.3, 0.3, 0.3)
+
+    # Metallic
+    bsdf.inputs["Metallic"].default_value = 0.1
+
+    # Roughness
+    bsdf.inputs["Roughness"].default_value = 0.2
+
+    # Alpha
+    bsdf.inputs["Alpha"].default_value = alpha
+
+    return mat
+
+def render_scene(outputfile, samples=512):
+    """
+    Render the scene
+    """
+    bpy.context.scene.cycles.samples = samples
+
+    print('Start render')
+    start = time.time()
+    bpy.data.scenes['Scene'].render.filepath = outputfile
+    bpy.ops.render.render(write_still=True)
+    end = time.time()
+    print('Finished rendering frame in %.1f seconds' % (end - start))
+
+def read_xyz(filename):
+    f = open(filename)
+    nratoms = int(f.readline())
+    f.readline() # skip line
+
+    angtobohr = 1.8897259886
+
+    mol = []
+    for i in range(0,nratoms):
+        pieces = f.readline().split()
+        mol.append(
+            [pieces[0],
+            (
+                float(pieces[1]) * angtobohr,
+                float(pieces[2]) * angtobohr,
+                float(pieces[3]) * angtobohr
+            )]
+        )
+
+    return mol
+
+def hex2rgbtuple(hexcode):
+    """
+    Convert 6-digit color hexcode to a tuple of floats
+    """
+    hexcode += "FF"
+    hextuple = tuple([int(hexcode[i:i+2], 16)/255.0 for i in [0,2,4,6]])
+
+    return tuple([color_srgb_to_scene_linear(c) for c in hextuple])
+
+def color_srgb_to_scene_linear(c):
+    """
+    Convert RGB to sRGB
+    """
+    if c < 0.04045:
+        return 0.0 if c < 0.0 else c * (1.0 / 12.92)
+    else:
+        return ((c + 0.055) * (1.0 / 1.055)) ** 2.4
+
+if __name__ == '__main__':
+    main()

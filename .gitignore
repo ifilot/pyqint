@@ -136,7 +136,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-*.xyz
+!src/pyqint/molecules/*.xyz
 
 # Spynx documentation
 docs/build/*
@@ -153,3 +153,6 @@ anaconda-upload/*
 # managlyph .abo files
 *.abo
 .vscode
+
+*.jpg
+*.png
