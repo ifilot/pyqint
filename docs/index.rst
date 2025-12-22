@@ -71,6 +71,7 @@ requests are ideally submitted via the `github issue tracker
 
    installation
    user_interface
+   gallery
    community_guidelines
 
 Indices and tables

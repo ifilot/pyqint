@@ -50,7 +50,6 @@ py.install_sources(
     'isosurface.py',
     'molecule.py',
     'molecule_builder.py',
-    'mopa.py',
     'population_analysis.py',
     'spherical_harmonics.py',
 

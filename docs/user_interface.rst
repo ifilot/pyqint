@@ -1321,8 +1321,14 @@ to the same value, as expected for the highly symmetric CH\ :sub:`4` molecule.
     **Always verify that a calculation is properly converged before using
     its output.**
 
+Population Analysis
+===================
+
+Single Atom Population Analysis
+-------------------------------
+
 Molecular Orbital Hamilton and Overlap Population Analysis
-==========================================================
+----------------------------------------------------------
 
 .. note::
 
@@ -1332,7 +1338,7 @@ Molecular Orbital Hamilton and Overlap Population Analysis
     for *crystal orbitals* (Bloch functions) in periodic systems.
 
 Background of MOHP and MOOP
----------------------------
+***************************
 
 Within the scope of chemical bonding analysis, molecular orbitals can be
 classified as bonding, antibonding, or non-bonding with respect to any given
@@ -1380,7 +1386,7 @@ where :math:`S_{ij}` is an element of the overlap matrix :math:`\mathbf{S}`.
     as virtual orbitals do not correspond to occupied electronic states.
 
 Procedure of MOHP and MOOP
---------------------------
+**************************
 
 MOHP and MOOP calculations are performed using the `MOPA` class, which
 takes the output of a Hartree–Fock calculation as input.
@@ -1404,7 +1410,7 @@ The example below demonstrates MOHP and MOOP analysis for the CO molecule.
 
 Example output::
 
-  MOHP and MOOP values of canonical Hartree–Fock orbitals
+  MOHP and MOOP values of canonical Hartree-Fock orbitals
     1     -20.3914       0.0319      -0.0017
     2     -11.0902       0.0094      -0.0009
     3      -1.4047      -0.4347       0.2937
@@ -1416,8 +1422,8 @@ Example output::
     9       0.2865       0.4489      -0.2562
    10       0.9253       5.1204      -2.6744
 
-MOHP and MOOP analysis of Foster-oys localized orbitals
---------------------------------------------------------
+MOHP and MOOP analysis of Foster-Boys localized orbitals
+*******************************************************
 
 It is often insightful to perform population analysis on *localized*
 molecular orbitals. Since Foster-Boys localization corresponds to a unitary
