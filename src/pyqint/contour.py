@@ -78,6 +78,8 @@ class ContourPlotter:
                 if isinstance(plane, str):
                     # Cartesian-aligned plane
                     grid = ContourPlotter.__create_cartesian_grid(sz, npts, plane)
+                    xlabel = '$%s$ [a.u.]' % plane[0]
+                    ylabel = '$%s$ [a.u.]' % plane[1]
                 else:
                     # Arbitrary plane defined by three atoms
                     grid = ContourPlotter.__build_plane_from_atoms(
@@ -88,6 +90,8 @@ class ContourPlotter:
                         size=sz,
                         npts=npts,
                     )
+                    xlabel = None
+                    ylabel = None
 
                 # --------------------------------------------------
                 # Evaluate wavefunction on grid
@@ -129,6 +133,12 @@ class ContourPlotter:
                 ax[i, j].set_xticks(np.linspace(-sz, sz, ngrid))
                 ax[i, j].set_yticks(np.linspace(-sz, sz, ngrid))
                 ax[i, j].grid(linestyle="--", alpha=0.5)
+
+                if xlabel is not None:
+                    ax[i,j].set_xlabel(xlabel)
+
+                if ylabel is not None:
+                    ax[i,j].set_ylabel(ylabel)
 
                 # Title handling
                 if labels is not None:

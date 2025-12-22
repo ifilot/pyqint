@@ -55,7 +55,7 @@ computed at the Hartree–Fock/STO-3G level.
         
         MatrixPlotter.plot_matrix(
             mat=res['overlap'],
-            filename='co-overlap.png',
+            filename='overlap-co.png',
             xlabels=labels,
             ylabels=labels,
             xlabelrot=0,
@@ -91,7 +91,7 @@ In this example:
 - The figure size is determined automatically from the matrix dimension, while
   the output filename is specified explicitly for each plot.
 
-.. figure:: _static/img/co-overlap.png
+.. figure:: _static/img/overlap-co.png
 
     Overlap matrix of CO, visualized using the :code:`MatrixPlotter` class.
     Note that the entries on the diagonal are all equal to one, indicating

@@ -80,6 +80,7 @@ requests are ideally submitted via the `github issue tracker
    matrix_visualization
    geometry_optimization
    population_analysis
+   symmetry_adapted_basis
    gallery
    community_guidelines
 

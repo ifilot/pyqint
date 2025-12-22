@@ -88,6 +88,7 @@ class MatrixPlotter:
                     va="center",
                     fontsize=7,
                     color="white" if abs(val) > 0.7 else "black",
+                    alpha=0.5 if abs(val) < 0.01 else 1.0,
                 )
 
         # --------------------------------------------------
