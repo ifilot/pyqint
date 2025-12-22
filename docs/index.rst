@@ -70,7 +70,14 @@ requests are ideally submitted via the `github issue tracker
    :caption: Contents:
 
    installation
-   user_interface
+   basis_functions
+   integral_evaluation
+   basis_sets_and_molecules
+   electronic_structure_calculations
+   orbital_visualization
+   orbital_localization
+   geometry_optimization
+   population_analysis
    gallery
    community_guidelines
 

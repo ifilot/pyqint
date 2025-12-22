@@ -69,7 +69,7 @@ class Molecule:
         """
         res = f"Molecule: {self.__name}\n"
         for symbol, pos in self.__atoms:
-            res += f" {symbol} ({pos[0]:.6f},{pos[1]:.6f},{pos[2]:.6f})\n"
+            res += f" {symbol} {pos[0]:12.6f}  {pos[1]:12.6f}  {pos[2]:12.6f}\n"
         return res
 
     def __len__(self) -> int:

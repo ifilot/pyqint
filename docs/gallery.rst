@@ -1,5 +1,4 @@
-.. _gallery:
-.. index:: Gallery
+.. index:: gallery
 
 Gallery
 =======
