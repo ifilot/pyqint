@@ -1,0 +1,375 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electronic structure calculations &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Molecular Orbital Diagrams" href="molecular_orbital_diagrams.html" />
+    <link rel="prev" title="Basis sets and molecules" href="basis_sets_and_molecules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Electronic structure calculations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hartree-fock">Hartree-Fock</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#result-dictionary">Result dictionary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-basis-sets">Custom basis sets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="electronic-structure-calculations">
+<span id="index-0"></span><h1><a class="toc-backref" href="#id3" role="doc-backlink">Electronic structure calculations</a><a class="headerlink" href="#electronic-structure-calculations" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#electronic-structure-calculations" id="id3">Electronic structure calculations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#hartree-fock" id="id4">Hartree-Fock</a></p></li>
+<li><p><a class="reference internal" href="#result-dictionary" id="id5">Result dictionary</a></p></li>
+<li><p><a class="reference internal" href="#custom-basis-sets" id="id6">Custom basis sets</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="hartree-fock">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Hartree-Fock</a><a class="headerlink" href="#hartree-fock" title="Link to this heading"></a></h2>
+<p>The Hartree-Fock procedure is readily available as a separate class in the
+<strong class="program">PyQInt</strong> package. It gives rich output allowing the user to investigate
+the Hartree-Fock coefficient optimization procedure in detail.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.axes_grid1</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_axes_locatable</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># calculate sto3g coefficients for h2o</span>
+    <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">()</span>
+
+    <span class="c1"># visualize orbitals</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">144</span><span class="p">)</span>
+    <span class="n">sz</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+            <span class="n">dens</span> <span class="o">=</span> <span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="o">+</span><span class="n">j</span><span class="p">],</span> <span class="n">sz</span><span class="o">=</span><span class="n">sz</span><span class="p">)</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dens</span><span class="p">)),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dens</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+              <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;PiYG&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+              <span class="n">levels</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+              <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">],</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+              <span class="n">levels</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x [Bohr]&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;z [Bohr]&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">():</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="mf">3.5</span><span class="p">):</span>
+    <span class="c1"># build integrator</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+    <span class="c1"># build grid</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+    <span class="n">xx</span><span class="p">,</span> <span class="n">zz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+    <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xx</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">res</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<img alt="_images/co_orbs_contour.png" src="_images/co_orbs_contour.png" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using contour plots.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The manual construction of contour plots shown above provides full control
+over grid generation and visualization. For convenience, <strong class="program">PyQInt</strong>
+also provides the <code class="code docutils literal notranslate"><span class="pre">ContourPlotter</span></code> helper class (see
+<a class="reference internal" href="orbital_visualization.html#contourplotter-helper"><span class="std std-ref">ContourPlotter helper class</span></a>) which encapsulates this workflow and allows
+rapid generation of grids of molecular orbital contour plots with minimal
+boilerplate code.</p>
+</div>
+</section>
+<section id="result-dictionary">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Result dictionary</a><a class="headerlink" href="#result-dictionary" title="Link to this heading"></a></h2>
+<p>The result of a Hartree-Fock calculation is captured inside a dictionary
+object. This dictionary objects contains the following keys</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Description of the data contained in the result library</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+<td><p>Final energy of the electronic structure calculation</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclei</span></code></p></td>
+<td><p>List of elements and their position in Bohr units</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">cgfs</span></code></p></td>
+<td><p>List of contracted Gaussian functional objects</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">energies</span></code></p></td>
+<td><p>List of energies during the self-convergence procedure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe</span></code></p></td>
+<td><p>Orbital energies (converged) (array of N element)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc</span></code></p></td>
+<td><p>Orbital coefficients (converted) (matrix of N x N elements)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density</span></code></p></td>
+<td><p>Density matrix <span class="math notranslate nohighlight">\(\mathbf{P}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">fock</span></code></p></td>
+<td><p>Fock matrix <span class="math notranslate nohighlight">\(\mathbf{F}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">transform</span></code></p></td>
+<td><p>Unitary transformation matrix <span class="math notranslate nohighlight">\(\mathbf{X}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">overlap</span></code></p></td>
+<td><p>Overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">kinetic</span></code></p></td>
+<td><p>Kinetic energy matrix <span class="math notranslate nohighlight">\(\mathbf{T}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclear</span></code></p></td>
+<td><p>Nuclear attraction matrix <span class="math notranslate nohighlight">\(\mathbf{V}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">hcore</span></code></p></td>
+<td><p>Core Hamiltonian matrix <span class="math notranslate nohighlight">\(\mathbf{H_\textrm{core}}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">tetensor</span></code></p></td>
+<td><p>Two-electron tensor object <span class="math notranslate nohighlight">\((i,j,k,l)\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">time_stats</span></code></p></td>
+<td><p>Time statistics object</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ecore</span></code></p></td>
+<td><p>Sum of kinetic and nuclear attraction energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">ekin</span></code></p></td>
+<td><p>Total kinetic energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">enuc</span></code></p></td>
+<td><p>Total nuclear attraction energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">erep</span></code></p></td>
+<td><p>Total electron-electron repulsion energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ex</span></code></p></td>
+<td><p>Total exchange energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">enucrep</span></code></p></td>
+<td><p>Electrostatic repulsion energy of the nuclei</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nelec</span></code></p></td>
+<td><p>Total number of electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">mol</span></code></p></td>
+<td><p>Molecule class</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">forces</span></code></p></td>
+<td><p>Forces on the atoms (if calculated, else <code class="code docutils literal notranslate"><span class="pre">None</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<p>To provide an example how one can use the above data, let us consider the
+situation wherein the user wants to decompose the individual components of the
+total energy as given by</p>
+<div class="math notranslate nohighlight">
+\[E_{\textrm{total}} = E_{\textrm{kin}} + E_{\textrm{nuc}} + E_{\textrm{e-e}} + E_{\textrm{ex}} + E_{\textrm{nuc,rep}}\]</div>
+<p>Via the script below, one can easily verify that the above equation holds and
+that the total energy is indeed the sum of the kinetic, nuclear attraction,
+electron-electron repulsion, exchange and nuclear repulsion energies within a
+Hartree-Fock calculation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span><span class="n">HF</span>
+
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;CH4&#39;</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Kinetic energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Nuclear attraction energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Electron-electron repulsion: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exchange energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Repulsion between nuclei: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of the individual terms: &#39;</span><span class="p">,</span>
+      <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The output of the above script yields:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kinetic</span> <span class="n">energy</span><span class="p">:</span>  <span class="mf">39.42613774982387</span>
+<span class="n">Nuclear</span> <span class="n">attraction</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">118.63789179775034</span>
+<span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">32.7324270326041</span>
+<span class="n">Exchange</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">6.609004673631048</span>
+<span class="n">Repulsion</span> <span class="n">between</span> <span class="n">nuclei</span><span class="p">:</span>  <span class="mf">13.362026647057352</span>
+
+<span class="n">Total</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.72630504189621</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">the</span> <span class="n">individual</span> <span class="n">terms</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.726305041896055</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-basis-sets">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h2>
+<p>Besides the basis sets offered by <strong class="program">PyQInt</strong>, one can also use a custom
+basis set defined by the user. The <code class="code docutils literal notranslate"><span class="pre">rhf</span></code> routine accepts either a basis set
+for its <code class="code docutils literal notranslate"><span class="pre">basis</span></code> argument, or alternatively a list of <code class="code docutils literal notranslate"><span class="pre">cgf</span></code> objects.
+In the example code shown below, the latter is done.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">cgf</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">get_nuclei</span><span class="p">()</span>
+
+<span class="n">cgfs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nuclei</span><span class="p">:</span>
+    <span class="n">cgf</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">cgfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cgf</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">cgfs</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>A nice website to find a large collection of Gaussian Type basis set coefficients is
+<a class="reference external" href="https://www.basissetexchange.org/">https://www.basissetexchange.org/</a>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basis_sets_and_molecules.html" class="btn btn-neutral float-left" title="Basis sets and molecules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="molecular_orbital_diagrams.html" class="btn btn-neutral float-right" title="Molecular Orbital Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

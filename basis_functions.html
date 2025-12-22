@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basis functions &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Integral evaluation" href="integral_evaluation.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basis functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gaussian-type-orbitals-gto">Gaussian type orbitals (GTO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contracted-gaussian-functions-cgf">Contracted Gaussian Functions (CGF)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#position-handling-and-advanced-usage">Position Handling and Advanced Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-atom-centered-gtos-and-mixed-center-cgfs">Non-Atom-Centered GTOs and Mixed-Center CGFs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integral-evaluation-and-position-resolution">Integral Evaluation and Position Resolution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="basis-functions">
+<span id="index-0"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">Basis functions</a><a class="headerlink" href="#basis-functions" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#basis-functions" id="id1">Basis functions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#gaussian-type-orbitals-gto" id="id2">Gaussian type orbitals (GTO)</a></p></li>
+<li><p><a class="reference internal" href="#contracted-gaussian-functions-cgf" id="id3">Contracted Gaussian Functions (CGF)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#position-handling-and-advanced-usage" id="id4">Position Handling and Advanced Usage</a></p></li>
+<li><p><a class="reference internal" href="#non-atom-centered-gtos-and-mixed-center-cgfs" id="id5">Non-Atom-Centered GTOs and Mixed-Center CGFs</a></p></li>
+<li><p><a class="reference internal" href="#integral-evaluation-and-position-resolution" id="id6">Integral Evaluation and Position Resolution</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="gaussian-type-orbitals-gto">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Gaussian type orbitals (GTO)</a><a class="headerlink" href="#gaussian-type-orbitals-gto" title="Link to this heading"></a></h2>
+<p><strong class="program">PyQInt</strong> uses cartesian Gaussian type orbitals as given by</p>
+<div class="math notranslate nohighlight">
+\[\Phi(\alpha,l,m,n,\vec{R}) = N (x - X)^{l} (y - Y)^{m} (z - Z)^{n} \exp \left(- \alpha |\vec{r} - \vec{R}|^{2} \right)\]</div>
+<p>wherein <span class="math notranslate nohighlight">\(\alpha\)</span> is the exponent, <span class="math notranslate nohighlight">\(\vec{R} = \left(X,Y,Z\right)\)</span> the
+position of the orbital, <span class="math notranslate nohighlight">\((l,m,n)\)</span> the orders of the pre-exponential
+polynomial, and <span class="math notranslate nohighlight">\(N\)</span> a normalization constant such that</p>
+<div class="math notranslate nohighlight">
+\[\left&lt; \Phi | \Phi \right&gt; = 1\]</div>
+<p>GTOs are a fundamental building block of CGF (see below) and typically a user
+would not directly work with them (a notable exception is provided below).
+Nevertheless, GTO objects can be constructed as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span><span class="p">,</span> <span class="n">GTO</span>
+
+<span class="n">coeff</span> <span class="o">=</span> <span class="mf">1.0</span>    <span class="c1"># coefficients only have meaning for GTOs within a CGF</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">GTO</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The normalization constant is automatically calculated by <cite>PyQInt</cite> based
+on the value of <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\((l,m,n)\)</span> and does not have
+to be supplied by the user.</p></li>
+<li><p>If you work with individual GTOs, the first parameter to construct the GTO
+should have a value of 1.0. This first parameter corresponds to the linear
+expansion coefficient used in the formulation of Contracted Gaussian Functions
+(see below).</p></li>
+</ul>
+</div>
+</section>
+<section id="contracted-gaussian-functions-cgf">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Contracted Gaussian Functions (CGF)</a><a class="headerlink" href="#contracted-gaussian-functions-cgf" title="Link to this heading"></a></h2>
+<p>Several GTOs can be combined to produce a so-called Contracted Gaussian Functional which
+is esentially a linear combination of GTOs as given by</p>
+<div class="math notranslate nohighlight">
+\[\phi = \sum_{i} c_{i} \Phi_{i}(\alpha,l,m,n,\vec{R})\]</div>
+<p>To build a CGF, we first have to produce the CGF object and then
+add GTOs to it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span>
+
+<span class="n">cgf</span> <span class="o">=</span> <span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.154329</span><span class="p">,</span> <span class="mf">3.425251</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.535328</span><span class="p">,</span> <span class="mf">0.623914</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="mf">0.444635</span><span class="p">,</span> <span class="mf">0.168855</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The first argument of the <code class="code docutils literal notranslate"><span class="pre">add_gto</span></code> function is the linear expansion coefficient
+<span class="math notranslate nohighlight">\(c_{i}\)</span> and the second argument is <span class="math notranslate nohighlight">\(\alpha\)</span>.</p>
+</div>
+<section id="position-handling-and-advanced-usage">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Position Handling and Advanced Usage</a><a class="headerlink" href="#position-handling-and-advanced-usage" title="Link to this heading"></a></h3>
+<p>A <code class="code docutils literal notranslate"><span class="pre">CGF</span></code> object carries an explicit spatial position <span class="math notranslate nohighlight">\(\vec{R}\)</span>,
+which is specified when the object is constructed. This position is used as
+the <em>default center</em> for all Gaussian Type Orbitals (GTOs) added to the CGF via
+the standard <code class="code docutils literal notranslate"><span class="pre">add_gto</span></code> method.</p>
+<p>When using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cgf</span><span class="o">.</span><span class="n">add_gto</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>the position of the CGF itself is implicitly copied to the newly created GTO.
+This is the typical and intended usage pattern for atom-centered basis sets,
+where all primitive Gaussians contributing to a contracted function are located
+on the same atomic center. Under this assumption, the CGF represents a single
+atomic basis function composed of multiple primitives sharing a common center.</p>
+</section>
+<section id="non-atom-centered-gtos-and-mixed-center-cgfs">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Non-Atom-Centered GTOs and Mixed-Center CGFs</a><a class="headerlink" href="#non-atom-centered-gtos-and-mixed-center-cgfs" title="Link to this heading"></a></h3>
+<p>In more advanced scenarios, it may be desirable to construct contracted
+functions composed of GTOs located at <em>different spatial positions</em>. This can
+arise, for example, when building symmetry-adapted basis functions or other
+non-standard orbital constructions.</p>
+<p>For such cases, the <code class="code docutils literal notranslate"><span class="pre">CGF</span></code> class provides the method
+<code class="code docutils literal notranslate"><span class="pre">add_gto_with_position</span></code>, which allows explicit specification of the GTO
+center:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cgf</span><span class="o">.</span><span class="n">add_gto_with_position</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="code docutils literal notranslate"><span class="pre">p</span></code> is a three-component array specifying the Cartesian coordinates
+of the GTO center.</p>
+<p>When this method is used, the position stored in the CGF object itself is
+<em>ignored</em> for that particular GTO, and the explicitly provided position is
+stored with the primitive instead.</p>
+</section>
+<section id="integral-evaluation-and-position-resolution">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Integral Evaluation and Position Resolution</a><a class="headerlink" href="#integral-evaluation-and-position-resolution" title="Link to this heading"></a></h3>
+<p>It is important to emphasize that <strong>all integral evaluations are performed using
+the positions of the individual GTOs</strong>, not the position stored in the CGF
+object. The CGF position serves only as a convenient default when adding
+atom-centered primitives via <code class="code docutils literal notranslate"><span class="pre">add_gto</span></code>. Consequently, CGFs containing GTOs
+at mixed centers are handled correctly by the integral engine, provided that
+<code class="code docutils literal notranslate"><span class="pre">add_gto_with_position</span></code> is used where appropriate.</p>
+<p>Users are therefore encouraged to:</p>
+<ul class="simple">
+<li><p>Use <code class="code docutils literal notranslate"><span class="pre">add_gto</span></code> for standard atom-centered basis functions</p></li>
+<li><p>Use <code class="code docutils literal notranslate"><span class="pre">add_gto_with_position</span></code> when constructing non-standard or
+symmetry-adapted contracted functions</p></li>
+<li><p>Rely on GTO positions - <strong>not CGF positions</strong> — when reasoning about integral
+evaluation</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="integral_evaluation.html" class="btn btn-neutral float-right" title="Integral evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

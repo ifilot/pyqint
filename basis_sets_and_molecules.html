@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basis sets and molecules &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Electronic structure calculations" href="electronic_structure_calculations.html" />
+    <link rel="prev" title="Integral evaluation" href="integral_evaluation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basis sets and molecules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#building-molecules">Building molecules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-moleculebuilder-class">Using the MoleculeBuilder class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constructing-basis-functions-for-a-molecule">Constructing basis functions for a molecule</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parallel-evaluation-of-integrals">Parallel evaluation of integrals</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="basis-sets-and-molecules">
+<span id="index-0"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">Basis sets and molecules</a><a class="headerlink" href="#basis-sets-and-molecules" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#basis-sets-and-molecules" id="id1">Basis sets and molecules</a></p>
+<ul>
+<li><p><a class="reference internal" href="#building-molecules" id="id2">Building molecules</a></p></li>
+<li><p><a class="reference internal" href="#using-the-moleculebuilder-class" id="id3">Using the MoleculeBuilder class</a></p></li>
+<li><p><a class="reference internal" href="#constructing-basis-functions-for-a-molecule" id="id4">Constructing basis functions for a molecule</a></p></li>
+<li><p><a class="reference internal" href="#parallel-evaluation-of-integrals" id="id5">Parallel evaluation of integrals</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="building-molecules">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Building molecules</a><a class="headerlink" href="#building-molecules" title="Link to this heading"></a></h2>
+<p>Molecules can be efficiently built from the <code class="code docutils literal notranslate"><span class="pre">Molecule</span></code> class. For example,
+to build the H<sub>2</sub> molecule, one can run the script below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Molecule</span><span class="p">:</span> <span class="n">H2</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+ <span class="n">H</span> <span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="using-the-moleculebuilder-class">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Using the MoleculeBuilder class</a><a class="headerlink" href="#using-the-moleculebuilder-class" title="Link to this heading"></a></h2>
+<p>Next to constructing molecules from scratch, one can also use the
+<code class="code docutils literal notranslate"><span class="pre">MoleculeBuilder</span></code> class which contains a number of pre-generated molecules.</p>
+<p>To see which molecules are available in the MoleculeBuilder class, run</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">print_list_molecules</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To load any of these molecules, one uses the <code class="code docutils literal notranslate"><span class="pre">from_name</span></code> function
+as shown in the script below</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script shows the elements and the atom positions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Molecule</span><span class="p">:</span> <span class="n">methane</span>
+ <span class="n">C</span>     <span class="mf">0.000000</span>      <span class="mf">0.000000</span>      <span class="mf">0.000000</span>
+ <span class="n">H</span>     <span class="mf">1.195756</span>      <span class="mf">1.195756</span>      <span class="mf">1.195756</span>
+ <span class="n">H</span>    <span class="o">-</span><span class="mf">1.195756</span>     <span class="o">-</span><span class="mf">1.195756</span>      <span class="mf">1.195756</span>
+ <span class="n">H</span>    <span class="o">-</span><span class="mf">1.195756</span>      <span class="mf">1.195756</span>     <span class="o">-</span><span class="mf">1.195756</span>
+ <span class="n">H</span>     <span class="mf">1.195756</span>     <span class="o">-</span><span class="mf">1.195756</span>     <span class="o">-</span><span class="mf">1.195756</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Naming a molecule is completely optional and has no further implications
+on any of the calculations. To name a molecule, populate the <code class="code docutils literal notranslate"><span class="pre">name</span></code>
+member of the <code class="code docutils literal notranslate"><span class="pre">Molecule</span></code> class.</p>
+</div>
+<p>Alternatively, one can load molecules from a <code class="code docutils literal notranslate"><span class="pre">.xyz</span></code> file via the
+<code class="code docutils literal notranslate"><span class="pre">from_file</span></code> routine.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;ch4.xyz&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is assumed that the positions inside the <cite>.xyz</cite> file are stored in
+<strong>angstroms</strong>. Internally, <strong class="program">PyQInt</strong> uses Bohr distances and the
+distances as reported in the <code class="code docutils literal notranslate"><span class="pre">.xyz</span></code> file are automatically converted.</p>
+</div>
+</section>
+<section id="constructing-basis-functions-for-a-molecule">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Constructing basis functions for a molecule</a><a class="headerlink" href="#constructing-basis-functions-for-a-molecule" title="Link to this heading"></a></h2>
+<p>To construct the basis functions for a given molecule, one first needs to
+construct the molecule after which the <code class="code docutils literal notranslate"><span class="pre">build_basis</span></code> function can be used
+to construct a basis.</p>
+<p>The following basis sets are supported. For each basis set, the range of atoms
+that are supported are given:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">sto3g</span></code> (H-I)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">sto6g</span></code> (H-Kr)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">p321</span></code> (H-Cs)</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">p631</span></code> (H-Zn)</p></li>
+</ul>
+<p>The example code below builds the basis functions for the H<sub>2</sub> molecule:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">cgf</span> <span class="ow">in</span> <span class="n">cgfs</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">nucleus</span> <span class="ow">in</span> <span class="n">nuclei</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nucleus</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">CGF</span><span class="p">;</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">01</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.154329</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">3.425251</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">02</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.535328</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.623914</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">03</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.444635</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.168855</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="p">,</span> <span class="n">CGF</span><span class="p">;</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">01</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.154329</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">3.425251</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">02</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.535328</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.623914</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">03</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.444635</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.168855</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="p">[</span><span class="n">CGF</span><span class="p">;</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">01</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.154329</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">3.425251</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">02</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.535328</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.623914</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="mi">03</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.444635</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.168855</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">)</span>
+<span class="p">,</span> <span class="n">CGF</span><span class="p">;</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">01</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.154329</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">3.425251</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">02</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.535328</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.623914</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="mi">03</span> <span class="o">|</span> <span class="n">GTO</span> <span class="p">:</span> <span class="n">c</span><span class="o">=</span><span class="mf">0.444635</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.168855</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="p">(</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">0.000000</span><span class="p">,</span><span class="mf">1.400000</span><span class="p">)</span>
+<span class="p">]</span>
+<span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">(</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span> <span class="p">,</span> <span class="mf">0.</span> <span class="p">,</span> <span class="mf">1.4</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="parallel-evaluation-of-integrals">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Parallel evaluation of integrals</a><a class="headerlink" href="#parallel-evaluation-of-integrals" title="Link to this heading"></a></h2>
+<p>From a collection of Contracted Gaussian Functions, the complete set of overlap,
+kinetic, nuclear attraction and two-electron integrals can be quickly evaluated
+using the <cite>build_integrals_openmp</cite> function. The function will automatically determine
+the number of available cores to allocate for this process.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># construct integrator object</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+
+<span class="c1"># build hydrogen molecule</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+
+<span class="c1"># evaluate all integrals</span>
+<span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">teint</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_integrals_openmp</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">teint</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The output of the above script is given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="mf">1.00000011</span> <span class="mf">0.6593185</span> <span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.6593185</span>  <span class="mf">1.00000011</span><span class="p">]]</span>
+<span class="p">[[</span><span class="mf">0.76003161</span> <span class="mf">0.23645446</span><span class="p">]</span>
+ <span class="p">[</span><span class="mf">0.23645446</span> <span class="mf">0.76003161</span><span class="p">]]</span>
+<span class="p">[[</span><span class="o">-</span><span class="mf">1.88044067</span> <span class="o">-</span><span class="mf">1.19483464</span><span class="p">]</span>
+ <span class="p">[</span><span class="o">-</span><span class="mf">1.19483464</span> <span class="o">-</span><span class="mf">1.88044067</span><span class="p">]]</span>
+<span class="p">[</span><span class="mf">0.7746057639733748</span><span class="p">,</span> <span class="mf">0.4441076656879813</span><span class="p">,</span> <span class="mf">0.29702859983423036</span><span class="p">,</span> <span class="mf">0.5696758530951017</span><span class="p">,</span> <span class="mf">0.44410766568798105</span><span class="p">,</span> <span class="mf">0.7746057639733748</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="integral_evaluation.html" class="btn btn-neutral float-left" title="Integral evaluation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="electronic_structure_calculations.html" class="btn btn-neutral float-right" title="Electronic structure calculations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

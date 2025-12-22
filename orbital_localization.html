@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbital localization: Foster-Boys &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Matrix visualization" href="matrix_visualization.html" />
+    <link rel="prev" title="Orbital visualization" href="orbital_visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Orbital localization: Foster-Boys</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#background-of-fb">Background of FB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#procedure-of-fb">Procedure of FB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#foster-boys-output-object">Foster-Boys output object</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="orbital-localization-foster-boys">
+<span id="index-0"></span><h1><a class="toc-backref" href="#id4" role="doc-backlink">Orbital localization: Foster-Boys</a><a class="headerlink" href="#orbital-localization-foster-boys" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#orbital-localization-foster-boys" id="id4">Orbital localization: Foster-Boys</a></p>
+<ul>
+<li><p><a class="reference internal" href="#background-of-fb" id="id5">Background of FB</a></p></li>
+<li><p><a class="reference internal" href="#procedure-of-fb" id="id6">Procedure of FB</a></p></li>
+<li><p><a class="reference internal" href="#foster-boys-output-object" id="id7">Foster-Boys output object</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="background-of-fb">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Background of FB</a><a class="headerlink" href="#background-of-fb" title="Link to this heading"></a></h2>
+<p>The canonical orbitals of a Hartree-Fock calculation are defined such that these
+will diagonalize the Fock-matrix by which these molecular orbitals are eigenfunctions
+of the Fock-operator. Nevertheless, this set of solutions is not unique in the sense
+that multiple sets of molecular orbitals produce the same electron density and
+the same total electronic energy. One is allowed to perform an arbitrary
+unitary transformations on the set of <strong>occupied</strong> orbitals yielding a new
+set that is as good as a representation as the old set. Some of these representations
+are however more useful than others and one particular useful representation is
+the one that makes the orbitals as localized (compact and condensed) as possible.</p>
+<p>The degree of localization can be captured via relatively simple metric as given
+by</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{M} = \sum_{i \in \textrm{occ}} \left&lt;\psi_{i} | \vec{r} | \psi_{i} \right&gt;^{2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\psi_{i}\)</span> is a molecular orbital and <span class="math notranslate nohighlight">\(i\)</span> loops over the occupied
+molecular orbitals. One obtains (perhaps counter-intuitively) the most localized orbitals
+by <strong>maximizing</strong> the value of <code class="code docutils literal notranslate"><span class="pre">mathcal{M}</span></code>.</p>
+<p>The process of mixing the molecular orbitals among themselves to the aim of maximizing
+is <code class="code docutils literal notranslate"><span class="pre">mathcal{M}</span></code> is embedded in the <code class="code docutils literal notranslate"><span class="pre">FosterBoys</span></code> class.</p>
+</section>
+<section id="procedure-of-fb">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Procedure of FB</a><a class="headerlink" href="#procedure-of-fb" title="Link to this heading"></a></h2>
+<p>The code below first performs a Hartree-Fock calculation on the CO molecule
+after which the localized molecular orbitals are calculated using the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys">Foster-Boys method</a>.
+The Foster-Boys localization procedure is present as a separate class in the
+<strong class="program">PyQInt</strong> package. It takes the output of a Hartree-Fock calculation
+as its input.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The code below uses the PyTessel package for constructing the isosurfaces.
+PyTessel is an external package for easy construction of isosurfaces from
+scalar fields. More information is given <a class="reference external" href="#constructing-isosurfaces">in the corresponding section</a>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">FosterBoys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyqint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytessel</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyTessel</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">(</span><span class="mf">1.145414</span><span class="p">)</span>
+    <span class="n">resfb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">])):</span>
+        <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">&#39;MO_</span><span class="si">%03i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span>
+                         <span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">][:,</span><span class="n">i</span><span class="p">],</span>
+                         <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Full function for evaluation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_isosurface</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">isovalue</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">npts</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="c1"># generate some data</span>
+    <span class="n">isovalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_rectgrid3d</span><span class="p">(</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">npts</span><span class="p">)</span>
+    <span class="n">scalarfield</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">),</span> <span class="p">(</span><span class="n">npts</span><span class="p">,</span> <span class="n">npts</span><span class="p">,</span> <span class="n">npts</span><span class="p">))</span>
+    <span class="n">unitcell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sz</span><span class="p">)</span>
+
+    <span class="n">pytessel</span> <span class="o">=</span> <span class="n">PyTessel</span><span class="p">()</span>
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_pos.ply&#39;</span>
+    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="o">-</span><span class="n">isovalue</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_neg.ply&#39;</span>
+    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<img alt="_images/co_canonical_isosurfaces.jpg" src="_images/co_canonical_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Canonical molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id2">
+<img alt="_images/co_fosterboys_isosurfaces.jpg" src="_images/co_fosterboys_isosurfaces.jpg" />
+<figcaption>
+<p><span class="caption-text">Localized molecular orbitals of CO visualized using isosurfaces with an
+isovalue of +/-0.03. Note that the localization procedure has only been
+applied to the occupied molecular orbitals. Observe that the localized
+orbitals contain a triple-degenerate state corresponding to the triple
+bond and two lone pairs for C and O.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="foster-boys-output-object">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Foster-Boys output object</a><a class="headerlink" href="#foster-boys-output-object" title="Link to this heading"></a></h2>
+<p>The output object of a Foster-Boys calculation is very similar to the one
+of a Hartree-Fock calculation. It is a dictionary that contains the following
+elements.</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Description of the data contained in the result library</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe</span></code></p></td>
+<td><p>Orbital energies after the unitary transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc</span></code></p></td>
+<td><p>Orbital coefficient after the unitary transformation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">nriter</span></code></p></td>
+<td><p>Number of iterations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">r2start</span></code></p></td>
+<td><p>Initial sum of the squared dipole moment norm of the molecular orbitals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">r2final</span></code></p></td>
+<td><p>Final sum of the squared dipole moment norm of the molecular orbitals.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>One can directly connect the output of a Foster-Boys calculation to a
+COHP calculation. The details of the process are found in the
+<a class="reference external" href="#cohp-analysis-of-the-foster-boys-localized-orbitals">cohp analysis of Foster-Boys localized orbitals section</a>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="orbital_visualization.html" class="btn btn-neutral float-left" title="Orbital visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="matrix_visualization.html" class="btn btn-neutral float-right" title="Matrix visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Molecular Orbital Diagrams &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Orbital visualization" href="orbital_visualization.html" />
+    <link rel="prev" title="Electronic structure calculations" href="electronic_structure_calculations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Molecular Orbital Diagrams</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#canonical-molecular-orbital-diagram-for-co">Canonical Molecular Orbital Diagram for CO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#localized-orbital-diagrams">Localized Orbital Diagrams</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="molecular-orbital-diagrams">
+<span id="index-0"></span><h1>Molecular Orbital Diagrams<a class="headerlink" href="#molecular-orbital-diagrams" title="Link to this heading"></a></h1>
+<p>While <strong class="program">PyQInt</strong> provides access to molecular orbital energies and
+coefficients, the construction of molecular orbital (MO) diagrams is handled
+externally using the <strong class="program">PyMoDia</strong> package. PyMoDia is a dedicated tool for
+building clear and customizable MO diagrams from quantum-chemical data. The
+PyMoDia package is documented separately at: <a class="reference external" href="https://ifilot.github.io/pymodia">https://ifilot.github.io/pymodia</a></p>
+<p>In this section, we demonstrate how results obtained from <strong class="program">PyQInt</strong> can be
+exported and visualized using PyMoDia.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>PyMoDia represents molecular orbital diagrams as energy-level schemes,
+optionally including fragment orbitals, interaction arrows, and symmetry-adapted
+labels. To simplify interoperability, PyMoDia provides helper routines that can
+automatically extract the relevant information from <strong class="program">PyQInt</strong>
+Hartree-Fock results.</p>
+<p><strong class="program">PyMoDia</strong> can be easily installed via</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pymodia
+</pre></div>
+</div>
+</section>
+<section id="canonical-molecular-orbital-diagram-for-co">
+<h2>Canonical Molecular Orbital Diagram for CO<a class="headerlink" href="#canonical-molecular-orbital-diagram-for-co" title="Link to this heading"></a></h2>
+<p>The following example constructs a canonical molecular orbital diagram for
+carbon monoxide (CO) using Hartree-Fock/STO-3G orbitals computed with
+<strong class="program">PyQInt</strong>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymodia</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoDia</span><span class="p">,</span> <span class="n">MoDiaData</span><span class="p">,</span> <span class="n">autobuild_from_pyqint</span><span class="p">,</span> <span class="n">MoDiaSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span>
+
+<span class="c1"># Perform PyQInt calculations for CO</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;co&#39;</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+
+<span class="c1"># Adjust PyMoDia visualization settings</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="n">MoDiaSettings</span><span class="p">()</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">orbc_color</span> <span class="o">=</span> <span class="s1">&#39;#555555&#39;</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">arrow_color</span> <span class="o">=</span> <span class="s1">&#39;#CC0000&#39;</span>
+
+<span class="c1"># Automatically construct molecule and fragment definitions</span>
+<span class="n">mol</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">autobuild_from_pyqint</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;co&#39;</span><span class="p">)</span>
+
+<span class="c1"># Retrieve molecular orbital energies</span>
+<span class="n">moe</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">]</span>
+
+<span class="c1"># Slightly shift one orbital level to improve visual separation</span>
+<span class="n">moe</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.1</span>
+
+<span class="c1"># Build PyMoDia data object</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">MoDiaData</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">set_moe</span><span class="p">(</span><span class="n">moe</span><span class="p">)</span>
+
+<span class="c1"># Construct and export the MO diagram</span>
+<span class="n">diagram</span> <span class="o">=</span> <span class="n">MoDia</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">draw_level_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">level_labels_style</span><span class="o">=</span><span class="s1">&#39;mo_ao&#39;</span><span class="p">,</span>
+    <span class="n">mo_labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;1σ&#39;</span><span class="p">,</span> <span class="s1">&#39;2σ&#39;</span><span class="p">,</span> <span class="s1">&#39;3σ&#39;</span><span class="p">,</span> <span class="s1">&#39;4σ&#39;</span><span class="p">,</span> <span class="s1">&#39;1π&#39;</span><span class="p">,</span> <span class="s1">&#39;1π&#39;</span><span class="p">,</span> <span class="s1">&#39;5σ&#39;</span><span class="p">,</span> <span class="s1">&#39;2π&#39;</span><span class="p">,</span> <span class="s1">&#39;2π&#39;</span><span class="p">,</span> <span class="s1">&#39;6σ&#39;</span><span class="p">],</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span>
+<span class="p">)</span>
+
+<span class="n">diagram</span><span class="o">.</span><span class="n">export_svg</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;mo_co_canonical.svg&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<img alt="_images/mo_co_canonical.svg" src="_images/mo_co_canonical.svg" />
+<figcaption>
+<p><span class="caption-text">Molecular orbital diagram for the canonical molecular orbitals of CO.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Atomic orbital (AO) energy levels shown in PyMoDia diagrams are obtained from
+an internal element-specific dictionary and are intended for qualitative
+visualization purposes only. They do not necessarily represent the true
+atomic orbital energies for a given calculation and may be adjusted manually
+(see the PyMoDia manual). Quantitative AO energies can, in principle, be
+obtained from unrestricted Hartree–Fock calculations on the isolated atoms,
+which are not yet supported in <strong class="program">PyQInt</strong>.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For complex molecules or closely spaced orbital manifolds, it is sometimes
+necessary to apply small <em>visual offsets</em> to selected molecular orbital
+energy levels in order to avoid overlaps in the diagram. In the example
+above, the energy of the <span class="math notranslate nohighlight">\(5\sigma\)</span> orbital is shifted slightly upward
+to separate it from the degenerate <span class="math notranslate nohighlight">\(2\pi\)</span> levels.</p>
+<p>It is important to emphasize that:</p>
+<ul class="simple">
+<li><p>These adjustments affect <strong>only the vertical placement</strong> of the orbital
+levels in the diagram</p></li>
+<li><p>The <strong>numerical energy values displayed</strong> in the figure correspond to the
+<em>original, unmodified</em> Hartree-Fock orbital energies</p></li>
+<li><p>The underlying quantum-chemical results remain unchanged</p></li>
+</ul>
+<p>Such adjustments are therefore purely cosmetic and serve only to improve the
+clarity and readability of the resulting MO diagram.</p>
+</div>
+</section>
+<section id="localized-orbital-diagrams">
+<h2>Localized Orbital Diagrams<a class="headerlink" href="#localized-orbital-diagrams" title="Link to this heading"></a></h2>
+<p><strong class="program">PyMoDia</strong> can equally well be used to visualize localized molecular
+orbitals, such as those obtained via Foster-Boys localization. Since orbital
+localization corresponds to a unitary transformation of the occupied subspace,
+the localized orbitals can be passed directly to <strong class="program">PyMoDia</strong> using the
+same workflow.</p>
+<p>Localized MO diagrams often provide a more chemically intuitive picture, making
+bonding patterns and fragment interactions easier to interpret, while retaining
+a direct connection to the underlying <strong class="program">PyQInt</strong> calculation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymodia</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoDia</span><span class="p">,</span> <span class="n">MoDiaData</span><span class="p">,</span> <span class="n">autobuild_from_pyqint</span><span class="p">,</span> <span class="n">MoDiaSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span>
+
+<span class="c1"># Perform PyQInt calculations for CO and its localization</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;co&#39;</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+
+<span class="c1"># adjust settings</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="n">MoDiaSettings</span><span class="p">()</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">orbc_color</span> <span class="o">=</span> <span class="s1">&#39;#555555&#39;</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">arrow_color</span> <span class="o">=</span> <span class="s1">&#39;#CC0000&#39;</span>
+
+<span class="c1"># making diagram for localized orbitals</span>
+<span class="n">resfb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;nuclei&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;nuclei&#39;</span><span class="p">]</span> <span class="c1"># no longer required from PyQInt &gt;= 1.2.0</span>
+<span class="n">mol</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span> <span class="o">=</span> <span class="n">autobuild_from_pyqint</span><span class="p">(</span><span class="n">resfb</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;co&#39;</span><span class="p">)</span>
+
+<span class="c1"># we make here a small adjustment to the height of the third orbital to avoid</span>
+<span class="c1"># overlap with the triple degenerate state of the localized MOs of CO</span>
+<span class="n">moe</span> <span class="o">=</span> <span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">]</span>
+<span class="n">moe</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="mf">0.5</span>
+<span class="n">moe</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.1</span>
+
+<span class="c1"># build data object</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">MoDiaData</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">set_moe</span><span class="p">(</span><span class="n">moe</span><span class="p">)</span>
+
+<span class="c1"># construct diagram</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">])</span>
+<span class="n">diagram</span> <span class="o">=</span> <span class="n">MoDia</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">draw_level_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">level_labels_style</span><span class="o">=</span><span class="s1">&#39;mo_ao&#39;</span><span class="p">,</span>
+                <span class="n">mo_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+<span class="n">diagram</span><span class="o">.</span><span class="n">export_svg</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;mo_co_localized.svg&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id2">
+<img alt="_images/mo_co_localized.svg" src="_images/mo_co_localized.svg" />
+<figcaption>
+<p><span class="caption-text">Molecular orbital diagram for the localized molecular orbitals of CO. Note
+that we observe a threefold degenerate state correspond to the C-O triple
+bond.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="electronic_structure_calculations.html" class="btn btn-neutral float-left" title="Electronic structure calculations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="orbital_visualization.html" class="btn btn-neutral float-right" title="Orbital visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrix visualization &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Geometry optimization" href="geometry_optimization.html" />
+    <link rel="prev" title="Orbital localization: Foster-Boys" href="orbital_localization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Matrix visualization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#atomic-orbital-labeling">Atomic orbital labeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-overlap-fock-and-coefficient-matrices-of-co">Example: overlap, Fock, and coefficient matrices of CO</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="matrix-visualization">
+<h1>Matrix visualization<a class="headerlink" href="#matrix-visualization" title="Link to this heading"></a></h1>
+<p>Many quantities encountered in electronic-structure theory are naturally
+represented as matrices, such as overlap matrices, Fock matrices, or molecular
+orbital coefficient matrices. To facilitate the inspection and interpretation
+of such data, <strong class="program">PyQInt</strong> provides the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> helper class.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> is intentionally stateless and offers a compact
+interface for visualizing square matrices as annotated heatmaps. Each matrix
+element is displayed both by color and by its numerical value, making the
+structure and magnitude of matrix elements immediately apparent.</p>
+<section id="atomic-orbital-labeling">
+<h2>Atomic orbital labeling<a class="headerlink" href="#atomic-orbital-labeling" title="Link to this heading"></a></h2>
+<p>For chemically meaningful matrix plots, it is often desirable to label rows and
+columns using atomic orbital (AO) labels. Since AO labels cannot be inferred
+unambiguously from contracted Gaussian functions alone, the
+<code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> provides a helper routine (<code class="code docutils literal notranslate"><span class="pre">generate_ao_labels</span></code>) for
+generating AO labels from an explicit shell specification.</p>
+<p>AO labels are generated by providing for each atom its element symbol and the
+list of shells that should be included. The shell specification explicitly
+defines the principal quantum number and angular momentum and avoids any
+ambiguity associated with multiple shells of identical angular momentum.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># example to generate AO labels for CO</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="example-overlap-fock-and-coefficient-matrices-of-co">
+<h2>Example: overlap, Fock, and coefficient matrices of CO<a class="headerlink" href="#example-overlap-fock-and-coefficient-matrices-of-co" title="Link to this heading"></a></h2>
+<p>The following example demonstrates how to visualize the overlap matrix, Fock
+matrix, and molecular orbital coefficient matrix of carbon monoxide (CO)
+computed at the Hartree–Fock/STO-3G level.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">MatrixPlotter</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+    <span class="p">])</span>
+
+    <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;overlap-co.png&#39;</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Overlap&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;fock&#39;</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;fock-co.png&#39;</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Fock&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;coefficient-co.png&#39;</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\psi_{</span><span class="si">%i</span><span class="s1">}$&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">]))],</span>
+        <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Coefficient&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In this example:</p>
+<ul class="simple">
+<li><p>The overlap and Fock matrices are visualized using AO labels on both axes.</p></li>
+<li><p>The molecular orbital coefficient matrix is visualized with atomic orbitals
+along the rows and molecular orbitals along the columns.</p></li>
+<li><p>The figure size is determined automatically from the matrix dimension, while
+the output filename is specified explicitly for each plot.</p></li>
+</ul>
+<figure class="align-default" id="id1">
+<img alt="_static/img/overlap-co.png" src="_static/img/overlap-co.png" />
+<figcaption>
+<p><span class="caption-text">Overlap matrix of CO, visualized using the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> class.
+Note that the entries on the diagonal are all equal to one, indicating
+that the basis set is normalized. Also note that because of the symmetry
+of the molecule, certain elements of the matrix are equal to zero.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id2">
+<img alt="_static/img/fock-co.png" src="_static/img/fock-co.png" />
+<figcaption>
+<p><span class="caption-text">Fock matrix of CO, visualized using the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> class. Observe
+that the first and sixth diagonal element have significantly lower energies,
+indicating that these basis functions correspond to core atomic orbitals.
+Also note that because of the symmetry of the molecule, certain elements
+of the matrix are equal to zero, similar to the overlap matrix.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id3">
+<img alt="_static/img/coefficient-co.png" src="_static/img/coefficient-co.png" />
+<figcaption>
+<p><span class="caption-text">Coefficient matrix of CO, visualized using the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> class.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="orbital_localization.html" class="btn btn-neutral float-left" title="Orbital localization: Foster-Boys" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geometry_optimization.html" class="btn btn-neutral float-right" title="Geometry optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
