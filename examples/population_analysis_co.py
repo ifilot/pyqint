@@ -1,9 +1,9 @@
-from pyqint import MoleculeBuilder, HF, PA
+from pyqint import MoleculeBuilder, HF, PopulationAnalysis
 
 def main():
     mol = MoleculeBuilder().from_name('CO')
-    res = HF().rhf(mol, 'sto3g')
-    pa = PA(res)
+    res = HF(mol, 'sto3g').rhf()
+    pa = PopulationAnalysis(res)
 
     mulliken_0 = pa.mulliken(0)
     mulliken_1 = pa.mulliken(1)

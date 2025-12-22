@@ -63,6 +63,31 @@ class TestMOPA(unittest.TestCase):
         np.testing.assert_almost_equal(coeff,
                                        coeff_ref,
                                        decimal=4)
+
+        #
+        # Molecular orbital bond index analysis
+        #
+        coeff = pa.mobi(0, 1)
+
+        coeff_ref = np.array([
+            6.6383e-04,
+            3.8125e-04,
+            -2.8206e-03,
+            3.4761e-01,
+            5.0100e-01,
+            5.0100e-01,
+            2.1104e-01,
+            -8.6348e-01,
+            -8.6348e-01,
+            -1.5583e+00,
+        ])
+
+        # note that Foster-Boys optimization is somewhat random and thus
+        # we use relatively loose testing criteria
+        np.testing.assert_almost_equal(coeff,
+                                       coeff_ref,
+                                       decimal=4)
+
         #
         # Charge Analyses
         #
