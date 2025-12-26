@@ -1128,11 +1128,17 @@ double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const in
     std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
     std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
 
+    // pre-calculate all Fgamma values
+    std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
+    for (unsigned int i=0; i<fg.size(); ++i) {
+        fg[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
+    }
+
     double sum = 0.0;
     for(int i=0; i<=(la+lb+lc+ld); i++) {
         for(int j=0; j<=(ma+mb+mc+md); j++) {
             for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k]*this->gamma_inc.Fgamma(i+j+k,0.25*rpq2/delta);
+                sum += bx[i]*by[j]*bz[k]*fg[i+j+k];
             }
         }
     }
