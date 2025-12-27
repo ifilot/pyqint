@@ -274,8 +274,9 @@ class HF:
             use_diis: bool = True,
             verbose: bool = False,
             tolerance: float = 1e-9,
-            orbc_init: Optional[Dict[str, "Mat"]] = None,   # expects {"alpha": Ca, "beta": Cb}
+            orbc_init: Optional[Dict[str, Mat]] = None,   # expects {"alpha": Ca, "beta": Cb}
             ortho: str = "canonical",
+            nelec: Optional[int] = None,
         ) -> Dict[str, Any]:
         """
         Perform an unrestricted Hartree-Fock calculation.
@@ -306,7 +307,8 @@ class HF:
         """
 
         # electron counts
-        nelec = int(self._nelec)
+        if nelec is None:
+            nelec = int(self._nelec)
         if multiplicity < 1 or multiplicity > nelec + 1:
             raise ValueError(f"Invalid multiplicity={multiplicity} for nelec={nelec}.")
 
@@ -316,7 +318,7 @@ class HF:
         if nalpha < 0 or nbeta < 0:
             raise ValueError("Computed negative Nalpha/Nbeta; check nelec/multiplicity.")
 
-        # basis size / occupations
+        # basis size and occupations
         time_stats = {}
         N = len(self._cgfs)
         occ_a = np.array([1 if i < nalpha else 0 for i in range(N)], dtype=float)
@@ -375,18 +377,6 @@ class HF:
         Ca = Cb = None
         Fa = Fb = None
 
-        def build_J(Ptot):
-            """
-            Auxiliary matrix for coulombic repulsion
-            """
-            return np.einsum('kl,ijlk->ij', Ptot, tetensor)
-
-        def build_K(Pspin):
-            """
-            Auxiliary matrix for exchange
-            """
-            return np.einsum('kl,iklj->ij', Pspin, tetensor)
-
         # SCF iterations
         for niter in range(0, itermax):
             iterstart = time.time()
@@ -423,9 +413,9 @@ class HF:
 
             # Build Coulomb/exchange from current densities
             Ptot = Pa + Pb
-            J = build_J(Ptot)
-            Ka = build_K(Pa)
-            Kb = build_K(Pb)
+            J = np.einsum('kl,ijlk->ij', Ptot, tetensor)
+            Ka = np.einsum('kl,iklj->ij', Pa, tetensor)
+            Kb = np.einsum('kl,iklj->ij', Pb, tetensor)
 
             # Build Fock matrices
             Fa = T + V + J - Ka
@@ -447,9 +437,9 @@ class HF:
 
             # Calculate energy
             Ptot_new = Pa_new + Pb_new
-            J_new = build_J(Ptot_new)
-            Ka_new = build_K(Pa_new)
-            Kb_new = build_K(Pb_new)
+            J_new = np.einsum('kl,ijlk->ij', Ptot_new, tetensor)
+            Ka_new = np.einsum('kl,iklj->ij', Pa_new, tetensor)
+            Kb_new = np.einsum('kl,iklj->ij', Pb_new, tetensor)
 
             E_elec = (
                 np.einsum('ij,ji', Ptot_new, (T + V))
@@ -500,9 +490,9 @@ class HF:
 
         # Final recompute of common matrices for reporting
         Ptot = Pa + Pb
-        J = build_J(Ptot)
-        Ka = build_K(Pa)
-        Kb = build_K(Pb)
+        J = np.einsum('kl,ijlk->ij', Ptot, tetensor)
+        Ka = np.einsum('kl,iklj->ij', Pa, tetensor)
+        Kb = np.einsum('kl,iklj->ij', Pb, tetensor)
         Fa = T + V + J - Ka
         Fb = T + V + J - Kb
 

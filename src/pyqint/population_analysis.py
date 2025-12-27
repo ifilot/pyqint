@@ -32,6 +32,9 @@ class PopulationAnalysis:
         res
             Result dictionary returned by a Hartree–Fock calculation.
         """
+        if 'orbe_alpha' in res.keys():
+            raise Exception('PopulationAnalysis is not yet supported for UHF')
+
         # Molecular orbital coefficients (AO -> MO)
         self.orbc: Mat = res["orbc"]
 

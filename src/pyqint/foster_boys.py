@@ -47,6 +47,9 @@ class FosterBoys:
         maxiter
             Maximum number of Foster–Boys iterations.
         """
+        if 'orbe_alpha' in hf_result.keys():
+            raise Exception('PopulationAnalysis is not yet supported for UHF')
+
         # Canonical HF quantities (read-only)
         self._orbc_canonical: Mat = hf_result["orbc"]
         self._orbe_canonical: Vec = hf_result["orbe"]
