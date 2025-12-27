@@ -12,6 +12,10 @@ PyMoDia package is documented separately at: https://ifilot.github.io/pymodia
 In this section, we demonstrate how results obtained from :program:`PyQInt` can be
 exported and visualized using PyMoDia.
 
+.. warning::
+
+    PyMoDia currently only support **restricted** Hartree-Fock calculations.
+
 Overview
 --------
 

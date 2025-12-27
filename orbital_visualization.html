@@ -164,6 +164,11 @@ evaluating molecular orbitals, <strong class="program">PyQInt</strong> provides 
 generating grids of contour plots for molecular orbitals obtained from a
 Hartree-Fock calculation. The class itself is intentionally stateless: all
 required information is passed explicitly via the Hartree-Fock results object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>ContourPlotter methods currently only support <strong>restricted</strong>
+Hartree-Fock calculations.</p>
+</div>
 <section id="cartesian-aligned-contour-plots">
 <h3><a class="toc-backref" href="#id4" role="doc-backlink">Cartesian-aligned contour plots</a><a class="headerlink" href="#cartesian-aligned-contour-plots" title="Link to this heading"></a></h3>
 <p>The simplest usage corresponds to contour plots aligned with one of the

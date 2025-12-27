@@ -6,6 +6,11 @@ Population Analysis
 .. contents:: Table of Contents
     :depth: 3
 
+.. warning::
+
+    Population Analysis methods currently only support **restricted**
+    Hartree-Fock calculations.
+
 Single Atom Population Analysis
 -------------------------------
 
@@ -251,7 +256,7 @@ Example output::
    10       0.9253       5.1204      -2.6744      -1.4625
 
 MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals
-********************************************************
+***************************************************************
 
 It is often insightful to perform population analysis on *localized*
 molecular orbitals. Since Foster-Boys localization corresponds to a unitary
