@@ -847,10 +847,11 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
  */
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
-    double rep = this->repulsion(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                                 gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                                 gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                                 gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+    // this function can deploy to "repulsion" or to "repulsion_fgamma_cached"; the latter should be faster
+    double rep = this->repulsion_fgamma_cached(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                                               gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                                               gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
+                                               gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
 
     return rep;
 }
@@ -1128,17 +1129,11 @@ double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const in
     std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
     std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
 
-    // pre-calculate all Fgamma values
-    std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
-    for (unsigned int i=0; i<fg.size(); ++i) {
-        fg[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
-    }
-
     double sum = 0.0;
     for(int i=0; i<=(la+lb+lc+ld); i++) {
         for(int j=0; j<=(ma+mb+mc+md); j++) {
             for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k]*fg[i+j+k];
+                sum += bx[i]*by[j]*bz[k] * this->gamma_inc.Fgamma(i+j+k,0.25*rpq2/delta);
             }
         }
     }
@@ -1188,20 +1183,17 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
     std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
     std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
 
-    // pre-calculate Fgamma values and cache them inside a vector
-    const unsigned int imax = la+lb+lc+ld;
-    const unsigned int jmax = ma+mb+mc+md;
-    const unsigned int kmax = na+nb+nc+nd;
-    std::vector<double> Fgamma_lookup(imax + jmax + kmax + 1, 0.0);
-    for(unsigned int i=0; i<Fgamma_lookup.size(); i++) {
-        Fgamma_lookup[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
+    // pre-calculate all Fgamma values
+    std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
+    for (unsigned int i=0; i<fg.size(); ++i) {
+        fg[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
     }
 
     double sum = 0.0;
     for(int i=0; i<=(la+lb+lc+ld); i++) {
         for(int j=0; j<=(ma+mb+mc+md); j++) {
             for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k]*Fgamma_lookup[i+j+k];
+                sum += bx[i]*by[j]*bz[k]*fg[i+j+k];
             }
         }
     }
