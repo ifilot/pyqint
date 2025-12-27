@@ -162,9 +162,9 @@ can be made explicit by projecting molecular orbitals onto atomic subspaces.
 
 Two closely related population analysis techniques are implemented in *pyqint*:
 
-* **MOHP** – Molecular Orbital *Hamilton* Population
-* **MOOP** – Molecular Orbital *Overlap* Population
-* **MOBI** – Molecular Orbital *Bond* Index
+* **MOHP** - Molecular Orbital *Hamilton* Population
+* **MOOP** - Molecular Orbital *Overlap* Population
+* **MOBI** - Molecular Orbital *Bond* Index
 
 All three analyses quantify the contribution of a given molecular orbital to the
 interaction between two atoms.
@@ -183,7 +183,7 @@ where:
 - :math:`C_{ik}` and :math:`C_{jk}` are elements of the molecular orbital
   coefficient matrix :math:`\mathbf{C}`
 - :math:`H_{ij}` is an element of the Fock (Hamiltonian) matrix
-- the factor of 2 accounts for spin degeneracy in restricted Hartree–Fock theory
+- the factor of 2 accounts for spin degeneracy in restricted Hartree-Fock theory
 
 Analogously, the **MOOP coefficient** is defined as
 
@@ -221,7 +221,7 @@ Procedure of MOHP, MOOP, and MOBI
 *********************************
 
 MOHP, MOOP, and MOBI calculations are performed using the `PopulationAnalysis` class, 
-which takes the output of a Hartree–Fock calculation as input.
+which takes the output of a Hartree-Fock calculation as input.
 
 The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule.
 
@@ -237,13 +237,13 @@ The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule
     moop = mopa.moop(0, 1)
     mobi = mopa.mobi(0, 1)
 
-    print('MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals')
+    print('MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals')
     for i, (e, h, o, b) in enumerate(zip(res['orbe'], mohp, moop, mobi)):
         print('%3i %12.4f %12.4f %12.4f %12.4f' % (i+1, e, h, o, b))
 
 Example output::
 
-  MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals
+  MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals
     1     -20.3914       0.0319      -0.0017      +0.0005
     2     -11.0902       0.0094      -0.0009      +0.0003
     3      -1.4047      -0.4347       0.2937      -0.0219
