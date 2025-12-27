@@ -1,6 +1,7 @@
 # PyQInt
 
 [![status](https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54/status.svg)](https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54)
+![Version](https://img.shields.io/github/v/tag/ifilot/pyqint?label=version)
 [![PyPI pkg](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml)
 [![PyPI](https://img.shields.io/pypi/v/pyqint?style=flat-square)](https://pypi.org/project/pyqint/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
