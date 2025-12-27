@@ -66,6 +66,11 @@ generating grids of contour plots for molecular orbitals obtained from a
 Hartree-Fock calculation. The class itself is intentionally stateless: all
 required information is passed explicitly via the Hartree-Fock results object.
 
+.. warning::
+
+    ContourPlotter methods currently only support **restricted**
+    Hartree-Fock calculations.
+
 Cartesian-aligned contour plots
 *******************************
 

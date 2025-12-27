@@ -6,6 +6,11 @@ Orbital localization: Foster-Boys
 .. contents:: Table of Contents
     :depth: 3
 
+.. warning::
+
+    Orbital Localization methods currently only support **restricted**
+    Hartree-Fock calculations.
+
 Background of FB
 ----------------
 
@@ -46,7 +51,8 @@ as its input.
 .. note::
     The code below uses the PyTessel package for constructing the isosurfaces.
     PyTessel is an external package for easy construction of isosurfaces from
-    scalar fields. More information is given `in the corresponding section <#constructing-isosurfaces>`_.
+    scalar fields. More information is given 
+    `in the corresponding section <#constructing-isosurfaces>`_.
 
 .. code-block:: python
 
