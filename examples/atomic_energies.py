@@ -1,20 +1,51 @@
 from pyqint import Molecule, HF
+from tqdm import tqdm
+
+"""
+Atomic orbital energy evaluation using unrestricted Hartree-Fock.
+
+This script computes atomic orbital energies for isolated atoms using
+an unrestricted Hartree-Fock (UHF) formalism. When the alpha and beta
+orbital energies differ, their average is reported.
+
+The calculations are intended to serve as guides to build MO diagrams.
+"""
+
+ATOMS = [
+    ('H',  2),
+    ('He', 1),
+    ('Li', 2),
+    ('Be', 1),
+    ('B',  2),
+    ('C',  3),
+    ('N',  4),
+    ('O',  3),
+    ('F',  2),
+    ('Ne', 1),
+]
 
 def main():
     res = []
-    for a,m in zip(['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne'], [2, 1, 2, 1, 2, 3, 4, 3, 2, 1]):
-        res.append((a, calculate_atom(a, m)))
 
-    for a,o in res:
-        print('%2s  | %12.8f  %12.8f  %12.8f  %12.8f  %12.8f' % 
-            (
-                a, 
-                o[0]['energy'],
-                o[1]['energy'] if len(o) > 1 else 0,
-                o[2]['energy'] if len(o) > 2 else 0,
-                o[3]['energy'] if len(o) > 3 else 0,
-                o[4]['energy'] if len(o) > 4 else 0,
-            )
+    for symbol, multiplicity in tqdm(
+        ATOMS,
+        total=len(ATOMS),
+        desc="Calculating atoms",
+        unit="atom",
+    ):
+        res.append((symbol, calculate_atom(symbol, multiplicity)))
+
+    for symbol, outputs in res:
+        energies = [o["energy"] for o in outputs]
+        energies += [0.0] * (5 - len(energies))  # pad safely
+
+        print(
+            f"{symbol:>2s}  | "
+            f"{energies[0]:12.8f}  "
+            f"{energies[1]:12.8f}  "
+            f"{energies[2]:12.8f}  "
+            f"{energies[3]:12.8f}  "
+            f"{energies[4]:12.8f}"
         )
 
 def calculate_atom(atom, multiplicity):

@@ -6,7 +6,8 @@ ANG_MOM_MAP = {
     1: "P",
     2: "D",
     3: "F",
-    4: "G"
+    4: "G",
+    5: "H"
 }
 
 ATOMIC_SYMBOLS = {
