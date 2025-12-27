@@ -85,7 +85,14 @@ Nevertheless, if you spot any mistake, please kindly open an
 In the image below, the (canonical) molecular orbitals as found using a
 restricted Hartree-Fock calculation for the CO molecule are shown.
 
-![Molecular orbitals of CO](img/co.jpg)
+![Contour plots of CO](img/co.jpg)
+Contour plots of the CO molecule
+
+![Isosurfaces of CO](docs/_static/img/co_canonical_isosurfaces.jpg)
+Isosurfaces of the canonical molecular orbitals of CO
+
+![Isosurfaces of CO](docs/_static/img/co_fosterboys_isosurfaces.jpg)
+Isosurfaces of the localized molecular orbitals of CO
 
 ## Community guidelines
 
