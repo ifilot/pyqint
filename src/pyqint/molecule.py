@@ -208,6 +208,31 @@ class Molecule:
 
         self.__cgfs = []
 
+        SHELL_L = {
+            "S": 0,
+            "P": 1,
+            "D": 2,
+            "F": 3,
+            "G": 4,
+            "H": 5,
+        }
+
+        def cartesian_shell(L:int):
+            """
+            Product the cartesian Gaussian orbitals
+            
+            L - Angular momentum
+            """
+            shell = []
+            for l in range(L + 1):
+                for m in range(L + 1 - l):
+                    n = L - l - m
+                    shell.append((l, m, n))
+
+            # the sorted() is needed to remain consistent with earlier versions
+            # of PyQInt()
+            return sorted(shell, reverse=True)
+
         # Loop over atoms and attach basis functions
         for aidx, (symbol, position) in enumerate(self.__atoms):
             atom_basis = basis[symbol]
@@ -216,36 +241,18 @@ class Molecule:
             self.__charges[aidx] = atom_basis["atomic_number"]
 
             for cgf_def in atom_basis["cgfs"]:
+                shell_type = cgf_def["type"]
 
-                # s orbitals
-                if cgf_def["type"] == "S":
+                try:
+                    L = SHELL_L[shell_type]
+                except KeyError:
+                    raise ValueError(f"Unknown shell type: {shell_type}")
+
+                for l, m, n in cartesian_shell(L):
                     cgf = CGF(position)
                     for gto in cgf_def["gtos"]:
-                        cgf.add_gto(gto["coeff"], gto["alpha"], 0, 0, 0)
+                        cgf.add_gto(gto["coeff"], gto["alpha"], l, m, n)
                     self.__cgfs.append(cgf)
-
-                # p orbitals (x, y, z)
-                elif cgf_def["type"] == "P":
-                    for l, m, n in [(1, 0, 0), (0, 1, 0), (0, 0, 1)]:
-                        cgf = CGF(position)
-                        for gto in cgf_def["gtos"]:
-                            cgf.add_gto(gto["coeff"], gto["alpha"], l, m, n)
-                        self.__cgfs.append(cgf)
-
-                # d orbitals (Cartesian representation)
-                elif cgf_def["type"] == "D":
-                    for l, m, n in [
-                        (2, 0, 0),
-                        (0, 2, 0),
-                        (0, 0, 2),
-                        (1, 1, 0),
-                        (1, 0, 1),
-                        (0, 1, 1),
-                    ]:
-                        cgf = CGF(position)
-                        for gto in cgf_def["gtos"]:
-                            cgf.add_gto(gto["coeff"], gto["alpha"], l, m, n)
-                        self.__cgfs.append(cgf)
 
         # Finalize nuclear information and electron count
         self.get_nuclei()
