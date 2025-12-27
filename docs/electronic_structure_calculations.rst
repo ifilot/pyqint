@@ -6,12 +6,20 @@ Electronic structure calculations
 .. contents:: Table of Contents
     :depth: 3
 
-Hartree-Fock
-------------
+The :program:`PyQInt` package provides two flavors of Hartree-Fock electronic
+structure calculations: **restricted Hartree-Fock (RHF)** and
+**unrestricted Hartree-Fock (UHF)**. The restricted formulation is suitable for
+closed-shell systems, whereas the unrestricted formulation allows for the
+treatment of open-shell systems with unpaired electrons.
 
-The Hartree-Fock procedure is readily available as a separate class in the
-:program:`PyQInt` package. It gives rich output allowing the user to investigate
-the Hartree-Fock coefficient optimization procedure in detail.
+Both approaches expose detailed intermediate results, allowing the user to
+inspect orbital coefficients, density matrices, Fock matrices, and energy
+contributions throughout the self-consistent field (SCF) procedure.
+
+Restricted Hartree-Fock
+-----------------------
+
+Below, an example of an **restricted** Hartree-Fock calculation is given.
 
 .. code-block:: python
 
@@ -83,8 +91,8 @@ the Hartree-Fock coefficient optimization procedure in detail.
    rapid generation of grids of molecular orbital contour plots with minimal
    boilerplate code.
 
-Result dictionary
------------------
+Result dictionary (RHF)
+***********************
 
 The result of a Hartree-Fock calculation is captured inside a dictionary
 object. This dictionary objects contains the following keys
@@ -186,6 +194,148 @@ The output of the above script yields::
 
     Total energy:  -39.72630504189621
     Sum of the individual terms:  -39.726305041896055
+
+Unrestricted Hartree-Fock (UHF)
+-------------------------------
+
+For systems containing unpaired electrons, such as radicals or atoms with open
+shells, the restricted Hartree-Fock approximation is no longer appropriate.
+In such cases, :program:`PyQInt` provides an **unrestricted Hartree-Fock (UHF)**
+implementation via the :code:`uhf()` method.
+
+In UHF, separate spatial orbitals are used for spin-up (:math:`\alpha`) and
+spin-down (:math:`\beta`) electrons. This leads to distinct α and β density
+matrices and Fock matrices, allowing the electronic structure to exhibit spin
+polarization.
+
+As a representative example, consider the methyl radical (CH₃), which has one
+unpaired electron and therefore requires an unrestricted treatment. The geometry
+used below places the carbon atom at the origin, with three hydrogen atoms
+arranged in a planar configuration with H-C-H angles of 120 degrees and a C-H
+bond length of 2.039 Bohr.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF
+    import numpy as np
+
+    R = 2.039
+    sqrt3 = np.sqrt(3.0)
+
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, 0.0)
+    mol.add_atom('H',  R, 0.0, 0.0)
+    mol.add_atom('H', -0.5 * R,  0.5 * sqrt3 * R, 0.0)
+    mol.add_atom('H', -0.5 * R, -0.5 * sqrt3 * R, 0.0)
+
+    # CH3 is a doublet (multiplicity = 2)
+    res = HF(mol, 'sto3g').uhf(multiplicity=2)
+
+    print('Total energy:', res['energy'])
+
+Result dictionary (UHF)
+***********************
+
+The result of an unrestricted Hartree-Fock (UHF) calculation is likewise captured
+inside a dictionary object. Compared to restricted Hartree-Fock, the UHF result
+dictionary contains **spin-resolved quantities**, reflecting the fact that
+different spatial orbitals are used for spin-up (:math:`\alpha`) and spin-down
+(:math:`\beta`) electrons.
+
+Below, the most important entries of the UHF result dictionary are listed.
+
+.. list-table:: Description of the data contained in the UHF result dictionary
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`energy`
+     - Final total electronic energy
+   * - :code:`nuclei`
+     - List of elements and their position in Bohr units
+   * - :code:`cgfs`
+     - List of contracted Gaussian functional objects
+   * - :code:`energies`
+     - List of total energies during the SCF convergence procedure
+   * - :code:`orbe_alpha`
+     - Converged orbital energies for spin-up (:math:`\alpha`) electrons
+   * - :code:`orbe_beta`
+     - Converged orbital energies for spin-down (:math:`\beta`) electrons
+   * - :code:`orbc_alpha`
+     - Orbital coefficient matrix for :math:`\alpha` electrons
+   * - :code:`orbc_beta`
+     - Orbital coefficient matrix for :math:`\beta` electrons
+   * - :code:`density_alpha`
+     - Density matrix :math:`\mathbf{P}^{\alpha}` for spin-up electrons
+   * - :code:`density_beta`
+     - Density matrix :math:`\mathbf{P}^{\beta}` for spin-down electrons
+   * - :code:`density`
+     - Total density matrix :math:`\mathbf{P} = \mathbf{P}^{\alpha} + \mathbf{P}^{\beta}`
+   * - :code:`fock_alpha`
+     - Fock matrix for :math:`\alpha` electrons
+   * - :code:`fock_beta`
+     - Fock matrix for :math:`\beta` electrons
+   * - :code:`transform`
+     - Unitary transformation matrix :math:`\mathbf{X}`
+   * - :code:`overlap`
+     - Overlap matrix :math:`\mathbf{S}`
+   * - :code:`kinetic`
+     - Kinetic energy matrix :math:`\mathbf{T}`
+   * - :code:`nuclear`
+     - Nuclear attraction matrix :math:`\mathbf{V}`
+   * - :code:`hcore`
+     - Core Hamiltonian matrix :math:`\mathbf{H_{\textrm{core}}}`
+   * - :code:`tetensor`
+     - Two-electron integral tensor :math:`(i,j,k,l)`
+   * - :code:`time_stats`
+     - Time statistics object
+
+In unrestricted Hartree-Fock, the exchange contribution is spin-dependent.
+Accordingly, the exchange energy is split into separate :math:`\alpha` and
+:math:`\beta` components.
+
+.. list-table:: UHF energy contributions
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`ecore`
+     - Sum of kinetic and nuclear attraction energy
+   * - :code:`ej`
+     - Coulomb (Hartree) energy
+   * - :code:`ex_alpha`
+     - Exchange energy contribution from :math:`\alpha` electrons
+   * - :code:`ex_beta`
+     - Exchange energy contribution from :math:`\beta` electrons
+   * - :code:`enucrep`
+     - Electrostatic repulsion energy of the nuclei
+
+In addition to the electronic structure data, the UHF result dictionary contains
+explicit information about the spin state of the system.
+
+.. list-table:: Spin-related quantities
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Key
+     - Description
+   * - :code:`nelec`
+     - Total number of electrons
+   * - :code:`nalpha`
+     - Number of spin-up (:math:`\alpha`) electrons
+   * - :code:`nbeta`
+     - Number of spin-down (:math:`\beta`) electrons
+   * - :code:`multiplicity`
+     - Spin multiplicity :math:`(2S + 1)`
+
+.. note::
+
+   Unlike restricted Hartree-Fock, unrestricted Hartree-Fock allows for spin
+   polarization. As a consequence, the resulting wavefunction is generally not
+   an exact eigenfunction of the total spin operator, which may lead to spin
+   contamination.
 
 Custom basis sets
 -----------------
