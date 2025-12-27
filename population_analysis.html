@@ -242,9 +242,9 @@ pair of atoms. When working with localized basis functions, this classification
 can be made explicit by projecting molecular orbitals onto atomic subspaces.</p>
 <p>Two closely related population analysis techniques are implemented in <em>pyqint</em>:</p>
 <ul class="simple">
-<li><p><strong>MOHP</strong> – Molecular Orbital <em>Hamilton</em> Population</p></li>
-<li><p><strong>MOOP</strong> – Molecular Orbital <em>Overlap</em> Population</p></li>
-<li><p><strong>MOBI</strong> – Molecular Orbital <em>Bond</em> Index</p></li>
+<li><p><strong>MOHP</strong> - Molecular Orbital <em>Hamilton</em> Population</p></li>
+<li><p><strong>MOOP</strong> - Molecular Orbital <em>Overlap</em> Population</p></li>
+<li><p><strong>MOBI</strong> - Molecular Orbital <em>Bond</em> Index</p></li>
 </ul>
 <p>All three analyses quantify the contribution of a given molecular orbital to the
 interaction between two atoms.</p>
@@ -259,7 +259,7 @@ C_{ik} \, H_{ij} \, C_{jk}\]</div>
 <li><p><span class="math notranslate nohighlight">\(C_{ik}\)</span> and <span class="math notranslate nohighlight">\(C_{jk}\)</span> are elements of the molecular orbital
 coefficient matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(H_{ij}\)</span> is an element of the Fock (Hamiltonian) matrix</p></li>
-<li><p>the factor of 2 accounts for spin degeneracy in restricted Hartree–Fock theory</p></li>
+<li><p>the factor of 2 accounts for spin degeneracy in restricted Hartree-Fock theory</p></li>
 </ul>
 <p>Analogously, the <strong>MOOP coefficient</strong> is defined as</p>
 <div class="math notranslate nohighlight">
@@ -289,7 +289,7 @@ as virtual orbitals do not correspond to occupied electronic states.</p>
 <section id="procedure-of-mohp-moop-and-mobi">
 <h3><a class="toc-backref" href="#id8" role="doc-backlink">Procedure of MOHP, MOOP, and MOBI</a><a class="headerlink" href="#procedure-of-mohp-moop-and-mobi" title="Link to this heading"></a></h3>
 <p>MOHP, MOOP, and MOBI calculations are performed using the <cite>PopulationAnalysis</cite> class,
-which takes the output of a Hartree–Fock calculation as input.</p>
+which takes the output of a Hartree-Fock calculation as input.</p>
 <p>The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 
@@ -301,23 +301,23 @@ which takes the output of a Hartree–Fock calculation as input.</p>
 <span class="n">moop</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">mobi</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">mohp</span><span class="p">,</span> <span class="n">moop</span><span class="p">,</span> <span class="n">mobi</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Example output:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals
-  1     -20.3914       0.0319      -0.0017      +0.0005
-  2     -11.0902       0.0094      -0.0009      +0.0003
-  3      -1.4047      -0.4347       0.2937      -0.0219
-  4      -0.6899       0.1977      -0.0663      +0.3657
-  5      -0.5094      -0.2736       0.1562      +0.5121
-  6      -0.5094      -0.2736       0.1562      +0.5121
-  7      -0.4409       0.0813      -0.0375      +0.2263
-  8       0.2865       0.4489      -0.2562      -0.8401
-  9       0.2865       0.4489      -0.2562      -0.8401
- 10       0.9253       5.1204      -2.6744      -1.4625
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MOHP</span><span class="p">,</span> <span class="n">MOOP</span><span class="p">,</span> <span class="ow">and</span> <span class="n">MOBI</span> <span class="n">values</span> <span class="n">of</span> <span class="n">canonical</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">orbitals</span>
+  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.3914</span>       <span class="mf">0.0319</span>      <span class="o">-</span><span class="mf">0.0017</span>      <span class="o">+</span><span class="mf">0.0005</span>
+  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0902</span>       <span class="mf">0.0094</span>      <span class="o">-</span><span class="mf">0.0009</span>      <span class="o">+</span><span class="mf">0.0003</span>
+  <span class="mi">3</span>      <span class="o">-</span><span class="mf">1.4047</span>      <span class="o">-</span><span class="mf">0.4347</span>       <span class="mf">0.2937</span>      <span class="o">-</span><span class="mf">0.0219</span>
+  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6899</span>       <span class="mf">0.1977</span>      <span class="o">-</span><span class="mf">0.0663</span>      <span class="o">+</span><span class="mf">0.3657</span>
+  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>      <span class="o">+</span><span class="mf">0.5121</span>
+  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>      <span class="o">+</span><span class="mf">0.5121</span>
+  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4409</span>       <span class="mf">0.0813</span>      <span class="o">-</span><span class="mf">0.0375</span>      <span class="o">+</span><span class="mf">0.2263</span>
+  <span class="mi">8</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>      <span class="o">-</span><span class="mf">0.8401</span>
+  <span class="mi">9</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>      <span class="o">-</span><span class="mf">0.8401</span>
+ <span class="mi">10</span>       <span class="mf">0.9253</span>       <span class="mf">5.1204</span>      <span class="o">-</span><span class="mf">2.6744</span>      <span class="o">-</span><span class="mf">1.4625</span>
 </pre></div>
 </div>
 </section>
