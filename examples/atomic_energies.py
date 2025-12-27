@@ -1,19 +1,30 @@
 from pyqint import Molecule, HF
 
 def main():
-    for a,m in zip(['C', 'N', 'O', 'F'], [3, 4, 3, 2]):
-        calculate_atom(a, m)
+    res = []
+    for a,m in zip(['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne'], [2, 1, 2, 1, 2, 3, 4, 3, 2, 1]):
+        res.append((a, calculate_atom(a, m)))
+
+    for a,o in res:
+        print('%2s  | %12.8f  %12.8f  %12.8f  %12.8f  %12.8f' % 
+            (
+                a, 
+                o[0]['energy'],
+                o[1]['energy'] if len(o) > 1 else 0,
+                o[2]['energy'] if len(o) > 2 else 0,
+                o[3]['energy'] if len(o) > 3 else 0,
+                o[4]['energy'] if len(o) > 4 else 0,
+            )
+        )
 
 def calculate_atom(atom, multiplicity):
 
     mol = Molecule()
     mol.add_atom(atom, 0, 0, 0)
-    res = HF(mol, 'sto3g').uhf(multiplicity=multiplicity)
+    res = HF(mol, 'aug-cc-pVDZ').uhf(multiplicity=multiplicity)
 
     occ = occupied_mo_energies(res)
-    print('Atom: ', atom)
-    for o in occ:
-        print('%3i: %12.8f Ht (%s)' % (o['index']+1, o['energy'], o['occupation']))
+    return occ
 
 def occupied_mo_energies(res):
     """
