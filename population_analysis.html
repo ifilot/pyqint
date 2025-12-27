@@ -64,9 +64,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#mulliken-population-analysis">Mulliken Population Analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#lowdin-population-analysis">Löwdin Population Analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#example-atomic-charge-analysis">Example: Atomic Charge Analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#background-of-mohp-and-moop">Background of MOHP and MOOP</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#procedure-of-mohp-and-moop">Procedure of MOHP and MOOP</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mohp-and-moop-analysis-of-foster-boys-localized-orbitals">MOHP and MOOP analysis of Foster-Boys localized orbitals</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-analysis">Molecular Orbital Hamilton and Overlap Population Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#background-of-mohp-moop-and-mobi">Background of MOHP, MOOP, and MOBI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#procedure-of-mohp-moop-and-mobi">Procedure of MOHP, MOOP, and MOBI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a></li>
 </ul>
 </li>
 </ul>
@@ -106,9 +109,13 @@
 <li><p><a class="reference internal" href="#mulliken-population-analysis" id="id3">Mulliken Population Analysis</a></p></li>
 <li><p><a class="reference internal" href="#lowdin-population-analysis" id="id4">Löwdin Population Analysis</a></p></li>
 <li><p><a class="reference internal" href="#example-atomic-charge-analysis" id="id5">Example: Atomic Charge Analysis</a></p></li>
-<li><p><a class="reference internal" href="#background-of-mohp-and-moop" id="id6">Background of MOHP and MOOP</a></p></li>
-<li><p><a class="reference internal" href="#procedure-of-mohp-and-moop" id="id7">Procedure of MOHP and MOOP</a></p></li>
-<li><p><a class="reference internal" href="#mohp-and-moop-analysis-of-foster-boys-localized-orbitals" id="id8">MOHP and MOOP analysis of Foster-Boys localized orbitals</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-analysis" id="id6">Molecular Orbital Hamilton and Overlap Population Analysis</a></p>
+<ul>
+<li><p><a class="reference internal" href="#background-of-mohp-moop-and-mobi" id="id7">Background of MOHP, MOOP, and MOBI</a></p></li>
+<li><p><a class="reference internal" href="#procedure-of-mohp-moop-and-mobi" id="id8">Procedure of MOHP, MOOP, and MOBI</a></p></li>
+<li><p><a class="reference internal" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals" id="id9">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a></p></li>
 </ul>
 </li>
 </ul>
@@ -210,8 +217,11 @@ tetrahedral symmetry of the molecule. The Löwdin charges are smaller in
 magnitude than the Mulliken charges, consistent with the reduced basis-set
 sensitivity of Löwdin population analysis.</p>
 <p>For neutral molecules, the sum of all atomic charges obtained from either scheme
-is exactly zero. Molecular Orbital Hamilton and Overlap Population Analysis
-———————————————————-</p>
+is exactly zero.</p>
+</section>
+</section>
+<section id="molecular-orbital-hamilton-and-overlap-population-analysis">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Molecular Orbital Hamilton and Overlap Population Analysis</a><a class="headerlink" href="#molecular-orbital-hamilton-and-overlap-population-analysis" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In earlier versions of <strong class="program">PyQInt</strong>, this functionality was
@@ -219,9 +229,8 @@ erroneously referred to as <em>Crystal Orbital Hamilton Population</em> (COHP).
 While the underlying idea is closely related, COHP is formally defined
 for <em>crystal orbitals</em> (Bloch functions) in periodic systems.</p>
 </div>
-</section>
-<section id="background-of-mohp-and-moop">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">Background of MOHP and MOOP</a><a class="headerlink" href="#background-of-mohp-and-moop" title="Link to this heading"></a></h3>
+<section id="background-of-mohp-moop-and-mobi">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Background of MOHP, MOOP, and MOBI</a><a class="headerlink" href="#background-of-mohp-moop-and-mobi" title="Link to this heading"></a></h3>
 <p>Within the scope of chemical bonding analysis, molecular orbitals can be
 classified as bonding, antibonding, or non-bonding with respect to any given
 pair of atoms. When working with localized basis functions, this classification
@@ -230,8 +239,9 @@ can be made explicit by projecting molecular orbitals onto atomic subspaces.</p>
 <ul class="simple">
 <li><p><strong>MOHP</strong> – Molecular Orbital <em>Hamilton</em> Population</p></li>
 <li><p><strong>MOOP</strong> – Molecular Orbital <em>Overlap</em> Population</p></li>
+<li><p><strong>MOBI</strong> – Molecular Orbital <em>Bond</em> Index</p></li>
 </ul>
-<p>Both analyses quantify the contribution of a given molecular orbital to the
+<p>All three analyses quantify the contribution of a given molecular orbital to the
 interaction between two atoms.</p>
 <p>In a localized basis representation, the <strong>MOHP coefficient</strong> of molecular
 orbital <span class="math notranslate nohighlight">\(k\)</span> with respect to atoms <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> is defined as</p>
@@ -258,62 +268,77 @@ C_{ik} \, S_{ij} \, C_{jk}\]</div>
 However, the interpretation of such values should be made with caution,
 as virtual orbitals do not correspond to occupied electronic states.</p>
 </div>
+<p>Lastly, the <strong>MOBI coefficient</strong> is defined as</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{MOBI}_k =
+2 \sum_{i \in A} \sum_{j \in B}
+C_{ik} \, P_{ij} \, C_{jk}\]</div>
+<p>where <span class="math notranslate nohighlight">\(P_{ij}\)</span> is an element of the density matrix <span class="math notranslate nohighlight">\(\mathbf{P}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>MOHP, MOOP, and MOBI can be evaluated for virtual (unoccupied) orbitals.
+However, the interpretation of such values should be made with caution,
+as virtual orbitals do not correspond to occupied electronic states.</p>
+</div>
 </section>
-<section id="procedure-of-mohp-and-moop">
-<h3><a class="toc-backref" href="#id7" role="doc-backlink">Procedure of MOHP and MOOP</a><a class="headerlink" href="#procedure-of-mohp-and-moop" title="Link to this heading"></a></h3>
-<p>MOHP and MOOP calculations are performed using the <cite>MOPA</cite> class, which
-takes the output of a Hartree–Fock calculation as input.</p>
-<p>The example below demonstrates MOHP and MOOP analysis for the CO molecule.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">MOPA</span>
+<section id="procedure-of-mohp-moop-and-mobi">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Procedure of MOHP, MOOP, and MOBI</a><a class="headerlink" href="#procedure-of-mohp-moop-and-mobi" title="Link to this heading"></a></h3>
+<p>MOHP, MOOP, and MOBI calculations are performed using the <cite>PopulationAnalysis</cite> class,
+which takes the output of a Hartree–Fock calculation as input.</p>
+<p>The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
-<span class="n">mopa</span> <span class="o">=</span> <span class="n">MOPA</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<span class="n">mopa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
 <span class="n">mohp</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">moop</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mobi</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MOHP and MOOP values of canonical Hartree–Fock orbitals&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">mohp</span><span class="p">,</span> <span class="n">moop</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">mohp</span><span class="p">,</span> <span class="n">moop</span><span class="p">,</span> <span class="n">mobi</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Example output:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MOHP</span> <span class="ow">and</span> <span class="n">MOOP</span> <span class="n">values</span> <span class="n">of</span> <span class="n">canonical</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">orbitals</span>
-  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.3914</span>       <span class="mf">0.0319</span>      <span class="o">-</span><span class="mf">0.0017</span>
-  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0902</span>       <span class="mf">0.0094</span>      <span class="o">-</span><span class="mf">0.0009</span>
-  <span class="mi">3</span>      <span class="o">-</span><span class="mf">1.4047</span>      <span class="o">-</span><span class="mf">0.4347</span>       <span class="mf">0.2937</span>
-  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6899</span>       <span class="mf">0.1977</span>      <span class="o">-</span><span class="mf">0.0663</span>
-  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>
-  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>
-  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4409</span>       <span class="mf">0.0813</span>      <span class="o">-</span><span class="mf">0.0375</span>
-  <span class="mi">8</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>
-  <span class="mi">9</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>
- <span class="mi">10</span>       <span class="mf">0.9253</span>       <span class="mf">5.1204</span>      <span class="o">-</span><span class="mf">2.6744</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MOHP, MOOP, and MOBI values of canonical Hartree–Fock orbitals
+  1     -20.3914       0.0319      -0.0017      +0.0005
+  2     -11.0902       0.0094      -0.0009      +0.0003
+  3      -1.4047      -0.4347       0.2937      -0.0219
+  4      -0.6899       0.1977      -0.0663      +0.3657
+  5      -0.5094      -0.2736       0.1562      +0.5121
+  6      -0.5094      -0.2736       0.1562      +0.5121
+  7      -0.4409       0.0813      -0.0375      +0.2263
+  8       0.2865       0.4489      -0.2562      -0.8401
+  9       0.2865       0.4489      -0.2562      -0.8401
+ 10       0.9253       5.1204      -2.6744      -1.4625
 </pre></div>
 </div>
 </section>
-<section id="mohp-and-moop-analysis-of-foster-boys-localized-orbitals">
-<h3><a class="toc-backref" href="#id8" role="doc-backlink">MOHP and MOOP analysis of Foster-Boys localized orbitals</a><a class="headerlink" href="#mohp-and-moop-analysis-of-foster-boys-localized-orbitals" title="Link to this heading"></a></h3>
+<section id="mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a><a class="headerlink" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals" title="Link to this heading"></a></h3>
 <p>It is often insightful to perform population analysis on <em>localized</em>
 molecular orbitals. Since Foster-Boys localization corresponds to a unitary
 transformation of the occupied orbital subspace, the output of a
-Foster-oys localization can be passed directly to the <cite>MOPA</cite> class.</p>
+Foster-Boys localization can be passed directly to the <cite>PopulationAnalysis</cite> class.</p>
 <p>The example below compares MOHP values obtained from canonical and
-Foster-oys localized orbitals.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span><span class="p">,</span> <span class="n">MOPA</span>
+Foster-Boys localized orbitals.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
-<span class="n">mopa</span> <span class="o">=</span> <span class="n">MOPA</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<span class="n">mopa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 <span class="n">mohp</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">moop</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mobi</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="n">res_fb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">mopa_fb</span> <span class="o">=</span> <span class="n">MOPA</span><span class="p">(</span><span class="n">res_fb</span><span class="p">)</span>
+<span class="n">mopa_fb</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res_fb</span><span class="p">)</span>
 <span class="n">mohp_fb</span> <span class="o">=</span> <span class="n">mopa_fb</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">moop_fb</span> <span class="o">=</span> <span class="n">mopa_fb</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mobi_fb</span> <span class="o">=</span> <span class="n">mopa_fb</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOHP (canonical orbitals):&#39;</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mohp</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
@@ -324,6 +349,11 @@ Foster-oys localized orbitals.</p>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">moop</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOOP (Foster-Boys orbitals):&#39;</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">moop_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOBI (canonical orbitals):&#39;</span><span class="p">,</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mobi</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOBI (Foster-Boys orbitals):&#39;</span><span class="p">,</span>
+      <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mobi_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
 </pre></div>
 </div>
 <p>Example output:</p>
@@ -331,9 +361,11 @@ Foster-oys localized orbitals.</p>
 <span class="n">Sum</span> <span class="n">of</span> <span class="n">MOHP</span> <span class="p">(</span><span class="n">Foster</span><span class="o">-</span><span class="n">Boys</span> <span class="n">orbitals</span><span class="p">):</span> <span class="o">-</span><span class="mf">0.6617486641766972</span>
 <span class="n">Sum</span> <span class="n">of</span> <span class="n">MOOP</span> <span class="p">(</span><span class="n">canonical</span> <span class="n">orbitals</span><span class="p">):</span> <span class="mf">0.49960515685531653</span>
 <span class="n">Sum</span> <span class="n">of</span> <span class="n">MOOP</span> <span class="p">(</span><span class="n">Foster</span><span class="o">-</span><span class="n">Boys</span> <span class="n">orbitals</span><span class="p">):</span> <span class="mf">0.49960515685531626</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">MOBI</span> <span class="p">(</span><span class="n">canonical</span> <span class="n">orbitals</span><span class="p">):</span> <span class="mf">1.5951431033478687</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">MOBI</span> <span class="p">(</span><span class="n">Foster</span><span class="o">-</span><span class="n">Boys</span> <span class="n">orbitals</span><span class="p">):</span> <span class="mf">1.5951431033478685</span>
 </pre></div>
 </div>
-<p>The results demonstrate that while individual MOHP and MOOP contributions may
+<p>The results demonstrate that while individual MOHP, MOOP, and MOBI contributions may
 differ significantly between canonical and localized orbitals, the <strong>sum over
 the occupied subspace is invariant under unitary transformations</strong>. This
 invariance reflects the fact that the total bonding character, electron density,

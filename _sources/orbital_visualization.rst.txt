@@ -85,7 +85,7 @@ The following example visualizes the molecular orbitals of carbon monoxide
 
     ContourPlotter.build_contourplot(
         res,
-        'co.png',
+        'co_contour.png',
         plane='yz',
         sz=3.0,
         npts=101,
@@ -106,7 +106,7 @@ orbitals in a :math:`2 \times 5` grid.
 
         ContourPlotter.build_contourplot(
             res,
-            'co.png',
+            'co_contour_level15.png',
             plane='yz',
             sz=3.0,
             npts=101,
@@ -153,7 +153,7 @@ the up direction:
     up = [0, 0, 1]
     ContourPlotter.build_contourplot(
         res,
-        'ch4.png',
+        'ch4_contour.png',
         plane=[0, 1, 2, up],
         sz=3.0,
         npts=101,

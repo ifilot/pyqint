@@ -152,7 +152,7 @@ For the creation of isosurfaces, we use <a class="reference external" href="http
 </pre></div>
 </div>
 <figure class="align-default">
-<img alt="_static/img/h2o_contour_manual.jpg" src="_static/img/h2o_contour_manual.jpg" />
+<img alt="_images/h2o_contour_manual.jpg" src="_images/h2o_contour_manual.jpg" />
 </figure>
 </section>
 <section id="contourplotter-helper-class">
@@ -178,7 +178,7 @@ is specified using a string identifier.</p>
 
 <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;co.png&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;co_contour.png&#39;</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="s1">&#39;yz&#39;</span><span class="p">,</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
@@ -191,14 +191,14 @@ is specified using a string identifier.</p>
 region of width <span class="math notranslate nohighlight">\(2 \times \text{sz}\)</span>, and display the lowest ten molecular
 orbitals in a <span class="math notranslate nohighlight">\(2 \times 5\)</span> grid.</p>
 <figure class="align-default">
-<img alt="_static/img/co_contour.png" src="_static/img/co_contour.png" />
+<img alt="_images/co_contour.png" src="_images/co_contour.png" />
 </figure>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Want more contour levels? Simply adjust the <code class="code docutils literal notranslate"><span class="pre">levels</span></code> argument.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;co.png&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;co_contour_level15.png&#39;</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="s1">&#39;yz&#39;</span><span class="p">,</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
@@ -209,7 +209,7 @@ orbitals in a <span class="math notranslate nohighlight">\(2 \times 5\)</span> g
 </pre></div>
 </div>
 <figure class="align-default">
-<img alt="_static/img/co_contour_level15.png" src="_static/img/co_contour_level15.png" />
+<img alt="_images/co_contour_level15.png" src="_images/co_contour_level15.png" />
 </figure>
 </div>
 </section>
@@ -241,7 +241,7 @@ the up direction:</p>
 <span class="n">up</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;ch4.png&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ch4_contour.png&#39;</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">up</span><span class="p">],</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
@@ -261,7 +261,7 @@ the up direction:</p>
 <p>This approach makes it possible to visualize molecular orbitals in <em>any</em>
 chemically meaningful plane, independent of the global coordinate system.</p>
 <figure class="align-default">
-<img alt="_static/img/ch4_contour.png" src="_static/img/ch4_contour.png" />
+<img alt="_images/ch4_contour.png" src="_images/ch4_contour.png" />
 </figure>
 </section>
 </section>

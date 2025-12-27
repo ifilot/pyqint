@@ -54,8 +54,14 @@
 <li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Electronic structure calculations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#hartree-fock">Hartree-Fock</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#result-dictionary">Result dictionary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#restricted-hartree-fock">Restricted Hartree-Fock</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#result-dictionary-rhf">Result dictionary (RHF)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#unrestricted-hartree-fock-uhf">Unrestricted Hartree-Fock (UHF)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#result-dictionary-uhf">Result dictionary (UHF)</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-basis-sets">Custom basis sets</a></li>
 </ul>
 </li>
@@ -89,24 +95,38 @@
            <div itemprop="articleBody">
              
   <section id="electronic-structure-calculations">
-<span id="index-0"></span><h1><a class="toc-backref" href="#id3" role="doc-backlink">Electronic structure calculations</a><a class="headerlink" href="#electronic-structure-calculations" title="Link to this heading"></a></h1>
+<span id="index-0"></span><h1><a class="toc-backref" href="#id6" role="doc-backlink">Electronic structure calculations</a><a class="headerlink" href="#electronic-structure-calculations" title="Link to this heading"></a></h1>
 <nav class="contents" id="table-of-contents">
 <p class="topic-title">Table of Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#electronic-structure-calculations" id="id3">Electronic structure calculations</a></p>
+<li><p><a class="reference internal" href="#electronic-structure-calculations" id="id6">Electronic structure calculations</a></p>
 <ul>
-<li><p><a class="reference internal" href="#hartree-fock" id="id4">Hartree-Fock</a></p></li>
-<li><p><a class="reference internal" href="#result-dictionary" id="id5">Result dictionary</a></p></li>
-<li><p><a class="reference internal" href="#custom-basis-sets" id="id6">Custom basis sets</a></p></li>
+<li><p><a class="reference internal" href="#restricted-hartree-fock" id="id7">Restricted Hartree-Fock</a></p>
+<ul>
+<li><p><a class="reference internal" href="#result-dictionary-rhf" id="id8">Result dictionary (RHF)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#unrestricted-hartree-fock-uhf" id="id9">Unrestricted Hartree-Fock (UHF)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#result-dictionary-uhf" id="id10">Result dictionary (UHF)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#custom-basis-sets" id="id11">Custom basis sets</a></p></li>
 </ul>
 </li>
 </ul>
 </nav>
-<section id="hartree-fock">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">Hartree-Fock</a><a class="headerlink" href="#hartree-fock" title="Link to this heading"></a></h2>
-<p>The Hartree-Fock procedure is readily available as a separate class in the
-<strong class="program">PyQInt</strong> package. It gives rich output allowing the user to investigate
-the Hartree-Fock coefficient optimization procedure in detail.</p>
+<p>The <strong class="program">PyQInt</strong> package provides two flavors of Hartree-Fock electronic
+structure calculations: <strong>restricted Hartree-Fock (RHF)</strong> and
+<strong>unrestricted Hartree-Fock (UHF)</strong>. The restricted formulation is suitable for
+closed-shell systems, whereas the unrestricted formulation allows for the
+treatment of open-shell systems with unpaired electrons.</p>
+<p>Both approaches expose detailed intermediate results, allowing the user to
+inspect orbital coefficients, density matrices, Fock matrices, and energy
+contributions throughout the self-consistent field (SCF) procedure.</p>
+<section id="restricted-hartree-fock">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Restricted Hartree-Fock</a><a class="headerlink" href="#restricted-hartree-fock" title="Link to this heading"></a></h2>
+<p>Below, an example of an <strong>restricted</strong> Hartree-Fock calculation is given.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -178,9 +198,8 @@ also provides the <code class="code docutils literal notranslate"><span class="p
 rapid generation of grids of molecular orbital contour plots with minimal
 boilerplate code.</p>
 </div>
-</section>
-<section id="result-dictionary">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Result dictionary</a><a class="headerlink" href="#result-dictionary" title="Link to this heading"></a></h2>
+<section id="result-dictionary-rhf">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Result dictionary (RHF)</a><a class="headerlink" href="#result-dictionary-rhf" title="Link to this heading"></a></h3>
 <p>The result of a Hartree-Fock calculation is captured inside a dictionary
 object. This dictionary objects contains the following keys</p>
 <table class="docutils align-default" id="id2">
@@ -308,8 +327,193 @@ Hartree-Fock calculation.</p>
 </pre></div>
 </div>
 </section>
+</section>
+<section id="unrestricted-hartree-fock-uhf">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Unrestricted Hartree-Fock (UHF)</a><a class="headerlink" href="#unrestricted-hartree-fock-uhf" title="Link to this heading"></a></h2>
+<p>For systems containing unpaired electrons, such as radicals or atoms with open
+shells, the restricted Hartree-Fock approximation is no longer appropriate.
+In such cases, <strong class="program">PyQInt</strong> provides an <strong>unrestricted Hartree-Fock (UHF)</strong>
+implementation via the <code class="code docutils literal notranslate"><span class="pre">uhf()</span></code> method.</p>
+<p>In UHF, separate spatial orbitals are used for spin-up (<span class="math notranslate nohighlight">\(\alpha\)</span>) and
+spin-down (<span class="math notranslate nohighlight">\(\beta\)</span>) electrons. This leads to distinct α and β density
+matrices and Fock matrices, allowing the electronic structure to exhibit spin
+polarization.</p>
+<p>As a representative example, consider the methyl radical (CH₃), which has one
+unpaired electron and therefore requires an unrestricted treatment. The geometry
+used below places the carbon atom at the origin, with three hydrogen atoms
+arranged in a planar configuration with H-C-H angles of 120 degrees and a C-H
+bond length of 2.039 Bohr.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">R</span> <span class="o">=</span> <span class="mf">2.039</span>
+<span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="c1"># CH3 is a doublet (multiplicity = 2)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total energy:&#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<section id="result-dictionary-uhf">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Result dictionary (UHF)</a><a class="headerlink" href="#result-dictionary-uhf" title="Link to this heading"></a></h3>
+<p>The result of an unrestricted Hartree-Fock (UHF) calculation is likewise captured
+inside a dictionary object. Compared to restricted Hartree-Fock, the UHF result
+dictionary contains <strong>spin-resolved quantities</strong>, reflecting the fact that
+different spatial orbitals are used for spin-up (<span class="math notranslate nohighlight">\(\alpha\)</span>) and spin-down
+(<span class="math notranslate nohighlight">\(\beta\)</span>) electrons.</p>
+<p>Below, the most important entries of the UHF result dictionary are listed.</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Description of the data contained in the UHF result dictionary</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+<td><p>Final total electronic energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclei</span></code></p></td>
+<td><p>List of elements and their position in Bohr units</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">cgfs</span></code></p></td>
+<td><p>List of contracted Gaussian functional objects</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">energies</span></code></p></td>
+<td><p>List of total energies during the SCF convergence procedure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe_alpha</span></code></p></td>
+<td><p>Converged orbital energies for spin-up (<span class="math notranslate nohighlight">\(\alpha\)</span>) electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe_beta</span></code></p></td>
+<td><p>Converged orbital energies for spin-down (<span class="math notranslate nohighlight">\(\beta\)</span>) electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc_alpha</span></code></p></td>
+<td><p>Orbital coefficient matrix for <span class="math notranslate nohighlight">\(\alpha\)</span> electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc_beta</span></code></p></td>
+<td><p>Orbital coefficient matrix for <span class="math notranslate nohighlight">\(\beta\)</span> electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density_alpha</span></code></p></td>
+<td><p>Density matrix <span class="math notranslate nohighlight">\(\mathbf{P}^{\alpha}\)</span> for spin-up electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">density_beta</span></code></p></td>
+<td><p>Density matrix <span class="math notranslate nohighlight">\(\mathbf{P}^{\beta}\)</span> for spin-down electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density</span></code></p></td>
+<td><p>Total density matrix <span class="math notranslate nohighlight">\(\mathbf{P} = \mathbf{P}^{\alpha} + \mathbf{P}^{\beta}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">fock_alpha</span></code></p></td>
+<td><p>Fock matrix for <span class="math notranslate nohighlight">\(\alpha\)</span> electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">fock_beta</span></code></p></td>
+<td><p>Fock matrix for <span class="math notranslate nohighlight">\(\beta\)</span> electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">transform</span></code></p></td>
+<td><p>Unitary transformation matrix <span class="math notranslate nohighlight">\(\mathbf{X}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">overlap</span></code></p></td>
+<td><p>Overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">kinetic</span></code></p></td>
+<td><p>Kinetic energy matrix <span class="math notranslate nohighlight">\(\mathbf{T}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclear</span></code></p></td>
+<td><p>Nuclear attraction matrix <span class="math notranslate nohighlight">\(\mathbf{V}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">hcore</span></code></p></td>
+<td><p>Core Hamiltonian matrix <span class="math notranslate nohighlight">\(\mathbf{H_{\textrm{core}}}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">tetensor</span></code></p></td>
+<td><p>Two-electron integral tensor <span class="math notranslate nohighlight">\((i,j,k,l)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">time_stats</span></code></p></td>
+<td><p>Time statistics object</p></td>
+</tr>
+</tbody>
+</table>
+<p>In unrestricted Hartree-Fock, the exchange contribution is spin-dependent.
+Accordingly, the exchange energy is split into separate <span class="math notranslate nohighlight">\(\alpha\)</span> and
+<span class="math notranslate nohighlight">\(\beta\)</span> components.</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">UHF energy contributions</span><a class="headerlink" href="#id4" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">ecore</span></code></p></td>
+<td><p>Sum of kinetic and nuclear attraction energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ej</span></code></p></td>
+<td><p>Coulomb (Hartree) energy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">ex_alpha</span></code></p></td>
+<td><p>Exchange energy contribution from <span class="math notranslate nohighlight">\(\alpha\)</span> electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">ex_beta</span></code></p></td>
+<td><p>Exchange energy contribution from <span class="math notranslate nohighlight">\(\beta\)</span> electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">enucrep</span></code></p></td>
+<td><p>Electrostatic repulsion energy of the nuclei</p></td>
+</tr>
+</tbody>
+</table>
+<p>In addition to the electronic structure data, the UHF result dictionary contains
+explicit information about the spin state of the system.</p>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Spin-related quantities</span><a class="headerlink" href="#id5" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">nelec</span></code></p></td>
+<td><p>Total number of electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nalpha</span></code></p></td>
+<td><p>Number of spin-up (<span class="math notranslate nohighlight">\(\alpha\)</span>) electrons</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">nbeta</span></code></p></td>
+<td><p>Number of spin-down (<span class="math notranslate nohighlight">\(\beta\)</span>) electrons</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">multiplicity</span></code></p></td>
+<td><p>Spin multiplicity <span class="math notranslate nohighlight">\((2S + 1)\)</span></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike restricted Hartree-Fock, unrestricted Hartree-Fock allows for spin
+polarization. As a consequence, the resulting wavefunction is generally not
+an exact eigenfunction of the total spin operator, which may lead to spin
+contamination.</p>
+</div>
+</section>
+</section>
 <section id="custom-basis-sets">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h2>
 <p>Besides the basis sets offered by <strong class="program">PyQInt</strong>, one can also use a custom
 basis set defined by the user. The <code class="code docutils literal notranslate"><span class="pre">rhf</span></code> routine accepts either a basis set
 for its <code class="code docutils literal notranslate"><span class="pre">basis</span></code> argument, or alternatively a list of <code class="code docutils literal notranslate"><span class="pre">cgf</span></code> objects.
