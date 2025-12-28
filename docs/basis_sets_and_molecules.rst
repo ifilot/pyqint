@@ -95,6 +95,9 @@ that are supported are given:
 * :code:`sto6g` (H-Kr)
 * :code:`p321` (H-Cs)
 * :code:`p631` (H-Zn)
+* :code:`aug-cc-pVDZ` (H-Kr, excl. K and Ca)
+* :code:`aug-cc-pVTZ` (H-Kr, excl. K and Ca)
+* :code:`aug-cc-pVQZ` (H-Kr, excl. K and Ca)
 
 The example code below builds the basis functions for the H\ :sub:`2` molecule:
 

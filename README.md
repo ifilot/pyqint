@@ -1,6 +1,7 @@
 # PyQInt
 
 [![status](https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54/status.svg)](https://jose.theoj.org/papers/2a73fa24200e8c1ec47fc6e37f818a54)
+![Version](https://img.shields.io/github/v/tag/ifilot/pyqint?label=version)
 [![PyPI pkg](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ifilot/pyqint/actions/workflows/build_wheels.yml)
 [![PyPI](https://img.shields.io/pypi/v/pyqint?style=flat-square)](https://pypi.org/project/pyqint/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -65,12 +66,15 @@ as well as the following geometric derivatives
 PyQInt offers additional features such as
 * Performing [restricted
   Hartree-Fock](https://en.wikipedia.org/wiki/Hartree%E2%80%93Fock_method)
-  calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS)
-* Calculation of [Crystal Orbital Hamilton Population](http://www.cohp.de/)
-  coefficients
+  calculations using [DIIS](https://en.wikipedia.org/wiki/DIIS) 
+* Population and bonding analysis methods, including:
+    - Mulliken and Löwdin atomic charge analysis  
+    - Molecular Orbital Hamilton Population (MOHP)  
+    - Molecular Orbital Overlap Population (MOOP)  
+    - Molecular Orbital Bond Index (MOBI)  
 * Construction of localized orbitals using the [Foster-Boys
   method](https://en.wikipedia.org/wiki/Localized_molecular_orbitals#Foster-Boys)
-* Geometry optimization using Conjugate Gradient
+* Geometry optimization using the Conjugate Gradient algorithm  
 * Visualization of molecular orbitals
 
 All routines are (automatically) tested and verified against several open-source
@@ -81,7 +85,14 @@ Nevertheless, if you spot any mistake, please kindly open an
 In the image below, the (canonical) molecular orbitals as found using a
 restricted Hartree-Fock calculation for the CO molecule are shown.
 
-![Molecular orbitals of CO](img/co.jpg)
+![Contour plots of CO](img/co.jpg)
+Contour plots of the CO molecule
+
+![Isosurfaces of CO](docs/_static/img/co_canonical_isosurfaces.jpg)
+Isosurfaces of the canonical molecular orbitals of CO
+
+![Isosurfaces of CO](docs/_static/img/co_fosterboys_isosurfaces.jpg)
+Isosurfaces of the localized molecular orbitals of CO
 
 ## Community guidelines
 

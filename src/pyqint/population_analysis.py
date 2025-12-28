@@ -19,6 +19,7 @@ class PopulationAnalysis:
       - Lowkin population analysis
       - MOOP: Molecular Orbital Overlap Population
       - MOHP: Molecular Orbital Hamilton Population
+      - MOBI: Molecular Orbital Bond Index
 
     The analysis operates on the output of a restricted Hartree–Fock
     calculation and assumes doubly occupied orbitals.
@@ -31,6 +32,9 @@ class PopulationAnalysis:
         res
             Result dictionary returned by a Hartree–Fock calculation.
         """
+        if 'orbe_alpha' in res.keys():
+            raise Exception('PopulationAnalysis is not yet supported for UHF')
+
         # Molecular orbital coefficients (AO -> MO)
         self.orbc: Mat = res["orbc"]
 
@@ -42,9 +46,6 @@ class PopulationAnalysis:
 
         # Density matrix
         self.P: Mat = res["density"]
-
-        # Overlap matrix
-        self.S: Mat = res["overlap"]
 
         # Number of electrons (restricted, closed-shell assumed)
         self.nelec: int = res["nelec"]
@@ -158,20 +159,37 @@ class PopulationAnalysis:
         """
         return self._population_analysis(n1, n2, matrix=self.H)
 
+    def mobi(self, n1: int, n2: int) -> Vec:
+        """
+        Compute the Molecular Orbital Bond Index (MOBI).
+
+        Parameters
+        ----------
+        n1, n2
+            Indices of the two nuclei.
+
+        Returns
+        -------
+        ndarray
+            MOBI values for each molecular orbital.
+        """
+        return self._population_analysis(n1, n2, matrix=self.P)
+
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
 
     def _population_analysis(self, n1: int, n2: int, matrix: Mat) -> Vec:
         """
-        Shared implementation of MOHP/MOOP.
+        Shared implementation of MOHP/MOOP/MOBI.
 
         Parameters
         ----------
         n1, n2
             Indices of the two nuclei.
         matrix
-            Either the overlap matrix (S) or the Hamiltonian matrix (H).
+            Either the overlap matrix (S), the Hamiltonian matrix (H), 
+            or density matrix (P).
 
         Returns
         -------
