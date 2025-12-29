@@ -94,6 +94,15 @@ def occupied_mo_energies(res):
             'energy': orbe_alpha[i]
         })
 
+    # Unoccupied orbitals (alpha)
+    for i in range(ndoubly + nsingly, len(orbe_alpha)):
+        occ.append({
+            'index': i,
+            'occupation': '0e',
+            'spin': 'alpha',
+            'energy': orbe_alpha[i]
+        })
+
     return occ
 
 if __name__ == '__main__':
