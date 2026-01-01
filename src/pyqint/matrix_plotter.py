@@ -4,6 +4,7 @@ from typing import Optional, Sequence, Iterable, List, Tuple
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 class MatrixPlotter:
     """
@@ -23,6 +24,7 @@ class MatrixPlotter:
         figsize: Optional[Tuple[float, float]] = None,
         dpi: int = 300,
         title: str = None,
+        boxes = None,
     ) -> None:
         """
         Produce a heatmap-style plot of a matrix with annotated values.
@@ -136,6 +138,21 @@ class MatrixPlotter:
 
         if title is not None:
             ax.set_title(title)
+
+        # highlight boxes
+        if boxes:
+            offset = 0
+            for t in boxes:
+                square = patches.Rectangle(
+                    (offset - 0.5, offset - 0.5),   # bottom-left corner
+                    t[0],        # width
+                    t[0],        # height
+                    edgecolor= t[1],
+                    facecolor = 'none', 
+                    zorder = 10
+                )
+                ax.add_patch(square)
+                offset += t[0]
 
         # --------------------------------------------------
         # Finalize figure
