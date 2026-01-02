@@ -24,6 +24,7 @@ class ContourPlotter:
         dpi: int = 144,
         ngrid: int = 5,
         labels=None,
+        plot_energies = True,
     ):
         """
         Generate a grid of contour plots for molecular orbitals.
@@ -41,6 +42,7 @@ class ContourPlotter:
         plane : str or tuple
             Plane specification:
             - str: one of {'xy', 'xz', 'yz'}
+            - list with str
             - tuple: (atom_i, atom_j, atom_k, up_direction)
         sz : float
             Half-width of the plotted plane.
@@ -80,6 +82,10 @@ class ContourPlotter:
                     grid = ContourPlotter.__create_cartesian_grid(sz, npts, plane)
                     xlabel = '$%s$ [a.u.]' % plane[0]
                     ylabel = '$%s$ [a.u.]' % plane[1]
+                elif isinstance(plane, list):
+                    grid = ContourPlotter.__create_cartesian_grid(sz, npts, plane[orb_idx])
+                    xlabel = '$%s$ [a.u.]' % plane[orb_idx][0]
+                    ylabel = '$%s$ [a.u.]' % plane[orb_idx][1]
                 else:
                     # Arbitrary plane defined by three atoms
                     grid = ContourPlotter.__build_plane_from_atoms(
@@ -140,14 +146,15 @@ class ContourPlotter:
                 if ylabel is not None:
                     ax[i,j].set_ylabel(ylabel)
 
-                # Title handling
                 if labels is not None:
-                    ax[i, j].set_title(
-                        r"%s (%.4f Ht)"
-                        % (labels[orb_idx], res["orbe"][orb_idx])
-                    )
+                    orblabel = labels[orb_idx]
                 else:
-                    ax[i, j].set_title(r"$\psi_{%i}$ (%.4f Ht)" % (orb_idx + 1, res["orbe"][orb_idx]))
+                    orblabel = r'$\psi_{%i}$' % (orb_idx + 1)
+
+                if plot_energies:
+                    orblabel += r' (%.4f Ht)' % res["orbe"][orb_idx]
+
+                ax[i, j].set_title(orblabel)
 
         plt.tight_layout()
         plt.savefig(filename)

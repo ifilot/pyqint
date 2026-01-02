@@ -237,11 +237,13 @@ class BlenderRender:
         isovalue = np.abs(isovalue)
         unitcell = np.diag(np.ones(3) * 2 * sz)
 
-        # try to import PyTessel but do not throw an error if it cannot be loaded
         try:
             from pytessel import PyTessel
-        except ModuleNotFoundError:
-            print('Cannot find module PyTessel')
+        except ModuleNotFoundError as exc:
+            raise ImportError(
+                "Isosurface rendering requires the optional dependency 'pytessel'. "
+                "Please install it (e.g. `pip install pytessel`)."
+            ) from exc
 
         pytessel = PyTessel()
         vertices, normals, indices = pytessel.marching_cubes(scalarfield.flatten(), scalarfield.shape, unitcell.flatten(), isovalue)
