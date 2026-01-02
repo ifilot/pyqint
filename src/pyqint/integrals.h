@@ -39,6 +39,12 @@
 #include <omp.h>
 #endif
 
+struct HellsingBTerm {
+    double c;  // coefficient
+    int mu;    // mu
+    int u;     // u
+};
+
 class Integrator {
 private:
     std::string compile_date;
@@ -628,6 +634,11 @@ private:
                                    const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
                                    const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
+    double repulsion_hellsing (const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                               const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                               const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                               const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+
     /**
      * @brief Calculates one dimensional overlap integral
      *
@@ -683,6 +694,13 @@ private:
     std::vector<double> B_array(const int l1,const int l2,const int l3,const int l4,
                                 const double p, const double a, const double b, const double q, const double c, const double d,
                                 const double g1, const double g2, const double delta) const;
+
+    std::vector<HellsingBTerm> B_array_hellsing(
+        int l1, int l2, int l3, int l4,
+        double a1, double a2, double a3, double a4,
+        double ax, double bx, double cx, double dx,
+        double px, double qx,
+        double g1, double g2) const;
 
     double B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
     const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,

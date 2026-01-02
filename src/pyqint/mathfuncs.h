@@ -54,3 +54,7 @@ inline double ipow(double x, int n) noexcept {
             return r;
     }
 }
+
+inline double sign_pow(int n) noexcept {
+    return (n & 1) ? -1.0 : 1.0;
+}

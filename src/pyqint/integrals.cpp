@@ -26,7 +26,7 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator() : boys_function(4) {}
+Integrator::Integrator() : boys_function(12) {}
 
 /**
  * @brief      Evaluate all integrals for cgfs in buffer
@@ -1019,7 +1019,7 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
     for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
         sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
                      (i == 0 ? 1 : double_factorial(2 * i - 1) ) /
-                     ipow(2 * gamma, i);
+                     std::pow(2 * gamma, i);
     }
 
     return sum;
@@ -1049,8 +1049,8 @@ double Integrator::binomial_prefactor(int s, int ia, int ib,
         if ((s-ia <= t) && (t <= ib)) {
             sum += this->binomial(ia, s-t)   *
                    this->binomial(ib, t)     *
-                   ipow(xpa, ia - s + t) *
-                   ipow(xpb, ib - t);
+                   std::pow(xpa, ia - s + t) *
+                   std::pow(xpb, ib - t);
         }
     }
 
@@ -1109,27 +1109,46 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
 }
 
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
-    return  ipow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
-            ipow(-1,u) * factorial(i)*ipow(cpx,i-2*r-2*u)*
-            ipow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
+    return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
+            std::pow(-1,u) * factorial(i)*std::pow(cpx,i-2*r-2*u)*
+            std::pow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
 }
 
 /**
- * @brief Performs nuclear integral evaluation
+ * @brief Evaluates a four-center electron–electron repulsion integral (ERI).
  *
- * @param Vec3 a            Center of the Gaussian orbital of the first GTO
- * @param unsigned int l1   Power of x component of the polynomial of the first GTO
- * @param unsigned int m1   Power of y component of the polynomial of the first GTO
- * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param double alpha1     Gaussian exponent of the first GTO
- * @param Vec3 b            Center of the Gaussian orbital of the second GTO
- * @param unsigned int l2   Power of x component of the polynomial of the second GTO
- * @param unsigned int m2   Power of y component of the polynomial of the second GTO
- * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param double alpha2     Gaussian exponent of the second GTO
- * @param Vec3 c
+ * Computes the Coulomb repulsion integral
  *
- * @return double value of the nuclear integral
+ *   (ab | cd)
+ *
+ * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
+ * a center, angular momentum tuple, and Gaussian exponent.
+ *
+ * @param a        Center of the first GTO
+ * @param la       x-angular momentum of the first GTO
+ * @param ma       y-angular momentum of the first GTO
+ * @param na       z-angular momentum of the first GTO
+ * @param alphaa  Gaussian exponent of the first GTO
+ *
+ * @param b        Center of the second GTO
+ * @param lb       x-angular momentum of the second GTO
+ * @param mb       y-angular momentum of the second GTO
+ * @param nb       z-angular momentum of the second GTO
+ * @param alphab  Gaussian exponent of the second GTO
+ *
+ * @param c        Center of the third GTO
+ * @param lc       x-angular momentum of the third GTO
+ * @param mc       y-angular momentum of the third GTO
+ * @param nc       z-angular momentum of the third GTO
+ * @param alphac  Gaussian exponent of the third GTO
+ *
+ * @param d        Center of the fourth GTO
+ * @param ld       x-angular momentum of the fourth GTO
+ * @param md       y-angular momentum of the fourth GTO
+ * @param nd       z-angular momentum of the fourth GTO
+ * @param alphad  Gaussian exponent of the fourth GTO
+ *
+ * @return Value of the electron–electron repulsion integral (ab | cd)
  */
 double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
                              const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
@@ -1167,23 +1186,40 @@ double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const in
 }
 
 /**
- * @brief Performs nuclear integral evaluation
+ * @brief Evaluates a four-center electron–electron repulsion integral (ERI).
  *
- * This function uses function-level caching of the Fgamma function
+ * Computes the Coulomb repulsion integral
  *
- * @param Vec3 a            Center of the Gaussian orbital of the first GTO
- * @param unsigned int l1   Power of x component of the polynomial of the first GTO
- * @param unsigned int m1   Power of y component of the polynomial of the first GTO
- * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param double alpha1     Gaussian exponent of the first GTO
- * @param Vec3 b            Center of the Gaussian orbital of the second GTO
- * @param unsigned int l2   Power of x component of the polynomial of the second GTO
- * @param unsigned int m2   Power of y component of the polynomial of the second GTO
- * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param double alpha2     Gaussian exponent of the second GTO
- * @param Vec3 c
+ *   (ab | cd)
  *
- * @return double value of the nuclear integral
+ * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
+ * a center, angular momentum tuple, and Gaussian exponent.
+ *
+ * @param a        Center of the first GTO
+ * @param la       x-angular momentum of the first GTO
+ * @param ma       y-angular momentum of the first GTO
+ * @param na       z-angular momentum of the first GTO
+ * @param alphaa  Gaussian exponent of the first GTO
+ *
+ * @param b        Center of the second GTO
+ * @param lb       x-angular momentum of the second GTO
+ * @param mb       y-angular momentum of the second GTO
+ * @param nb       z-angular momentum of the second GTO
+ * @param alphab  Gaussian exponent of the second GTO
+ *
+ * @param c        Center of the third GTO
+ * @param lc       x-angular momentum of the third GTO
+ * @param mc       y-angular momentum of the third GTO
+ * @param nc       z-angular momentum of the third GTO
+ * @param alphac  Gaussian exponent of the third GTO
+ *
+ * @param d        Center of the fourth GTO
+ * @param ld       x-angular momentum of the fourth GTO
+ * @param md       y-angular momentum of the fourth GTO
+ * @param nd       z-angular momentum of the fourth GTO
+ * @param alphad  Gaussian exponent of the fourth GTO
+ *
+ * @return Value of the electron–electron repulsion integral (ab | cd)
  */
 double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
                                            const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
@@ -1201,16 +1237,16 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
     double gamma1 = alphaa + alphab;
     double gamma2 = alphac + alphad;
     double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
+    const double T = 0.25*rpq2/delta;
 
     std::vector<double> bx = B_array(la, lb, lc, ld, p[0], a[0], b[0], q[0], c[0], d[0], gamma1, gamma2, delta);
     std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
     std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
 
     // pre-calculate all Fgamma values
+    const int lmax = la + lb + lc + ld + ma + mb + mc + md + na + nb + nc + nd;
     std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
-    for (unsigned int i=0; i<fg.size(); ++i) {
-        fg[i] = this->boys_function(i,0.25*rpq2/delta);
-    }
+    this->boys_function.compute_block(lmax, T, fg.data());
 
     double sum = 0.0;
     for(int i=0; i<=(la+lb+lc+ld); i++) {
@@ -1224,6 +1260,276 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
     return 2.0 * std::pow(M_PI,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
                  std::exp(-alphaa*alphab*rab2/gamma1)*
                  std::exp(-alphac*alphad*rcd2/gamma2)*sum;
+}
+
+/**
+ * @brief Evaluates a four-center electron–electron repulsion integral (ERI)
+ *        using the "Hellsing" method.
+ *
+ * Computes the Coulomb repulsion integral
+ *
+ *   (ab | cd)
+ *
+ * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
+ * a center, angular momentum tuple, and Gaussian exponent.
+ *
+ * @param a        Center of the first GTO
+ * @param la       x-angular momentum of the first GTO
+ * @param ma       y-angular momentum of the first GTO
+ * @param na       z-angular momentum of the first GTO
+ * @param alphaa  Gaussian exponent of the first GTO
+ *
+ * @param b        Center of the second GTO
+ * @param lb       x-angular momentum of the second GTO
+ * @param mb       y-angular momentum of the second GTO
+ * @param nb       z-angular momentum of the second GTO
+ * @param alphab  Gaussian exponent of the second GTO
+ *
+ * @param c        Center of the third GTO
+ * @param lc       x-angular momentum of the third GTO
+ * @param mc       y-angular momentum of the third GTO
+ * @param nc       z-angular momentum of the third GTO
+ * @param alphac  Gaussian exponent of the third GTO
+ *
+ * @param d        Center of the fourth GTO
+ * @param ld       x-angular momentum of the fourth GTO
+ * @param md       y-angular momentum of the fourth GTO
+ * @param nd       z-angular momentum of the fourth GTO
+ * @param alphad  Gaussian exponent of the fourth GTO
+ *
+ * @return Value of the electron–electron repulsion integral (ab | cd)
+ */
+double Integrator::repulsion_hellsing (
+    const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+    const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+    const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+    const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
+
+    const double dxAB = a[0] - b[0];
+    const double dyAB = a[1] - b[1];
+    const double dzAB = a[2] - b[2];
+    const double rab2 = dxAB*dxAB + dyAB*dyAB + dzAB*dzAB;
+
+    const double dxCD = c[0] - d[0];
+    const double dyCD = c[1] - d[1];
+    const double dzCD = c[2] - d[2];
+    const double rcd2 = dxCD*dxCD + dyCD*dyCD + dzCD*dzCD;
+
+    const Vec3 P = gaussian_product_center(alphaa, a, alphab, b);
+    const Vec3 Q = gaussian_product_center(alphac, c, alphad, d);
+
+    const double dxPQ = P[0] - Q[0];
+    const double dyPQ = P[1] - Q[1];
+    const double dzPQ = P[2] - Q[2];
+    const double rpq2 = dxPQ*dxPQ + dyPQ*dyPQ + dzPQ*dzPQ;
+
+    const double gamma1 = alphaa + alphab;
+    const double gamma2 = alphac + alphad;
+    const double eta    = (gamma1 * gamma2) / (gamma1 + gamma2);
+    const double T = eta * rpq2;
+
+    // evaluate nu_ma
+    const int nu_max =
+        (la + ma + na) +
+        (lb + mb + nb) +
+        (lc + mc + nc) +
+        (ld + md + nd);
+
+    // universal pre-factor
+    constexpr double pi25 = (M_PI * M_PI) * std::sqrt(M_PI);
+    const double pref =
+        2.0 * pi25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
+        std::exp(-alphaa * alphab * rab2 / gamma1) *
+        std::exp(-alphac * alphad * rcd2 / gamma2);
+
+    // early exit for (ss|ss); saves a couple of cycles
+    if(nu_max == 0) {
+        return pref * this->boys_function(0, T);
+    }
+
+    // Build B-arrays for each Cartesian component (x, y, z)
+    const auto Bx = B_array_hellsing(
+        la, lb, lc, ld,
+        alphaa, alphab, alphac, alphad,
+        a[0], b[0], c[0], d[0],
+        P[0], Q[0],
+        gamma1, gamma2);
+
+    const auto By = B_array_hellsing(
+        ma, mb, mc, md,
+        alphaa, alphab, alphac, alphad,
+        a[1], b[1], c[1], d[1],
+        P[1], Q[1],
+        gamma1, gamma2);
+
+    const auto Bz = B_array_hellsing(
+        na, nb, nc, nd,
+        alphaa, alphab, alphac, alphad,
+        a[2], b[2], c[2], d[2],
+        P[2], Q[2],
+        gamma1, gamma2);
+
+    // build Fgamma block
+    std::vector<double> F(nu_max + 1);
+    this->boys_function.compute_block(nu_max, T, F.data());
+
+    // triple sum
+    double s = 0.0;
+    for (const auto& tx : Bx) {
+        for (const auto& ty : By) {
+            const int mu_xy = tx.mu + ty.mu;
+            const int u_xy  = tx.u  + ty.u;
+            const double c_xy = tx.c * ty.c;
+
+            for (const auto& tz : Bz) {
+                const int nu = (mu_xy + tz.mu) - (u_xy + tz.u);
+                // In theory nu is in [0, nu_max] given the construction; keep safe:
+                if (nu >= 0 && nu <= nu_max) {
+                    s += c_xy * tz.c * F[nu];
+                }
+            }
+        }
+    }
+
+    return pref * s;
+}
+
+std::vector<HellsingBTerm> Integrator::B_array_hellsing(
+    int l1, int l2, int l3, int l4,
+    double a1, double a2, double a3, double a4,
+    double ax, double bx, double cx, double dx,
+    double px, double qx,
+    double g1, double g2) const {
+
+    const double pre1 = sign_pow(l1 + l2)
+                      * factorial(l1) * factorial(l2)
+                      / ipow(g1, l1 + l2);
+
+    const double pre2 = factorial(l3) * factorial(l4)
+                      / ipow(g2, l3 + l4);
+
+    const double eta = (g1 * g2) / (g1 + g2);
+
+    std::vector<HellsingBTerm> arr;
+
+    for (int i1 = 0; i1 <= l1 / 2; ++i1) {
+        for (int i2 = 0; i2 <= l2 / 2; ++i2) {
+            for (int o1 = 0; o1 <= l1 - 2 * i1; ++o1) {
+                for (int o2 = 0; o2 <= l2 - 2 * i2; ++o2) {
+                    const int oo12 = o1 + o2;
+                    for (int r1 = 0; r1 <= oo12 / 2; ++r1) {
+                        const double t11 = sign_pow(o2 + r1)
+                                         * factorial(oo12)
+                                         / ipow(4.0, i1 + i2 + r1)
+                                         / factorial(i1)
+                                         / factorial(i2)
+                                         / factorial(o1)
+                                         / factorial(o2)
+                                         / factorial(r1);
+
+                        const int e_a1 = o2 - i1 - r1;
+                        const int e_a2 = o1 - i2 - r1;
+                        const int e_g1 = 2 * (i1 + i2) + r1;
+                        const int e_x1 = oo12 - 2 * r1;
+
+                        if (e_a1 < 0 || e_a2 < 0 || e_x1 < 0) continue;
+
+                        const double num12 =
+                            ipow(a1, e_a1) *
+                            ipow(a2, e_a2) *
+                            ipow(g1, e_g1) *
+                            ipow(ax - bx, e_x1);
+
+                        const int f1 = l1 - 2 * i1 - o1;
+                        const int f2 = l2 - 2 * i2 - o2;
+                        const int f3 = e_x1;
+
+                        if (f1 < 0 || f2 < 0 || f3 < 0) continue;
+
+                        const double den12 =
+                            factorial(f1) *
+                            factorial(f2) *
+                            factorial(f3);
+
+                        const double t12 = num12 / den12;
+
+                        for (int i3 = 0; i3 <= l3 / 2; ++i3) {
+                            for (int i4 = 0; i4 <= l4 / 2; ++i4) {
+                                for (int o3 = 0; o3 <= l3 - 2 * i3; ++o3) {
+                                    for (int o4 = 0; o4 <= l4 - 2 * i4; ++o4) {
+                                        const int oo34 = o3 + o4;
+                                        for (int r2 = 0; r2 <= oo34 / 2; ++r2) {
+                                            const double t21 = sign_pow(o3 + r2)
+                                                             * factorial(oo34)
+                                                             / ipow(4.0, i3 + i4 + r2)
+                                                             / factorial(i3)
+                                                             / factorial(i4)
+                                                             / factorial(o3)
+                                                             / factorial(o4)
+                                                             / factorial(r2);
+
+                                            const int e_a3 = o4 - i3 - r2;
+                                            const int e_a4 = o3 - i4 - r2;
+                                            const int e_g2 = 2 * (i3 + i4) + r2;
+                                            const int e_x2 = oo34 - 2 * r2;
+
+                                            if (e_a3 < 0 || e_a4 < 0 || e_x2 < 0) continue;
+
+                                            const double num22 =
+                                                ipow(a3, e_a3) *
+                                                ipow(a4, e_a4) *
+                                                ipow(g2, e_g2) *
+                                                ipow(cx - dx, e_x2);
+
+                                            const int g1f = l3 - 2 * i3 - o3;
+                                            const int g2f = l4 - 2 * i4 - o4;
+                                            const int g3f = e_x2;
+
+                                            if (g1f < 0 || g2f < 0 || g3f < 0) continue;
+
+                                            const double den22 =
+                                                factorial(g1f) *
+                                                factorial(g2f) *
+                                                factorial(g3f);
+
+                                            const double t22 = num22 / den22;
+
+                                            const int mu =
+                                                (l1 + l2 + l3 + l4)
+                                                - 2 * (i1 + i2 + i3 + i4)
+                                                - (o1 + o2 + o3 + o4);
+
+                                            if (mu < 0) continue;
+
+                                            for (int u = 0; u <= mu / 2; ++u) {
+                                                const int e_eta = mu - u;
+                                                const int e_pq  = mu - 2 * u;
+                                                if (e_pq < 0) continue;
+
+                                                const double t3 =
+                                                    sign_pow(u) *
+                                                    factorial(mu) *
+                                                    ipow(eta, e_eta) *
+                                                    ipow(px - qx, e_pq) /
+                                                    ipow(4.0, u) /
+                                                    factorial(u) /
+                                                    factorial(e_pq);
+
+                                                const double coeff = pre1 * pre2 * t11 * t12 * t21 * t22 * t3;
+                                                arr.push_back(HellsingBTerm{coeff, mu, u});
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return arr;
 }
 
 std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,const int l4,

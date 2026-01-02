@@ -24,7 +24,7 @@ public:
     */
     Vec3(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
 
-    double& operator[](int n) {
+    inline double& operator[](int n) {
         switch(n) {
             case 0:
                 return this->x;
@@ -37,7 +37,7 @@ public:
         }
     }
 
-    const double& operator[](int n) const {
+    inline const double& operator[](int n) const {
         switch(n) {
             case 0:
                 return this->x;

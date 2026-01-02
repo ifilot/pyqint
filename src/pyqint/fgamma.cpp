@@ -25,8 +25,7 @@
 inline constexpr double kEps = std::numeric_limits<double>::epsilon();
 
 // -------------------- Small-T series --------------------
-inline double boys_series(int n, double T)
-{
+inline double boys_series(int n, double T) {
     double term = 1.0 / (2.0 * n + 1.0);
     double sum  = term;
 
@@ -45,8 +44,7 @@ inline double boys_series(int n, double T)
 }
 
 // -------------------- Accurate F0 --------------------
-inline double boys_F0(double T)
-{
+inline double boys_F0(double T) {
     if (T == 0.0) return 1.0;
 
     if (T < 1e-10) {
@@ -64,8 +62,7 @@ BoysFunction::BoysFunction(int nu_max)
     : nu_tab_max_(-1),
       logT_min_(0.0),
       logT_max_(0.0),
-      inv_dlogT_(0.0)
-{
+      inv_dlogT_(0.0) {
     init_table(nu_max);
 }
 
@@ -120,8 +117,7 @@ int BoysFunction::max_order() const noexcept
 
 // ==================== Table initialization ====================
 
-void BoysFunction::init_table(int nu_max)
-{
+void BoysFunction::init_table(int nu_max) {
     nu_tab_max_ = std::max(0, nu_max);
     Htab_.resize((nu_tab_max_ + 1) * NTABLE);
 
@@ -148,8 +144,7 @@ void BoysFunction::init_table(int nu_max)
 
 // ==================== Interpolation ====================
 
-double BoysFunction::interpolate(int nu, double T) const noexcept
-{
+double BoysFunction::interpolate(int nu, double T) const noexcept {
     const double x = (std::log(T) - logT_min_) * inv_dlogT_;
 
     int i = static_cast<int>(x);
@@ -170,15 +165,13 @@ double BoysFunction::interpolate(int nu, double T) const noexcept
     return H / (sqrtT * Tnu);
 }
 
-int BoysFunction::idx(int nu, int i) const noexcept
-{
+int BoysFunction::idx(int nu, int i) const noexcept {
     return nu * NTABLE + i;
 }
 
 // ==================== Exact reference ====================
 
-double BoysFunction::Fgamma_exact(int nu, double T)
-{
+double BoysFunction::Fgamma_exact(int nu, double T) {
     if (T < 0.1)
         return boys_series(nu, T);
 
@@ -193,8 +186,7 @@ double BoysFunction::Fgamma_exact(int nu, double T)
     return F;
 }
 
-void BoysFunction::Fgamma_block_exact(int nu_max, double T, double* F)
-{
+void BoysFunction::Fgamma_block_exact(int nu_max, double T, double* F) {
     if (T < 0.1) {
         for (int nu = 0; nu <= nu_max; ++nu)
             F[nu] = boys_series(nu, T);
