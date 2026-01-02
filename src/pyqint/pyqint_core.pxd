@@ -93,6 +93,9 @@ cdef extern from "integrals.h":
         # openmp routine for integral evaluation
         vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
 
+        # openmp routine for tei evaluation
+        vector[double] evaluate_tei(vector[CGF]) except +
+
         # openmp routine for geometric derivatives evaluation
         vector[double] evaluate_geometric_derivatives(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
 

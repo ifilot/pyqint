@@ -5,7 +5,7 @@ import time
 # for this basis set
 integrator = PyQInt()
 st = time.perf_counter()
-mol = MoleculeBuilder.from_name('benzene')
+mol = MoleculeBuilder.from_name('cubane')
 cgfs, nuclei = mol.build_basis('sto3g')
 S, T, V, tetensor = integrator.build_integrals_openmp(cgfs, nuclei)
 end = time.perf_counter()

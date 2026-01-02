@@ -124,6 +124,11 @@ public:
                                       const std::vector<double>& pz) const;
 
     /**
+     * @brief      Evaluate all two-electron integrals within the basis set
+     */
+    std::vector<double> evaluate_tei(const std::vector<CGF>& cgfs) const;
+
+    /**
      * @brief      Evaluate all integrals for cgfs in buffer
      */
     std::vector<double> evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
@@ -690,4 +695,6 @@ private:
     double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
     double BB0(int i, int r, double q) const;
     double fact_ratio2(unsigned int a, unsigned int b) const;
+
+    void calculate_two_electron_integrals(const std::vector<CGF>& cgfs, std::vector<double>& tetensor) const;
 };

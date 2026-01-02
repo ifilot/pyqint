@@ -38,7 +38,7 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                                               const std::vector<double>& pz) const {
     std::vector<double> results;
 
-    size_t sz = cgfs.size();
+    const size_t sz = cgfs.size();
 
     std::vector<double> S(sz*sz, 0.0);
     std::vector<double> T(sz*sz, 0.0);
@@ -68,6 +68,48 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     }
 
     // calculate all two-electron integrals
+    std::vector<double> tetensor(std::pow(sz,4));
+    this->calculate_two_electron_integrals(cgfs, tetensor);
+
+    // package everything into results vector, will be unpacked in
+    // connected Python class
+    std::vector<double> Svec(S.data(), S.data()+sz*sz);
+    results.insert(results.end(), Svec.begin(), Svec.end());
+
+    // kinetic integrals
+    std::vector<double> Tvec(T.data(), T.data() + sz*sz);
+    results.insert(results.end(), Tvec.begin(), Tvec.end());
+
+    // nuclear integrals
+    std::vector<double> Vvec(V.data(), V.data() + sz*sz);
+    results.insert(results.end(), Vvec.begin(), Vvec.end());
+
+    // two electron in tegrals
+    results.insert(results.end(), tetensor.begin(), tetensor.end());
+
+    return results;
+}
+
+/**
+ * @brief      Evaluate all integrals for cgfs in buffer
+ */
+std::vector<double> Integrator::evaluate_tei(const std::vector<CGF>& cgfs) const {
+    const size_t sz = cgfs.size();
+    std::vector<double> results;
+
+    // calculate all two-electron integrals
+    std::vector<double> tetensor(std::pow(sz,4));
+    this->calculate_two_electron_integrals(cgfs, tetensor);
+
+    // two electron in tegrals
+    results.insert(results.end(), tetensor.begin(), tetensor.end());
+
+    return results;
+}
+
+void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
+                                                  std::vector<double>& tetensor) const {
+    const size_t sz = cgfs.size();
     std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
 
     // it is more efficient to first 'unroll' the fourfold nested loop
@@ -108,7 +150,6 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
     }
 
     // reorganize everyting into a tensor object
-    std::vector<double> tetensor(std::pow(sz,4));
     for(size_t i=0; i<sz; i++) {
         for(size_t j=0; j<sz; j++) {
             for(size_t k=0; k<sz; k++) {
@@ -119,24 +160,6 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
             }
         }
     }
-
-    // package everything into results vector, will be unpacked in
-    // connected Python class
-    std::vector<double> Svec(S.data(), S.data()+sz*sz);
-    results.insert(results.end(), Svec.begin(), Svec.end());
-
-    // kinetic integrals
-    std::vector<double> Tvec(T.data(), T.data() + sz*sz);
-    results.insert(results.end(), Tvec.begin(), Tvec.end());
-
-    // nuclear integrals
-    std::vector<double> Vvec(V.data(), V.data() + sz*sz);
-    results.insert(results.end(), Vvec.begin(), Vvec.end());
-
-    // two electron in tegrals
-    results.insert(results.end(), tetensor.begin(), tetensor.end());
-
-    return results;
 }
 
 /**

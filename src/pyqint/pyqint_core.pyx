@@ -494,6 +494,30 @@ cdef class PyQInt:
 
         return S, T, V, tetensor
 
+    def build_tei_openmp(self, cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+        """Build two-electron tensor
+
+        Args:
+            cgfs (Iterable[cgf]): list of contracted gaussian functions
+
+        Returns:
+            npt.NDArray[np.float64]: two-electron tensor
+        """
+        cdef vector[CGF] c_cgfs
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+
+        results = np.array(self.integrator.evaluate_tei(c_cgfs))
+
+        sz = len(cgfs)
+        tetensor = results.reshape((sz,sz,sz,sz))
+
+        return tetensor
+
     def build_geometric_derivatives_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]]) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
