@@ -109,3 +109,65 @@ In this example:
 .. figure:: _static/img/coefficient-co.png
 
     Coefficient matrix of CO, visualized using the :code:`MatrixPlotter` class.
+
+Highlighting elements
+---------------------
+
+In some cases, it is useful not only to visualize a matrix, but also to
+emphasize specific elements or regions within it. This can be achieved using
+the ``boxes`` argument.
+
+The ``boxes`` argument expects a list of 5-tuples. Each tuple defines a
+rectangular region and consists of the following elements, in order:
+
+- the starting x-coordinate
+- the starting y-coordinate
+- the width of the rectangle
+- the height of the rectangle
+- the color of the rectangle
+
+The example below demonstrates how to draw red, green, and blue rectangles on
+top of a matrix visualization.
+
+.. code-block:: python
+
+    from pyqint import MoleculeBuilder, HF, MatrixPlotter
+
+    def main():
+        mol = MoleculeBuilder().from_name('CO')
+        res = HF(mol, 'sto3g').rhf(verbose=False)
+
+        labels = MatrixPlotter.generate_ao_labels([
+            ('O', ('1s', '2s', '2p')),
+            ('C', ('1s', '2s', '2p')),
+        ])
+
+        # highlighting boxes
+        boxes = [
+            (0,0,1,1,'#BB0000'),
+            (1,2,3,1,'#00BB00'),
+            (3,4,1,3,'#0000BB'),
+        ]
+
+        MatrixPlotter.plot_matrix(
+            mat=res['overlap'],
+            filename='overlap-co.png',
+            xlabels=labels,
+            ylabels=labels,
+            xlabelrot=0,
+            title='Overlap',
+            boxes=boxes
+        )
+
+    if __name__ == '__main__':
+        main()
+
+.. figure:: _static/img/overlap-co-boxes.png
+
+    Coefficient matrix of CO, visualized using the :code:`MatrixPlotter` class,
+    where a number of elements have been highlighted.
+
+.. note::
+
+    The ``(x, y)`` coordinates use **zero-based indexing**. Consequently, the
+    top-left corner of the first box is specified as ``(0, 0)``.

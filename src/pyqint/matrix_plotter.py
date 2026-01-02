@@ -141,18 +141,16 @@ class MatrixPlotter:
 
         # highlight boxes
         if boxes:
-            offset = 0
             for t in boxes:
                 square = patches.Rectangle(
-                    (offset - 0.5, offset - 0.5),   # bottom-left corner
-                    t[0],        # width
-                    t[0],        # height
-                    edgecolor= t[1],
+                    (t[0] - 0.5, t[1] - 0.5),
+                    t[2],        # width
+                    t[3],        # height
+                    edgecolor= t[4],
                     facecolor = 'none', 
                     zorder = 10
                 )
                 ax.add_patch(square)
-                offset += t[0]
 
         # --------------------------------------------------
         # Finalize figure
