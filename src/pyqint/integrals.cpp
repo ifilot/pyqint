@@ -1336,7 +1336,7 @@ double Integrator::repulsion_hellsing (
         (ld + md + nd);
 
     // universal pre-factor
-    constexpr double pi25 = (M_PI * M_PI) * std::sqrt(M_PI);
+    constexpr double pi25 = 17.49341832762486284626;
     const double pref =
         2.0 * pi25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
         std::exp(-alphaa * alphab * rab2 / gamma1) *
