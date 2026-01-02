@@ -59,6 +59,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Matrix visualization</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#atomic-orbital-labeling">Atomic orbital labeling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-overlap-fock-and-coefficient-matrices-of-co">Example: overlap, Fock, and coefficient matrices of CO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#highlighting-elements">Highlighting elements</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
@@ -195,6 +196,67 @@ of the matrix are equal to zero, similar to the overlap matrix.</span><a class="
 <p><span class="caption-text">Coefficient matrix of CO, visualized using the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> class.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
+</section>
+<section id="highlighting-elements">
+<h2>Highlighting elements<a class="headerlink" href="#highlighting-elements" title="Link to this heading"></a></h2>
+<p>In some cases, it is useful not only to visualize a matrix, but also to
+emphasize specific elements or regions within it. This can be achieved using
+the <code class="docutils literal notranslate"><span class="pre">boxes</span></code> argument.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">boxes</span></code> argument expects a list of 5-tuples. Each tuple defines a
+rectangular region and consists of the following elements, in order:</p>
+<ul class="simple">
+<li><p>the starting x-coordinate</p></li>
+<li><p>the starting y-coordinate</p></li>
+<li><p>the width of the rectangle</p></li>
+<li><p>the height of the rectangle</p></li>
+<li><p>the color of the rectangle</p></li>
+</ul>
+<p>The example below demonstrates how to draw red, green, and blue rectangles on
+top of a matrix visualization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">MatrixPlotter</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+    <span class="p">])</span>
+
+    <span class="c1"># highlighting boxes</span>
+    <span class="n">boxes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;#BB0000&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;#00BB00&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;#0000BB&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;overlap-co.png&#39;</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
+        <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Overlap&#39;</span><span class="p">,</span>
+        <span class="n">boxes</span><span class="o">=</span><span class="n">boxes</span>
+    <span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id4">
+<img alt="_images/overlap-co-boxes.png" src="_images/overlap-co-boxes.png" />
+<figcaption>
+<p><span class="caption-text">Coefficient matrix of CO, visualized using the <code class="code docutils literal notranslate"><span class="pre">MatrixPlotter</span></code> class,
+where a number of elements have been highlighted.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y)</span></code> coordinates use <strong>zero-based indexing</strong>. Consequently, the
+top-left corner of the first box is specified as <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0)</span></code>.</p>
+</div>
 </section>
 </section>
 

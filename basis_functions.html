@@ -51,7 +51,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basis functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#gaussian-type-orbitals-gto">Gaussian type orbitals (GTO)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gaussian-type-orbitals-gtos">Gaussian Type Orbitals (GTOs)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gto-construction">GTO Construction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#retrieving-gto-data-members">Retrieving GTO Data Members</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluating-a-gto">Evaluating a GTO</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#contracted-gaussian-functions-cgf">Contracted Gaussian Functions (CGF)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#position-handling-and-advanced-usage">Position Handling and Advanced Usage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#non-atom-centered-gtos-and-mixed-center-cgfs">Non-Atom-Centered GTOs and Mixed-Center CGFs</a></li>
@@ -99,55 +104,114 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#basis-functions" id="id1">Basis functions</a></p>
 <ul>
-<li><p><a class="reference internal" href="#gaussian-type-orbitals-gto" id="id2">Gaussian type orbitals (GTO)</a></p></li>
-<li><p><a class="reference internal" href="#contracted-gaussian-functions-cgf" id="id3">Contracted Gaussian Functions (CGF)</a></p>
+<li><p><a class="reference internal" href="#gaussian-type-orbitals-gtos" id="id2">Gaussian Type Orbitals (GTOs)</a></p>
 <ul>
-<li><p><a class="reference internal" href="#position-handling-and-advanced-usage" id="id4">Position Handling and Advanced Usage</a></p></li>
-<li><p><a class="reference internal" href="#non-atom-centered-gtos-and-mixed-center-cgfs" id="id5">Non-Atom-Centered GTOs and Mixed-Center CGFs</a></p></li>
-<li><p><a class="reference internal" href="#integral-evaluation-and-position-resolution" id="id6">Integral Evaluation and Position Resolution</a></p></li>
+<li><p><a class="reference internal" href="#gto-construction" id="id3">GTO Construction</a></p></li>
+<li><p><a class="reference internal" href="#retrieving-gto-data-members" id="id4">Retrieving GTO Data Members</a></p></li>
+<li><p><a class="reference internal" href="#evaluating-a-gto" id="id5">Evaluating a GTO</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#contracted-gaussian-functions-cgf" id="id6">Contracted Gaussian Functions (CGF)</a></p>
+<ul>
+<li><p><a class="reference internal" href="#position-handling-and-advanced-usage" id="id7">Position Handling and Advanced Usage</a></p></li>
+<li><p><a class="reference internal" href="#non-atom-centered-gtos-and-mixed-center-cgfs" id="id8">Non-Atom-Centered GTOs and Mixed-Center CGFs</a></p></li>
+<li><p><a class="reference internal" href="#integral-evaluation-and-position-resolution" id="id9">Integral Evaluation and Position Resolution</a></p></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </nav>
-<section id="gaussian-type-orbitals-gto">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">Gaussian type orbitals (GTO)</a><a class="headerlink" href="#gaussian-type-orbitals-gto" title="Link to this heading"></a></h2>
-<p><strong class="program">PyQInt</strong> uses cartesian Gaussian type orbitals as given by</p>
+<section id="gaussian-type-orbitals-gtos">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Gaussian Type Orbitals (GTOs)</a><a class="headerlink" href="#gaussian-type-orbitals-gtos" title="Link to this heading"></a></h2>
+<p><strong class="program">PyQInt</strong> employs <em>Cartesian Gaussian Type Orbitals</em> (GTOs), defined as</p>
 <div class="math notranslate nohighlight">
-\[\Phi(\alpha,l,m,n,\vec{R}) = N (x - X)^{l} (y - Y)^{m} (z - Z)^{n} \exp \left(- \alpha |\vec{r} - \vec{R}|^{2} \right)\]</div>
-<p>wherein <span class="math notranslate nohighlight">\(\alpha\)</span> is the exponent, <span class="math notranslate nohighlight">\(\vec{R} = \left(X,Y,Z\right)\)</span> the
-position of the orbital, <span class="math notranslate nohighlight">\((l,m,n)\)</span> the orders of the pre-exponential
-polynomial, and <span class="math notranslate nohighlight">\(N\)</span> a normalization constant such that</p>
+\[\Phi(\alpha, l, m, n, \vec{R}) =
+N (x - X)^{l} (y - Y)^{m} (z - Z)^{n}
+\exp \left(- \alpha \lvert \vec{r} - \vec{R} \rvert^{2} \right)\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\alpha\)</span> denotes the orbital exponent,
+<span class="math notranslate nohighlight">\(\vec{R} = (X, Y, Z)\)</span> the position of the orbital center,
+<span class="math notranslate nohighlight">\((l, m, n)\)</span> the orders of the Cartesian polynomial prefactor,
+and <span class="math notranslate nohighlight">\(N\)</span> a normalization constant chosen such that</p>
 <div class="math notranslate nohighlight">
-\[\left&lt; \Phi | \Phi \right&gt; = 1\]</div>
-<p>GTOs are a fundamental building block of CGF (see below) and typically a user
-would not directly work with them (a notable exception is provided below).
-Nevertheless, GTO objects can be constructed as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">CGF</span><span class="p">,</span> <span class="n">GTO</span>
+\[\langle \Phi \mid \Phi \rangle = 1\]</div>
+<section id="gto-construction">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">GTO Construction</a><a class="headerlink" href="#gto-construction" title="Link to this heading"></a></h3>
+<p>Gaussian Type Orbitals form the fundamental building blocks of <em>Contracted
+Gaussian Functions</em> (CGFs; see below). In typical workflows, users interact
+with CGFs rather than individual GTOs. Nevertheless, GTOs can be constructed
+explicitly when needed via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">GTO</span>
 
-<span class="n">coeff</span> <span class="o">=</span> <span class="mf">1.0</span>    <span class="c1"># coefficients only have meaning for GTOs within a CGF</span>
-<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
-<span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">GTO</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">coeff</span> <span class="o">=</span> <span class="mf">1.0</span>      <span class="c1"># linear expansion coefficient</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span>      <span class="c1"># exponent</span>
+<span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="n">position</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">gto</span> <span class="o">=</span> <span class="n">GTO</span><span class="p">(</span><span class="n">coeff</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The normalization constant is automatically calculated by <cite>PyQInt</cite> based
-on the value of <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\((l,m,n)\)</span> and does not have
-to be supplied by the user.</p></li>
-<li><p>If you work with individual GTOs, the first parameter to construct the GTO
-should have a value of 1.0. This first parameter corresponds to the linear
-expansion coefficient used in the formulation of Contracted Gaussian Functions
-(see below).</p></li>
+<li><p>The normalization constant <span class="math notranslate nohighlight">\(N\)</span> is computed automatically by
+<strong class="program">PyQInt</strong> based on the values of <span class="math notranslate nohighlight">\(\alpha\)</span> and
+<span class="math notranslate nohighlight">\((l, m, n)\)</span> and must not be supplied explicitly.</p></li>
+<li><p>When working with individual GTOs (i.e. not as part of a CGF), the
+coefficient should be set to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>. This parameter represents the
+linear expansion coefficient used internally by CGFs.</p></li>
 </ul>
 </div>
 </section>
+<section id="retrieving-gto-data-members">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Retrieving GTO Data Members</a><a class="headerlink" href="#retrieving-gto-data-members" title="Link to this heading"></a></h3>
+<p>The <code class="code docutils literal notranslate"><span class="pre">GTO</span></code> class is intentionally designed as a <em>flat and accessible</em>
+Python object. All defining parameters of the orbital are stored as public
+data members and can be accessed directly.</p>
+<p>The following attributes are available:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">c</span></code> — linear expansion coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> — orbital center <span class="math notranslate nohighlight">\((X, Y, Z)\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> — Gaussian exponent</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">l</span></code>, <code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code> — Cartesian polynomial orders</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coeff</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">c</span>
+<span class="n">position</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">p</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">alpha</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">l</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">m</span>
+<span class="n">n</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">n</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Coefficient:&quot;</span><span class="p">,</span> <span class="n">coeff</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Position:&quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exponent:&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Orders:&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>These attributes fully define the mathematical form of the primitive Gaussian
+orbital and may be inspected or reused when constructing higher-level objects,
+such as CGFs.</p>
+</section>
+<section id="evaluating-a-gto">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Evaluating a GTO</a><a class="headerlink" href="#evaluating-a-gto" title="Link to this heading"></a></h3>
+<p>In addition to direct data access, a GTO provides methods for numerical
+evaluation. For example, the orbital amplitude at a point
+<span class="math notranslate nohighlight">\((x, y, z)\)</span> can be obtained using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">get_amp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The normalization constant used internally may be retrieved via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">norm</span> <span class="o">=</span> <span class="n">gto</span><span class="o">.</span><span class="n">get_norm</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This separation between <em>data members</em> and <em>evaluation routines</em> allows users
+to both inspect the orbital parameters and efficiently compute values when
+needed.</p>
+</section>
+</section>
 <section id="contracted-gaussian-functions-cgf">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">Contracted Gaussian Functions (CGF)</a><a class="headerlink" href="#contracted-gaussian-functions-cgf" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Contracted Gaussian Functions (CGF)</a><a class="headerlink" href="#contracted-gaussian-functions-cgf" title="Link to this heading"></a></h2>
 <p>Several GTOs can be combined to produce a so-called Contracted Gaussian Functional which
 is esentially a linear combination of GTOs as given by</p>
 <div class="math notranslate nohighlight">
@@ -169,7 +233,7 @@ add GTOs to it:</p>
 <span class="math notranslate nohighlight">\(c_{i}\)</span> and the second argument is <span class="math notranslate nohighlight">\(\alpha\)</span>.</p>
 </div>
 <section id="position-handling-and-advanced-usage">
-<h3><a class="toc-backref" href="#id4" role="doc-backlink">Position Handling and Advanced Usage</a><a class="headerlink" href="#position-handling-and-advanced-usage" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Position Handling and Advanced Usage</a><a class="headerlink" href="#position-handling-and-advanced-usage" title="Link to this heading"></a></h3>
 <p>A <code class="code docutils literal notranslate"><span class="pre">CGF</span></code> object carries an explicit spatial position <span class="math notranslate nohighlight">\(\vec{R}\)</span>,
 which is specified when the object is constructed. This position is used as
 the <em>default center</em> for all Gaussian Type Orbitals (GTOs) added to the CGF via
@@ -185,7 +249,7 @@ on the same atomic center. Under this assumption, the CGF represents a single
 atomic basis function composed of multiple primitives sharing a common center.</p>
 </section>
 <section id="non-atom-centered-gtos-and-mixed-center-cgfs">
-<h3><a class="toc-backref" href="#id5" role="doc-backlink">Non-Atom-Centered GTOs and Mixed-Center CGFs</a><a class="headerlink" href="#non-atom-centered-gtos-and-mixed-center-cgfs" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Non-Atom-Centered GTOs and Mixed-Center CGFs</a><a class="headerlink" href="#non-atom-centered-gtos-and-mixed-center-cgfs" title="Link to this heading"></a></h3>
 <p>In more advanced scenarios, it may be desirable to construct contracted
 functions composed of GTOs located at <em>different spatial positions</em>. This can
 arise, for example, when building symmetry-adapted basis functions or other
@@ -203,7 +267,7 @@ of the GTO center.</p>
 stored with the primitive instead.</p>
 </section>
 <section id="integral-evaluation-and-position-resolution">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">Integral Evaluation and Position Resolution</a><a class="headerlink" href="#integral-evaluation-and-position-resolution" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Integral Evaluation and Position Resolution</a><a class="headerlink" href="#integral-evaluation-and-position-resolution" title="Link to this heading"></a></h3>
 <p>It is important to emphasize that <strong>all integral evaluations are performed using
 the positions of the individual GTOs</strong>, not the position stored in the CGF
 object. The CGF position serves only as a convenient default when adding

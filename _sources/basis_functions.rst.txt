@@ -6,43 +6,100 @@ Basis functions
 .. contents:: Table of Contents
     :depth: 3
 
-Gaussian type orbitals (GTO)
-============================
+Gaussian Type Orbitals (GTOs)
+=============================
 
-:program:`PyQInt` uses cartesian Gaussian type orbitals as given by
-
-.. math::
-
-    \Phi(\alpha,l,m,n,\vec{R}) = N (x - X)^{l} (y - Y)^{m} (z - Z)^{n} \exp \left(- \alpha |\vec{r} - \vec{R}|^{2} \right)
-
-wherein :math:`\alpha` is the exponent, :math:`\vec{R} = \left(X,Y,Z\right)` the
-position of the orbital, :math:`(l,m,n)` the orders of the pre-exponential
-polynomial, and :math:`N` a normalization constant such that
+:program:`PyQInt` employs *Cartesian Gaussian Type Orbitals* (GTOs), defined as
 
 .. math::
 
-    \left< \Phi | \Phi \right> = 1
+    \Phi(\alpha, l, m, n, \vec{R}) =
+    N (x - X)^{l} (y - Y)^{m} (z - Z)^{n}
+    \exp \left(- \alpha \lvert \vec{r} - \vec{R} \rvert^{2} \right)
 
-GTOs are a fundamental building block of CGF (see below) and typically a user
-would not directly work with them (a notable exception is provided below).
-Nevertheless, GTO objects can be constructed as follows::
+Here, :math:`\alpha` denotes the orbital exponent,
+:math:`\vec{R} = (X, Y, Z)` the position of the orbital center,
+:math:`(l, m, n)` the orders of the Cartesian polynomial prefactor,
+and :math:`N` a normalization constant chosen such that
 
-    from pyqint import PyQInt, CGF, GTO
+.. math::
 
-    coeff = 1.0    # coefficients only have meaning for GTOs within a CGF
-    alpha = 0.5
-    l,m,n = 0,0,0
-    p = (0,0,0)
-    G = GTO(coeff, p, alpha, l, m, n)
+    \langle \Phi \mid \Phi \rangle = 1
+
+GTO Construction
+****************
+
+Gaussian Type Orbitals form the fundamental building blocks of *Contracted
+Gaussian Functions* (CGFs; see below). In typical workflows, users interact
+with CGFs rather than individual GTOs. Nevertheless, GTOs can be constructed
+explicitly when needed via::
+
+    from pyqint import GTO
+
+    coeff = 1.0      # linear expansion coefficient
+    alpha = 0.5      # exponent
+    l, m, n = 0, 0, 0
+    position = (0.0, 0.0, 0.0)
+
+    gto = GTO(coeff, position, alpha, l, m, n)
 
 .. note::
-    * The normalization constant is automatically calculated by `PyQInt` based
-      on the value of :math:`\alpha` and :math:`(l,m,n)` and does not have
-      to be supplied by the user.
-    * If you work with individual GTOs, the first parameter to construct the GTO
-      should have a value of 1.0. This first parameter corresponds to the linear
-      expansion coefficient used in the formulation of Contracted Gaussian Functions
-      (see below).
+
+    - The normalization constant :math:`N` is computed automatically by
+      :program:`PyQInt` based on the values of :math:`\alpha` and
+      :math:`(l, m, n)` and must not be supplied explicitly.
+    - When working with individual GTOs (i.e. not as part of a CGF), the
+      coefficient should be set to ``1.0``. This parameter represents the
+      linear expansion coefficient used internally by CGFs.
+
+Retrieving GTO Data Members
+***************************
+
+The :code:`GTO` class is intentionally designed as a *flat and accessible*
+Python object. All defining parameters of the orbital are stored as public
+data members and can be accessed directly.
+
+The following attributes are available:
+
+- ``c`` — linear expansion coefficient
+- ``p`` — orbital center :math:`(X, Y, Z)`
+- ``alpha`` — Gaussian exponent
+- ``l``, ``m``, ``n`` — Cartesian polynomial orders
+
+For example::
+
+    coeff = gto.c
+    position = gto.p
+    alpha = gto.alpha
+    l = gto.l
+    m = gto.m
+    n = gto.n
+
+    print("Coefficient:", coeff)
+    print("Position:", position)
+    print("Exponent:", alpha)
+    print("Orders:", (l, m, n))
+
+These attributes fully define the mathematical form of the primitive Gaussian
+orbital and may be inspected or reused when constructing higher-level objects,
+such as CGFs.
+
+Evaluating a GTO
+****************
+
+In addition to direct data access, a GTO provides methods for numerical
+evaluation. For example, the orbital amplitude at a point
+:math:`(x, y, z)` can be obtained using::
+
+    value = gto.get_amp(x, y, z)
+
+The normalization constant used internally may be retrieved via::
+
+    norm = gto.get_norm()
+
+This separation between *data members* and *evaluation routines* allows users
+to both inspect the orbital parameters and efficiently compute values when
+needed.
 
 Contracted Gaussian Functions (CGF)
 ===================================
