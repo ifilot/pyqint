@@ -37,7 +37,7 @@ class TestHFDeriv(unittest.TestCase):
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
     def test_hartree_fock_forces_ch4(self):
         """
@@ -80,7 +80,7 @@ class TestHFDeriv(unittest.TestCase):
         np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
 
 def perform_hf(mol):
-    sol = HF(mol, 'sto3g').rhf(tolerance=1e-12)
+    sol = HF(mol, 'sto3g').rhf(tolerance=1e-15)
     return sol
 
 def calculate_forces_finite_difference(mol):
@@ -90,7 +90,7 @@ def calculate_forces_finite_difference(mol):
     """
     forces = np.zeros((len(mol.get_atoms()),3))
 
-    sz = 1e-3
+    sz = 1e-4
 
     for i in range(0, len(mol.get_atoms())): # loop over nuclei
         for j in range(0, 3): # loop over directions

@@ -17,8 +17,8 @@ cdef extern from "plotter.h":
 cdef extern from "cgf.h":
     pass
 
-# Gamma and incomplete Gamma function
-cdef extern from "gamma.h":
+# Boys Function evaluation
+cdef extern from "fgamma.h":
     pass
 
 # Contracted Gaussian Functions class

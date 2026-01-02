@@ -20,7 +20,7 @@ py.extension_module(
         'integrals.cpp',
         'plotter.cpp',
         'cgf.cpp',
-        'gamma.cpp',
+        'fgamma.cpp',
     ],
     include_directories: inc,
     override_options: ['cython_language=cpp'],

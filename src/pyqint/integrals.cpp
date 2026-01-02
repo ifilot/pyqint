@@ -26,7 +26,7 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator(){}
+Integrator::Integrator() : boys_function(4) {}
 
 /**
  * @brief      Evaluate all integrals for cgfs in buffer
@@ -1084,7 +1084,7 @@ double Integrator::nuclear(const Vec3& a, int l1, int m1, int n1, double alpha1,
     for(int i=0; i<=l1+l2;i++) {
         for(int j=0; j<=m1+m2;j++) {
             for(int k=0; k<=n1+n2;k++) {
-                sum += ax[i] * ay[j] * az[k] * this->gamma_inc.Fgamma(i+j+k,rcp2*gamma);
+                sum += ax[i] * ay[j] * az[k] * this->boys_function(i+j+k,rcp2*gamma);
             }
         }
     }
@@ -1156,7 +1156,7 @@ double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const in
     for(int i=0; i<=(la+lb+lc+ld); i++) {
         for(int j=0; j<=(ma+mb+mc+md); j++) {
             for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k] * this->gamma_inc.Fgamma(i+j+k,0.25*rpq2/delta);
+                sum += bx[i]*by[j]*bz[k] * this->boys_function(i+j+k,0.25*rpq2/delta);
             }
         }
     }
@@ -1209,7 +1209,7 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
     // pre-calculate all Fgamma values
     std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
     for (unsigned int i=0; i<fg.size(); ++i) {
-        fg[i] = this->gamma_inc.Fgamma(i,0.25*rpq2/delta);
+        fg[i] = this->boys_function(i,0.25*rpq2/delta);
     }
 
     double sum = 0.0;

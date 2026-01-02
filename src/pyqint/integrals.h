@@ -30,7 +30,7 @@
 #include <vector>
 #include <array>
 
-#include "gamma.h"
+#include "fgamma.h"
 #include "cgf.h"
 #include "factorials.h"
 #include "mathfuncs.h"
@@ -46,6 +46,8 @@ private:
     std::string openmp_version;
     std::string compiler_version;
     std::string compiler_type;
+
+    BoysFunction boys_function;
 
 public:
     /**
@@ -492,12 +494,6 @@ public:
     size_t teindex(size_t i, size_t j, size_t k, size_t l) const;
 
 private:
-    /*
-     * @var     gamma_inc
-     * @brief   class that handles the evaluation of the Gamma function
-     */
-    GammaInc gamma_inc;
-
     /**
      * @brief Performs overlap integral evaluation
      *
