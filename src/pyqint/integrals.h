@@ -29,11 +29,13 @@
 #include <cstring>
 #include <vector>
 #include <array>
+#include <memory>
 
 #include "fgamma.h"
 #include "cgf.h"
 #include "factorials.h"
 #include "mathfuncs.h"
+#include "hellsing_cache.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -54,6 +56,7 @@ private:
     std::string compiler_type;
 
     BoysFunction boys_function;
+    HellsingCacheTable1D hellsing_cache;
 
 public:
     /**
@@ -520,7 +523,7 @@ private:
                    double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b) const;
 
     /**
-     * @brief Performs overlap integral evaluation
+     * @brief Performs dipole integral evaluation
      *
      * @param double alpha1     Gaussian exponent of the first GTO
      * @param unsigned int l1   Power of x component of the polynomial of the first GTO
@@ -609,35 +612,106 @@ private:
                      const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
-     * @brief Performs nuclear integral evaluation including caching of Fgamma
+     * @brief Performs electron repulsion integral (ERI) evaluation with cached Boys function
      *
-     * This function uses function-level caching of the Fgamma function; this implementation
-     * was suggested in https://github.com/ifilot/hfcxx/issues/8, but explicit unit testing
-     * actually shows not appreciable difference in speed.
+     * @param a        Center of the first Gaussian-type orbital (GTO)
+     * @param la       Power of x component of the polynomial of the first GTO
+     * @param ma       Power of y component of the polynomial of the first GTO
+     * @param na       Power of z component of the polynomial of the first GTO
+     * @param alphaa  Gaussian exponent of the first GTO
      *
-     * @param Vec3 a            Center of the Gaussian orbital of the first GTO
-     * @param unsigned int l1   Power of x component of the polynomial of the first GTO
-     * @param unsigned int m1   Power of y component of the polynomial of the first GTO
-     * @param unsigned int n1   Power of z component of the polynomial of the first GTO
-     * @param double alpha1     Gaussian exponent of the first GTO
-     * @param Vec3 b            Center of the Gaussian orbital of the second GTO
-     * @param unsigned int l2   Power of x component of the polynomial of the second GTO
-     * @param unsigned int m2   Power of y component of the polynomial of the second GTO
-     * @param unsigned int n2   Power of z component of the polynomial of the second GTO
-     * @param double alpha2     Gaussian exponent of the second GTO
-     * @param Vec3 c
+     * @param b        Center of the second Gaussian-type orbital (GTO)
+     * @param lb       Power of x component of the polynomial of the second GTO
+     * @param mb       Power of y component of the polynomial of the second GTO
+     * @param nb       Power of z component of the polynomial of the second GTO
+     * @param alphab  Gaussian exponent of the second GTO
      *
-     * @return double value of the nuclear integral
+     * @param c        Center of the third Gaussian-type orbital (GTO)
+     * @param lc       Power of x component of the polynomial of the third GTO
+     * @param mc       Power of y component of the polynomial of the third GTO
+     * @param nc       Power of z component of the polynomial of the third GTO
+     * @param alphac  Gaussian exponent of the third GTO
+     *
+     * @param d        Center of the fourth Gaussian-type orbital (GTO)
+     * @param ld       Power of x component of the polynomial of the fourth GTO
+     * @param md       Power of y component of the polynomial of the fourth GTO
+     * @param nd       Power of z component of the polynomial of the fourth GTO
+     * @param alphad  Gaussian exponent of the fourth GTO
+     *
+     * @return Value of the electron repulsion integral
      */
-    double repulsion_fgamma_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                   const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                   const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                   const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+    double repulsion_boys_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                 const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                 const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                 const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
+    /**
+     * @brief Performs electron repulsion integral (ERI) evaluation with in-situ Hellsing engine
+     *
+     * @param a        Center of the first Gaussian-type orbital (GTO)
+     * @param la       Power of x component of the polynomial of the first GTO
+     * @param ma       Power of y component of the polynomial of the first GTO
+     * @param na       Power of z component of the polynomial of the first GTO
+     * @param alphaa  Gaussian exponent of the first GTO
+     *
+     * @param b        Center of the second Gaussian-type orbital (GTO)
+     * @param lb       Power of x component of the polynomial of the second GTO
+     * @param mb       Power of y component of the polynomial of the second GTO
+     * @param nb       Power of z component of the polynomial of the second GTO
+     * @param alphab  Gaussian exponent of the second GTO
+     *
+     * @param c        Center of the third Gaussian-type orbital (GTO)
+     * @param lc       Power of x component of the polynomial of the third GTO
+     * @param mc       Power of y component of the polynomial of the third GTO
+     * @param nc       Power of z component of the polynomial of the third GTO
+     * @param alphac  Gaussian exponent of the third GTO
+     *
+     * @param d        Center of the fourth Gaussian-type orbital (GTO)
+     * @param ld       Power of x component of the polynomial of the fourth GTO
+     * @param md       Power of y component of the polynomial of the fourth GTO
+     * @param nd       Power of z component of the polynomial of the fourth GTO
+     * @param alphad  Gaussian exponent of the fourth GTO
+     *
+     * @return Value of the electron repulsion integral
+     */
     double repulsion_hellsing (const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
                                const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
                                const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
                                const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
+
+    /**
+     * @brief Performs electron repulsion integral (ERI) evaluation with cached Hellsing engine
+     *
+     * @param a        Center of the first Gaussian-type orbital (GTO)
+     * @param la       Power of x component of the polynomial of the first GTO
+     * @param ma       Power of y component of the polynomial of the first GTO
+     * @param na       Power of z component of the polynomial of the first GTO
+     * @param alphaa  Gaussian exponent of the first GTO
+     *
+     * @param b        Center of the second Gaussian-type orbital (GTO)
+     * @param lb       Power of x component of the polynomial of the second GTO
+     * @param mb       Power of y component of the polynomial of the second GTO
+     * @param nb       Power of z component of the polynomial of the second GTO
+     * @param alphab  Gaussian exponent of the second GTO
+     *
+     * @param c        Center of the third Gaussian-type orbital (GTO)
+     * @param lc       Power of x component of the polynomial of the third GTO
+     * @param mc       Power of y component of the polynomial of the third GTO
+     * @param nc       Power of z component of the polynomial of the third GTO
+     * @param alphac  Gaussian exponent of the third GTO
+     *
+     * @param d        Center of the fourth Gaussian-type orbital (GTO)
+     * @param ld       Power of x component of the polynomial of the fourth GTO
+     * @param md       Power of y component of the polynomial of the fourth GTO
+     * @param nd       Power of z component of the polynomial of the fourth GTO
+     * @param alphad  Gaussian exponent of the fourth GTO
+     *
+     * @return Value of the electron repulsion integral
+     */
+    double repulsion_hellsing_cached (const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                      const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                      const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                      const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @brief Calculates one dimensional overlap integral

@@ -21,6 +21,7 @@ py.extension_module(
         'plotter.cpp',
         'cgf.cpp',
         'fgamma.cpp',
+        'hellsing_cache.cpp',
     ],
     include_directories: inc,
     override_options: ['cython_language=cpp'],

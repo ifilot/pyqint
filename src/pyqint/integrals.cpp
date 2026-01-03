@@ -26,7 +26,9 @@
  *
  * @return Integrator class
  */
-Integrator::Integrator() : boys_function(12) {}
+Integrator::Integrator() : 
+    boys_function(12),
+    hellsing_cache(4) {}
 
 /**
  * @brief      Evaluate all integrals for cgfs in buffer
@@ -872,17 +874,17 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
  */
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
-    // this function can deploy to "repulsion" or to "repulsion_fgamma_cached"; the latter should be faster
-    double rep = this->repulsion_hellsing(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                                          gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                                          gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                                          gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+    // we here opt for cached Hellsing engine, which is currently the fastest implementation
+    double rep = this->repulsion_hellsing_cached(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                                                 gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                                                 gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
+                                                 gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
 
     return rep;
 }
 
 /**
- * @brief Calculates overlap integral of two GTO
+ * @brief Calculates repulsion derivative integral of four GTO
  *
  * @param const GTO& gto1       Gaussian Type Orbital
  * @param const GTO& gto2       Gaussian Type Orbital
@@ -1188,45 +1190,38 @@ double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const in
 }
 
 /**
- * @brief Evaluates a four-center electron–electron repulsion integral (ERI).
+ * @brief Performs electron repulsion integral (ERI) evaluation with cached Boys function
  *
- * Computes the Coulomb repulsion integral
- *
- *   (ab | cd)
- *
- * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
- * a center, angular momentum tuple, and Gaussian exponent.
- *
- * @param a        Center of the first GTO
- * @param la       x-angular momentum of the first GTO
- * @param ma       y-angular momentum of the first GTO
- * @param na       z-angular momentum of the first GTO
+ * @param a        Center of the first Gaussian-type orbital (GTO)
+ * @param la       Power of x component of the polynomial of the first GTO
+ * @param ma       Power of y component of the polynomial of the first GTO
+ * @param na       Power of z component of the polynomial of the first GTO
  * @param alphaa  Gaussian exponent of the first GTO
  *
- * @param b        Center of the second GTO
- * @param lb       x-angular momentum of the second GTO
- * @param mb       y-angular momentum of the second GTO
- * @param nb       z-angular momentum of the second GTO
+ * @param b        Center of the second Gaussian-type orbital (GTO)
+ * @param lb       Power of x component of the polynomial of the second GTO
+ * @param mb       Power of y component of the polynomial of the second GTO
+ * @param nb       Power of z component of the polynomial of the second GTO
  * @param alphab  Gaussian exponent of the second GTO
  *
- * @param c        Center of the third GTO
- * @param lc       x-angular momentum of the third GTO
- * @param mc       y-angular momentum of the third GTO
- * @param nc       z-angular momentum of the third GTO
+ * @param c        Center of the third Gaussian-type orbital (GTO)
+ * @param lc       Power of x component of the polynomial of the third GTO
+ * @param mc       Power of y component of the polynomial of the third GTO
+ * @param nc       Power of z component of the polynomial of the third GTO
  * @param alphac  Gaussian exponent of the third GTO
  *
- * @param d        Center of the fourth GTO
- * @param ld       x-angular momentum of the fourth GTO
- * @param md       y-angular momentum of the fourth GTO
- * @param nd       z-angular momentum of the fourth GTO
+ * @param d        Center of the fourth Gaussian-type orbital (GTO)
+ * @param ld       Power of x component of the polynomial of the fourth GTO
+ * @param md       Power of y component of the polynomial of the fourth GTO
+ * @param nd       Power of z component of the polynomial of the fourth GTO
  * @param alphad  Gaussian exponent of the fourth GTO
  *
- * @return Value of the electron–electron repulsion integral (ab | cd)
+ * @return Value of the electron repulsion integral
  */
-double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                           const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                           const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                           const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
+double Integrator::repulsion_boys_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+                                         const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+                                         const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+                                         const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
     const double rab2 = (a-b).norm2();
     const double rcd2 = (c-d).norm2();
@@ -1265,41 +1260,33 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
 }
 
 /**
- * @brief Evaluates a four-center electron–electron repulsion integral (ERI)
- *        using the "Hellsing" method.
+ * @brief Performs electron repulsion integral (ERI) evaluation with in-situ Hellsing engine
  *
- * Computes the Coulomb repulsion integral
- *
- *   (ab | cd)
- *
- * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
- * a center, angular momentum tuple, and Gaussian exponent.
- *
- * @param a        Center of the first GTO
- * @param la       x-angular momentum of the first GTO
- * @param ma       y-angular momentum of the first GTO
- * @param na       z-angular momentum of the first GTO
+ * @param a        Center of the first Gaussian-type orbital (GTO)
+ * @param la       Power of x component of the polynomial of the first GTO
+ * @param ma       Power of y component of the polynomial of the first GTO
+ * @param na       Power of z component of the polynomial of the first GTO
  * @param alphaa  Gaussian exponent of the first GTO
  *
- * @param b        Center of the second GTO
- * @param lb       x-angular momentum of the second GTO
- * @param mb       y-angular momentum of the second GTO
- * @param nb       z-angular momentum of the second GTO
+ * @param b        Center of the second Gaussian-type orbital (GTO)
+ * @param lb       Power of x component of the polynomial of the second GTO
+ * @param mb       Power of y component of the polynomial of the second GTO
+ * @param nb       Power of z component of the polynomial of the second GTO
  * @param alphab  Gaussian exponent of the second GTO
  *
- * @param c        Center of the third GTO
- * @param lc       x-angular momentum of the third GTO
- * @param mc       y-angular momentum of the third GTO
- * @param nc       z-angular momentum of the third GTO
+ * @param c        Center of the third Gaussian-type orbital (GTO)
+ * @param lc       Power of x component of the polynomial of the third GTO
+ * @param mc       Power of y component of the polynomial of the third GTO
+ * @param nc       Power of z component of the polynomial of the third GTO
  * @param alphac  Gaussian exponent of the third GTO
  *
- * @param d        Center of the fourth GTO
- * @param ld       x-angular momentum of the fourth GTO
- * @param md       y-angular momentum of the fourth GTO
- * @param nd       z-angular momentum of the fourth GTO
+ * @param d        Center of the fourth Gaussian-type orbital (GTO)
+ * @param ld       Power of x component of the polynomial of the fourth GTO
+ * @param md       Power of y component of the polynomial of the fourth GTO
+ * @param nd       Power of z component of the polynomial of the fourth GTO
  * @param alphad  Gaussian exponent of the fourth GTO
  *
- * @return Value of the electron–electron repulsion integral (ab | cd)
+ * @return Value of the electron repulsion integral
  */
 double Integrator::repulsion_hellsing (
     const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
@@ -1363,12 +1350,6 @@ double Integrator::repulsion_hellsing (
     std::vector<double> F(nu_max + 1);
     this->boys_function.compute_block(nu_max, T, F.data());
 
-    // struct HellsingBTerm {
-    //     double c;  // coefficient
-    //     int mu;    // mu
-    //     int u;     // u
-    // };
-
     // triple sum
     double s = 0.0;
     for (const auto& tx : Bx) {
@@ -1376,6 +1357,135 @@ double Integrator::repulsion_hellsing (
             for (const auto& tz : Bz) {
                 const int nu = (tx.mu + ty.mu + tz.mu) - (tx.u + ty.u + tz.u);
                 s += tx.c * ty.c * tz.c * F[nu];
+            }
+        }
+    }
+
+    return pref * s;
+}
+
+/**
+ * @brief Performs electron repulsion integral (ERI) evaluation with cached Hellsing engine
+ *
+ * @param a        Center of the first Gaussian-type orbital (GTO)
+ * @param la       Power of x component of the polynomial of the first GTO
+ * @param ma       Power of y component of the polynomial of the first GTO
+ * @param na       Power of z component of the polynomial of the first GTO
+ * @param alphaa  Gaussian exponent of the first GTO
+ *
+ * @param b        Center of the second Gaussian-type orbital (GTO)
+ * @param lb       Power of x component of the polynomial of the second GTO
+ * @param mb       Power of y component of the polynomial of the second GTO
+ * @param nb       Power of z component of the polynomial of the second GTO
+ * @param alphab  Gaussian exponent of the second GTO
+ *
+ * @param c        Center of the third Gaussian-type orbital (GTO)
+ * @param lc       Power of x component of the polynomial of the third GTO
+ * @param mc       Power of y component of the polynomial of the third GTO
+ * @param nc       Power of z component of the polynomial of the third GTO
+ * @param alphac  Gaussian exponent of the third GTO
+ *
+ * @param d        Center of the fourth Gaussian-type orbital (GTO)
+ * @param ld       Power of x component of the polynomial of the fourth GTO
+ * @param md       Power of y component of the polynomial of the fourth GTO
+ * @param nd       Power of z component of the polynomial of the fourth GTO
+ * @param alphad  Gaussian exponent of the fourth GTO
+ *
+ * @return Value of the electron repulsion integral
+ */
+double Integrator::repulsion_hellsing_cached(
+    const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
+    const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
+    const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
+    const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const
+{
+    // ---------------- geometry ----------------
+    const double rab2 = (a - b).norm2();
+    const double rcd2 = (c - d).norm2();
+
+    const Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    const Vec3 q = gaussian_product_center(alphac, c, alphad, d);
+    const double rpq2 = (p - q).norm2();
+
+    // ---------------- scalars ----------------
+    const double gamma1 = alphaa + alphab;
+    const double gamma2 = alphac + alphad;
+    const double eta    = (gamma1 * gamma2) / (gamma1 + gamma2);
+    const double T      = eta * rpq2;
+
+    const int nu_max =
+        (la + ma + na) +
+        (lb + mb + nb) +
+        (lc + mc + nc) +
+        (ld + md + nd);
+
+    // ---------------- universal prefactor ----------------
+    constexpr double PI25 = 17.493418327624862846262821679871;
+    const double pref =
+        2.0 * PI25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
+        std::exp(-alphaa * alphab * rab2 / gamma1) *
+        std::exp(-alphac * alphad * rcd2 / gamma2);
+
+    // ---------------- Boys block ----------------
+    std::vector<double> F(nu_max + 1);
+    this->boys_function.compute_block(nu_max, T, F.data());
+
+    // ---------------- cached kernels ----------------
+    const auto& Kx = hellsing_cache.get(la, lb, lc, ld);
+    const auto& Ky = hellsing_cache.get(ma, mb, mc, md);
+    const auto& Kz = hellsing_cache.get(na, nb, nc, nd);
+
+    // ---------------- build 1D polynomials ----------------
+    auto build_poly =
+        [&](const HellsingCache1D& K,
+            double AB, double CD, double PQ,
+            std::vector<double>& poly,
+            std::vector<int>& nu)
+    {
+        const std::size_t n = K.scalar.size();
+        poly.resize(n);
+        nu.resize(n);
+
+        for (std::size_t i = 0; i < n; ++i) {
+            const auto& pwr = K.powers[i];
+
+            poly[i] =
+                K.scalar[i] *
+                ipow(alphaa, pwr[0]) *
+                ipow(alphab, pwr[1]) *
+                ipow(alphac, pwr[2]) *
+                ipow(alphad, pwr[3]) *
+                ipow(gamma1, pwr[4]) *
+                ipow(gamma2, pwr[5]) *
+                ipow(AB,     pwr[6]) *
+                ipow(CD,     pwr[7]) *
+                ipow(eta,    pwr[8]) *
+                ipow(PQ,     pwr[9]);
+
+            // this is exactly: mu - u
+            nu[i] = static_cast<int>(K.mu[i]) - static_cast<int>(K.u[i]);
+        }
+    };
+
+    std::vector<double> Bx, By, Bz;
+    std::vector<int>    nux, nuy, nuz;
+
+    build_poly(Kx, a[0] - b[0], c[0] - d[0], p[0] - q[0], Bx, nux);
+    build_poly(Ky, a[1] - b[1], c[1] - d[1], p[1] - q[1], By, nuy);
+    build_poly(Kz, a[2] - b[2], c[2] - d[2], p[2] - q[2], Bz, nuz);
+
+    // ---------------- triple sum (same logic as reference) ----------------
+    double s = 0.0;
+    for (std::size_t ix = 0; ix < Bx.size(); ++ix) {
+        const double cx = Bx[ix];
+        const int    nx = nux[ix];
+
+        for (std::size_t iy = 0; iy < By.size(); ++iy) {
+            const double cxy = cx * By[iy];
+            const int    nxy = nx + nuy[iy];
+
+            for (std::size_t iz = 0; iz < Bz.size(); ++iz) {
+                s += cxy * Bz[iz] * F[nxy + nuz[iz]];
             }
         }
     }
