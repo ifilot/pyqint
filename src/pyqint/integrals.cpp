@@ -822,7 +822,12 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
     bool cgf3_nuc = (cgf3.get_r() - nucleus).norm2() < 0.0001;
     bool cgf4_nuc = (cgf4.get_r() - nucleus).norm2() < 0.0001;
 
-    // early exit
+    // Early exit:
+    // If all CGFs are centered on this nucleus, the ERI is invariant under
+    // rigid translation of the entire quartet (derivative = 0).
+    // If none of the CGFs are centered on this nucleus, the ERI does not
+    // depend on this nuclear coordinate (derivative = 0).
+    // These two cases are exactly captured by all cgf*_nuc flags being equal.
     if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
         return 0.0;
     }
@@ -1336,9 +1341,9 @@ double Integrator::repulsion_hellsing (
         (ld + md + nd);
 
     // universal pre-factor
-    constexpr double pi25 = 17.49341832762486284626;
+    constexpr double PI25 = 17.493418327624862846262821679871;
     const double pref =
-        2.0 * pi25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
+        2.0 * PI25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
         std::exp(-alphaa * alphab * rab2 / gamma1) *
         std::exp(-alphac * alphad * rcd2 / gamma2);
 
