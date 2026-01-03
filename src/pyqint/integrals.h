@@ -64,7 +64,7 @@ public:
      *
      * @return Integrator class
      */
-    Integrator();
+    Integrator(int lmax=4, int nu_max=12);
 
     inline int get_num_threads() const {
         #ifdef _OPENMP

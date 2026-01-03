@@ -22,14 +22,19 @@
 #pragma once
 
 /**
- * @brief  Integer-based exponentation
- * @note   Only evaluates positive powers
- * @param  base: base
- * @param  exp: power value
- * @retval 
+ * @brief Integer-based exponentiation using binary exponentiation
+ *
+ * Computes an integer power of a floating-point base using an efficient
+ * binary exponentiation algorithm.
+ *
+ * Negative exponents are supported via reciprocal evaluation.
+ *
+ * @param base Base value
+ * @param exp Integer exponent
+ * @return base raised to the power exp
  */
 inline double ipow(double base, int exp) {
-    if(exp < 0) {
+    if (exp < 0) {
         return 1.0 / ipow(base, -exp);
     }
     double result = 1.0;
@@ -42,6 +47,14 @@ inline double ipow(double base, int exp) {
     return result;
 }
 
+/**
+ * @brief Returns (-1)^n as a double
+ *
+ * Utility function commonly used for phase factors and parity checks.
+ *
+ * @param n Integer exponent
+ * @return -1.0 if n is odd, +1.0 if n is even
+ */
 inline double sign_pow(int n) noexcept {
     return (n & 1) ? -1.0 : 1.0;
 }

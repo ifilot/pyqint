@@ -48,7 +48,7 @@ cdef extern from "plotter.h":
 # Integrator class
 cdef extern from "integrals.h":
     cdef cppclass Integrator:
-        Integrator() except +
+        Integrator(int, int) except +
 
         int get_num_threads() except +
 

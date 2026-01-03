@@ -62,37 +62,45 @@ cdef class PyQInt:
     """
     Python representation of the Integrator class
     """
-    cdef Integrator *integrator
-    integrator_uint = 0
+    cdef Integrator* integrator
+    cdef int _lmax
+    cdef int _nu_max
 
-    def __cinit__(self):
-        self.integrator = new Integrator()
+    def __cinit__(self, int lmax=4, int nu_max=12):
+        self.integrator = NULL
+        self._lmax = lmax
+        self._nu_max = nu_max
+
+        self.integrator = new Integrator(lmax, nu_max)
 
     def __dealloc__(self):
-        del self.integrator
+        if self.integrator != NULL:
+            del self.integrator
+            self.integrator = NULL
 
+    # -------- pickling --------
     def __getstate__(self):
-        return self.__class__
+        return (self._lmax, self._nu_max)
 
-    def __setstate__(self, d):
-        self.integrator = new Integrator()
+    def __setstate__(self, state):
+        self._lmax, self._nu_max = state
+        self.integrator = new Integrator(self._lmax, self._nu_max)
 
+    # -------- API --------
     def get_compile_info(self):
-        compiler_version = self.integrator.get_compiler_version()
-        compile_date = self.integrator.get_compile_date()
-        compile_time = self.integrator.get_compile_time()
-        openmp_version = self.integrator.get_openmp_version()
-        compiler_type = self.integrator.get_compiler_type()
+        cdef bytes compiler_version = self.integrator.get_compiler_version()
+        cdef bytes compile_date     = self.integrator.get_compile_date()
+        cdef bytes compile_time     = self.integrator.get_compile_time()
+        cdef bytes openmp_version   = self.integrator.get_openmp_version()
+        cdef bytes compiler_type    = self.integrator.get_compiler_type()
 
-        compile_info = {
-            "compiler_version" : compiler_version.decode('utf8'),
-            "compile_date" :     compile_date.decode('utf8'),
-            "compile_time" :     compile_time.decode('utf8'),
-            "openmp_version" :   openmp_version.decode('utf8'),
-            "compiler_type" :    compiler_type.decode('utf8'),
+        return {
+            "compiler_version": compiler_version.decode("utf8"),
+            "compile_date":     compile_date.decode("utf8"),
+            "compile_time":     compile_time.decode("utf8"),
+            "openmp_version":   openmp_version.decode("utf8"),
+            "compiler_type":    compiler_type.decode("utf8"),
         }
-
-        return compile_info
 
     @staticmethod
     cdef CGF build_c_cgf(object cgf):
