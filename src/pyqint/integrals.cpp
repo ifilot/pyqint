@@ -698,27 +698,25 @@ double Integrator::nuclear_gto(const GTO& gto1,
 }
 
 /**
- * @brief Calculates nuclear integral of two CGF
+ * @brief Calculates derivative of the nuclear attraction integral of two CGF
  *
  * @param const CGF& cgf1       Contracted Gaussian Function
  * @param const CGF& cgf2       Contracted Gaussian Function
- * @param unsigned int charge   charge of the nucleus in a.u.
+ * @param const Vec3& nucleus   Position of the nucleus generating the potential
+ * @param unsigned int charge   Charge of the nucleus in a.u.
+ * @param const Vec3& nucderiv  Center with respect to which the derivative is taken
+ * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
  *
- * Calculates the value of < cgf1 | V | cgf2 >
+ * Calculates the value of
  *
- * In contrast to the other derivatives, this will be done using a finite
- * difference procedure.
+ *     d/dR ⟨ cgf1 | V_nuc | cgf2 ⟩
  *
- * @return double value of the nuclear integral
+ * where R is the selected Cartesian coordinate of the given center.
+ *
+ * @return double value of the nuclear attraction gradient
  */
-double Integrator::nuclear_deriv(
-    const CGF& cgf1,
-    const CGF& cgf2,
-    const Vec3& nucleus,
-    unsigned int charge,      // kept for signature compatibility
-    const Vec3& nucderiv,
-    unsigned int coord) const
-{
+double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& nucleus,
+    unsigned int charge, const Vec3& nucderiv, unsigned int coord) const {
     double sum = 0.0;
 
     // Identify derivative target
@@ -726,9 +724,6 @@ double Integrator::nuclear_deriv(
     const bool cgf2_nuc = (cgf2.get_r() - nucderiv).norm2() < 0.0001;
     const bool nuc_nuc  = (nucleus    - nucderiv).norm2() < 0.0001;
 
-    // Same logic as ERI derivative:
-    // - all true  → rigid translation → 0
-    // - all false → no dependence     → 0
     if (cgf1_nuc == cgf2_nuc && cgf2_nuc == nuc_nuc) {
         return 0.0;
     }
@@ -760,10 +755,8 @@ double Integrator::nuclear_deriv(
 
             // derivative w.r.t. nucleus via translational invariance
             if (nuc_nuc) {
-                const double dA =
-                    this->nuclear_deriv(g1, g2, nucleus, coord);
-                const double dB =
-                    this->nuclear_deriv(g2, g1, nucleus, coord);
+                const double dA = this->nuclear_deriv(g1, g2, nucleus, coord);
+                const double dB = this->nuclear_deriv(g2, g1, nucleus, coord);
                 deriv += -(dA + dB);
             }
 
@@ -775,12 +768,27 @@ double Integrator::nuclear_deriv(
     return static_cast<double>(charge) * sum;
 }
 
-double Integrator::nuclear_deriv(
-    const GTO& gto1,
-    const GTO& gto2,
-    const Vec3& nucleus,
-    unsigned int coord) const
-{
+/**
+ * @brief Calculates derivative of the nuclear attraction integral of two GTO
+ *
+ * @param const GTO& gto1       Gaussian Type Orbital
+ * @param const GTO& gto2       Gaussian Type Orbital
+ * @param const Vec3& nucleus   Position of the nucleus generating the potential
+ * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
+ *
+ * Calculates the value of
+ *
+ *     d/dR ⟨ gto1 | V_nuc | gto2 ⟩
+ *
+ * where R is the selected Cartesian coordinate of the nuclear position.
+ *
+ * This routine evaluates the derivative of the nuclear attraction integral and
+ * returns the corresponding energy gradient component.
+ *
+ * @return double value of the nuclear attraction gradient
+ */
+double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2, 
+                                 const Vec3& nucleus, unsigned int coord) const {
     std::array<unsigned int,3> ang = {
         gto1.get_l(),
         gto1.get_m(),
@@ -803,7 +811,7 @@ double Integrator::nuclear_deriv(
     const double term_plus =
         this->nuclear_gto(gto_plus, gto2, nucleus);
 
-    // restore l+1 → l
+    // restore l+1 -> l
     ang[coord] -= 1;
 
     if (l > 0) {
@@ -818,14 +826,12 @@ double Integrator::nuclear_deriv(
             ang[0], ang[1], ang[2]
         );
 
-        const double term_min =
-            this->nuclear_gto(gto_min, gto2, nucleus);
+        const double term_min = this->nuclear_gto(gto_min, gto2, nucleus);
 
         // restore l
         ang[coord] += 1;
 
-        return 2.0 * gto1.get_alpha() * term_plus
-             - static_cast<double>(l) * term_min;
+        return 2.0 * gto1.get_alpha() * term_plus - static_cast<double>(l) * term_min;
     }
     else {
         // s-type along this axis

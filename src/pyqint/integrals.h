@@ -396,19 +396,29 @@ public:
     }
 
     /**
-     * @brief Calculates nuclear integral of two CGF
+     * @brief Calculates derivative of the nuclear attraction integral of two CGF
      *
      * @param const CGF& cgf1       Contracted Gaussian Function
      * @param const CGF& cgf2       Contracted Gaussian Function
-     * @param const Vec3 nucleus    Position of the nucleus
-     * @param unsigned int charge   charge of the nucleus in a.u.
+     * @param const Vec3& nucleus   Position of the nucleus generating the potential
+     * @param unsigned int charge   Charge of the nucleus in a.u.
+     * @param const Vec3& nucderiv  Center with respect to which the derivative is taken
+     * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
      *
-     * Calculates the value of < cgf1 | V | cgf2 >
+     * Calculates the value of
      *
-     * @return double value of the nuclear integral
+     *     d/dR ⟨ cgf1 | V_nuc | cgf2 ⟩
+     *
+     * where R is the selected Cartesian coordinate of the given center.
+     *
+     * In contrast to the other integrals, this routine evaluates the
+     * nuclear attraction **derivative** directly and returns the
+     * corresponding energy gradient component.
+     *
+     * @return double value of the nuclear attraction gradient
      */
-    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const Vec3& nucleus, unsigned int charge,
-                         const Vec3& nucderiv, unsigned int coord) const;
+    double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, const Vec3& nucleus, 
+                         unsigned int charge, const Vec3& nucderiv, unsigned int coord) const;
 
     // expanded notation for Cython interface
     inline double nuclear_deriv(const CGF &cgf1, const CGF &cgf2, double cx, double cy, double cz, unsigned int charge,
@@ -431,11 +441,27 @@ public:
         return this->nuclear_gto(gto1, gto2, Vec3(cx, cy, cz));
     }
 
-    double nuclear_deriv(
-    const GTO& gto1,
-    const GTO& gto2,
-    const Vec3& nucleus,
-    unsigned int coord) const;
+    /**
+     * @brief Calculates derivative of the nuclear attraction integral of two GTO
+     *
+     * @param const GTO& gto1       Gaussian Type Orbital
+     * @param const GTO& gto2       Gaussian Type Orbital
+     * @param const Vec3& nucleus   Position of the nucleus generating the potential
+     * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
+     *
+     * Calculates the value of
+     *
+     *     d/dR ⟨ gto1 | V_nuc | gto2 ⟩
+     *
+     * where R is the selected Cartesian coordinate of the nuclear position.
+     *
+     * This routine evaluates the derivative of the nuclear attraction
+     * integral and returns the corresponding energy gradient component.
+     *
+     * @return double value of the nuclear attraction gradient
+     */
+    double nuclear_deriv(const GTO& gto1, const GTO& gto2, const Vec3& nucleus,
+                         unsigned int coord) const;
 
 /**************************************************************************
  * TWO-ELECTRON INTEGRALS
