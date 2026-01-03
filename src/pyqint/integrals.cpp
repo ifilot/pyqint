@@ -833,26 +833,23 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
     }
 
     for(unsigned int i=0; i< cgf1.size(); i++) {
+        const double c1 = cgf1.get_coefficient_gto(i) * cgf1.get_norm_gto(i);
         for(unsigned int j=0; j< cgf2.size(); j++) {
+            const double c2 = c1 * cgf2.get_coefficient_gto(j) * cgf2.get_norm_gto(j);
             for(unsigned int k=0; k < cgf3.size(); k++) {
+                const double c3 = c2 * cgf3.get_coefficient_gto(k) * cgf3.get_norm_gto(k);
                 for(unsigned int l=0; l < cgf4.size(); l++) {
 
                     // calculate product of coefficients
-                    double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
-
-                    // get normalization factors
-                    const double n1 = cgf1.get_norm_gto(i);
-                    const double n2 = cgf2.get_norm_gto(j);
-                    const double n3 = cgf3.get_norm_gto(k);
-                    const double n4 = cgf4.get_norm_gto(l);
+                    const double pre = c3 * cgf4.get_coefficient_gto(l) * cgf4.get_norm_gto(l);
 
                     // take the derivative towards the basis functions
-                    double t1 = cgf1_nuc ? this->repulsion_deriv(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
-                    double t2 = cgf2_nuc ? this->repulsion_deriv(cgf2.get_gto(j), cgf1.get_gto(i), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
-                    double t3 = cgf3_nuc ? this->repulsion_deriv(cgf3.get_gto(k), cgf4.get_gto(l), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
-                    double t4 = cgf4_nuc ? this->repulsion_deriv(cgf4.get_gto(l), cgf3.get_gto(k), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
+                    const double t1 = cgf1_nuc ? this->repulsion_deriv(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
+                    const double t2 = cgf2_nuc ? this->repulsion_deriv(cgf2.get_gto(j), cgf1.get_gto(i), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
+                    const double t3 = cgf3_nuc ? this->repulsion_deriv(cgf3.get_gto(k), cgf4.get_gto(l), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
+                    const double t4 = cgf4_nuc ? this->repulsion_deriv(cgf4.get_gto(l), cgf3.get_gto(k), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
 
-                    sum += pre * n1 * n2 * n3 * n4 * (t1 + t2 + t3 + t4);
+                    sum += pre * (t1 + t2 + t3 + t4);
                 }
             }
         }
