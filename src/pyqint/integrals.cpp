@@ -873,10 +873,10 @@ double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
     // this function can deploy to "repulsion" or to "repulsion_fgamma_cached"; the latter should be faster
-    double rep = this->repulsion_fgamma_cached(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                                               gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                                               gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                                               gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
+    double rep = this->repulsion_hellsing(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
+                                          gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
+                                          gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
+                                          gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
 
     return rep;
 }
@@ -1228,17 +1228,17 @@ double Integrator::repulsion_fgamma_cached(const Vec3 &a, const int la, const in
                                            const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
                                            const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
-    double rab2 = (a-b).norm2();
-    double rcd2 = (c-d).norm2();
+    const double rab2 = (a-b).norm2();
+    const double rcd2 = (c-d).norm2();
 
-    Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
-    Vec3 q = gaussian_product_center(alphac, c, alphad, d);
+    const Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    const Vec3 q = gaussian_product_center(alphac, c, alphad, d);
 
-    double rpq2 = (p-q).norm2();
+    const double rpq2 = (p-q).norm2();
 
-    double gamma1 = alphaa + alphab;
-    double gamma2 = alphac + alphad;
-    double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
+    const double gamma1 = alphaa + alphab;
+    const double gamma2 = alphac + alphad;
+    const double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
     const double T = 0.25*rpq2/delta;
 
     std::vector<double> bx = B_array(la, lb, lc, ld, p[0], a[0], b[0], q[0], c[0], d[0], gamma1, gamma2, delta);
@@ -1307,23 +1307,12 @@ double Integrator::repulsion_hellsing (
     const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
     const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
 
-    const double dxAB = a[0] - b[0];
-    const double dyAB = a[1] - b[1];
-    const double dzAB = a[2] - b[2];
-    const double rab2 = dxAB*dxAB + dyAB*dyAB + dzAB*dzAB;
+    const double rab2 = (a-b).norm2();
+    const double rcd2 = (c-d).norm2();
 
-    const double dxCD = c[0] - d[0];
-    const double dyCD = c[1] - d[1];
-    const double dzCD = c[2] - d[2];
-    const double rcd2 = dxCD*dxCD + dyCD*dyCD + dzCD*dzCD;
-
-    const Vec3 P = gaussian_product_center(alphaa, a, alphab, b);
-    const Vec3 Q = gaussian_product_center(alphac, c, alphad, d);
-
-    const double dxPQ = P[0] - Q[0];
-    const double dyPQ = P[1] - Q[1];
-    const double dzPQ = P[2] - Q[2];
-    const double rpq2 = dxPQ*dxPQ + dyPQ*dyPQ + dzPQ*dzPQ;
+    const Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
+    const Vec3 q = gaussian_product_center(alphac, c, alphad, d);
+    const double rpq2 = (p-q).norm2();
 
     const double gamma1 = alphaa + alphab;
     const double gamma2 = alphac + alphad;
@@ -1339,10 +1328,9 @@ double Integrator::repulsion_hellsing (
 
     // universal pre-factor
     constexpr double PI25 = 17.493418327624862846262821679871;
-    const double pref =
-        2.0 * PI25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
-        std::exp(-alphaa * alphab * rab2 / gamma1) *
-        std::exp(-alphac * alphad * rcd2 / gamma2);
+    const double pref = 2.0 * PI25 / (gamma1 * gamma2 * std::sqrt(gamma1 + gamma2)) *
+                        std::exp(-alphaa * alphab * rab2 / gamma1) *
+                        std::exp(-alphac * alphad * rcd2 / gamma2);
 
     // early exit for (ss|ss); saves a couple of cycles
     if(nu_max == 0) {
@@ -1354,41 +1342,40 @@ double Integrator::repulsion_hellsing (
         la, lb, lc, ld,
         alphaa, alphab, alphac, alphad,
         a[0], b[0], c[0], d[0],
-        P[0], Q[0],
+        p[0], q[0],
         gamma1, gamma2);
 
     const auto By = B_array_hellsing(
         ma, mb, mc, md,
         alphaa, alphab, alphac, alphad,
         a[1], b[1], c[1], d[1],
-        P[1], Q[1],
+        p[1], q[1],
         gamma1, gamma2);
 
     const auto Bz = B_array_hellsing(
         na, nb, nc, nd,
         alphaa, alphab, alphac, alphad,
         a[2], b[2], c[2], d[2],
-        P[2], Q[2],
+        p[2], q[2],
         gamma1, gamma2);
 
     // build Fgamma block
     std::vector<double> F(nu_max + 1);
     this->boys_function.compute_block(nu_max, T, F.data());
 
+    // struct HellsingBTerm {
+    //     double c;  // coefficient
+    //     int mu;    // mu
+    //     int u;     // u
+    // };
+
     // triple sum
     double s = 0.0;
     for (const auto& tx : Bx) {
         for (const auto& ty : By) {
-            const int mu_xy = tx.mu + ty.mu;
-            const int u_xy  = tx.u  + ty.u;
-            const double c_xy = tx.c * ty.c;
-
             for (const auto& tz : Bz) {
-                const int nu = (mu_xy + tz.mu) - (u_xy + tz.u);
-                // In theory nu is in [0, nu_max] given the construction; keep safe:
-                if (nu >= 0 && nu <= nu_max) {
-                    s += c_xy * tz.c * F[nu];
-                }
+                const int nu = (tx.mu + ty.mu + tz.mu) - (tx.u + ty.u + tz.u);
+                s += tx.c * ty.c * tz.c * F[nu];
             }
         }
     }
@@ -1401,132 +1388,92 @@ std::vector<HellsingBTerm> Integrator::B_array_hellsing(
     double a1, double a2, double a3, double a4,
     double ax, double bx, double cx, double dx,
     double px, double qx,
-    double g1, double g2) const {
+    double g1, double g2) const
+{
+    const double pre1 =
+        sign_pow(l1 + l2) *
+        factorial(l1) * factorial(l2) /
+        std::pow(g1, l1 + l2);
 
-    const double pre1 = sign_pow(l1 + l2)
-                      * factorial(l1) * factorial(l2)
-                      / ipow(g1, l1 + l2);
+    const double pre2 =
+        factorial(l3) * factorial(l4) /
+        std::pow(g2, l3 + l4);
 
-    const double pre2 = factorial(l3) * factorial(l4)
-                      / ipow(g2, l3 + l4);
-
-    const double eta = (g1 * g2) / (g1 + g2);
+    const double eta = g1 * g2 / (g1 + g2);
 
     std::vector<HellsingBTerm> arr;
 
-    for (int i1 = 0; i1 <= l1 / 2; ++i1) {
-        for (int i2 = 0; i2 <= l2 / 2; ++i2) {
-            for (int o1 = 0; o1 <= l1 - 2 * i1; ++o1) {
-                for (int o2 = 0; o2 <= l2 - 2 * i2; ++o2) {
-                    const int oo12 = o1 + o2;
-                    for (int r1 = 0; r1 <= oo12 / 2; ++r1) {
-                        const double t11 = sign_pow(o2 + r1)
-                                         * factorial(oo12)
-                                         / ipow(4.0, i1 + i2 + r1)
-                                         / factorial(i1)
-                                         / factorial(i2)
-                                         / factorial(o1)
-                                         / factorial(o2)
-                                         / factorial(r1);
+    for (int i1 = 0; i1 <= l1 / 2; ++i1)
+    for (int i2 = 0; i2 <= l2 / 2; ++i2)
+    for (int o1 = 0; o1 <= l1 - 2 * i1; ++o1)
+    for (int o2 = 0; o2 <= l2 - 2 * i2; ++o2)
+    for (int r1 = 0; r1 <= (o1 + o2) / 2; ++r1)
+    {
+        const double t11 =
+            sign_pow(o2 + r1) *
+            factorial(o1 + o2) /
+            ipow(4.0, i1 + i2 + r1) /
+            factorial(i1) /
+            factorial(i2) /
+            factorial(o1) /
+            factorial(o2) /
+            factorial(r1);
 
-                        const int e_a1 = o2 - i1 - r1;
-                        const int e_a2 = o1 - i2 - r1;
-                        const int e_g1 = 2 * (i1 + i2) + r1;
-                        const int e_x1 = oo12 - 2 * r1;
+        const double t12 =
+            ipow(a1, o2 - i1 - r1) *
+            ipow(a2, o1 - i2 - r1) *
+            ipow(g1, 2 * (i1 + i2) + r1) *
+            ipow(ax - bx, o1 + o2 - 2 * r1) /
+            factorial(l1 - 2 * i1 - o1) /
+            factorial(l2 - 2 * i2 - o2) /
+            factorial(o1 + o2 - 2 * r1);
 
-                        if (e_a1 < 0 || e_a2 < 0 || e_x1 < 0) continue;
+        for (int i3 = 0; i3 <= l3 / 2; ++i3)
+        for (int i4 = 0; i4 <= l4 / 2; ++i4)
+        for (int o3 = 0; o3 <= l3 - 2 * i3; ++o3)
+        for (int o4 = 0; o4 <= l4 - 2 * i4; ++o4)
+        for (int r2 = 0; r2 <= (o3 + o4) / 2; ++r2)
+        {
+            const double t21 =
+                sign_pow(o3 + r2) *
+                factorial(o3 + o4) /
+                ipow(4.0, i3 + i4 + r2) /
+                factorial(i3) /
+                factorial(i4) /
+                factorial(o3) /
+                factorial(o4) /
+                factorial(r2);
 
-                        const double num12 =
-                            ipow(a1, e_a1) *
-                            ipow(a2, e_a2) *
-                            ipow(g1, e_g1) *
-                            ipow(ax - bx, e_x1);
+            const double t22 =
+                ipow(a3, o4 - i3 - r2) *
+                ipow(a4, o3 - i4 - r2) *
+                ipow(g2, 2 * (i3 + i4) + r2) *
+                ipow(cx - dx, o3 + o4 - 2 * r2) /
+                factorial(l3 - 2 * i3 - o3) /
+                factorial(l4 - 2 * i4 - o4) /
+                factorial(o3 + o4 - 2 * r2);
 
-                        const int f1 = l1 - 2 * i1 - o1;
-                        const int f2 = l2 - 2 * i2 - o2;
-                        const int f3 = e_x1;
+            const int mu =
+                l1 + l2 + l3 + l4
+                - 2 * (i1 + i2 + i3 + i4)
+                - (o1 + o2 + o3 + o4);
 
-                        if (f1 < 0 || f2 < 0 || f3 < 0) continue;
+            for (int u = 0; u <= mu / 2; ++u)
+            {
+                const double t3 =
+                    sign_pow(u) *
+                    factorial(mu) *
+                    ipow(eta, mu - u) *
+                    ipow(px - qx, mu - 2 * u) /
+                    ipow(4.0, u) /
+                    factorial(u) /
+                    factorial(mu - 2 * u);
 
-                        const double den12 =
-                            factorial(f1) *
-                            factorial(f2) *
-                            factorial(f3);
-
-                        const double t12 = num12 / den12;
-
-                        for (int i3 = 0; i3 <= l3 / 2; ++i3) {
-                            for (int i4 = 0; i4 <= l4 / 2; ++i4) {
-                                for (int o3 = 0; o3 <= l3 - 2 * i3; ++o3) {
-                                    for (int o4 = 0; o4 <= l4 - 2 * i4; ++o4) {
-                                        const int oo34 = o3 + o4;
-                                        for (int r2 = 0; r2 <= oo34 / 2; ++r2) {
-                                            const double t21 = sign_pow(o3 + r2)
-                                                             * factorial(oo34)
-                                                             / ipow(4.0, i3 + i4 + r2)
-                                                             / factorial(i3)
-                                                             / factorial(i4)
-                                                             / factorial(o3)
-                                                             / factorial(o4)
-                                                             / factorial(r2);
-
-                                            const int e_a3 = o4 - i3 - r2;
-                                            const int e_a4 = o3 - i4 - r2;
-                                            const int e_g2 = 2 * (i3 + i4) + r2;
-                                            const int e_x2 = oo34 - 2 * r2;
-
-                                            if (e_a3 < 0 || e_a4 < 0 || e_x2 < 0) continue;
-
-                                            const double num22 =
-                                                ipow(a3, e_a3) *
-                                                ipow(a4, e_a4) *
-                                                ipow(g2, e_g2) *
-                                                ipow(cx - dx, e_x2);
-
-                                            const int g1f = l3 - 2 * i3 - o3;
-                                            const int g2f = l4 - 2 * i4 - o4;
-                                            const int g3f = e_x2;
-
-                                            if (g1f < 0 || g2f < 0 || g3f < 0) continue;
-
-                                            const double den22 =
-                                                factorial(g1f) *
-                                                factorial(g2f) *
-                                                factorial(g3f);
-
-                                            const double t22 = num22 / den22;
-
-                                            const int mu =
-                                                (l1 + l2 + l3 + l4)
-                                                - 2 * (i1 + i2 + i3 + i4)
-                                                - (o1 + o2 + o3 + o4);
-
-                                            if (mu < 0) continue;
-
-                                            for (int u = 0; u <= mu / 2; ++u) {
-                                                const int e_eta = mu - u;
-                                                const int e_pq  = mu - 2 * u;
-                                                if (e_pq < 0) continue;
-
-                                                const double t3 =
-                                                    sign_pow(u) *
-                                                    factorial(mu) *
-                                                    ipow(eta, e_eta) *
-                                                    ipow(px - qx, e_pq) /
-                                                    ipow(4.0, u) /
-                                                    factorial(u) /
-                                                    factorial(e_pq);
-
-                                                const double coeff = pre1 * pre2 * t11 * t12 * t21 * t22 * t3;
-                                                arr.push_back(HellsingBTerm{coeff, mu, u});
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                arr.push_back({
+                    pre1 * pre2 * t11 * t12 * t21 * t22 * t3,
+                    mu,
+                    u
+                });
             }
         }
     }
