@@ -431,6 +431,12 @@ public:
         return this->nuclear_gto(gto1, gto2, Vec3(cx, cy, cz));
     }
 
+    double nuclear_deriv(
+    const GTO& gto1,
+    const GTO& gto2,
+    const Vec3& nucleus,
+    unsigned int coord) const;
+
 /**************************************************************************
  * TWO-ELECTRON INTEGRALS
  **************************************************************************/

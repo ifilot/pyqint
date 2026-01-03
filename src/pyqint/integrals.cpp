@@ -711,55 +711,126 @@ double Integrator::nuclear_gto(const GTO& gto1,
  *
  * @return double value of the nuclear integral
  */
-double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3 &nucleus, unsigned int charge,
-                                 const Vec3& nucderiv, unsigned int coord) const {
+double Integrator::nuclear_deriv(
+    const CGF& cgf1,
+    const CGF& cgf2,
+    const Vec3& nucleus,
+    unsigned int charge,      // kept for signature compatibility
+    const Vec3& nucderiv,
+    unsigned int coord) const
+{
+    double sum = 0.0;
 
-    // check if cgf originates from nucleus
-    bool n1 = (cgf1.get_r() - nucderiv).norm2() < 0.0001;
-    bool n2 = (cgf2.get_r() - nucderiv).norm2() < 0.0001;
-    bool n3 = (nucleus - nucderiv).norm2() < 0.0001;
+    // Identify derivative target
+    const bool cgf1_nuc = (cgf1.get_r() - nucderiv).norm2() < 0.0001;
+    const bool cgf2_nuc = (cgf2.get_r() - nucderiv).norm2() < 0.0001;
+    const bool nuc_nuc  = (nucleus    - nucderiv).norm2() < 0.0001;
 
-    if(n1 == n2 && n2 == n3) {
+    // Same logic as ERI derivative:
+    // - all true  → rigid translation → 0
+    // - all false → no dependence     → 0
+    if (cgf1_nuc == cgf2_nuc && cgf2_nuc == nuc_nuc) {
         return 0.0;
     }
 
-    static const double delta = 1e-5;
+    for (unsigned int i = 0; i < cgf1.size(); ++i) {
+        const double c1 =
+            cgf1.get_coefficient_gto(i) *
+            cgf1.get_norm_gto(i);
+        const GTO& g1 = cgf1.get_gto(i);
 
-    // create copies of objects
-    CGF cgf1m = cgf1;
-    CGF cgf1p = cgf1;
-    CGF cgf2m = cgf2;
-    CGF cgf2p = cgf2;
-    Vec3 nucm = nucleus;
-    Vec3 nucp = nucleus;
+        for (unsigned int j = 0; j < cgf2.size(); ++j) {
+            const double pre =
+                c1 *
+                cgf2.get_coefficient_gto(j) *
+                cgf2.get_norm_gto(j);
+            const GTO& g2 = cgf2.get_gto(j);
 
-    if(n1) {
-        Vec3 rm = cgf1.get_r();
-        rm[coord] -= delta;
-        cgf1m.set_position(rm);
-        Vec3 rp = cgf1.get_r();
-        rp[coord] += delta;
-        cgf1p.set_position(rp);
+            double deriv = 0.0;
+
+            // derivative w.r.t. center of cgf1
+            if (cgf1_nuc) {
+                deriv += this->nuclear_deriv(g1, g2, nucleus, coord);
+            }
+
+            // derivative w.r.t. center of cgf2 (swap trick)
+            if (cgf2_nuc) {
+                deriv += this->nuclear_deriv(g2, g1, nucleus, coord);
+            }
+
+            // derivative w.r.t. nucleus via translational invariance
+            if (nuc_nuc) {
+                const double dA =
+                    this->nuclear_deriv(g1, g2, nucleus, coord);
+                const double dB =
+                    this->nuclear_deriv(g2, g1, nucleus, coord);
+                deriv += -(dA + dB);
+            }
+
+            sum += pre * deriv;
+        }
     }
 
-    if(n2) {
-        Vec3 rm = cgf2.get_r();
-        rm[coord] -= delta;
-        cgf2m.set_position(rm);
-        Vec3 rp = cgf2.get_r();
-        rp[coord] += delta;
-        cgf2p.set_position(rp);
+    // charge factor (nuclear attraction)
+    return static_cast<double>(charge) * sum;
+}
+
+double Integrator::nuclear_deriv(
+    const GTO& gto1,
+    const GTO& gto2,
+    const Vec3& nucleus,
+    unsigned int coord) const
+{
+    std::array<unsigned int,3> ang = {
+        gto1.get_l(),
+        gto1.get_m(),
+        gto1.get_n()
+    };
+
+    const unsigned int l = ang[coord];
+
+    // (l + 1) term
+    ang[coord] += 1;
+    GTO gto_plus(
+        gto1.get_coefficient(),
+        gto1.get_position()[0],
+        gto1.get_position()[1],
+        gto1.get_position()[2],
+        gto1.get_alpha(),
+        ang[0], ang[1], ang[2]
+    );
+
+    const double term_plus =
+        this->nuclear_gto(gto_plus, gto2, nucleus);
+
+    // restore l+1 → l
+    ang[coord] -= 1;
+
+    if (l > 0) {
+        // (l - 1) term
+        ang[coord] -= 1;
+        GTO gto_min(
+            gto1.get_coefficient(),
+            gto1.get_position()[0],
+            gto1.get_position()[1],
+            gto1.get_position()[2],
+            gto1.get_alpha(),
+            ang[0], ang[1], ang[2]
+        );
+
+        const double term_min =
+            this->nuclear_gto(gto_min, gto2, nucleus);
+
+        // restore l
+        ang[coord] += 1;
+
+        return 2.0 * gto1.get_alpha() * term_plus
+             - static_cast<double>(l) * term_min;
     }
-
-    if(n3) {
-        nucm[coord] -= delta;
-        nucp[coord] += delta;
+    else {
+        // s-type along this axis
+        return 2.0 * gto1.get_alpha() * term_plus;
     }
-
-    double vm = this->nuclear(cgf1m, cgf2m, nucm, charge);
-    double vp = this->nuclear(cgf1p, cgf2p, nucp, charge);
-
-    return (vp - vm) / (2.0 * delta);
 }
 
 /**************************************************************************
