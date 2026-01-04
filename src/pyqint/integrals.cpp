@@ -113,6 +113,13 @@ void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
                                                   std::vector<double>& tetensor) const {
     const size_t sz = cgfs.size();
     std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
+    
+    // expand cache if needed
+    unsigned int max_l = 0;
+    for (const auto& cgf : cgfs) {
+        max_l = std::max(max_l, cgf.max_primitive_l());
+    }    
+    hellsing_cache.ensure_lmax(max_l);
 
     // it is more efficient to first 'unroll' the fourfold nested loop
     // into a single vector of jobs to execute
@@ -172,6 +179,13 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
                                                                const std::vector<double>& px,
                                                                const std::vector<double>& py,
                                                                const std::vector<double>& pz) const {
+    // expand cache if needed
+    unsigned int max_l = 0;
+    for (const auto& cgf : cgfs) {
+        max_l = std::max(max_l, cgf.max_primitive_l());
+    }    
+    hellsing_cache.ensure_lmax(max_l+1);                                                                
+
     const size_t sz = cgfs.size();
 
     // Construct 2x2 matrices to hold values for the overlap,
@@ -855,7 +869,7 @@ double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2,
  *
  * @return double value of the repulsion integral
  */
-double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,const CGF &cgf4) const {
+double Integrator::repulsion(const CGF& cgf1,const CGF& cgf2,const CGF& cgf3,const CGF& cgf4) const {
     double sum = 0;
 
     for(unsigned int i=0; i< cgf1.size(); i++) {
@@ -891,7 +905,7 @@ double Integrator::repulsion(const CGF &cgf1,const CGF &cgf2,const CGF &cgf3,con
  *
  * @return double value of the repulsion integral
  */
-double Integrator::repulsion_deriv(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4,
+double Integrator::repulsion_deriv(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4,
     const Vec3& nucleus, unsigned int coord) const {
     double sum = 0;
 
@@ -1397,4 +1411,14 @@ size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     }
 
     return ij * (ij + 1) / 2 + kl;
+}
+
+void Integrator::ensure_hellsing_cache(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4) {
+    unsigned int lmax = std::max({cgf1.max_primitive_l(),
+                                  cgf2.max_primitive_l(),
+                                  cgf3.max_primitive_l(),
+                                  cgf4.max_primitive_l()});
+
+    // one more to also include derivatives
+    this->hellsing_cache.ensure_lmax(lmax+1);
 }

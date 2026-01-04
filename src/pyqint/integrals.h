@@ -30,6 +30,7 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <algorithm>
 
 #include "fgamma.h"
 #include "cgf.h"
@@ -56,7 +57,7 @@ private:
     std::string compiler_type;
 
     BoysFunction boys_function;
-    HellsingCacheTable1D hellsing_cache;
+    mutable HellsingCacheTable1D hellsing_cache;
 
 public:
     /**
@@ -533,6 +534,8 @@ public:
     double repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const;
 
     size_t teindex(size_t i, size_t j, size_t k, size_t l) const;
+
+    void ensure_hellsing_cache(const CGF &cgf1, const CGF &cgf2, const CGF &cgf3, const CGF &cgf4);
 
 private:
     /**

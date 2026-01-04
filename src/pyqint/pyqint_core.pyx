@@ -379,6 +379,9 @@ cdef class PyQInt:
         for gto in cgf4.gtos:
             c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
 
+        # ensure Hellsing has enough cache
+        self.integrator.ensure_hellsing_cache(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
+
         return self.integrator.repulsion(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
 
     def repulsion_deriv(self, cgf1:cgf, cgf2:cgf, cgf3:cgf, cgf4:cgf, nuc:Iterable[float], coord:int) -> float:
@@ -409,6 +412,9 @@ cdef class PyQInt:
         c_cgf4 = CGF(cgf4.p[0], cgf4.p[1], cgf4.p[2])
         for gto in cgf4.gtos:
             c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+
+        # ensure Hellsing has enough cache
+        self.integrator.ensure_hellsing_cache(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
 
         return self.integrator.repulsion_deriv(c_cgf1, c_cgf2, c_cgf3, c_cgf4, nuc[0], nuc[1], nuc[2], coord)
 

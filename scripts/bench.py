@@ -4,7 +4,7 @@ import statistics
 
 mol = MoleculeBuilder.from_name('benzene')
 cgfs, nuclei = mol.build_basis('sto3g')
-integrator = PyQInt()
+integrator = PyQInt(lmax=0, nu_max=0)
 
 def tei():
     tetensor = integrator.build_tei_openmp(cgfs)

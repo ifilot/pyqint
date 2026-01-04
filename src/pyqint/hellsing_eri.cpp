@@ -239,8 +239,8 @@ std::vector<HellsingBTerm> Integrator::B_array_hellsing(
     double a1, double a2, double a3, double a4,
     double ax, double bx, double cx, double dx,
     double px, double qx,
-    double g1, double g2) const
-{
+    double g1, double g2) const {
+
     const double pre1 =
         sign_pow(l1 + l2) *
         factorial(l1) * factorial(l2) /

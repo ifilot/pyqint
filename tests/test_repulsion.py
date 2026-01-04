@@ -94,6 +94,26 @@ class TestRepulsion(unittest.TestCase):
         np.testing.assert_almost_equal(T3, 1.2524675232209947, 6)
         np.testing.assert_almost_equal(T4, 1.2197162364818680, 6)
 
+    def test_cgf_repulsion_d_fallback(self):
+        # construct integrator object without any caching
+        integrator = PyQInt(0,0)
+
+        # build hydrogen molecule
+        mol = Molecule("Fe")
+        mol.add_atom('Fe', 0.0, 0.0, 0.0)
+        mol.add_atom('C', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        T1 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[9], cgfs[9])
+        T2 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[8], cgfs[8])
+        T3 = integrator.repulsion(cgfs[10], cgfs[10], cgfs[2], cgfs[2])
+        T4 = integrator.repulsion(cgfs[11], cgfs[11], cgfs[3], cgfs[3])
+        
+        np.testing.assert_almost_equal(T1, 1.1397159628941587, 6)
+        np.testing.assert_almost_equal(T2, 0.9716098948578764, 6)
+        np.testing.assert_almost_equal(T3, 1.2524675232209947, 6)
+        np.testing.assert_almost_equal(T4, 1.2197162364818680, 6)
+
     def test_two_electron_indices(self):
         """
         Test unique two-electron indices

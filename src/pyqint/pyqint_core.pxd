@@ -89,6 +89,7 @@ cdef extern from "integrals.h":
 
         # two-electron indexing
         int teindex(int, int, int, int) except +
+        void ensure_hellsing_cache(CGF, CGF, CGF, CGF) except +
 
         # openmp routine for integral evaluation
         vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
