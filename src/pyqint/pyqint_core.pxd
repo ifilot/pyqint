@@ -17,8 +17,8 @@ cdef extern from "plotter.h":
 cdef extern from "cgf.h":
     pass
 
-# Gamma and incomplete Gamma function
-cdef extern from "gamma.h":
+# Boys Function evaluation
+cdef extern from "fgamma.h":
     pass
 
 # Contracted Gaussian Functions class
@@ -48,7 +48,7 @@ cdef extern from "plotter.h":
 # Integrator class
 cdef extern from "integrals.h":
     cdef cppclass Integrator:
-        Integrator() except +
+        Integrator(int, int) except +
 
         int get_num_threads() except +
 
@@ -89,6 +89,7 @@ cdef extern from "integrals.h":
 
         # two-electron indexing
         int teindex(int, int, int, int) except +
+        void ensure_hellsing_cache(CGF, CGF, CGF, CGF) except +
 
         # openmp routine for integral evaluation
         vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +

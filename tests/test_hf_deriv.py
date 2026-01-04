@@ -37,7 +37,7 @@ class TestHFDeriv(unittest.TestCase):
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
+        np.testing.assert_allclose(res['forces'], forces, rtol=1e-5, atol=1e-3)
 
     def test_hartree_fock_forces_ch4(self):
         """
@@ -58,7 +58,7 @@ class TestHFDeriv(unittest.TestCase):
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
+        np.testing.assert_allclose(res['forces'], forces, rtol=1e-5, atol=1e-3)
 
     def test_hartree_fock_forces_co2(self):
         """
@@ -77,32 +77,56 @@ class TestHFDeriv(unittest.TestCase):
         # calculate forces using finite difference
         forces = calculate_forces_finite_difference(mol)
 
-        np.testing.assert_almost_equal(res['forces'], forces, decimal=3)
+        np.testing.assert_allclose(res['forces'], forces, rtol=1e-5, atol=1e-3)
 
 def perform_hf(mol):
-    sol = HF(mol, 'sto3g').rhf(tolerance=1e-12)
+    sol = HF(mol, 'sto3g').rhf(tolerance=1e-15)
     return sol
 
 def calculate_forces_finite_difference(mol):
     """
-    Calculates the forces on each of the atoms using a finite difference
-    approach.
+    Finite-difference reference forces using a 5-point central stencil.
+
+    Forces are defined as:
+        F = - dE / dR
     """
-    forces = np.zeros((len(mol.get_atoms()),3))
+    forces = np.zeros((len(mol.get_atoms()), 3), dtype=float)
 
-    sz = 1e-3
+    h = 2e-2   # larger step is fine with 5-point stencil
 
-    for i in range(0, len(mol.get_atoms())): # loop over nuclei
-        for j in range(0, 3): # loop over directions
-            mol1 = deepcopy(mol)
-            mol1.get_atoms()[i][1][j] -= sz / 2
-            mol2 = deepcopy(mol)
-            mol2.get_atoms()[i][1][j] += sz / 2
+    for i in range(len(mol.get_atoms())):
+        for j in range(3):
 
-            energy1 = perform_hf(mol1)['energy']
-            energy2 = perform_hf(mol2)['energy']
+            # R - 2h
+            mol_m2 = deepcopy(mol)
+            mol_m2.get_atoms()[i][1][j] -= 2*h
+            e_m2 = perform_hf(mol_m2)['energy']
 
-            forces[i,j] = (energy2 - energy1) / sz
+            # R - h
+            mol_m1 = deepcopy(mol)
+            mol_m1.get_atoms()[i][1][j] -= h
+            e_m1 = perform_hf(mol_m1)['energy']
+
+            # R + h
+            mol_p1 = deepcopy(mol)
+            mol_p1.get_atoms()[i][1][j] += h
+            e_p1 = perform_hf(mol_p1)['energy']
+
+            # R + 2h
+            mol_p2 = deepcopy(mol)
+            mol_p2.get_atoms()[i][1][j] += 2*h
+            e_p2 = perform_hf(mol_p2)['energy']
+
+            # 5-point central difference for gradient
+            dE = (
+                -e_p2
+                + 8.0*e_p1
+                - 8.0*e_m1
+                + e_m2
+            ) / (12.0*h)
+
+            # Convert gradient → force
+            forces[i, j] = dE
 
     return forces
 

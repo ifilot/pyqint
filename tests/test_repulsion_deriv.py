@@ -30,8 +30,8 @@ class TestRepulsionDeriv(unittest.TestCase):
         # assert that the repulsion of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 4)
-        np.testing.assert_almost_equal(fx2, ans2, 4)
+        np.testing.assert_almost_equal(fx1, ans1, 5)
+        np.testing.assert_almost_equal(fx2, ans2, 5)
 
         # assert that the cross-terms will change
         fx3 = integrator.repulsion_deriv(cgfs[3], cgfs[3], cgfs[5], cgfs[5], nuclei[0][0], 0)
@@ -39,7 +39,75 @@ class TestRepulsionDeriv(unittest.TestCase):
         fx5 = integrator.repulsion_deriv(cgfs[5], cgfs[3], cgfs[5], cgfs[3], nuclei[0][0], 0)
         fx6 = integrator.repulsion_deriv(cgfs[3], cgfs[5], cgfs[3], cgfs[5], nuclei[1][0], 0)
 
-        print(fx3)
+        # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
+        ans3 = calculate_force_finite_difference(mol, 0, 3, 3, 5, 5, 0)
+        ans4 = calculate_force_finite_difference(mol, 1, 3, 3, 5, 5, 0)
+        ans5 = calculate_force_finite_difference(mol, 0, 5, 3, 5, 3, 0)
+        ans6 = calculate_force_finite_difference(mol, 1, 3, 5, 3, 5, 0)
+
+        # assert that these are non-trivial tests
+        self.assertFalse(ans3 == 0.0)
+        self.assertFalse(ans4 == 0.0)
+        self.assertFalse(ans5 == 0.0)
+        self.assertFalse(ans6 == 0.0)
+
+        np.testing.assert_almost_equal(fx3, ans3, 5)
+        np.testing.assert_almost_equal(fx4, ans4, 5)
+        np.testing.assert_almost_equal(fx5, ans5, 5)
+        np.testing.assert_almost_equal(fx6, ans6, 5)
+
+        # assert that the cross-terms will change
+        fx7 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[0][0], 0)
+        fx8 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[1][0], 1)
+        fx9 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[2][0], 1)
+
+        # get answers
+        ans7 = calculate_force_finite_difference(mol, 0, 2, 3, 5, 6, 0)
+        ans8 = calculate_force_finite_difference(mol, 1, 2, 3, 5, 6, 1)
+        ans9 = calculate_force_finite_difference(mol, 2, 2, 3, 5, 6, 1)
+
+        # assert that these are non-trivial tests
+        self.assertFalse(ans7 == 0.0)
+        self.assertFalse(ans8 == 0.0)
+        self.assertFalse(ans9 == 0.0)
+
+        np.testing.assert_almost_equal(fx7, ans7, 5)
+        np.testing.assert_almost_equal(fx8, ans8, 5)
+        np.testing.assert_almost_equal(fx9, ans9, 5)
+
+    def testDerivH2O_hellsing_fallback(self):
+        """
+        Test Derivatives of water
+        """
+
+        # build integrator object
+        integrator = PyQInt(0,0)
+
+        # build hydrogen molecule
+        mol = Molecule()
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.7570, 0.5860, 0.0)
+        mol.add_atom('H', -0.7570, 0.5860, 0.0)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        # calculate derivative of 2s AO on oxygen towards H1 in the x-direction
+        fx1 = integrator.repulsion_deriv(cgfs[2], cgfs[2], cgfs[2], cgfs[2], nuclei[1][0], 0) # px
+        fx2 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[3], cgfs[3], nuclei[1][0], 0) # py
+
+        ans1 = calculate_force_finite_difference(mol, 1, 2, 2, 2, 2, 0)
+        ans2 = calculate_force_finite_difference(mol, 1, 3, 3, 3, 3, 0)
+
+        # assert that the repulsion of two CGFs that spawn from
+        # the same nucleus will not change in energy due to a
+        # change of the nucleus coordinates
+        np.testing.assert_almost_equal(fx1, ans1, 5)
+        np.testing.assert_almost_equal(fx2, ans2, 5)
+
+        # assert that the cross-terms will change
+        fx3 = integrator.repulsion_deriv(cgfs[3], cgfs[3], cgfs[5], cgfs[5], nuclei[0][0], 0)
+        fx4 = integrator.repulsion_deriv(cgfs[3], cgfs[3], cgfs[5], cgfs[5], nuclei[1][0], 0)
+        fx5 = integrator.repulsion_deriv(cgfs[5], cgfs[3], cgfs[5], cgfs[3], nuclei[0][0], 0)
+        fx6 = integrator.repulsion_deriv(cgfs[3], cgfs[5], cgfs[3], cgfs[5], nuclei[1][0], 0)
 
         # mol | nuc_id | cgf_id1 | cgf_id2 | cgf_id3 | cgf_id4 | coord
         ans3 = calculate_force_finite_difference(mol, 0, 3, 3, 5, 5, 0)
@@ -102,10 +170,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         # assert that the repulsion of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 4)
-        np.testing.assert_almost_equal(fx1, 0.0, 4)
-        np.testing.assert_almost_equal(fx2, ans2, 4)
-        np.testing.assert_almost_equal(fx2, 0.0, 4)
+        np.testing.assert_almost_equal(fx1, ans1, 5)
+        np.testing.assert_almost_equal(fx1, 0.0, 5)
+        np.testing.assert_almost_equal(fx2, ans2, 5)
+        np.testing.assert_almost_equal(fx2, 0.0, 5)
 
         # assert that the cross-terms will change
         fx3 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[0][0], 0)
@@ -119,37 +187,50 @@ class TestRepulsionDeriv(unittest.TestCase):
         ans5 = calculate_force_finite_difference(mol, 0, 1, 0, 1, 0, 0)
         ans6 = calculate_force_finite_difference(mol, 1, 1, 0, 1, 0, 0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 4)
-        np.testing.assert_almost_equal(fx4, ans4, 4)
-        np.testing.assert_almost_equal(fx5, ans5, 4)
-        np.testing.assert_almost_equal(fx6, ans6, 4)
+        np.testing.assert_almost_equal(fx3, ans3, 5)
+        np.testing.assert_almost_equal(fx4, ans4, 5)
+        np.testing.assert_almost_equal(fx5, ans5, 5)
+        np.testing.assert_almost_equal(fx6, ans6, 5)
 
-def calculate_force_finite_difference(mol, nuc_id, cgf_id1, cgf_id2, cgf_id3, cgf_id4, coord):
-    # build integrator object
+
+def calculate_force_finite_difference(
+    mol, nuc_id,
+    cgf_id1, cgf_id2, cgf_id3, cgf_id4,
+    coord
+):
     integrator = PyQInt()
 
-    # distance
-    diff = 0.00001
+    h = 1e-2
 
-    mol1 = deepcopy(mol)
-    mol1.get_atoms()[nuc_id][1][coord] -= diff / 2
-    mol2 = deepcopy(mol)
-    mol2.get_atoms()[nuc_id][1][coord] += diff / 2
+    def eval_repulsion(shift):
+        mol_shifted = deepcopy(mol)
+        mol_shifted.get_atoms()[nuc_id][1][coord] += shift
+        cgfs, nuclei = mol_shifted.build_basis('sto3g')
+        return integrator.repulsion(
+            cgfs[cgf_id1],
+            cgfs[cgf_id2],
+            cgfs[cgf_id3],
+            cgfs[cgf_id4],
+        )
 
-    # build hydrogen molecule
-    cgfs1, nuclei = mol1.build_basis('sto3g')
-    left = integrator.repulsion(cgfs1[cgf_id1], cgfs1[cgf_id2], cgfs1[cgf_id3], cgfs1[cgf_id4])
-    cgfs2, nuclei = mol2.build_basis('sto3g')
-    right = integrator.repulsion(cgfs2[cgf_id1], cgfs2[cgf_id2], cgfs2[cgf_id3], cgfs2[cgf_id4])
+    e_m2 = eval_repulsion(-2.0 * h)
+    e_m1 = eval_repulsion(-1.0 * h)
+    e_p1 = eval_repulsion(+1.0 * h)
+    e_p2 = eval_repulsion(+2.0 * h)
 
-    return (right - left) / diff
+    return (
+        -e_p2
+        + 8.0 * e_p1
+        - 8.0 * e_m1
+        + e_m2
+    ) / (12.0 * h)
 
 def calculate_deriv_gto(gto1, gto2, gto3, gto4, coord):
     # build integrator object
     integrator = PyQInt()
 
     # distance
-    diff = 0.000001
+    diff = 1e-6
     p = np.zeros(3)
     p[coord] = diff
 

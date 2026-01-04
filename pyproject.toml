@@ -43,7 +43,7 @@ module-path = "src"
 # ---------------------------------------------------------------------------
 [project]
 name = "pyqint"
-version = "1.3.1"
+version = "1.4.0"
 description = "Python package for evaluating integrals of Gaussian type orbitals"
 readme = "README.md"
 license = { text = "GPL-3.0-only" }

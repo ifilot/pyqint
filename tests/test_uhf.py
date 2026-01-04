@@ -76,7 +76,7 @@ class TestHF(unittest.TestCase):
 
         # N2 is a doublet → multiplicity = 2
         results_uhf = HF(mol, 'p631').uhf(nelec=15, multiplicity=2, tolerance=1e-14)
-        np.testing.assert_almost_equal(results_uhf['energy'], -108.75046193148577, decimal=4)
+        np.testing.assert_almost_equal(results_uhf['energy'], -108.75042559940775, decimal=4)
 
 if __name__ == '__main__':
     unittest.main()

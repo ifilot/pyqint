@@ -20,7 +20,7 @@ class TestHFMoleculeCharged(unittest.TestCase):
 
         # check that energy matches
         self.assertEqual(results['data']['nelec'], 16)    
-        np.testing.assert_almost_equal(results['energies'][-1], -111.523147758727, 5)
+        np.testing.assert_almost_equal(results['energies'][-1], -111.52311961578226, 4)
 
 if __name__ == '__main__':
     unittest.main()

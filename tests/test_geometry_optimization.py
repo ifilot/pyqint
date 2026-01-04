@@ -20,7 +20,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', -0.9, 0.0, 0.0)
 
         res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
-        np.testing.assert_almost_equal(res['opt'].fun, -1.117506)
+        np.testing.assert_almost_equal(res['opt'].fun, -1.1175053490814069)
 
         self.assertEqual(len(res['energies']), len(res['forces']))
         self.assertEqual(len(res['energies']), len(res['coordinates']))
@@ -76,7 +76,7 @@ class TestGeometryOptimization(unittest.TestCase):
         mol.add_atom('H', -dist, dist, -dist, unit='angstrom')
         mol.add_atom('H', dist, -dist, -dist, unit='angstrom')
 
-        res = GeometryOptimization(mol, 'sto3g', verbose=False).run()
+        res = GeometryOptimization(mol, 'sto3g', verbose=False).run(gtol=1e-8)
         np.testing.assert_almost_equal(res['opt'].fun, -39.72691085946399, decimal=4)
 
         self.assertEqual(len(res['energies']), len(res['forces']))

@@ -65,7 +65,7 @@ GTO::GTO(double _c,
  *
  * @return const double amplitude
  */
-const double GTO::get_amp(const Vec3& r) const {
+const double GTO::get_amp(const Vec3& r) const noexcept {
     const double dx = r[0] - this->position[0];
     const double dy = r[1] - this->position[1];
     const double dz = r[2] - this->position[2];
@@ -86,17 +86,20 @@ const double GTO::get_amp(const Vec3& r) const {
  *
  * @return gradient
  */
-Vec3 GTO::get_grad(const Vec3& r) const {
+Vec3 GTO::get_grad(const Vec3& r) const noexcept {
     // calculate exponential term and its product with the cartesian terms
     // for x,y,z components
-    const double ex = std::exp(-this->alpha * std::pow(r[0]-this->position[0],2));
-    const double fx = std::pow(r[0] - this->position[0], this->l) * ex;
+    const double dx = r[0] - this->position[0];
+    const double dy = r[1] - this->position[1];
+    const double dz = r[2] - this->position[2];
 
-    const double ey = std::exp(-this->alpha * std::pow(r[1]-this->position[1],2));
-    const double fy = std::pow(r[1] - this->position[1], this->m) * ey;
+    const double ex = std::exp(-this->alpha * dx * dx);
+    const double ey = std::exp(-this->alpha * dy * dy);
+    const double ez = std::exp(-this->alpha * dz * dz);
 
-    const double ez = std::exp(-this->alpha * std::pow(r[2]-this->position[2],2));
-    const double fz = std::pow(r[2] - this->position[2], this->n) * ez;
+    const double fx = ipow(dx, this->l) * ex;
+    const double fy = ipow(dy, this->m) * ey;
+    const double fz = ipow(dz, this->n) * ez;
 
     // calculate first derivative of the exponential term
     double gx = -2.0 * this->alpha * (r[0]-this->position[0]) * fx;
@@ -106,13 +109,13 @@ Vec3 GTO::get_grad(const Vec3& r) const {
     // if there is a Cartesian component (l,m,n > 0), apply the product rule
     // and add the contribution of this term
     if(this->l > 0) {
-        gx += this->l * std::pow(r[0] - this->position[0], this->l-1) * ex;
+        gx += this->l * ipow(r[0] - this->position[0], this->l-1) * ex;
     }
     if(this->m > 0) {
-        gy += this->m * std::pow(r[1] - this->position[1], this->m-1) * ey;
+        gy += this->m * ipow(r[1] - this->position[1], this->m-1) * ey;
     }
     if(this->n > 0) {
-        gz += this->n * std::pow(r[2] - this->position[2], this->n-1) * ez;
+        gz += this->n * ipow(r[2] - this->position[2], this->n-1) * ez;
     }
 
     // return vector with derivative towards x,y and z
@@ -178,7 +181,7 @@ CGF::CGF(const Vec3& _r):
  *
  * @return const double amplitude
  */
-const double CGF::get_amp(const Vec3& r) const {
+const double CGF::get_amp(const Vec3& r) const noexcept {
     double sum = 0.0;
 
     for(const auto& gto : this->gtos) {
@@ -196,7 +199,7 @@ const double CGF::get_amp(const Vec3& r) const {
  *
  * @return gradient
  */
-std::vector<double> CGF::get_grad(const Vec3& r) const {
+std::vector<double> CGF::get_grad(const Vec3& r) const noexcept {
     Vec3 sum = Vec3(0,0,0);
 
     for(const auto& gto : this->gtos) {
@@ -325,4 +328,24 @@ void CGF::set_position(const Vec3 &pos) {
     for(unsigned int i=0; i<this->gtos.size(); i++) {
         this->gtos[i].set_position(pos);
     }
+}
+
+/*
+ * @fn max_primitive_l
+ * @brief Get maximum l value among GTOs
+ *
+ * @return unsigned int maximum l value among GTOs
+ */
+unsigned int CGF::max_primitive_l() const noexcept {
+    unsigned int max_l = 0;
+
+    for (unsigned int i = 0; i < this->size(); ++i) {
+        const GTO& g = this->get_gto(i);
+
+        max_l = std::max(max_l, g.get_l());
+        max_l = std::max(max_l, g.get_m());
+        max_l = std::max(max_l, g.get_n());
+    }
+
+    return max_l;
 }

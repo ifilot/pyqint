@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, GTO, Molecule
+from pyqint import PyQInt, GTO, Molecule, MoleculeBuilder
 import numpy as np
 
 class TestRepulsion(unittest.TestCase):
@@ -53,6 +53,66 @@ class TestRepulsion(unittest.TestCase):
         # test similarity between two-electron integrals
         np.testing.assert_almost_equal(T1222, T1112, 4)
         np.testing.assert_almost_equal(T1122, T2211, 4)
+
+    def test_cgf_repulsion_p(self):
+        # construct integrator object
+        integrator = PyQInt()
+
+        # build hydrogen molecule
+        mol = MoleculeBuilder.from_name('H2O')
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        px_px_py_py = integrator.repulsion(cgfs[2], cgfs[2], cgfs[3], cgfs[3])
+        px_px_px_py = integrator.repulsion(cgfs[2], cgfs[2], cgfs[2], cgfs[3])
+        px_py_px_py = integrator.repulsion(cgfs[2], cgfs[3], cgfs[2], cgfs[3])
+        px_py_pz_s =  integrator.repulsion(cgfs[2], cgfs[3], cgfs[4], cgfs[0])
+        
+        np.testing.assert_almost_equal(px_px_py_py, 0.78526963118414730, 6)
+        np.testing.assert_almost_equal(px_px_px_py, 0.00000000000000000, 6)
+        np.testing.assert_almost_equal(px_py_px_py, 0.04744441988686837, 6)
+        np.testing.assert_almost_equal(px_py_pz_s,  0.00000000000000000, 6)
+
+    def test_cgf_repulsion_d(self):
+        # construct integrator object
+        integrator = PyQInt()
+
+        # build hydrogen molecule
+        mol = Molecule("Fe")
+        mol.add_atom('Fe', 0.0, 0.0, 0.0)
+        mol.add_atom('C', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        print(cgfs[9])
+
+        T1 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[9], cgfs[9])
+        T2 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[8], cgfs[8])
+        T3 = integrator.repulsion(cgfs[10], cgfs[10], cgfs[2], cgfs[2])
+        T4 = integrator.repulsion(cgfs[11], cgfs[11], cgfs[3], cgfs[3])
+        
+        np.testing.assert_almost_equal(T1, 1.1397159628941587, 6)
+        np.testing.assert_almost_equal(T2, 0.9716098948578764, 6)
+        np.testing.assert_almost_equal(T3, 1.2524675232209947, 6)
+        np.testing.assert_almost_equal(T4, 1.2197162364818680, 6)
+
+    def test_cgf_repulsion_d_fallback(self):
+        # construct integrator object without any caching
+        integrator = PyQInt(0,0)
+
+        # build hydrogen molecule
+        mol = Molecule("Fe")
+        mol.add_atom('Fe', 0.0, 0.0, 0.0)
+        mol.add_atom('C', 0.0, 0.0, 1.4)
+        cgfs, nuclei = mol.build_basis('sto3g')
+
+        T1 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[9], cgfs[9])
+        T2 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[8], cgfs[8])
+        T3 = integrator.repulsion(cgfs[10], cgfs[10], cgfs[2], cgfs[2])
+        T4 = integrator.repulsion(cgfs[11], cgfs[11], cgfs[3], cgfs[3])
+        
+        np.testing.assert_almost_equal(T1, 1.1397159628941587, 6)
+        np.testing.assert_almost_equal(T2, 0.9716098948578764, 6)
+        np.testing.assert_almost_equal(T3, 1.2524675232209947, 6)
+        np.testing.assert_almost_equal(T4, 1.2197162364818680, 6)
 
     def test_two_electron_indices(self):
         """

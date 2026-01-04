@@ -1,5 +1,4 @@
-#ifndef _FACTORIALS_H
-#define _FACTORIALS_H
+#pragma once
 
 static double factorial(size_t n) {
     static const double ans[] = {
@@ -24,5 +23,3 @@ static double double_factorial(size_t n) {
         return ans[n];
     }
 }
-
-#endif

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Foster–Boys orbital localization.
+Foster-Boys orbital localization.
 
-This module implements the Foster–Boys procedure for constructing
-localized molecular orbitals from canonical Hartree–Fock orbitals.
+This module implements the Foster-Boys procedure for constructing
+localized molecular orbitals from canonical Hartree-Fock orbitals.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ Mat = npt.NDArray[np.float64]
 
 class FosterBoys:
     """
-    Foster–Boys orbital localization procedure.
+    Foster-Boys orbital localization procedure.
 
     This class is *stateful* and intended for one localization task.
     Users should interact only via `run()`.
@@ -41,11 +41,11 @@ class FosterBoys:
         Parameters
         ----------
         hf_result
-            Result dictionary returned by the Hartree–Fock procedure.
+            Result dictionary returned by the Hartree-Fock procedure.
         seed
             Random seed for reproducibility.
         maxiter
-            Maximum number of Foster–Boys iterations.
+            Maximum number of Foster-Boys iterations.
         """
         if 'orbe_alpha' in hf_result.keys():
             raise Exception('PopulationAnalysis is not yet supported for UHF')
@@ -81,7 +81,7 @@ class FosterBoys:
 
     def run(self, nr_runners: int = 1) -> Dict[str, Any]:
         """
-        Run the Foster–Boys localization.
+        Run the Foster-Boys localization.
 
         Multiple random initializations can be used to reduce the
         probability of converging to a local minimum.
@@ -114,7 +114,7 @@ class FosterBoys:
 
     def _single_runner(self) -> Dict[str, Any]:
         """
-        Execute one Foster–Boys optimization run.
+        Execute one Foster-Boys optimization run.
         """
         C = self._random_orthogonal_initial_guess(self._orbc_canonical)
 
@@ -125,7 +125,7 @@ class FosterBoys:
                 break
             r2_old = r2_new
         else:
-            raise RuntimeError("Foster–Boys localization did not converge.")
+            raise RuntimeError("Foster-Boys localization did not converge.")
 
         orbe, orbc = self._compute_orbital_energies(C)
 
@@ -145,7 +145,7 @@ class FosterBoys:
         }
 
     # ------------------------------------------------------------------
-    # Foster–Boys mechanics
+    # Foster-Boys mechanics
     # ------------------------------------------------------------------
 
     def _mix_orbitals(self, C: Mat) -> tuple[Mat, float]:
@@ -185,7 +185,7 @@ class FosterBoys:
 
     def _compute_r2(self, C: Mat) -> float:
         """
-        Compute the Foster–Boys localization functional.
+        Compute the Foster-Boys localization functional.
         """
         dip = np.einsum("ji,ki,jkl->il", C, C, self._dipole_tensor)
         return float(np.einsum("ij,i->", dip**2, self._occ))

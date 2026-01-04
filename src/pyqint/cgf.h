@@ -108,7 +108,7 @@ public:
      *
      * @return const double coefficient
      */
-    inline const double get_coefficient() const {
+    inline const double get_coefficient() const noexcept {
         return this->c;
     }
 
@@ -118,7 +118,7 @@ public:
      *
      * @return const double coefficient
      */
-    inline const double get_alpha() const {
+    inline const double get_alpha() const noexcept {
         return this->alpha;
     }
 
@@ -128,7 +128,7 @@ public:
      *
      * @return const double power
      */
-    inline const unsigned int get_l() const {
+    inline const unsigned int get_l() const noexcept {
         return this->l;
     }
 
@@ -138,7 +138,7 @@ public:
      *
      * @return const double power
      */
-    inline const unsigned int get_m() const {
+    inline const unsigned int get_m() const noexcept {
         return this->m;
     }
 
@@ -148,7 +148,7 @@ public:
      *
      * @return const double power
      */
-    inline const unsigned int get_n() const {
+    inline const unsigned int get_n() const noexcept {
         return this->n;
     }
 
@@ -158,7 +158,7 @@ public:
      *
      * @return const double norm constant
      */
-    inline const double get_norm() const {
+    inline const double get_norm() const noexcept {
         return this->norm;
     }
 
@@ -168,7 +168,7 @@ public:
      *
      * @return const double Vec3
      */
-    inline const Vec3& get_position() const {
+    inline const Vec3& get_position() const noexcept {
         return this->position;
     }
 
@@ -180,7 +180,7 @@ public:
      *
      * @return const double amplitude
      */
-    const double get_amp(const Vec3& r) const;
+    const double get_amp(const Vec3& r) const noexcept;
 
     /*
      * @fn get_amp
@@ -190,7 +190,7 @@ public:
      *
      * @return const double amplitude
      */
-    inline double get_amp(double x, double y, double z) const {
+    inline double get_amp(double x, double y, double z) const noexcept {
         return this->get_amp(Vec3(x,y,z));
     }
 
@@ -202,7 +202,7 @@ public:
      *
      * @return gradient
      */
-    Vec3 get_grad(const Vec3& r) const;
+    Vec3 get_grad(const Vec3& r) const noexcept;
 
     /*
      * @fn set_position
@@ -276,7 +276,7 @@ public:
      *
      * @return     Position
      */
-    inline const Vec3& get_r() const {
+    inline const Vec3& get_r() const noexcept {
         return r;
     }
 
@@ -286,7 +286,7 @@ public:
      *
      * @return unsigned int length
      */
-    inline size_t size() const {
+    inline size_t size() const noexcept {
         return this->gtos.size();
     }
 
@@ -298,7 +298,7 @@ public:
      *
      * @return double normalization constant
      */
-    inline const double get_norm_gto(const unsigned int i) const {
+    inline const double get_norm_gto(const unsigned int i) const noexcept {
         return this->gtos[i].get_norm();
     }
 
@@ -310,7 +310,7 @@ public:
      *
      * @return double GTO coefficient
      */
-    inline const double get_coefficient_gto(const unsigned int i) const {
+    inline const double get_coefficient_gto(const unsigned int i) const noexcept {
         return this->gtos[i].get_coefficient();
     }
 
@@ -322,7 +322,7 @@ public:
      *
      * @return GTO
      */
-    inline const GTO& get_gto(const unsigned int i) const {
+    inline const GTO& get_gto(const unsigned int i) const noexcept {
         return this->gtos[i];
     }
 
@@ -334,7 +334,7 @@ public:
      *
      * @return const double amplitude
      */
-    const double get_amp(const Vec3& r) const;
+    const double get_amp(const Vec3& r) const noexcept;
 
     /*
      * @fn get_amp
@@ -344,7 +344,7 @@ public:
      *
      * @return const double amplitude
      */
-    inline double get_amp(double x, double y, double z) const {
+    inline double get_amp(double x, double y, double z) const noexcept {
         return this->get_amp(Vec3(x,y,z));
     }
 
@@ -356,7 +356,7 @@ public:
      *
      * @return gradient
      */
-    std::vector<double> get_grad(const Vec3& r) const;
+    std::vector<double> get_grad(const Vec3& r) const noexcept;
 
     /*
      * @fn get_grad
@@ -366,7 +366,7 @@ public:
      *
      * @return gradient
      */
-    inline std::vector<double> get_grad(double x, double y, double z) const {
+    inline std::vector<double> get_grad(double x, double y, double z) const noexcept {
         return this->get_grad(Vec3(x,y,z));
     }
 
@@ -435,4 +435,12 @@ public:
      * @return void
      */
     void set_position(const Vec3 &pos);
+
+    /*
+     * @fn max_primitive_l
+     * @brief Get maximum l value among GTOs
+     *
+     * @return unsigned int maximum l value among GTOs
+     */
+    unsigned int max_primitive_l() const noexcept;
 };
