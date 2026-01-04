@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integral evaluation acceleration routines &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Gallery" href="gallery.html" />
+    <link rel="prev" title="Symmetry-adapted basis sets" href="symmetry_adapted_basis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Integral evaluation acceleration routines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hellsing-kernel-cache">Hellsing Kernel Cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#boys-function-lookup-table-and-recurrence">Boys Function Lookup Table and Recurrence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lookup-table-construction">Lookup Table Construction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation-strategy">Interpolation Strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recursive-evaluation-of-boys-function-blocks">Recursive Evaluation of Boys Function Blocks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exact-and-fallback-evaluation">Exact and Fallback Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integrator-construction-and-defaults">Integrator Construction and Defaults</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="integral-evaluation-acceleration-routines">
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Integral evaluation acceleration routines</a><a class="headerlink" href="#integral-evaluation-acceleration-routines" title="Link to this heading"></a></h1>
+<nav class="contents" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#integral-evaluation-acceleration-routines" id="id1">Integral evaluation acceleration routines</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p></li>
+<li><p><a class="reference internal" href="#hellsing-kernel-cache" id="id3">Hellsing Kernel Cache</a></p></li>
+<li><p><a class="reference internal" href="#boys-function-lookup-table-and-recurrence" id="id4">Boys Function Lookup Table and Recurrence</a></p>
+<ul>
+<li><p><a class="reference internal" href="#lookup-table-construction" id="id5">Lookup Table Construction</a></p></li>
+<li><p><a class="reference internal" href="#interpolation-strategy" id="id6">Interpolation Strategy</a></p></li>
+<li><p><a class="reference internal" href="#recursive-evaluation-of-boys-function-blocks" id="id7">Recursive Evaluation of Boys Function Blocks</a></p></li>
+<li><p><a class="reference internal" href="#exact-and-fallback-evaluation" id="id8">Exact and Fallback Evaluation</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#integrator-construction-and-defaults" id="id9">Integrator Construction and Defaults</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>Two-electron integrals are evaluated in <strong class="program">PyQInt</strong> using a
+Hellsing-type expansion combined with a tabulated evaluation of the
+Boys function. To reduce the computational cost associated with repeated
+integral evaluations, both the Hellsing kernels and the Boys function
+values are cached.</p>
+<p>This section describes how these caches are constructed, how they are
+used during integral evaluation, and how their behavior can be controlled
+by the user.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section is intended for advanced users familiar with molecular
+integral evaluation in quantum chemistry. For most users, the default
+settings are sufficient and require no modification.</p>
+</div>
+<section id="overview">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> integrator constructs internal lookup tables for</p>
+<ul class="simple">
+<li><p>one-dimensional Hellsing expansion kernels</p></li>
+<li><p>Boys function values up to a maximum order.</p></li>
+</ul>
+<p>These tables are created during construction of the integrator object
+and are reused across all subsequent integral evaluations.</p>
+</section>
+<section id="hellsing-kernel-cache">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Hellsing Kernel Cache</a><a class="headerlink" href="#hellsing-kernel-cache" title="Link to this heading"></a></h2>
+<p>The Hellsing expansion expresses Cartesian electron-electron repulsion integrals
+as finite sums over one-dimensional kernels.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+    K^{(1\mathrm{D})}_{l_1 l_2 l_3 l_4}
+    &amp;=
+    \sum_{\substack{
+    i_1,i_2,i_3,i_4 \\
+    o_1,o_2,o_3,o_4 \\
+    r_1,r_2,u
+    }}
+    (-1)^{l_1+l_2+o_2+r_1+o_3+r_2+u}
+    \, l_1! \, l_2! \, l_3! \, l_4!
+    \nonumber\\[0.6em]
+    &amp;\quad\times
+    \frac{(o_1+o_2)!}
+        {4^{\,i_1+i_2+r_1}
+        \, i_1! \, i_2!
+        \, o_1! \, o_2!
+        \, r_1!
+        \, (l_1-2i_1-o_1)!
+        \, (l_2-2i_2-o_2)!
+        \, (o_1+o_2-2r_1)!}
+    \nonumber\\[0.8em]
+    &amp;\quad\times
+    \frac{(o_3+o_4)!}
+        {4^{\,i_3+i_4+r_2}
+        \, i_3! \, i_4!
+        \, o_3! \, o_4!
+        \, r_2!
+        \, (l_3-2i_3-o_3)!
+        \, (l_4-2i_4-o_4)!
+        \, (o_3+o_4-2r_2)!}
+    \nonumber\\[0.8em]
+    &amp;\quad\times
+    \frac{\mu!}
+        {4^{\,u}
+        \, u!
+        \, (\mu-2u)!} \, .
+\end{align}\end{split}\]</div>
+<p>with</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+    \mu &amp;= l_1 + l_2 + l_3 + l_4
+        - 2(i_1+i_2+i_3+i_4)
+        - (o_1+o_2+o_3+o_4),
+    \\
+    0 &amp;\le i_k \le \left\lfloor \frac{l_k}{2} \right\rfloor,
+    \qquad
+    0 \le o_k \le l_k - 2 i_k,
+    \\
+    0 &amp;\le r_1 \le \left\lfloor \frac{o_1+o_2}{2} \right\rfloor,
+    \qquad
+    0 \le r_2 \le \left\lfloor \frac{o_3+o_4}{2} \right\rfloor,
+    \\
+    0 &amp;\le u \le \left\lfloor \frac{\mu}{2} \right\rfloor.
+\end{align}\end{split}\]</div>
+<p>For a given angular momentum quartet <span class="math notranslate nohighlight">\((l_1, l_2, l_3, l_4)\)</span>, the
+corresponding kernel depends only on these angular momenta and not on the
+molecular geometry. For this reason, all required Hellsing kernels are
+precomputed and stored in a lookup table indexed by the angular momenta. The
+size of this table is controlled by the parameter <span class="math notranslate nohighlight">\(l_{\max}\)</span>, which
+defines the maximum angular momentum supported by the cache.</p>
+</section>
+<section id="boys-function-lookup-table-and-recurrence">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Boys Function Lookup Table and Recurrence</a><a class="headerlink" href="#boys-function-lookup-table-and-recurrence" title="Link to this heading"></a></h2>
+<p>The Boys function</p>
+<div class="math notranslate nohighlight">
+\[F_\nu(T) = \int_0^1 t^{2\nu} e^{-T t^2} \, \mathrm{d}t\]</div>
+<p>appears ubiquitously in the evaluation of electron–electron repulsion
+integrals. Direct numerical evaluation of this integral is expensive
+when performed repeatedly for many values of the order <span class="math notranslate nohighlight">\(\nu\)</span>
+and argument <span class="math notranslate nohighlight">\(T\)</span>. To reduce this cost, <strong class="program">PyQInt</strong> employs
+a hybrid strategy combining a precomputed lookup table with stable
+recurrence relations and exact fallback evaluation.</p>
+<section id="lookup-table-construction">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Lookup Table Construction</a><a class="headerlink" href="#lookup-table-construction" title="Link to this heading"></a></h3>
+<p>Upon construction of the integrator, a lookup table for the Boys function
+is initialized up to a maximum order <span class="math notranslate nohighlight">\(\nu_{\max}\)</span>. The table spans
+a logarithmically spaced grid in <span class="math notranslate nohighlight">\(T\)</span> over the interval</p>
+<div class="math notranslate nohighlight">
+\[T \in [T_{\mathrm{small}}, T_{\mathrm{large}}].\]</div>
+<p>Rather than tabulating <span class="math notranslate nohighlight">\(F_\nu(T)\)</span> directly, the following scaled
+quantity is stored:</p>
+<div class="math notranslate nohighlight">
+\[H_\nu(T) = \sqrt{T} \, T^\nu \, F_\nu(T).\]</div>
+<p>This scaling removes the dominant asymptotic behavior of the Boys
+function and significantly improves interpolation accuracy.</p>
+<p>For each grid point <span class="math notranslate nohighlight">\(T_i\)</span>, the exact Boys function values
+<span class="math notranslate nohighlight">\(F_\nu(T_i)\)</span> are computed using a reference implementation and
+stored in the table as</p>
+<div class="math notranslate nohighlight">
+\[H_\nu(T_i) = \sqrt{T_i} \, T_i^\nu \, F_\nu(T_i),
+\qquad \nu = 0, \dots, \nu_{\max}.\]</div>
+<p>Linear interpolation is then used to approximate <span class="math notranslate nohighlight">\(H_\nu(T)\)</span>
+for intermediate values of <span class="math notranslate nohighlight">\(T\)</span>. The Boys function is recovered
+from the interpolated value via</p>
+<div class="math notranslate nohighlight">
+\[F_\nu(T) = \frac{H_\nu(T)}{\sqrt{T} \, T^\nu}.\]</div>
+</section>
+<section id="interpolation-strategy">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Interpolation Strategy</a><a class="headerlink" href="#interpolation-strategy" title="Link to this heading"></a></h3>
+<p>For arguments within the tabulated range, the Boys function is evaluated
+by interpolating in logarithmic <span class="math notranslate nohighlight">\(T\)</span> space. Let</p>
+<div class="math notranslate nohighlight">
+\[x = \frac{\log T - \log T_{\mathrm{small}}}
+         {\log T_{\mathrm{large}} - \log T_{\mathrm{small}}}
+    (N_{\mathrm{table}} - 1),\]</div>
+<p>where <span class="math notranslate nohighlight">\(N_{\mathrm{table}}\)</span> is the number of grid points. The two
+nearest table entries are linearly interpolated to obtain
+<span class="math notranslate nohighlight">\(H_\nu(T)\)</span>.</p>
+<p>This approach provides a good compromise between accuracy and speed for
+the range of <span class="math notranslate nohighlight">\(T\)</span> values typically encountered in molecular
+integrals.</p>
+</section>
+<section id="recursive-evaluation-of-boys-function-blocks">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Recursive Evaluation of Boys Function Blocks</a><a class="headerlink" href="#recursive-evaluation-of-boys-function-blocks" title="Link to this heading"></a></h3>
+<p>In practical integral evaluation, entire blocks of Boys function values</p>
+<div class="math notranslate nohighlight">
+\[\{ F_0(T), F_1(T), \dots, F_{\nu_{\max}}(T) \}\]</div>
+<p>are required. To compute these efficiently, <strong class="program">PyQInt</strong> combines
+table lookup with stable recurrence relations.</p>
+<p>For moderate to large values of <span class="math notranslate nohighlight">\(T\)</span>, upward recurrence is used:</p>
+<div class="math notranslate nohighlight">
+\[F_{\nu+1}(T)
+=
+\frac{(2\nu+1) F_\nu(T) - e^{-T}}{2T}.\]</div>
+<p>This recurrence is numerically stable when <span class="math notranslate nohighlight">\(T\)</span> is sufficiently
+large compared to <span class="math notranslate nohighlight">\(\nu\)</span>.</p>
+<p>For smaller values of <span class="math notranslate nohighlight">\(T\)</span>, downward recurrence is preferred:</p>
+<div class="math notranslate nohighlight">
+\[F_{\nu-1}(T)
+=
+\frac{2T F_\nu(T) + e^{-T}}{2\nu - 1},\]</div>
+<p>starting from a reliably computed value of <span class="math notranslate nohighlight">\(F_{\nu_{\max}}(T)\)</span>.</p>
+<p>The direction of recurrence is chosen dynamically based on the relative
+sizes of <span class="math notranslate nohighlight">\(T\)</span> and <span class="math notranslate nohighlight">\(\nu_{\max}\)</span> to ensure numerical stability.</p>
+</section>
+<section id="exact-and-fallback-evaluation">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Exact and Fallback Evaluation</a><a class="headerlink" href="#exact-and-fallback-evaluation" title="Link to this heading"></a></h3>
+<p>If the requested order exceeds the tabulated maximum, or if <span class="math notranslate nohighlight">\(T\)</span>
+lies outside the interpolation range, the Boys function is evaluated
+using an exact reference implementation.</p>
+<p>For small <span class="math notranslate nohighlight">\(T\)</span>, a rapidly convergent power series expansion is used:</p>
+<div class="math notranslate nohighlight">
+\[F_\nu(T)
+=
+\sum_{k=0}^{\infty}
+\frac{(-T)^k}{k! (2\nu + 2k + 1)}.\]</div>
+<p>For larger <span class="math notranslate nohighlight">\(T\)</span>, the value of <span class="math notranslate nohighlight">\(F_0(T)\)</span> is computed using an
+error-function-based expression and higher orders are obtained via
+upward recurrence.</p>
+<p>This layered strategy guarantees both robustness and high performance
+across the full range of parameters encountered during integral
+evaluation.</p>
+</section>
+</section>
+<section id="integrator-construction-and-defaults">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Integrator Construction and Defaults</a><a class="headerlink" href="#integrator-construction-and-defaults" title="Link to this heading"></a></h2>
+<p>Upon construction of a <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> integrator object, default cache
+sizes are selected:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(l_{\max} = 4\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\nu_{\max} = 12\)</span></p></li>
+</ul>
+<p>These values are sufficient for basis sets composed of first- and second-row
+elements. If integrals are requested that exceed the current cache limits, the
+integrator will automatically expand the Hellsing kernel cache or fall back to
+direct Boys function evaluation.</p>
+<p>Advanced users may override the default cache sizes by explicitly specifying
+<span class="math notranslate nohighlight">\(l_{\max}\)</span> and <span class="math notranslate nohighlight">\(\nu_{\max}\)</span> when constructing the integrator.
+Increasing these parameters may improve performance for systems with
+high-angular-momentum basis functions at the cost of increased memory usage.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span>
+
+<span class="c1"># construct integrator class</span>
+<span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">(</span><span class="n">lmax</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">nu_max</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+<span class="c1"># use it</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>All wrapper classes, e.g. <code class="code docutils literal notranslate"><span class="pre">HF</span></code>, <code class="code docutils literal notranslate"><span class="pre">GeometryOptimization</span></code>, etc. will
+automatically determine optimal caching sizes and adjust the Kernel cache if
+needed.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="symmetry_adapted_basis.html" class="btn btn-neutral float-left" title="Symmetry-adapted basis sets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gallery.html" class="btn btn-neutral float-right" title="Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -81,6 +81,7 @@ requests are ideally submitted via the `github issue tracker
    geometry_optimization
    population_analysis
    symmetry_adapted_basis
+   acceleration_routines
    gallery
    community_guidelines
 
