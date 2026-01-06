@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integrator object &mdash; PyQInt  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=ede6f590" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Gallery" href="gallery.html" />
+    <link rel="prev" title="Integral evaluation acceleration routines" href="acceleration_routines.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyQInt
+              <img src="_static/pyqint_logo_128.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_functions.html">Basis functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integral_evaluation.html">Integral evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basis_sets_and_molecules.html">Basis sets and molecules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronic_structure_calculations.html">Electronic structure calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="molecular_orbital_diagrams.html">Molecular Orbital Diagrams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_visualization.html">Orbital visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="geometry_optimization.html">Geometry optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="population_analysis.html">Population Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acceleration_routines.html">Integral evaluation acceleration routines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Integrator object</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-an-integrator">Creating an Integrator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#typical-usage">Typical Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parallel-execution">Parallel Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-information">Build Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grid-based-evaluation">Grid-Based Evaluation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="community_guidelines.html">Community guidelines</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyQInt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div style="text-align: right;">
+<a href="https://github.com/ifilot/pyqint" target="_blank"><i class="fa-brands fa-github"></i> Github</a>
+</div>
+<hr>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="integrator-object">
+<span id="index-0"></span><h1>Integrator object<a class="headerlink" href="#integrator-object" title="Link to this heading"></a></h1>
+<p>The <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> class is the low-level numerical integrator used internally
+throughout the <code class="docutils literal notranslate"><span class="pre">pyqint</span></code> package. It provides efficient evaluation of
+Gaussian-type orbital (GTO) and contracted Gaussian function (CGF) integrals
+via a C++ backend with optional OpenMP parallelization.</p>
+<p>Most users do <strong>not</strong> interact with <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> directly. Instead, higher-
+level routines construct and manage an integrator instance internally. Direct
+use of <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> is intended for advanced users who need fine-grained
+control over integral evaluation or wish to experiment with custom workflows.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The integrator implements core quantum-chemical building blocks, including:</p>
+<ul class="simple">
+<li><p>Overlap integrals</p></li>
+<li><p>Kinetic energy integrals</p></li>
+<li><p>Nuclear attraction integrals</p></li>
+<li><p>Two-electron (electron–repulsion) integrals</p></li>
+<li><p>First derivatives with respect to nuclear coordinates</p></li>
+<li><p>Grid-based evaluation of basis functions and molecular orbitals</p></li>
+</ul>
+<p>The implementation is optimized for repeated evaluation and makes use of
+internal caching where possible.</p>
+</section>
+<section id="creating-an-integrator">
+<h2>Creating an Integrator<a class="headerlink" href="#creating-an-integrator" title="Link to this heading"></a></h2>
+<p>An integrator instance is created by specifying limits on angular momentum
+and the maximum order of the Boys function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span>
+
+<span class="n">qint</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">(</span><span class="n">lmax</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">nu_max</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The parameters control internal cache sizes and directly affect both memory
+usage and performance. Reusing a single integrator instance is recommended
+when evaluating many integrals.</p>
+</section>
+<section id="typical-usage">
+<h2>Typical Usage<a class="headerlink" href="#typical-usage" title="Link to this heading"></a></h2>
+<p>Most integrals are evaluated using contracted Gaussian functions (CGFs):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">overlap</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">kinetic</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">nuclear</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">rc</span><span class="p">,</span> <span class="n">zc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Two-electron integrals can be computed either individually or in batches:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">eri</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">repulsion</span><span class="p">(</span><span class="n">cgf1</span><span class="p">,</span> <span class="n">cgf2</span><span class="p">,</span> <span class="n">cgf3</span><span class="p">,</span> <span class="n">cgf4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For performance-critical workflows, the integrator provides routines that
+build full matrices and tensors in a single call using OpenMP:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">tei</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">build_integrals_openmp</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="parallel-execution">
+<h2>Parallel Execution<a class="headerlink" href="#parallel-execution" title="Link to this heading"></a></h2>
+<p>If OpenMP support was available at build time, the integrator will
+automatically parallelize suitable workloads. The number of threads is
+controlled via standard OpenMP environment variables such as <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code>.</p>
+<p>The current thread count can be queried at runtime:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nthreads</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">get_num_threads</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="build-information">
+<h2>Build Information<a class="headerlink" href="#build-information" title="Link to this heading"></a></h2>
+<p>For diagnostic and reproducibility purposes, the integrator exposes
+build-time information:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">info</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">get_compile_info</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The returned dictionary includes compiler details, OpenMP availability,
+and compilation date and time.</p>
+</section>
+<section id="grid-based-evaluation">
+<h2>Grid-Based Evaluation<a class="headerlink" href="#grid-based-evaluation" title="Link to this heading"></a></h2>
+<p>The integrator also supports evaluation of basis functions, molecular
+orbitals, and their gradients on three-dimensional grids:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grid</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">build_rectgrid3d</span><span class="p">(</span><span class="o">-</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These routines are primarily intended for visualization and analysis.</p>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The <code class="code docutils literal notranslate"><span class="pre">PyQInt</span></code> object is <strong>not thread-safe</strong> across Python threads.</p></li>
+<li><p>Creating multiple integrators increases memory usage due to internal caches.</p></li>
+<li><p>Most users should rely on higher-level interfaces provided by <code class="docutils literal notranslate"><span class="pre">pyqint</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="acceleration_routines.html" class="btn btn-neutral float-left" title="Integral evaluation acceleration routines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gallery.html" class="btn btn-neutral float-right" title="Gallery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Inorganic Materials and Catalysis.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
