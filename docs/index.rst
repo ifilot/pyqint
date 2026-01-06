@@ -82,6 +82,7 @@ requests are ideally submitted via the `github issue tracker
    population_analysis
    symmetry_adapted_basis
    acceleration_routines
+   integrator
    gallery
    community_guidelines
 

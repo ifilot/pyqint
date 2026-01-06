@@ -1,13 +1,15 @@
 py = import('python').find_installation(pure: false)
 cpp = meson.get_compiler('cpp')
 
-# Optional OpenMP (Linux only)
+# OpenMP
 openmp_dep = []
-if host_machine.system() == 'linux'
-    openmp = dependency('openmp', required: false)
-    if openmp.found()
-        openmp_dep = [openmp]
-    endif
+openmp = dependency('openmp', required: false)
+
+if openmp.found()
+    openmp_dep = [openmp]
+    message('OpenMP enabled')
+else
+    message('OpenMP not found')
 endif
 
 # Headers live in this directory
