@@ -1,3 +1,4 @@
+import pytest
 import unittest
 import pyqint
 from pyqint import PyQInt, Molecule
@@ -34,6 +35,30 @@ class TestString(unittest.TestCase):
         self.assertTrue(strver[0].isnumeric())
         self.assertTrue(strver[1].isnumeric())
         self.assertTrue(strver[2].isnumeric())
+
+    def test_get_compile_info(self):
+        integrator = PyQInt()
+
+        info = integrator.get_compile_info()
+
+        # Basic structure
+        self.assertIsInstance(info, dict)
+
+        expected_keys = {
+            "compiler_version",
+            "compile_date",
+            "compile_time",
+            "openmp_version",
+            "compiler_type",
+        }
+
+        self.assertEqual(set(info.keys()), expected_keys)
+
+        # Values should be non-empty strings
+        for key, value in info.items():
+            with self.subTest(key=key):
+                self.assertIsInstance(value, str)
+                self.assertNotEqual(value.strip(), "")
 
 if __name__ == '__main__':
     unittest.main()

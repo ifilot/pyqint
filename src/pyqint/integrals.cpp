@@ -22,13 +22,62 @@
 #include "integrals.h"
 
 /**
- * @brief Integrator constructor method
+ * @brief Construct an Integrator instance and capture build-time information.
  *
- * @return Integrator class
+ * The compile information (compiler, version, OpenMP, date, time) is
+ * captured once at construction time using compile-time macros.
+ *
+ * @param lmax    Maximum angular momentum
+ * @param nu_max  Maximum Boys function order
  */
-Integrator::Integrator(int lmax, int nu_max) : 
-    boys_function(nu_max),
-    hellsing_cache(lmax) {}
+Integrator::Integrator(int lmax, int nu_max)
+    : boys_function(nu_max),
+      hellsing_cache(lmax)
+{
+    // ---------------------------------------------------------------------
+    // Compile date & time
+    // ---------------------------------------------------------------------
+#ifdef __DATE__
+    compile_date = __DATE__;
+#else
+    compile_date = "unknown";
+#endif
+
+#ifdef __TIME__
+    compile_time = __TIME__;
+#else
+    compile_time = "unknown";
+#endif
+
+    // ---------------------------------------------------------------------
+    // Compiler type & version
+    // ---------------------------------------------------------------------
+#if defined(_MSC_VER)
+    compiler_type    = "MSVC";
+    compiler_version = std::to_string(_MSC_VER);
+
+#elif defined(__clang__)
+    compiler_type    = "Clang";
+    compiler_version = __clang_version__;
+
+#elif defined(__GNUC__)
+    compiler_type    = "GCC";
+    compiler_version = __VERSION__;
+
+#else
+    compiler_type    = "unknown";
+    compiler_version = "unknown";
+#endif
+
+    // ---------------------------------------------------------------------
+    // OpenMP version
+    // ---------------------------------------------------------------------
+#ifdef _OPENMP
+    openmp_version = std::to_string(_OPENMP);
+#else
+    openmp_version = "disabled";
+#endif
+}
 
 /**
  * @brief      Evaluate all integrals for cgfs in buffer
