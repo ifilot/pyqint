@@ -20,7 +20,7 @@ class TestKinetic(unittest.TestCase):
         gto3 = GTO(0.444635, [0.0, 0.0, 0.0], 0.168855, 0, 0, 0)
         kinetic = integrator.kinetic_gto(gto1, gto1)
         result = 1.595603108406067
-        np.testing.assert_almost_equal(kinetic, result, 4)
+        np.testing.assert_almost_equal(kinetic, result, 9)
 
     def test_cgf_kinetic(self):
         """
@@ -43,11 +43,11 @@ class TestKinetic(unittest.TestCase):
         T[0,1] = T[1,0] = integrator.kinetic(cgfs[0], cgfs[1])
         T[1,1] = integrator.kinetic(cgfs[1], cgfs[1])
 
-        T11 = 0.7600315809249878
-        T12 = 0.2364544570446014
-        np.testing.assert_almost_equal(T[0,0], T11, 4)
-        np.testing.assert_almost_equal(T[1,1], T11, 4)
-        np.testing.assert_almost_equal(T[0,1], T12, 4)
+        T11 = 0.7600315315362414
+        T12 = 0.23645443591648982
+        np.testing.assert_almost_equal(T[0,0], T11, 9)
+        np.testing.assert_almost_equal(T[1,1], T11, 9)
+        np.testing.assert_almost_equal(T[0,1], T12, 9)
 
 if __name__ == '__main__':
     unittest.main()

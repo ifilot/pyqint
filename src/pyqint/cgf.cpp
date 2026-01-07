@@ -20,6 +20,7 @@
  **************************************************************************/
 
 #include "cgf.h"
+#include <cassert>
 
 GTO::GTO(double _c,
          const Vec3& _position,     // position (unit = Bohr)
@@ -348,4 +349,51 @@ unsigned int CGF::max_primitive_l() const noexcept {
     }
 
     return max_l;
+}
+
+double CGF::get_contraction_norm() const {
+    // NOTE: any GTO is fine for the same shell tuple (lmn)
+    assert(gtos.size() != 0LU && "No GTOs found!");
+
+    // Check if all GTOs have the same angular momentum
+    const auto& first = this->get_gto(0);
+    const auto l = first.get_l();
+    const auto m = first.get_m();
+    const auto n = first.get_n();
+
+    // NOTE: only needed for the spherical harmonics test; otherwise not needed...
+    for (size_t i = 1; i < this->size(); ++i) {
+        const auto& gto = this->get_gto(i);
+        if (gto.get_l() != l || gto.get_m() != m || gto.get_n() != n) {
+            // Mixed angular momentum (e.g., spherical harmonics)
+            // Coefficients are pre-normalised; no additional factor needed
+            return 1.0;
+        }
+    }
+
+    // Standard contraction: all primitives have same (l,m,n)
+    const int L = l + m + n;
+
+    static const double pi_three_half_pow = M_PI * std::sqrt(M_PI);
+    const double prefactor = pi_three_half_pow *
+                       (l < 1 ? 1.0 : double_factorial(2*l - 1)) *
+                       (m < 1 ? 1.0 : double_factorial(2*m - 1)) *
+                       (n < 1 ? 1.0 : double_factorial(2*n - 1)) /
+                       static_cast<double>(1 << L);
+
+    double sum = 0.0;
+    for (size_t i = 0; i < this->size(); ++i) {
+        for (size_t j = 0; j < this->size(); ++j) {
+            // const double a_i = this->get_coefficient_gto(i);
+            // const double a_j = this->get_coefficient_gto(j);
+            const double a_i = this->get_norm_gto(i) * this->get_coefficient_gto(i);
+            const double a_j = this->get_norm_gto(j) * this->get_coefficient_gto(j);
+            const double alpha_i = this->get_gto(i).get_alpha();
+            const double alpha_j = this->get_gto(j).get_alpha();
+
+            sum += a_i * a_j / std::pow(alpha_i + alpha_j, L + 1.5);
+        }
+    }
+
+    return 1.0 / std::sqrt(prefactor * sum);
 }

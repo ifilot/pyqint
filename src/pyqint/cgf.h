@@ -443,4 +443,15 @@ public:
      * @return unsigned int maximum l value among GTOs
      */
     unsigned int max_primitive_l() const noexcept;
+
+    /*
+     * @fn get_contraction_norm
+     * @brief Get the normalization constant for the pair of CGFs
+     *    N < φ_i | φ_i > = 1 => N = ...
+     *    for φ_i is a CGF with angular momentum shell pair (l,m,n)
+     * see: https://arxiv.org/pdf/2007.12057 page 10 for more details
+     *
+     * @return normalization constant
+     */
+    double get_contraction_norm() const;
 };

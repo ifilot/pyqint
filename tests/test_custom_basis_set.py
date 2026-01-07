@@ -3,11 +3,11 @@ from pyqint import Molecule, CGF, HF, MoleculeBuilder
 import numpy as np
 
 class TestCustomBasisSet(unittest.TestCase):
-    
+
     def test_custom_basis_set_h2(self):
         mol = Molecule()
         mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
-        mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')        
+        mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')
         nuclei = mol.get_nuclei()
 
         cgfs = []
@@ -21,14 +21,14 @@ class TestCustomBasisSet(unittest.TestCase):
             cgfs.append(_cgf)
 
         res = HF(mol, basis=cgfs).rhf()
-        np.testing.assert_almost_equal(res['energy'], -1.1175059, 5)
+        np.testing.assert_almost_equal(res['energy'], -1.1175053456568793, 9)
 
     def test_custom_basis_set_co(self):
         mol = MoleculeBuilder.from_name('CO')
         cgfs, nuclei = mol.build_basis('sto3g')
 
         res = HF(mol, basis=cgfs).rhf()
-        np.testing.assert_almost_equal(res['energy'], -111.2192571, 4)
+        np.testing.assert_almost_equal(res['energy'], -111.21922241432557, 9)
 
 if __name__ == '__main__':
     unittest.main()
