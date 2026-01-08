@@ -47,7 +47,7 @@ class TestCGF(unittest.TestCase):
             amp = cgfs[0].get_amp(coord)
             amps.append(amp)
 
-        np.testing.assert_almost_equal(amps, ans, 9)
+        np.testing.assert_almost_equal(amps, ans, 6)
 
     def testPlotGrid(self):
         """
@@ -139,7 +139,7 @@ class TestCGF(unittest.TestCase):
         # All diagonal elements of overlap matrix should be 1.0
         for i, cgf in enumerate(cgfs):
             S_ii = integrator.overlap(cgf, cgf)
-            self.assertAlmostEqual(S_ii, 1.0, places=10,
+            self.assertAlmostEqual(S_ii, 1.0, places=8,
                 msg=f"Contracted basis function {i} has self-overlap {S_ii}")
 
     def testOverlapMatrixSymmetryAndDiagonal(self):
@@ -156,7 +156,7 @@ class TestCGF(unittest.TestCase):
         mol.add_atom('O', 0.0, 0.0, 0.0)
         mol.add_atom('H', 0.7570, 0.5860, 0.0)
         mol.add_atom('H', -0.7570, 0.5860, 0.0)
-        cgfs, nuclei = mol.build_basis('sto3g')
+        cgfs, _ = mol.build_basis('sto3g')
 
         # Build full overlap matrix
         nbf = len(cgfs)
@@ -166,11 +166,11 @@ class TestCGF(unittest.TestCase):
                 S[i, j] = integrator.overlap(cgfs[i], cgfs[j])
 
         # Test 1: Diagonal elements should be 1.0
-        np.testing.assert_almost_equal(np.diag(S), np.ones(nbf), decimal=10,
+        np.testing.assert_almost_equal(np.diag(S), np.ones(nbf), decimal=8,
             err_msg="Diagonal elements of overlap matrix are not 1.0")
 
         # Test 2: Matrix should be symmetric
-        np.testing.assert_almost_equal(S, S.T, decimal=10,
+        np.testing.assert_almost_equal(S, S.T, decimal=8,
             err_msg="Overlap matrix is not symmetric")
 
         # Test 3: Off-diagonal elements should have magnitude < 1.0

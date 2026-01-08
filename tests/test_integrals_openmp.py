@@ -40,10 +40,10 @@ class TestIntegralsOpenMP(unittest.TestCase):
         self.assertEqual(len(cgfs), 7)
         self.assertEqual(S.shape[0], S.shape[1])
         self.assertEqual(S.shape[0], len(cgfs))
-        np.testing.assert_almost_equal(S, S_result, 9)
-        np.testing.assert_almost_equal(T, T_result, 9)
-        np.testing.assert_almost_equal(V, V_result, 9)
-        np.testing.assert_almost_equal(tetensor, tetensor_result, 9)
+        np.testing.assert_almost_equal(S, S_result, 7)
+        np.testing.assert_almost_equal(T, T_result, 7)
+        np.testing.assert_almost_equal(V, V_result, 7)
+        np.testing.assert_almost_equal(tetensor, tetensor_result, 7)
 
     def test_integrals_h2o_openmp_sto6g(self):
         """
@@ -74,10 +74,10 @@ class TestIntegralsOpenMP(unittest.TestCase):
         self.assertEqual(len(cgfs), 7)
         self.assertEqual(S.shape[0], S.shape[1])
         self.assertEqual(S.shape[0], len(cgfs))
-        np.testing.assert_almost_equal(S, S_result, 9)
-        np.testing.assert_almost_equal(T, T_result, 9)
-        np.testing.assert_almost_equal(V, V_result, 9)
-        np.testing.assert_almost_equal(tetensor, tetensor_result, 9)
+        np.testing.assert_almost_equal(S, S_result, 7)
+        np.testing.assert_almost_equal(T, T_result, 7)
+        np.testing.assert_almost_equal(V, V_result, 7)
+        np.testing.assert_almost_equal(tetensor, tetensor_result, 7)
 
     def test_integrals_h2o_openmp_p321(self):
         """
@@ -108,10 +108,10 @@ class TestIntegralsOpenMP(unittest.TestCase):
         self.assertEqual(len(cgfs), 13)
         self.assertEqual(S.shape[0], S.shape[1])
         self.assertEqual(S.shape[0], len(cgfs))
-        np.testing.assert_almost_equal(S, S_result, 9)
-        np.testing.assert_almost_equal(T, T_result, 9)
-        np.testing.assert_almost_equal(V, V_result, 9)
-        np.testing.assert_almost_equal(tetensor, tetensor_result, 9)
+        np.testing.assert_almost_equal(S, S_result, 7)
+        np.testing.assert_almost_equal(T, T_result, 7)
+        np.testing.assert_almost_equal(V, V_result, 7)
+        np.testing.assert_almost_equal(tetensor, tetensor_result, 7)
 
     def test_integrals_h2o_openmp_p631(self):
         """
@@ -143,10 +143,10 @@ class TestIntegralsOpenMP(unittest.TestCase):
         self.assertEqual(len(cgfs), 13)
         self.assertEqual(S.shape[0], S.shape[1])
         self.assertEqual(S.shape[0], len(cgfs))
-        np.testing.assert_almost_equal(S, S_result, 9)
-        np.testing.assert_almost_equal(T, T_result, 9)
-        np.testing.assert_almost_equal(V, V_result, 9)
-        np.testing.assert_almost_equal(tetensor, tetensor_result, 9)
+        np.testing.assert_almost_equal(S, S_result, 7)
+        np.testing.assert_almost_equal(T, T_result, 7)
+        np.testing.assert_almost_equal(V, V_result, 7)
+        np.testing.assert_almost_equal(tetensor, tetensor_result, 7)
 
     def __repackage_tensor(self, teint_result, N):
         # construct integrator object

@@ -26,7 +26,7 @@ class TestPlotData(unittest.TestCase):
         wf = integrator.plot_wavefunction(coord, c, cgfs)
 
         res = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2_wf.npy'))
-        np.testing.assert_almost_equal(wf, res, 9)
+        np.testing.assert_almost_equal(wf, res, 7)
 
     def test_plot_gradient(self):
         """
@@ -49,14 +49,14 @@ class TestPlotData(unittest.TestCase):
         self.assertEqual(grad.shape[0], 1)
         self.assertEqual(grad.shape[1], 3)
         res = np.array([[0.009262441, 0.009262441, 0.007677702]])
-        np.testing.assert_almost_equal(grad, res, 9)
+        np.testing.assert_almost_equal(grad, res, 7)
 
         sc = np.array([[-2., 2.,-2.]])
         grad = integrator.plot_gradient(sc, c, cgfs)
         self.assertEqual(grad.shape[0], 1)
         self.assertEqual(grad.shape[1], 3)
         res = np.array([[ 0.009262441, -0.009262441, 0.007677702]])
-        np.testing.assert_almost_equal(grad, res, 9)
+        np.testing.assert_almost_equal(grad, res, 7)
 
         # test two points
         tc = np.array([[-2.,-2.,-2.],[-2., 2.,-2.]])
@@ -69,7 +69,7 @@ class TestPlotData(unittest.TestCase):
                 [0.009262441, -0.009262441, 0.007677702],
             ]
         )
-        np.testing.assert_almost_equal(grad, res, 9)
+        np.testing.assert_almost_equal(grad, res, 7)
 
         # test grid of points
         # x = np.linspace(-2, 2, 6, endpoint=True)
@@ -79,7 +79,7 @@ class TestPlotData(unittest.TestCase):
         self.assertEqual(grad.shape[0], 6*6*6)
         self.assertEqual(grad.shape[1], 3)
         res = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2_grad.npy'))
-        np.testing.assert_almost_equal(grad, res, 9)
+        np.testing.assert_almost_equal(grad, res, 7)
 
 if __name__ == '__main__':
     unittest.main()

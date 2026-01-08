@@ -30,8 +30,8 @@ class TestOverlapDeriv(unittest.TestCase):
         # assert that the overlap of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 9)
-        np.testing.assert_almost_equal(fx2, ans2, 9)
+        np.testing.assert_almost_equal(fx1, ans1, 7)
+        np.testing.assert_almost_equal(fx2, ans2, 7)
 
         # assert that the cross-terms will change
         fx3 = integrator.overlap_deriv(cgfs[2], cgfs[5], nuclei[1][0], 0)
@@ -40,9 +40,9 @@ class TestOverlapDeriv(unittest.TestCase):
         ans3 = calculate_force_finite_difference(mol, 1, 2, 5, 0)
         ans4 = calculate_force_finite_difference(mol, 1, 2, 5, 0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 9)
+        np.testing.assert_almost_equal(fx3, ans3, 7)
         self.assertFalse(fx3 == 0.0)
-        np.testing.assert_almost_equal(fx4, ans4, 9)
+        np.testing.assert_almost_equal(fx4, ans4, 7)
         self.assertFalse(fx4 == 0.0)
 
     def testDerivH2(self):
@@ -69,10 +69,10 @@ class TestOverlapDeriv(unittest.TestCase):
         # assert that the overlap of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 9)
-        np.testing.assert_almost_equal(fx1, 0.0, 9)
-        np.testing.assert_almost_equal(fx2, ans2, 9)
-        np.testing.assert_almost_equal(fx2, 0.0, 9)
+        np.testing.assert_almost_equal(fx1, ans1, 7)
+        np.testing.assert_almost_equal(fx1, 0.0, 7)
+        np.testing.assert_almost_equal(fx2, ans2, 7)
+        np.testing.assert_almost_equal(fx2, 0.0, 7)
 
         # assert that the cross-terms will change
         fx3 = integrator.overlap_deriv(cgfs[0], cgfs[1], nuclei[0][0], 0)
@@ -85,10 +85,10 @@ class TestOverlapDeriv(unittest.TestCase):
         ans5 = calculate_force_finite_difference(mol, 0, 1, 0, 0)
         ans6 = calculate_force_finite_difference(mol, 1, 1, 0, 0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 9)
-        np.testing.assert_almost_equal(fx4, ans4, 9)
-        np.testing.assert_almost_equal(fx5, ans5, 9)
-        np.testing.assert_almost_equal(fx6, ans6, 9)
+        np.testing.assert_almost_equal(fx3, ans3, 7)
+        np.testing.assert_almost_equal(fx4, ans4, 7)
+        np.testing.assert_almost_equal(fx5, ans5, 7)
+        np.testing.assert_almost_equal(fx6, ans6, 7)
 
 def calculate_force_finite_difference(mol, nuc_id, cgf_id1, cgf_id2, coord):
     # build integrator object

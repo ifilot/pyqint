@@ -39,7 +39,7 @@ class TestMOPA(unittest.TestCase):
         np.testing.assert_almost_equal(coeff,
                                        coeff_ref,
                                        decimal=4)
-        
+
         #
         # Molecular orbital overlap population analysis
         #
@@ -98,7 +98,7 @@ class TestMOPA(unittest.TestCase):
         np.testing.assert_almost_equal(charges_mulliken,
                                        [v, -v],
                                        decimal=3)
-        
+
         v = 0.047
         np.testing.assert_almost_equal(charges_lowdin,
                                        [v, -v],
@@ -114,12 +114,12 @@ class TestMOPA(unittest.TestCase):
 
         charges_mulliken = [pa.mulliken(n) for n in range(len(mol))]
         charges_lowdin =   [pa.lowdin(n) for n in range(len(mol))]
-        
+
         v = -0.248559
         np.testing.assert_almost_equal(charges_mulliken,
                                        [v, -v/4, -v/4, -v/4, -v/4],
                                        decimal=3)
-        
+
         v = -0.134084
         np.testing.assert_almost_equal(charges_lowdin,
                                        [v, -v/4, -v/4, -v/4, -v/4],
