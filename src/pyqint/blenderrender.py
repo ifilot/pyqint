@@ -166,6 +166,7 @@ class BlenderRender:
             'atom_radii' : {
                 'H': 0.4,
                 'N': 0.6,
+                'B': 0.5,
                 'C': 0.6,
                 'O': 0.6,
             },
