@@ -172,6 +172,7 @@ class BlenderRender:
             },
             'atom_colors' : {
                 'H': 'FFFFFF',
+                'B': 'e3bc86',
                 'N': '0000FF',
                 'C': '000000',
                 'O': 'DD0000',
