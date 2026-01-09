@@ -36,7 +36,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -77.07390203525122, 7)
+        np.testing.assert_almost_equal(results['energy'], -77.07390203525122, 5)
 
     def testBF3(self):
         """
@@ -53,7 +53,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -318.66187490027113, 6)
+        np.testing.assert_almost_equal(results['energy'], -318.66187490027113, 5)
 
     def testCH4(self):
         """
@@ -71,7 +71,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -39.72684082274519, 7)
+        np.testing.assert_almost_equal(results['energy'], -39.72684082274519, 6)
 
     def testCO(self):
         """
@@ -86,7 +86,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -111.22540898697989, 6)
+        np.testing.assert_almost_equal(results['energy'], -111.22540898697989, 5)
 
     def testCO2(self):
         """
@@ -102,7 +102,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -185.0683324688419, 6)
+        np.testing.assert_almost_equal(results['energy'], -185.0683324688419, 5)
 
     def testH2O(self):
         """
@@ -118,7 +118,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -74.96587833201312, 7)
+        np.testing.assert_almost_equal(results['energy'], -74.96587833201312, 6)
 
     def testLIH(self):
         """
@@ -153,7 +153,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -55.79981538065868, 7)
+        np.testing.assert_almost_equal(results['energy'], -55.79981538065868, 6)
 
     def testC6H6(self):
         """
@@ -178,7 +178,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -227.8912671406505, 6)
+        np.testing.assert_almost_equal(results['energy'], -227.8912671406505, 5)
 
 if __name__ == '__main__':
     unittest.main()

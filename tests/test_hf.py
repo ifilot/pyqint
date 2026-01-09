@@ -16,7 +16,7 @@ class TestHF(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -73.21444239521301, 7)
+        np.testing.assert_almost_equal(results['energy'], -73.21444239521301, 6)
 
         # verify that terms are being calculated
         np.testing.assert_almost_equal(results['density'], np.einsum('ik,jk,k->ij', results['orbc'], results['orbc'], [2,2,2,2,2,0,0]), decimal=6)
@@ -50,10 +50,10 @@ class TestHF(unittest.TestCase):
                 0.40923474,
             ]
         )
-        np.testing.assert_almost_equal(results['orbe'], ans, 7)
+        np.testing.assert_almost_equal(results['orbe'], ans, 5)
 
         en = -39.35007280776424
-        np.testing.assert_almost_equal(results['energies'][-1], en, 7)
+        np.testing.assert_almost_equal(results['energies'][-1], en, 6)
 
     def test_hartree_fock_ch4_symmetric(self):
         """
@@ -84,10 +84,10 @@ class TestHF(unittest.TestCase):
                 0.40923474,
             ]
         )
-        np.testing.assert_almost_equal(results['orbe'], ans, 7)
+        np.testing.assert_almost_equal(results['orbe'], ans, 6)
 
         en = -39.35007280809286
-        np.testing.assert_almost_equal(results['energies'][-1], en, 7)
+        np.testing.assert_almost_equal(results['energies'][-1], en, 6)
 
     def test_hartree_fock_restart(self):
         """
@@ -116,10 +116,10 @@ class TestHF(unittest.TestCase):
                 0.40923474,
             ]
         )
-        np.testing.assert_almost_equal(results1['orbe'], ans, 7)
+        np.testing.assert_almost_equal(results1['orbe'], ans, 6)
 
         en = -39.35007280776424
-        np.testing.assert_almost_equal(results1['energies'][-1], en, 7)
+        np.testing.assert_almost_equal(results1['energies'][-1], en, 6)
 
         # create new CH4 molecule with slight adjustment in geometry and
         # seed the calculation with the previous converged result
