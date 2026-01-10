@@ -16,15 +16,15 @@ class TestHF(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -73.21447132, 4)
+        np.testing.assert_almost_equal(results['energy'], -73.21444239521301, 6)
 
         # verify that terms are being calculated
-        np.testing.assert_almost_equal(results['density'], np.einsum('ik,jk,k->ij', results['orbc'], results['orbc'], [2,2,2,2,2,0,0]), decimal=5)
-        np.testing.assert_almost_equal(results['ekin'] + results['enuc'] + results['erep'] + results['ex'] + results['enucrep'], results['energy'], decimal=5)
+        np.testing.assert_almost_equal(results['density'], np.einsum('ik,jk,k->ij', results['orbc'], results['orbc'], [2,2,2,2,2,0,0]), decimal=6)
+        np.testing.assert_almost_equal(results['ekin'] + results['enuc'] + results['erep'] + results['ex'] + results['enucrep'], results['energy'], decimal=6)
 
     def test_hartree_fock_ch4(self):
         """
-        Test Hartree-Fock calculation on water using STO-3G basis set
+        Test Hartree-Fock calculation on methane using STO-3G basis set
         """
         mol = Molecule()
         dist = 1.78/2
@@ -37,20 +37,24 @@ class TestHF(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that orbital energies are correctly approximated
-        ans = np.array([-11.0707,
-                         -0.7392,
-                         -0.3752,
-                         -0.3752,
-                         -0.3752,
-                          0.2865,
-                          0.4092,
-                          0.4092,
-                          0.4092])
-        np.testing.assert_almost_equal(results['orbe'], ans, 4)
+        ans = np.array(
+            [
+                -11.070708604,
+                -0.739227472,
+                -0.37521838,
+                -0.37521838,
+                -0.37521838,
+                0.28650488,
+                0.40923474,
+                0.40923474,
+                0.40923474,
+            ]
+        )
+        np.testing.assert_almost_equal(results['orbe'], ans, 5)
 
-        en = -39.35007843284954
-        np.testing.assert_almost_equal(results['energies'][-1], en, 4)
-        
+        en = -39.35007280776424
+        np.testing.assert_almost_equal(results['energies'][-1], en, 6)
+
     def test_hartree_fock_ch4_symmetric(self):
         """
         Test Hartree-Fock calculation on CH4 using an STO-3g basis set and
@@ -67,23 +71,27 @@ class TestHF(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf(ortho='symmetric')
 
         # check that orbital energies are correctly approximated
-        ans = np.array([-11.0707,
-                         -0.7392,
-                         -0.3752,
-                         -0.3752,
-                         -0.3752,
-                          0.2865,
-                          0.4092,
-                          0.4092,
-                          0.4092])
-        np.testing.assert_almost_equal(results['orbe'], ans, 4)
+        ans = np.array(
+            [
+                -11.070708606,
+                -0.739227466,
+                -0.375218382,
+                -0.375218382,
+                -0.375218382,
+                0.286504886,
+                0.40923474,
+                0.40923474,
+                0.40923474,
+            ]
+        )
+        np.testing.assert_almost_equal(results['orbe'], ans, 6)
 
-        en = -39.35007843284954
-        np.testing.assert_almost_equal(results['energies'][-1], en, 4)
+        en = -39.35007280809286
+        np.testing.assert_almost_equal(results['energies'][-1], en, 6)
 
     def test_hartree_fock_restart(self):
         """
-        Test Hartree-Fock calculation on water using STO-3G basis set
+        Test Hartree-Fock calculation on methane using STO-3G basis set
         """
         mol = Molecule()
         dist = 1.78/2
@@ -95,19 +103,23 @@ class TestHF(unittest.TestCase):
         results1 = HF(mol, 'sto3g').rhf()
 
         # check that orbital energies are correctly approximated
-        ans = np.array([-11.0707,
-                         -0.7392,
-                         -0.3752,
-                         -0.3752,
-                         -0.3752,
-                          0.2865,
-                          0.4092,
-                          0.4092,
-                          0.4092])
-        np.testing.assert_almost_equal(results1['orbe'], ans, 4)
+        ans = np.array(
+            [
+                -11.070708604,
+                -0.739227472,
+                -0.37521838,
+                -0.37521838,
+                -0.37521838,
+                0.28650488,
+                0.40923474,
+                0.40923474,
+                0.40923474,
+            ]
+        )
+        np.testing.assert_almost_equal(results1['orbe'], ans, 6)
 
-        en = -39.35007843284954
-        np.testing.assert_almost_equal(results1['energies'][-1], en, 4)
+        en = -39.35007280776424
+        np.testing.assert_almost_equal(results1['energies'][-1], en, 6)
 
         # create new CH4 molecule with slight adjustment in geometry and
         # seed the calculation with the previous converged result
@@ -126,7 +138,7 @@ class TestHF(unittest.TestCase):
         # assess that the energy of the perturbed result is different
         # (and also higher)
         en = -39.34538546003782
-        np.testing.assert_almost_equal(results2['energies'][-1], en, 3)
+        np.testing.assert_almost_equal(results2['energies'][-1], en, 5)
 
         # check that the convergence is quicker
         self.assertTrue(len(results1['energies']) > len(results2['energies']))

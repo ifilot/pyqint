@@ -19,8 +19,8 @@ class TestHFMoleculeCharged(unittest.TestCase):
         results = GeometryOptimization(mol, 'sto3g').run()
 
         # check that energy matches
-        self.assertEqual(results['data']['nelec'], 16)    
-        np.testing.assert_almost_equal(results['energies'][-1], -111.52311961578226, 4)
+        self.assertEqual(results['data']['nelec'], 16)
+        np.testing.assert_almost_equal(results['energies'][-1], -111.52311946674983, 5)
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,7 +7,7 @@ class TestHFMolecules(unittest.TestCase):
     def testH2(self):
         """
         Test Hartree-Fock calculation for H2
-        
+
         Data is compared to results obtained from Gaussian
         """
         mol = Molecule()
@@ -17,12 +17,12 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -1.1175059, 5)
-    
+        np.testing.assert_almost_equal(results['energy'], -1.1175053456568793, 7)
+
     def testC2H4(self):
         """
         Test Hartree-Fock calculation for Ethylene
-        
+
         Data is compared to results obtained from Gaussian
         """
         mol = Molecule()
@@ -36,7 +36,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -77.0739726, 4)
+        np.testing.assert_almost_equal(results['energy'], -77.07390203525122, 5)
 
     def testBF3(self):
         """
@@ -53,7 +53,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -318.6619373, 4)
+        np.testing.assert_almost_equal(results['energy'], -318.66187490027113, 5)
 
     def testCH4(self):
         """
@@ -71,7 +71,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -39.7268637, 1)
+        np.testing.assert_almost_equal(results['energy'], -39.72684082274519, 6)
 
     def testCO(self):
         """
@@ -86,7 +86,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -111.2254495, 4)
+        np.testing.assert_almost_equal(results['energy'], -111.22540898697989, 5)
 
     def testCO2(self):
         """
@@ -118,7 +118,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -74.9659012, 4)
+        np.testing.assert_almost_equal(results['energy'], -74.96587833201312, 5)
 
     def testLIH(self):
         """
@@ -133,12 +133,12 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -7.8633821, 5)
+        np.testing.assert_almost_equal(results['energy'], -7.863381809687618, 7)
 
     def testNH3(self):
         """
         Test Hartree-Fock calculation for NH3
-        
+
         Note: a lower energy is found here as compared to Gaussian, so I reckon
         (might be wrong!) that this result is better.
         Using Gaussian: EHF = -55.7433617 Ht is found
@@ -153,12 +153,12 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -55.7998313, 4)
+        np.testing.assert_almost_equal(results['energy'], -55.79981538065868, 5)
 
     def testC6H6(self):
         """
         Test Hartree-Fock calculation for Ethylene
-        
+
         Data is compared to results obtained from Gaussian
         """
         mol = Molecule()
@@ -178,7 +178,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -227.8912669208681, 5)
+        np.testing.assert_almost_equal(results['energy'], -227.8912671406505, 5)
 
 if __name__ == '__main__':
     unittest.main()
