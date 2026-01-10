@@ -24,7 +24,7 @@ class TestHF(unittest.TestCase):
 
     def test_hartree_fock_ch4(self):
         """
-        Test Hartree-Fock calculation on water using STO-3G basis set
+        Test Hartree-Fock calculation on methane using STO-3G basis set
         """
         mol = Molecule()
         dist = 1.78/2
@@ -91,7 +91,7 @@ class TestHF(unittest.TestCase):
 
     def test_hartree_fock_restart(self):
         """
-        Test Hartree-Fock calculation on water using STO-3G basis set
+        Test Hartree-Fock calculation on methane using STO-3G basis set
         """
         mol = Molecule()
         dist = 1.78/2
