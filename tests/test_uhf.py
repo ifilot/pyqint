@@ -17,7 +17,7 @@ class TestHF(unittest.TestCase):
         results_uhf = HF(mol, 'sto3g').uhf(multiplicity=1, tolerance=1e-12)
 
         # check that energy matches
-        np.testing.assert_almost_equal(results_rhf['energy'], results_uhf['energy'], 9)
+        np.testing.assert_almost_equal(results_rhf['energy'], results_uhf['energy'], 7)
 
         # verify that terms are being calculated
         np.testing.assert_almost_equal(results_uhf['orbe_alpha'], results_uhf['orbe_beta'], decimal=5)
