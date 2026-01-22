@@ -188,10 +188,16 @@ visualization of the resulting SALCs.
         # 8) Visualize symmetry-adapted basis functions (SALCs)
         #    as real-space contour plots
         # --------------------------------------------------------------------------
+        # simple hack to visualize the basis functions
+        res_salc['orbc'] = np.identity(res_salc['orbc'].shape[0])
+        # custom defined planes
+        planes = ['yz'] * res_salc['orbc'].shape[0]
+        planes[8] = 'xy'
+        planes[9] = 'xz'
         ContourPlotter.build_contourplot(
             res=res_salc,
             filename="ethylene_salcs_yz.png",
-            plane="yz",
+            plane=planes,
             sz=5.0,
             npts=101,
             nrows=2,
