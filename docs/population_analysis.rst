@@ -142,7 +142,7 @@ sensitivity of Löwdin population analysis.
 For neutral molecules, the sum of all atomic charges obtained from either scheme
 is exactly zero. 
 
-Molecular Orbital Hamilton and Overlap Population Analysis
+Molecular Orbital Hamilton and Overlap Population and Bond Index Analysis
 ----------------------------------------------------------
 
 .. note::
