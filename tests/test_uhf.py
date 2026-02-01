@@ -17,7 +17,7 @@ class TestHF(unittest.TestCase):
         results_uhf = HF(mol, 'sto3g').uhf(multiplicity=1, tolerance=1e-12)
 
         # check that energy matches
-        np.testing.assert_almost_equal(results_rhf['energy'], results_uhf['energy'], 5)
+        np.testing.assert_almost_equal(results_rhf['energy'], results_uhf['energy'], 7)
 
         # verify that terms are being calculated
         np.testing.assert_almost_equal(results_uhf['orbe_alpha'], results_uhf['orbe_beta'], decimal=5)
@@ -50,7 +50,7 @@ class TestHF(unittest.TestCase):
         self.assertIn('orbe_alpha', results_uhf)
         self.assertIn('orbe_beta', results_uhf)
 
-        # alpha and beta orbital energies should NOT be identical for 
+        # alpha and beta orbital energies should NOT be identical for
         # an open-shell system
         with self.assertRaises(AssertionError):
             np.testing.assert_almost_equal(

@@ -185,7 +185,7 @@ Constructing isosurfaces
 .. note::
     * Isosurface generation requires the :program:`PyTessel` package to be
       installed. Make sure you have installed :program:`PyTessel` alongside 
-      :program:`PyQInt`. For more details, see the :ref:`installation`.
+      :program:`PyQInt`. For more details, see the :ref:`installation:installation`.
     * Optionally, have a look at `PyTessel's documentation <https://ifilot.github.io/pytessel/>`_.
 
 .. code-block:: python
@@ -226,3 +226,65 @@ Constructing isosurfaces
 
     if __name__ == '__main__':
         main()
+
+Constructing ABO files
+----------------------
+
+:program:`PyQInt` can be interfaced with `ABO Builder
+<https://ifilot.github.io/abobuilder/>`__ to generate :code:`.abo` files that
+can be visualized using `Managlyph <https://ifilot.github.io/managlyph/>`__.
+`Managlyph <https://ifilot.github.io/managlyph/>`__ enables straightforward
+rendering of molecular orbitals and interactive 3D visualization, including
+stereoscopic viewing with red/cyan glasses.
+
+First, install :program:`ABO Builder`:
+
+.. code-block:: bash
+
+    pip install abobuilder
+
+The script below demonstrates how to generate an :code:`.abo` file directly
+from a Hartree-Fock calculation. For best performance, it is recommended to use
+the :code:`build_abo_hf_v1` function with compression enabled.
+
+If the molecular orbitals appear too coarse, increase the :code:`nsamples`
+parameter to improve grid resolution. If orbitals appear spatially truncated,
+increase the sampling box size using the :code:`sz` parameter.
+
+.. code-block:: python
+
+    import os
+
+    from abobuilder import AboBuilder, clean_multiline
+    from pyqint import MoleculeBuilder, HF
+
+    # Build the molecule and perform a Hartree–Fock calculation
+    ch4 = MoleculeBuilder().from_name('CH4')
+    res = HF(ch4, basis='sto3g').rhf(verbose=True)
+
+    # Geometry frame description
+    desc = clean_multiline(
+        """
+        Canonical molecular orbitals for CH4 (STO-3G), computed with PyQInt.
+        Generated with ABO Builder.
+        """
+    )
+
+    # Create the ABOF v1 file with compression enabled
+    if not os.path.exists('ch4.abo'):
+        AboBuilder().build_abo_hf_v1(
+            'ch4.abo',
+            res['nuclei'],
+            res['cgfs'],
+            res['orbc'],
+            res['orbe'],
+            nsamples=51,
+            compress=True,
+            geometry_descriptor=desc,
+        )
+
+The resulting file (:code:`ch4.abo`) should be around 865 kb in size. This file
+can be readily opened using :program:`Managlyph`. Below, a representative
+screenshot is provided.
+
+.. figure:: _static/img/managlyph-ch4.jpg

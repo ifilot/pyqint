@@ -29,12 +29,16 @@ class BlenderRender:
             print('Found executable: %s' % self.executable)
 
     def render_molecular_orbitals(self, molecule, cgfs, orbc, outpath,
-                                  mo_indices=None, sz=5, isovalue=0.03,
+                                  mo_indices=None, mo_occ=None, sz=5, isovalue=0.03,
                                   prefix='MO', npts=100,
-                                  negcol='276419', poscol='8f0153',
+                                  negcol_occ='276419', poscol_occ='8f0153',
+                                  negcol_unocc='c2ecf2', poscol_unocc='fcba03',
                                   orientation='camx', camera_scale=10):
         if mo_indices is None: # render all orbitals
             mo_indices = np.arange(0, len(orbc))
+
+        if mo_occ is None:
+            mo_occ = mo_indices
 
         # build a temporary folder
         tempdir = tempfile.mkdtemp()
@@ -69,6 +73,14 @@ class BlenderRender:
                 camera_rot = (np.radians(63.5593),0,np.radians(46.6919))
             else:
                 raise Exception('Invalid camera location')
+
+            # set color based on whether MO is occupied or not
+            if idx in mo_occ:
+                poscol = poscol_occ
+                negcol = negcol_occ
+            else:
+                poscol = poscol_unocc
+                negcol = negcol_unocc
 
             logoutput = self.__run_blender(plypos, plyneg, xyzfile, outfile, 
                                            tempdir, negcol, poscol, 
@@ -166,11 +178,13 @@ class BlenderRender:
             'atom_radii' : {
                 'H': 0.4,
                 'N': 0.6,
+                'B': 0.5,
                 'C': 0.6,
                 'O': 0.6,
             },
             'atom_colors' : {
                 'H': 'FFFFFF',
+                'B': 'e3bc86',
                 'N': '0000FF',
                 'C': '000000',
                 'O': 'DD0000',

@@ -142,8 +142,8 @@ sensitivity of Löwdin population analysis.
 For neutral molecules, the sum of all atomic charges obtained from either scheme
 is exactly zero. 
 
-Molecular Orbital Hamilton and Overlap Population Analysis
-----------------------------------------------------------
+Molecular Orbital Hamilton and Overlap Population and Bond Index Analysis
+-------------------------------------------------------------------------
 
 .. note::
 
@@ -195,12 +195,6 @@ Analogously, the **MOOP coefficient** is defined as
 
 where :math:`S_{ij}` is an element of the overlap matrix :math:`\mathbf{S}`.
 
-.. note::
-
-    Both MOHP and MOOP can be evaluated for virtual (unoccupied) orbitals.
-    However, the interpretation of such values should be made with caution,
-    as virtual orbitals do not correspond to occupied electronic states.
-
 Lastly, the **MOBI coefficient** is defined as
 
 .. math::
@@ -244,13 +238,13 @@ The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule
 Example output::
 
   MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals
-    1     -20.3914       0.0319      -0.0017      +0.0005
-    2     -11.0902       0.0094      -0.0009      +0.0003
+    1     -20.3914       0.0319      -0.0017       0.0005
+    2     -11.0902       0.0094      -0.0009       0.0003
     3      -1.4047      -0.4347       0.2937      -0.0219
-    4      -0.6899       0.1977      -0.0663      +0.3657
-    5      -0.5094      -0.2736       0.1562      +0.5121
-    6      -0.5094      -0.2736       0.1562      +0.5121
-    7      -0.4409       0.0813      -0.0375      +0.2263
+    4      -0.6899       0.1977      -0.0663       0.3657
+    5      -0.5094      -0.2736       0.1562       0.5121
+    6      -0.5094      -0.2736       0.1562       0.5121
+    7      -0.4409       0.0813      -0.0375       0.2263
     8       0.2865       0.4489      -0.2562      -0.8401
     9       0.2865       0.4489      -0.2562      -0.8401
    10       0.9253       5.1204      -2.6744      -1.4625

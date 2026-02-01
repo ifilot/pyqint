@@ -11,7 +11,7 @@ class testGTO(unittest.TestCase):
 
         gto_h = GTO(1.0, (0,0,0), 0.4166, 0, 0, 0)
         norm = gto_h.get_norm()
-        np.testing.assert_almost_equal(norm, 0.36957240951430304, 4)
+        np.testing.assert_almost_equal(norm, 0.36957240951430304, 9)
 
 if __name__ == '__main__':
     unittest.main()

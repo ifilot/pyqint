@@ -162,12 +162,12 @@ void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
                                                   std::vector<double>& tetensor) const {
     const size_t sz = cgfs.size();
     std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
-    
+
     // expand cache if needed
     unsigned int max_l = 0;
     for (const auto& cgf : cgfs) {
         max_l = std::max(max_l, cgf.max_primitive_l());
-    }    
+    }
     hellsing_cache.ensure_lmax(max_l);
 
     // it is more efficient to first 'unroll' the fourfold nested loop
@@ -207,7 +207,7 @@ void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
         tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
     }
 
-    // reorganize everyting into a tensor object
+    // reorganize everything into a tensor object
     for(size_t i=0; i<sz; i++) {
         for(size_t j=0; j<sz; j++) {
             for(size_t k=0; k<sz; k++) {
@@ -232,8 +232,8 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     unsigned int max_l = 0;
     for (const auto& cgf : cgfs) {
         max_l = std::max(max_l, cgf.max_primitive_l());
-    }    
-    hellsing_cache.ensure_lmax(max_l+1);                                                                
+    }
+    hellsing_cache.ensure_lmax(max_l+1);
 
     const size_t sz = cgfs.size();
 
@@ -366,17 +366,19 @@ double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) const {
 
     // loop over all GTOs inside the CGF, calculate the overlap integrals
     // and sum all the integral values
-    for(unsigned int k = 0; k < cgf1.size(); k++) {
-        for(unsigned int l = 0; l < cgf2.size(); l++) {
+    for (unsigned int k = 0; k < cgf1.size(); k++) {
+        for (unsigned int l = 0; l < cgf2.size(); l++) {
             sum += cgf1.get_norm_gto(k) *
                    cgf2.get_norm_gto(l) *
                    cgf1.get_coefficient_gto(k) *
                    cgf2.get_coefficient_gto(l) *
-                   this->overlap_gto(cgf1.get_gto(k), cgf2.get_gto(l) );
+                   this->overlap_gto(cgf1.get_gto(k), cgf2.get_gto(l));
         }
     }
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
 
-    return sum;
+    return sum * norm1 * norm2;
 }
 
 /**
@@ -439,7 +441,10 @@ double Integrator::overlap_deriv(const CGF& cgf1,
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
+    return sum * norm1 * norm2;
 }
 
 /**
@@ -525,7 +530,10 @@ double Integrator::dipole(const CGF& cgf1,
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
+    return sum * norm1 * norm2;
 }
 
 /**
@@ -578,7 +586,10 @@ double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) const {
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
+    return sum * norm1 * norm2;
 }
 
 /**
@@ -651,7 +662,10 @@ double Integrator::kinetic_deriv(const CGF& cgf1,
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
+    return sum * norm1 * norm2;
 }
 
 /**
@@ -739,7 +753,10 @@ double Integrator::nuclear(const CGF& cgf1,
         }
     }
 
-    return sum * (double)charge;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
+    return sum * static_cast<double>(charge) * norm1 * norm2;
 }
 
 /**
@@ -827,8 +844,11 @@ double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& n
         }
     }
 
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+
     // charge factor (nuclear attraction)
-    return static_cast<double>(charge) * sum;
+    return static_cast<double>(charge) * sum * norm1 * norm2;
 }
 
 /**
@@ -850,7 +870,7 @@ double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& n
  *
  * @return double value of the nuclear attraction gradient
  */
-double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2, 
+double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2,
                                  const Vec3& nucleus, unsigned int coord) const {
     std::array<unsigned int,3> ang = {
         gto1.get_l(),
@@ -937,7 +957,12 @@ double Integrator::repulsion(const CGF& cgf1,const CGF& cgf2,const CGF& cgf3,con
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+    const auto norm3 = cgf3.get_contraction_norm();
+    const auto norm4 = cgf4.get_contraction_norm();
+
+    return sum * norm1 * norm2 * norm3 * norm4;
 }
 
 /**
@@ -997,7 +1022,12 @@ double Integrator::repulsion_deriv(const CGF& cgf1, const CGF& cgf2, const CGF& 
         }
     }
 
-    return sum;
+    const auto norm1 = cgf1.get_contraction_norm();
+    const auto norm2 = cgf2.get_contraction_norm();
+    const auto norm3 = cgf3.get_contraction_norm();
+    const auto norm4 = cgf4.get_contraction_norm();
+
+    return sum * norm1 * norm2 * norm3 * norm4;
 }
 
 /**

@@ -39,7 +39,7 @@ as finite sums over one-dimensional kernels.
 
 .. math::
 
-    \begin{align}
+    \begin{aligned}
         K^{(1\mathrm{D})}_{l_1 l_2 l_3 l_4}
         &=
         \sum_{\substack{
@@ -75,13 +75,13 @@ as finite sums over one-dimensional kernels.
             {4^{\,u}
             \, u!
             \, (\mu-2u)!} \, .
-    \end{align}
+    \end{aligned}
 
 with
 
 .. math::
 
-    \begin{align}
+    \begin{aligned}
         \mu &= l_1 + l_2 + l_3 + l_4
             - 2(i_1+i_2+i_3+i_4)
             - (o_1+o_2+o_3+o_4),
@@ -95,7 +95,7 @@ with
         0 \le r_2 \le \left\lfloor \frac{o_3+o_4}{2} \right\rfloor,
         \\
         0 &\le u \le \left\lfloor \frac{\mu}{2} \right\rfloor.
-    \end{align}
+    \end{aligned}
 
 For a given angular momentum quartet :math:`(l_1, l_2, l_3, l_4)`, the
 corresponding kernel depends only on these angular momenta and not on the

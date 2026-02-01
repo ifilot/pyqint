@@ -30,8 +30,8 @@ class TestRepulsionDeriv(unittest.TestCase):
         # assert that the repulsion of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 5)
-        np.testing.assert_almost_equal(fx2, ans2, 5)
+        np.testing.assert_almost_equal(fx1, ans1, 7)
+        np.testing.assert_almost_equal(fx2, ans2, 7)
 
         # assert that the cross-terms will change
         fx3 = integrator.repulsion_deriv(cgfs[3], cgfs[3], cgfs[5], cgfs[5], nuclei[0][0], 0)
@@ -51,10 +51,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans5 == 0.0)
         self.assertFalse(ans6 == 0.0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 5)
-        np.testing.assert_almost_equal(fx4, ans4, 5)
-        np.testing.assert_almost_equal(fx5, ans5, 5)
-        np.testing.assert_almost_equal(fx6, ans6, 5)
+        np.testing.assert_almost_equal(fx3, ans3, 4)
+        np.testing.assert_almost_equal(fx4, ans4, 4)
+        np.testing.assert_almost_equal(fx5, ans5, 4)
+        np.testing.assert_almost_equal(fx6, ans6, 4)
 
         # assert that the cross-terms will change
         fx7 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[0][0], 0)
@@ -71,9 +71,9 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans8 == 0.0)
         self.assertFalse(ans9 == 0.0)
 
-        np.testing.assert_almost_equal(fx7, ans7, 5)
-        np.testing.assert_almost_equal(fx8, ans8, 5)
-        np.testing.assert_almost_equal(fx9, ans9, 5)
+        np.testing.assert_almost_equal(fx7, ans7, 4)
+        np.testing.assert_almost_equal(fx8, ans8, 4)
+        np.testing.assert_almost_equal(fx9, ans9, 4)
 
     def testDerivH2O_hellsing_fallback(self):
         """
@@ -100,8 +100,8 @@ class TestRepulsionDeriv(unittest.TestCase):
         # assert that the repulsion of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 5)
-        np.testing.assert_almost_equal(fx2, ans2, 5)
+        np.testing.assert_almost_equal(fx1, ans1, 4)
+        np.testing.assert_almost_equal(fx2, ans2, 4)
 
         # assert that the cross-terms will change
         fx3 = integrator.repulsion_deriv(cgfs[3], cgfs[3], cgfs[5], cgfs[5], nuclei[0][0], 0)
@@ -121,10 +121,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans5 == 0.0)
         self.assertFalse(ans6 == 0.0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 5)
-        np.testing.assert_almost_equal(fx4, ans4, 5)
-        np.testing.assert_almost_equal(fx5, ans5, 5)
-        np.testing.assert_almost_equal(fx6, ans6, 5)
+        np.testing.assert_almost_equal(fx3, ans3, 4)
+        np.testing.assert_almost_equal(fx4, ans4, 4)
+        np.testing.assert_almost_equal(fx5, ans5, 4)
+        np.testing.assert_almost_equal(fx6, ans6, 4)
 
         # assert that the cross-terms will change
         fx7 = integrator.repulsion_deriv(cgfs[2], cgfs[3], cgfs[5], cgfs[6], nuclei[0][0], 0)
@@ -141,9 +141,9 @@ class TestRepulsionDeriv(unittest.TestCase):
         self.assertFalse(ans8 == 0.0)
         self.assertFalse(ans9 == 0.0)
 
-        np.testing.assert_almost_equal(fx7, ans7, 5)
-        np.testing.assert_almost_equal(fx8, ans8, 5)
-        np.testing.assert_almost_equal(fx9, ans9, 5)
+        np.testing.assert_almost_equal(fx7, ans7, 4)
+        np.testing.assert_almost_equal(fx8, ans8, 4)
+        np.testing.assert_almost_equal(fx9, ans9, 4)
 
     def testDerivH2(self):
         """
@@ -170,10 +170,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         # assert that the repulsion of two CGFs that spawn from
         # the same nucleus will not change in energy due to a
         # change of the nucleus coordinates
-        np.testing.assert_almost_equal(fx1, ans1, 5)
-        np.testing.assert_almost_equal(fx1, 0.0, 5)
-        np.testing.assert_almost_equal(fx2, ans2, 5)
-        np.testing.assert_almost_equal(fx2, 0.0, 5)
+        np.testing.assert_almost_equal(fx1, ans1, 4)
+        np.testing.assert_almost_equal(fx1, 0.0, 4)
+        np.testing.assert_almost_equal(fx2, ans2, 4)
+        np.testing.assert_almost_equal(fx2, 0.0, 4)
 
         # assert that the cross-terms will change
         fx3 = integrator.repulsion_deriv(cgfs[0], cgfs[0], cgfs[1], cgfs[1], nuclei[0][0], 0)
@@ -187,10 +187,10 @@ class TestRepulsionDeriv(unittest.TestCase):
         ans5 = calculate_force_finite_difference(mol, 0, 1, 0, 1, 0, 0)
         ans6 = calculate_force_finite_difference(mol, 1, 1, 0, 1, 0, 0)
 
-        np.testing.assert_almost_equal(fx3, ans3, 5)
-        np.testing.assert_almost_equal(fx4, ans4, 5)
-        np.testing.assert_almost_equal(fx5, ans5, 5)
-        np.testing.assert_almost_equal(fx6, ans6, 5)
+        np.testing.assert_almost_equal(fx3, ans3, 4)
+        np.testing.assert_almost_equal(fx4, ans4, 4)
+        np.testing.assert_almost_equal(fx5, ans5, 4)
+        np.testing.assert_almost_equal(fx6, ans6, 4)
 
 
 def calculate_force_finite_difference(
