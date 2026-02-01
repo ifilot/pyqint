@@ -63,6 +63,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#constructing-isosurfaces">Constructing isosurfaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constructing-abo-files">Constructing ABO files</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="orbital_localization.html">Orbital localization: Foster-Boys</a></li>
@@ -109,6 +110,7 @@
 </ul>
 </li>
 <li><p><a class="reference internal" href="#constructing-isosurfaces" id="id6">Constructing isosurfaces</a></p></li>
+<li><p><a class="reference internal" href="#constructing-abo-files" id="id7">Constructing ABO files</a></p></li>
 </ul>
 </li>
 </ul>
@@ -321,6 +323,61 @@ installed. Make sure you have installed <strong class="program">PyTessel</strong
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
+</section>
+<section id="constructing-abo-files">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Constructing ABO files</a><a class="headerlink" href="#constructing-abo-files" title="Link to this heading"></a></h2>
+<p><strong class="program">PyQInt</strong> can be interfaced with <a class="reference external" href="https://ifilot.github.io/abobuilder/">ABO Builder</a> to generate <code class="code docutils literal notranslate"><span class="pre">.abo</span></code> files that
+can be visualized using <a class="reference external" href="https://ifilot.github.io/managlyph/">Managlyph</a>.
+<a class="reference external" href="https://ifilot.github.io/managlyph/">Managlyph</a> enables straightforward
+rendering of molecular orbitals and interactive 3D visualization, including
+stereoscopic viewing with red/cyan glasses.</p>
+<p>First, install <strong class="program">ABO Builder</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>abobuilder
+</pre></div>
+</div>
+<p>The script below demonstrates how to generate an <code class="code docutils literal notranslate"><span class="pre">.abo</span></code> file directly
+from a Hartree-Fock calculation. For best performance, it is recommended to use
+the <code class="code docutils literal notranslate"><span class="pre">build_abo_hf_v1</span></code> function with compression enabled.</p>
+<p>If the molecular orbitals appear too coarse, increase the <code class="code docutils literal notranslate"><span class="pre">nsamples</span></code>
+parameter to improve grid resolution. If orbitals appear spatially truncated,
+increase the sampling box size using the <code class="code docutils literal notranslate"><span class="pre">sz</span></code> parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abobuilder</span><span class="w"> </span><span class="kn">import</span> <span class="n">AboBuilder</span><span class="p">,</span> <span class="n">clean_multiline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span>
+
+<span class="c1"># Build the molecule and perform a Hartree–Fock calculation</span>
+<span class="n">ch4</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CH4&#39;</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">ch4</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Geometry frame description</span>
+<span class="n">desc</span> <span class="o">=</span> <span class="n">clean_multiline</span><span class="p">(</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Canonical molecular orbitals for CH4 (STO-3G), computed with PyQInt.</span>
+<span class="sd">    Generated with ABO Builder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Create the ABOF v1 file with compression enabled</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;ch4.abo&#39;</span><span class="p">):</span>
+    <span class="n">AboBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">build_abo_hf_v1</span><span class="p">(</span>
+        <span class="s1">&#39;ch4.abo&#39;</span><span class="p">,</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;nuclei&#39;</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span>
+        <span class="n">nsamples</span><span class="o">=</span><span class="mi">51</span><span class="p">,</span>
+        <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">geometry_descriptor</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>The resulting file (<code class="code docutils literal notranslate"><span class="pre">ch4.abo</span></code>) should be around 865 kb in size. This file
+can be readily opened using <strong class="program">Managlyph</strong>. Below, a representative
+screenshot is provided.</p>
+<figure class="align-default">
+<img alt="_images/managlyph-ch4.jpg" src="_images/managlyph-ch4.jpg" />
+</figure>
 </section>
 </section>
 
