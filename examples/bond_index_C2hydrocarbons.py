@@ -4,7 +4,7 @@ import os
 
 def main():
     
-    ethane = MoleculeBuilder.from_name('ethane.xyz')
+    ethane = MoleculeBuilder.from_name('ethane')
     ethylene = MoleculeBuilder.from_name('ethylene')
     acetylene = MoleculeBuilder.from_name('acetylene')
     
