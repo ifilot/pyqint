@@ -66,7 +66,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#example-atomic-charge-analysis">Example: Atomic Charge Analysis</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-analysis">Molecular Orbital Hamilton and Overlap Population Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-and-bond-index-analysis">Molecular Orbital Hamilton and Overlap Population and Bond Index Analysis</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#background-of-mohp-moop-and-mobi">Background of MOHP, MOOP, and MOBI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#procedure-of-mohp-moop-and-mobi">Procedure of MOHP, MOOP, and MOBI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a></li>
@@ -113,7 +113,7 @@
 <li><p><a class="reference internal" href="#example-atomic-charge-analysis" id="id5">Example: Atomic Charge Analysis</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-analysis" id="id6">Molecular Orbital Hamilton and Overlap Population Analysis</a></p>
+<li><p><a class="reference internal" href="#molecular-orbital-hamilton-and-overlap-population-and-bond-index-analysis" id="id6">Molecular Orbital Hamilton and Overlap Population and Bond Index Analysis</a></p>
 <ul>
 <li><p><a class="reference internal" href="#background-of-mohp-moop-and-mobi" id="id7">Background of MOHP, MOOP, and MOBI</a></p></li>
 <li><p><a class="reference internal" href="#procedure-of-mohp-moop-and-mobi" id="id8">Procedure of MOHP, MOOP, and MOBI</a></p></li>
@@ -227,8 +227,8 @@ sensitivity of Löwdin population analysis.</p>
 is exactly zero.</p>
 </section>
 </section>
-<section id="molecular-orbital-hamilton-and-overlap-population-analysis">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Molecular Orbital Hamilton and Overlap Population Analysis</a><a class="headerlink" href="#molecular-orbital-hamilton-and-overlap-population-analysis" title="Link to this heading"></a></h2>
+<section id="molecular-orbital-hamilton-and-overlap-population-and-bond-index-analysis">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Molecular Orbital Hamilton and Overlap Population and Bond Index Analysis</a><a class="headerlink" href="#molecular-orbital-hamilton-and-overlap-population-and-bond-index-analysis" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In earlier versions of <strong class="program">PyQInt</strong>, this functionality was
@@ -269,12 +269,6 @@ coefficient matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</sp
 2 \sum_{i \in A} \sum_{j \in B}
 C_{ik} \, S_{ij} \, C_{jk}\]</div>
 <p>where <span class="math notranslate nohighlight">\(S_{ij}\)</span> is an element of the overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Both MOHP and MOOP can be evaluated for virtual (unoccupied) orbitals.
-However, the interpretation of such values should be made with caution,
-as virtual orbitals do not correspond to occupied electronic states.</p>
-</div>
 <p>Lastly, the <strong>MOBI coefficient</strong> is defined as</p>
 <div class="math notranslate nohighlight">
 \[\mathrm{MOBI}_k =
@@ -310,13 +304,13 @@ which takes the output of a Hartree-Fock calculation as input.</p>
 </div>
 <p>Example output:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MOHP</span><span class="p">,</span> <span class="n">MOOP</span><span class="p">,</span> <span class="ow">and</span> <span class="n">MOBI</span> <span class="n">values</span> <span class="n">of</span> <span class="n">canonical</span> <span class="n">Hartree</span><span class="o">-</span><span class="n">Fock</span> <span class="n">orbitals</span>
-  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.3914</span>       <span class="mf">0.0319</span>      <span class="o">-</span><span class="mf">0.0017</span>      <span class="o">+</span><span class="mf">0.0005</span>
-  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0902</span>       <span class="mf">0.0094</span>      <span class="o">-</span><span class="mf">0.0009</span>      <span class="o">+</span><span class="mf">0.0003</span>
+  <span class="mi">1</span>     <span class="o">-</span><span class="mf">20.3914</span>       <span class="mf">0.0319</span>      <span class="o">-</span><span class="mf">0.0017</span>       <span class="mf">0.0005</span>
+  <span class="mi">2</span>     <span class="o">-</span><span class="mf">11.0902</span>       <span class="mf">0.0094</span>      <span class="o">-</span><span class="mf">0.0009</span>       <span class="mf">0.0003</span>
   <span class="mi">3</span>      <span class="o">-</span><span class="mf">1.4047</span>      <span class="o">-</span><span class="mf">0.4347</span>       <span class="mf">0.2937</span>      <span class="o">-</span><span class="mf">0.0219</span>
-  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6899</span>       <span class="mf">0.1977</span>      <span class="o">-</span><span class="mf">0.0663</span>      <span class="o">+</span><span class="mf">0.3657</span>
-  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>      <span class="o">+</span><span class="mf">0.5121</span>
-  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>      <span class="o">+</span><span class="mf">0.5121</span>
-  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4409</span>       <span class="mf">0.0813</span>      <span class="o">-</span><span class="mf">0.0375</span>      <span class="o">+</span><span class="mf">0.2263</span>
+  <span class="mi">4</span>      <span class="o">-</span><span class="mf">0.6899</span>       <span class="mf">0.1977</span>      <span class="o">-</span><span class="mf">0.0663</span>       <span class="mf">0.3657</span>
+  <span class="mi">5</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>       <span class="mf">0.5121</span>
+  <span class="mi">6</span>      <span class="o">-</span><span class="mf">0.5094</span>      <span class="o">-</span><span class="mf">0.2736</span>       <span class="mf">0.1562</span>       <span class="mf">0.5121</span>
+  <span class="mi">7</span>      <span class="o">-</span><span class="mf">0.4409</span>       <span class="mf">0.0813</span>      <span class="o">-</span><span class="mf">0.0375</span>       <span class="mf">0.2263</span>
   <span class="mi">8</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>      <span class="o">-</span><span class="mf">0.8401</span>
   <span class="mi">9</span>       <span class="mf">0.2865</span>       <span class="mf">0.4489</span>      <span class="o">-</span><span class="mf">0.2562</span>      <span class="o">-</span><span class="mf">0.8401</span>
  <span class="mi">10</span>       <span class="mf">0.9253</span>       <span class="mf">5.1204</span>      <span class="o">-</span><span class="mf">2.6744</span>      <span class="o">-</span><span class="mf">1.4625</span>

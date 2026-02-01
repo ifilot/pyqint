@@ -203,6 +203,7 @@ visualization of the resulting SALCs.
             nrows=2,
             ncols=7,
             labels=symlabels,
+			plot_energies = False,
         )
 
     def build_salcs_from_transform(

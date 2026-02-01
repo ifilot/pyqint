@@ -143,5 +143,5 @@ elements.
 .. hint::
 
     One can directly connect the output of a Foster-Boys calculation to a
-    COHP calculation. The details of the process are found in the
-    `cohp analysis of Foster-Boys localized orbitals section <#cohp-analysis-of-the-foster-boys-localized-orbitals>`_.
+    MOHP calculation. The details of the process are found in the
+    `MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals section <#MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals>`_.
