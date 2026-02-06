@@ -25,6 +25,7 @@ py.extension_module(
         'fgamma.cpp',
         'hellsing_cache.cpp',
         'hellsing_eri.cpp',
+        'gaussian_integrals.cpp',
     ],
     include_directories: inc,
     override_options: ['cython_language=cpp'],

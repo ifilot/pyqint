@@ -203,7 +203,7 @@ class TestCGF(unittest.TestCase):
                         g.n
                     )
         overlap = integrator.overlap(cgf, cgf)
-        self.assertEqual(overlap, 1.0)
+        self.assertAlmostEqual(overlap, 1.0, places=8)
 
 if __name__ == '__main__':
     unittest.main()

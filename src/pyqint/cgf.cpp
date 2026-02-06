@@ -20,6 +20,7 @@
  **************************************************************************/
 
 #include "cgf.h"
+#include "gaussian_integrals.h"
 #include <cassert>
 
 GTO::GTO(double _c,
@@ -380,16 +381,6 @@ double CGF::get_contraction_norm() const {
         }
     }
 
-    // Standard contraction: all primitives have same (l,m,n)
-    const int L = l + m + n;
-
-    static const double pi_three_half_pow = M_PI * std::sqrt(M_PI);
-    const double prefactor = pi_three_half_pow *
-                       (l < 1 ? 1.0 : double_factorial(2*l - 1)) *
-                       (m < 1 ? 1.0 : double_factorial(2*m - 1)) *
-                       (n < 1 ? 1.0 : double_factorial(2*n - 1)) /
-                       static_cast<double>(1 << L);
-
     double sum = 0.0;
     for (size_t i = 0; i < this->size(); ++i) {
         for (size_t j = 0; j < this->size(); ++j) {
@@ -397,12 +388,22 @@ double CGF::get_contraction_norm() const {
             // const double a_j = this->get_coefficient_gto(j);
             const double a_i = this->get_norm_gto(i) * this->get_coefficient_gto(i);
             const double a_j = this->get_norm_gto(j) * this->get_coefficient_gto(j);
-            const double alpha_i = this->get_gto(i).get_alpha();
-            const double alpha_j = this->get_gto(j).get_alpha();
+            const auto& gto_i = this->get_gto(i);
+            const auto& gto_j = this->get_gto(j);
 
-            sum += a_i * a_j / std::pow(alpha_i + alpha_j, L + 1.5);
+            sum += a_i * a_j *
+                   integrals::gaussian::overlap_gto(gto_i.get_alpha(),
+                                                    gto_i.get_l(),
+                                                    gto_i.get_m(),
+                                                    gto_i.get_n(),
+                                                    gto_i.get_position(),
+                                                    gto_j.get_alpha(),
+                                                    gto_j.get_l(),
+                                                    gto_j.get_m(),
+                                                    gto_j.get_n(),
+                                                    gto_j.get_position());
         }
     }
 
-    return 1.0 / std::sqrt(prefactor * sum);
+    return 1.0 / std::sqrt(sum);
 }

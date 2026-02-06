@@ -20,6 +20,7 @@
  **************************************************************************/
 
 #include "integrals.h"
+#include "gaussian_integrals.h"
 
 /**
  * @brief Construct an Integrator instance and capture build-time information.
@@ -1113,17 +1114,7 @@ double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &
  */
 double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
                            double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b) const {
-
-    double rab2 = (a-b).norm2();
-    double gamma = alpha1 + alpha2;
-    Vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
-
-    double pre = std::pow(M_PI / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
-    double wx = this->overlap_1D(l1, l2, p[0]-a[0], p[0]-b[0], gamma);
-    double wy = this->overlap_1D(m1, m2, p[1]-a[1], p[1]-b[1], gamma);
-    double wz = this->overlap_1D(n1, n2, p[2]-a[2], p[2]-b[2], gamma);
-
-    return pre * wx * wy * wz;
+    return integrals::gaussian::overlap_gto(alpha1, l1, m1, n1, a, alpha2, l2, m2, n2, b);
 }
 
 /**
@@ -1188,15 +1179,7 @@ double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsig
  * @return double value of the one dimensional overlap integral
  */
 double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma) const {
-    double sum = 0.0;
-
-    for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
-        sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
-                     (i == 0 ? 1 : double_factorial(2 * i - 1) ) /
-                     std::pow(2 * gamma, i);
-    }
-
-    return sum;
+    return integrals::gaussian::overlap_1d(l1, l2, x1, x2, gamma);
 }
 
 /**
@@ -1212,30 +1195,16 @@ double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma
  */
 Vec3 Integrator::gaussian_product_center(double alpha1, const Vec3& a,
                                          double alpha2, const Vec3& b) const {
-    return (alpha1 * a + alpha2 * b) / (alpha1 + alpha2);
+    return integrals::gaussian::gaussian_product_center(alpha1, a, alpha2, b);
 }
 
 double Integrator::binomial_prefactor(int s, int ia, int ib,
                                       double xpa, double xpb) const {
-    double sum = 0.0;
-
-    for (int t=0; t < s+1; t++) {
-        if ((s-ia <= t) && (t <= ib)) {
-            sum += this->binomial(ia, s-t)   *
-                   this->binomial(ib, t)     *
-                   std::pow(xpa, ia - s + t) *
-                   std::pow(xpb, ib - t);
-        }
-    }
-
-    return sum;
+    return integrals::gaussian::binomial_prefactor(s, ia, ib, xpa, xpb);
 }
 
 double Integrator::binomial(int a, int b) const {
-    if( (a < 0) || (b < 0) || (a-b < 0) ) {
-        return 1.0;
-    }
-    return factorial(a) / (factorial(b) * factorial(a-b));
+    return integrals::gaussian::binomial(a, b);
 }
 
 double Integrator::nuclear(const Vec3& a, int l1, int m1, int n1, double alpha1,
