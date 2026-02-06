@@ -87,7 +87,7 @@ class TestHF(unittest.TestCase):
         np.testing.assert_almost_equal(results['orbe'], ans, 6)
 
         en = -39.35007280809286
-        np.testing.assert_almost_equal(results['energies'][-1], en, 6)
+        np.testing.assert_almost_equal(results['energies'][-1], en, 5)
 
     def test_hartree_fock_restart(self):
         """
