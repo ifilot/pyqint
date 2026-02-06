@@ -1,10 +1,10 @@
 import unittest
-from pyqint import PyQInt, Molecule, CGF
+from pyqint import PyQInt, Molecule, CGF, MoleculeBuilder
 import numpy as np
 import os
 
 class TestCGF(unittest.TestCase):
-    def testFunctionsCGF(self):
+    def test_functions_cgf(self):
         """
         Test getting amplitude from CGF
         """
@@ -49,7 +49,7 @@ class TestCGF(unittest.TestCase):
 
         np.testing.assert_almost_equal(amps, ans, 6)
 
-    def testPlotGrid(self):
+    def test_plot_grid(self):
         """
         Test plotting of 1b2 molecular orbital of H2O
         """
@@ -77,7 +77,7 @@ class TestCGF(unittest.TestCase):
         ans = np.load(os.path.join(os.path.dirname(__file__), 'results', 'h2o_orb_1b2.npy'))
         np.testing.assert_almost_equal(res, ans, 6)
 
-    def testSphericalHarmonicsOnSite(self):
+    def test_spherical_harmonic_on_site(self):
         """
         Check if the overlap matrix of all spherical harmonics up to l=6 is the identity matrix
         """
@@ -97,7 +97,7 @@ class TestCGF(unittest.TestCase):
                 S[i,j] = integrator.overlap(orb1, orb2)
         np.testing.assert_almost_equal(S, np.eye(S.shape[0]), 6)
 
-    def testSinglePrimitiveNormalization(self):
+    def test_single_primitive_normalization(self):
         """
         Test that a single primitive GTO has self-overlap of 1.0
         """
@@ -123,7 +123,7 @@ class TestCGF(unittest.TestCase):
             self.assertAlmostEqual(S, 1.0, places=10,
                 msg=f"Single primitive ({l},{m},{n}) with alpha={alpha} failed: S={S}")
 
-    def testContractedBasisNormalization(self):
+    def test_contracted_basis_normalization(self):
         """
         Test that contracted basis functions (STO-3G) have self-overlap of 1.0
         This verifies the contraction normalization is applied correctly.
@@ -142,7 +142,7 @@ class TestCGF(unittest.TestCase):
             self.assertAlmostEqual(S_ii, 1.0, places=8,
                 msg=f"Contracted basis function {i} has self-overlap {S_ii}")
 
-    def testOverlapMatrixSymmetryAndDiagonal(self):
+    def test_overlap_matrix(self):
         """
         Test overlap matrix properties for a multi-atom system:
         1. Diagonal elements should be 1.0 (normalisation)
@@ -177,6 +177,33 @@ class TestCGF(unittest.TestCase):
         off_diag = S - np.diag(np.diag(S))
         self.assertTrue(np.all(np.abs(off_diag) < 1.0),
             msg="Off-diagonal overlap elements should have magnitude < 1.0")
+    
+    def test_nh3_symmetrized_cgf(self):
+        """
+        Test whether symmetrized CGF is normalized
+        """
+        integrator = PyQInt()
+
+        # Build water molecule with STO-3G basis
+        mol = MoleculeBuilder.from_name('NH3')
+        cgfs, _ = mol.build_basis('sto3g')
+        self.assertEqual(len(cgfs), 8)
+
+        # build symmetrized CGF
+        cgf = CGF()
+        for j,c in enumerate(np.array([0,0,0,0,0,1,1,-2], dtype=int)):
+            if c != 0:
+                for g in cgfs[j].gtos:
+                    cgf.add_gto_with_position(
+                        g.c * c,
+                        g.p,
+                        g.alpha,
+                        g.l,
+                        g.m,
+                        g.n
+                    )
+        overlap = integrator.overlap(cgf, cgf)
+        self.assertEqual(overlap, 1.0)
 
 if __name__ == '__main__':
     unittest.main()
