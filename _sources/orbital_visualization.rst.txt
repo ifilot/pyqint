@@ -133,11 +133,11 @@ using three atoms and an explicit *up direction*. The three atoms uniquely
 define the plane, while the up direction removes the sign ambiguity of the plane
 normal.
 
-The plane specification is given as a list:
+The plane specification is given as a **tuple**:
 
 .. math::
 
-    [i, j, k, \vec{u}]
+    (i, j, k, \vec{u})
 
 where:
 
@@ -159,7 +159,7 @@ the up direction:
     ContourPlotter.build_contourplot(
         res,
         'ch4_contour.png',
-        plane=[0, 1, 2, up],
+        plane=(0, 1, 2, up), # note: this needs to be a tuple
         sz=3.0,
         npts=101,
         nrows=3,

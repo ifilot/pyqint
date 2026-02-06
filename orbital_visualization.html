@@ -231,9 +231,9 @@ defined by three atoms or planes aligned with molecular symmetry elements. The
 using three atoms and an explicit <em>up direction</em>. The three atoms uniquely
 define the plane, while the up direction removes the sign ambiguity of the plane
 normal.</p>
-<p>The plane specification is given as a list:</p>
+<p>The plane specification is given as a <strong>tuple</strong>:</p>
 <div class="math notranslate nohighlight">
-\[[i, j, k, \vec{u}]\]</div>
+\[(i, j, k, \vec{u})\]</div>
 <p>where:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(j\)</span>, and <span class="math notranslate nohighlight">\(k\)</span> are atom indices defining the plane</p></li>
@@ -251,7 +251,7 @@ the up direction:</p>
 <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
     <span class="s1">&#39;ch4_contour.png&#39;</span><span class="p">,</span>
-    <span class="n">plane</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">up</span><span class="p">],</span>
+    <span class="n">plane</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">up</span><span class="p">),</span> <span class="c1"># note: this needs to be a tuple</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
     <span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
