@@ -360,30 +360,9 @@ unsigned int CGF::max_primitive_l() const noexcept {
  * @return normalization constant
  */
 double CGF::get_contraction_norm() const {
-    // NOTE: any GTO is fine for the same shell tuple (lmn)
-    assert(gtos.size() != 0LU && "No GTOs found!");
-
-    // Check if all GTOs have the same angular momentum
-    const auto& first = this->get_gto(0);
-    const auto l = first.get_l();
-    const auto m = first.get_m();
-    const auto n = first.get_n();
-
-    // NOTE: only needed for the spherical harmonics test; otherwise not needed...
-    for (size_t i = 1; i < this->size(); ++i) {
-        const auto& gto = this->get_gto(i);
-        if (gto.get_l() != l || gto.get_m() != m || gto.get_n() != n) {
-            // Mixed angular momentum (e.g., spherical harmonics)
-            // Coefficients are pre-normalised; no additional factor needed
-            return 1.0;
-        }
-    }
-
     double sum = 0.0;
     for (size_t i = 0; i < this->size(); ++i) {
         for (size_t j = 0; j < this->size(); ++j) {
-            // const double a_i = this->get_coefficient_gto(i);
-            // const double a_j = this->get_coefficient_gto(j);
             const double a_i = this->get_norm_gto(i) * this->get_coefficient_gto(i);
             const double a_j = this->get_norm_gto(j) * this->get_coefficient_gto(j);
             const auto& gto_i = this->get_gto(i);
