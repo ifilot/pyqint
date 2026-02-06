@@ -51,12 +51,13 @@ private:
     double norm;            // normalization constant
 
 public:
-    // empty constructor
+    /**
+     * @brief Default constructor.
+     */
     GTO(){}
 
-    /*
-     * @fn GTO
-     * @brief Construct Gaussian Type Orbital
+    /**
+     * @brief Construct Gaussian Type Orbital.
      *
      * @param _c        coefficient
      * @param _x        position of the Gaussian
@@ -66,8 +67,6 @@ public:
      * @param _l        power of x in the polynomial
      * @param _m        power of y in the polynomial
      * @param _n        power of z in the polynomial
-     *
-     * returns double value of the incomplete Gamma Function
      */
     GTO(double _c,
         double _x,
@@ -78,9 +77,8 @@ public:
         unsigned int _m,
         unsigned int _n);
 
-    /*
-     * @fn GTO
-     * @brief Construct Gaussian Type Orbital
+    /**
+     * @brief Construct Gaussian Type Orbital.
      *
      * @param _c        coefficient
      * @param _position position of the Gaussian
@@ -88,8 +86,6 @@ public:
      * @param _l        power of x in the polynomial
      * @param _m        power of y in the polynomial
      * @param _n        power of z in the polynomial
-     *
-     * returns double value of the incomplete Gamma Function
      */
     GTO(double _c,
         const Vec3& _position,
@@ -102,124 +98,112 @@ public:
      * INLINE GETTERS
      */
 
-    /*
-     * @fn get_coefficient
-     * @brief get the coefficient
+    /**
+     * @brief Get the coefficient.
      *
-     * @return const double coefficient
+     * @return coefficient value
      */
     inline const double get_coefficient() const noexcept {
         return this->c;
     }
 
-    /*
-     * @fn get_coefficient
-     * @brief Gets the alpha value in the polynomial
+    /**
+     * @brief Get the alpha value in the polynomial.
      *
-     * @return const double coefficient
+     * @return alpha value
      */
     inline const double get_alpha() const noexcept {
         return this->alpha;
     }
 
-    /*
-     * @fn get_l
-     * @brief Gets power of the x component
+    /**
+     * @brief Get power of the x component.
      *
-     * @return const double power
+     * @return x power
      */
     inline const unsigned int get_l() const noexcept {
         return this->l;
     }
 
-    /*
-     * @fn get_m
-     * @brief Gets power of the y component
+    /**
+     * @brief Get power of the y component.
      *
-     * @return const double power
+     * @return y power
      */
     inline const unsigned int get_m() const noexcept {
         return this->m;
     }
 
-    /*
-     * @fn get_n
-     * @brief Gets power of the z component
+    /**
+     * @brief Get power of the z component.
      *
-     * @return const double power
+     * @return z power
      */
     inline const unsigned int get_n() const noexcept {
         return this->n;
     }
 
-    /*
-     * @fn get normalization constant
-     * @brief Returns the constant that ensures that the GTO is normalized
+    /**
+     * @brief Return the normalization constant.
      *
-     * @return const double norm constant
+     * @return normalization constant
      */
     inline const double get_norm() const noexcept {
         return this->norm;
     }
 
-    /*
-     * @fn get_position
-     * @brief Get the center of the Gaussian
+    /**
+     * @brief Get the center of the Gaussian.
      *
-     * @return const double Vec3
+     * @return position vector
      */
     inline const Vec3& get_position() const noexcept {
         return this->position;
     }
 
-    /*
-     * @fn get_amp
-     * @brief Gets the amplitude of the GTO
+    /**
+     * @brief Get the amplitude of the GTO.
      *
-     * @param Vec3 r    coordinates
+     * @param r    coordinates
      *
-     * @return const double amplitude
+     * @return amplitude value
      */
     const double get_amp(const Vec3& r) const noexcept;
 
-    /*
-     * @fn get_amp
-     * @brief Gets the amplitude of the GTO
+    /**
+     * @brief Get the amplitude of the GTO.
      *
-     * @param Vec3 r    coordinates
+     * @param x    x coordinate
+     * @param y    y coordinate
+     * @param z    z coordinate
      *
-     * @return const double amplitude
+     * @return amplitude value
      */
     inline double get_amp(double x, double y, double z) const noexcept {
         return this->get_amp(Vec3(x,y,z));
     }
 
-    /*
-     * @fn get_gradient
-     * @brief Gets the gradient of the GTO
+    /**
+     * @brief Get the gradient of the GTO.
      *
-     * @param Vec3 r    coordinates
+     * @param r    coordinates
      *
-     * @return gradient
+     * @return gradient vector
      */
     Vec3 get_grad(const Vec3& r) const noexcept;
 
-    /*
-     * @fn set_position
-     * @brief Set (new) position of GTO
+    /**
+     * @brief Set a (new) position of the GTO.
      *
-     * @return void
+     * @param _position  new center position
      */
     inline void set_position(const Vec3& _position) {
         this->position = _position;
     }
 
 private:
-    /*
-     * @fn calculate_normalization_constant
-     * @brief Calculates the normalization constant so that <GTO|GTO>=1
-     *
-     * @return void
+    /**
+     * @brief Calculate the normalization constant so that <GTO|GTO>=1.
      */
     void calculate_normalization_constant();
 };
@@ -231,27 +215,24 @@ private:
     Vec3 r;                 // position of the CGF
 
 public:
-    /*
-     * @fn CGF
-     * @brief Constructor
-     *
-     * @return CGF
+    /**
+     * @brief Construct an empty CGF at the origin.
      */
     CGF();
 
-    /*
-     * @fn CGF
-     * @brief Default constructor
+    /**
+     * @brief Construct a CGF at the provided coordinates.
      *
-     * @return CGF
+     * @param x  x coordinate
+     * @param y  y coordinate
+     * @param z  z coordinate
      */
     CGF(double x, double y, double z);
 
-    /*
-     * @fn CGF
-     * @brief Default constructor
+    /**
+     * @brief Construct a CGF at the provided position.
      *
-     * @return CGF
+     * @param _r  center position
      */
     CGF(const Vec3& _r);
 
@@ -272,129 +253,119 @@ public:
     };
 
     /**
-     * @brief      Get the vector position
+     * @brief Get the vector position.
      *
-     * @return     Position
+     * @return position vector
      */
     inline const Vec3& get_r() const noexcept {
         return r;
     }
 
-    /*
-     * @fn size
-     * @brief Returns the length of the contraction
+    /**
+     * @brief Return the length of the contraction.
      *
-     * @return unsigned int length
+     * @return length of the contraction
      */
     inline size_t size() const noexcept {
         return this->gtos.size();
     }
 
-    /*
-     * @fn size
-     * @brief Returns the normalization constant of a GTO
+    /**
+     * @brief Return the normalization constant of a GTO.
      *
-     * @param unsigned int i        ith GTO in the CGF
+     * @param i  ith GTO in the CGF
      *
-     * @return double normalization constant
+     * @return normalization constant
      */
     inline const double get_norm_gto(const unsigned int i) const noexcept {
         return this->gtos[i].get_norm();
     }
 
-    /*
-     * @fn size
-     * @brief Returns the coefficient of the GTO
+    /**
+     * @brief Return the coefficient of the GTO.
      *
-     * @param unsigned int i        ith GTO in the CGF
+     * @param i  ith GTO in the CGF
      *
-     * @return double GTO coefficient
+     * @return GTO coefficient
      */
     inline const double get_coefficient_gto(const unsigned int i) const noexcept {
         return this->gtos[i].get_coefficient();
     }
 
-    /*
-     * @fn size
-     * @brief Returns the GTO
+    /**
+     * @brief Return the GTO.
      *
-     * @param unsigned int i        ith GTO in the CGF
+     * @param i  ith GTO in the CGF
      *
-     * @return GTO
+     * @return GTO reference
      */
     inline const GTO& get_gto(const unsigned int i) const noexcept {
         return this->gtos[i];
     }
 
-    /*
-     * @fn get_amp
-     * @brief Gets the amplitude of the CGF
+    /**
+     * @brief Get the amplitude of the CGF.
      *
-     * @param Vec3 r    coordinates
+     * @param r    coordinates
      *
-     * @return const double amplitude
+     * @return amplitude value
      */
     const double get_amp(const Vec3& r) const noexcept;
 
-    /*
-     * @fn get_amp
-     * @brief Gets the amplitude of the GTO
+    /**
+     * @brief Get the amplitude of the CGF.
      *
-     * @param Vec3 r    coordinates
+     * @param x  x coordinate
+     * @param y  y coordinate
+     * @param z  z coordinate
      *
-     * @return const double amplitude
+     * @return amplitude value
      */
     inline double get_amp(double x, double y, double z) const noexcept {
         return this->get_amp(Vec3(x,y,z));
     }
 
-    /*
-     * @fn get_grad
-     * @brief Gets the gradient of the CGF
+    /**
+     * @brief Get the gradient of the CGF.
      *
-     * @param Vec3 r    coordinates
+     * @param r    coordinates
      *
-     * @return gradient
+     * @return gradient components
      */
     std::vector<double> get_grad(const Vec3& r) const noexcept;
 
-    /*
-     * @fn get_grad
-     * @brief Gets the gradient of the CGF
+    /**
+     * @brief Get the gradient of the CGF.
      *
-     * @param Vec3 r    coordinates
+     * @param x  x coordinate
+     * @param y  y coordinate
+     * @param z  z coordinate
      *
-     * @return gradient
+     * @return gradient components
      */
     inline std::vector<double> get_grad(double x, double y, double z) const noexcept {
         return this->get_grad(Vec3(x,y,z));
     }
 
-    /*
-     * @fn add_GTO
-     * @brief Add a GTO to the CGF
+    /**
+     * @brief Add a GTO to the CGF.
      *
-     * @param unsigned int type     type of the orbital (see above for the list)
-     * @param double alpha          alpha value
-     * @param double c              coefficient
-     *
-     * @return void
+     * @param type   type of the orbital (see above for the list)
+     * @param alpha  alpha value
+     * @param c      coefficient
      */
     void add_gto(unsigned int type,
                  double alpha,
                  double c);
 
-    /*
-     * @fn add_gto
-     * @brief Add a GTO to the CGF
+    /**
+     * @brief Add a GTO to the CGF.
      *
-     * @param double c              coefficient
-     * @param double alpha          alpha value
-     * @param unsigned int l        l angular momentum x
-     * @param unsigned int m        m angular momentum y
-     * @param unsigned int n        n angular momentum z
-     *
-     * @return void
+     * @param c      coefficient
+     * @param alpha  alpha value
+     * @param l      l angular momentum x
+     * @param m      m angular momentum y
+     * @param n      n angular momentum z
      */
     void add_gto(double c,
                  double alpha,
@@ -402,20 +373,17 @@ public:
                  unsigned int m,
                  unsigned int n);
 
-    /*
-     * @fn add_gto_with_position
-     * @brief Add a GTO to the CGF
+    /**
+     * @brief Add a GTO to the CGF with an explicit position.
      *
-     * @param double c              coefficient
-     * @param double px             px value
-     * @param double py             px value
-     * @param double pz             px value
-     * @param double alpha          alpha value
-     * @param unsigned int l        l angular momentum x
-     * @param unsigned int m        m angular momentum y
-     * @param unsigned int n        n angular momentum z
-     *
-     * @return void
+     * @param c      coefficient
+     * @param px     px value
+     * @param py     py value
+     * @param pz     pz value
+     * @param alpha  alpha value
+     * @param l      l angular momentum x
+     * @param m      m angular momentum y
+     * @param n      n angular momentum z
      */
     void add_gto_with_position(double c,
                  double px,
@@ -426,29 +394,25 @@ public:
                  unsigned int m,
                  unsigned int n);
 
-    /*
-     * @fn set_position
-     * @brief Set a (new) center for the CGF
+    /**
+     * @brief Set a (new) center for the CGF.
      *
-     * @param pos   center of the CGF
-     *
-     * @return void
+     * @param pos  center of the CGF
      */
     void set_position(const Vec3 &pos);
 
-    /*
-     * @fn max_primitive_l
-     * @brief Get maximum l value among GTOs
+    /**
+     * @brief Get maximum l value among GTOs.
      *
-     * @return unsigned int maximum l value among GTOs
+     * @return maximum l value among GTOs
      */
     unsigned int max_primitive_l() const noexcept;
 
-    /*
-     * @fn get_contraction_norm
-     * @brief Get the normalization constant for the pair of CGFs
-     *    N < φ_i | φ_i > = 1 => N = ...
-     *    for φ_i is a CGF with angular momentum shell pair (l,m,n)
+    /**
+     * @brief Get the normalization constant for the pair of CGFs.
+     *
+     * N < φ_i | φ_i > = 1 => N = ...
+     * for φ_i is a CGF with angular momentum shell pair (l,m,n)
      * see: https://arxiv.org/pdf/2007.12057 page 10 for more details
      *
      * @return normalization constant

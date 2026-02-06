@@ -20,6 +20,7 @@
  **************************************************************************/
 
 #include "integrals.h"
+#include "gaussian_integrals.h"
 
 /**
  * @brief Construct an Integrator instance and capture build-time information.
@@ -80,7 +81,15 @@ Integrator::Integrator(int lmax, int nu_max)
 }
 
 /**
- * @brief      Evaluate all integrals for cgfs in buffer
+ * @brief Evaluate all one- and two-electron integrals for a basis set.
+ *
+ * @param cgfs     Contracted Gaussian functions
+ * @param charges  Nuclear charges
+ * @param px       Nuclear x coordinates
+ * @param py       Nuclear y coordinates
+ * @param pz       Nuclear z coordinates
+ *
+ * @return packed vector of overlap, kinetic, nuclear, and TEI values
  */
 std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                                               const std::vector<int>& charges,
@@ -142,7 +151,11 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
 }
 
 /**
- * @brief      Evaluate all integrals for cgfs in buffer
+ * @brief Evaluate all two-electron integrals within the basis set.
+ *
+ * @param cgfs  Contracted Gaussian functions
+ *
+ * @return packed vector of two-electron integrals
  */
 std::vector<double> Integrator::evaluate_tei(const std::vector<CGF>& cgfs) const {
     const size_t sz = cgfs.size();
@@ -158,6 +171,12 @@ std::vector<double> Integrator::evaluate_tei(const std::vector<CGF>& cgfs) const
     return results;
 }
 
+/**
+ * @brief Compute and pack all two-electron integrals.
+ *
+ * @param cgfs      Contracted Gaussian functions
+ * @param tetensor  Output tensor of two-electron integrals
+ */
 void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
                                                   std::vector<double>& tetensor) const {
     const size_t sz = cgfs.size();
@@ -221,7 +240,15 @@ void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
 }
 
 /**
- * @brief      Evaluate the geometric derivates for all cgfs in buffer
+ * @brief Evaluate geometric derivatives for all cgfs in buffer.
+ *
+ * @param cgfs     Contracted Gaussian functions
+ * @param charges  Nuclear charges
+ * @param px       Nuclear x coordinates
+ * @param py       Nuclear y coordinates
+ * @param pz       Nuclear z coordinates
+ *
+ * @return packed vector of overlap, kinetic, nuclear, and TEI derivatives
  */
 std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector<CGF>& cgfs,
                                                                const std::vector<int>& charges,
@@ -352,14 +379,14 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
  **************************************************************************/
 
 /**
- * @brief Calculates overlap integral of two CGF
+ * @brief Calculate overlap integral of two CGFs.
  *
- * @param const CGF& cgf1   Contracted Gaussian Function
- * @param const CGF& cgf2   Contracted Gaussian Function
+ * @param cgf1  Contracted Gaussian Function 1
+ * @param cgf2  Contracted Gaussian Function 2
  *
  * Calculates the value of < cgf1 | cgf2 >
  *
- * @return double value of the overlap integral
+ * @return value of the overlap integral
  */
 double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) const {
     double sum = 0.0;
@@ -382,14 +409,14 @@ double Integrator::overlap(const CGF& cgf1, const CGF& cgf2) const {
 }
 
 /**
- * @brief      Calculates overlap integral of two GTO
+ * @brief Calculate overlap integral of two GTOs.
  *
- * @param[in]  gto1  Gaussian Type Orbital 1
- * @param[in]  gto2  Gaussian Type Orbital 2
+ * @param gto1  Gaussian Type Orbital 1
+ * @param gto2  Gaussian Type Orbital 2
  *
  * Calculates the value of < gto1 | gto2 >
  *
- * @return     double value of the overlap integral
+ * @return value of the overlap integral
  */
 double Integrator::overlap_gto(const GTO& gto1, const GTO& gto2) const {
     return this->overlap(gto1.get_alpha(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_position(),
@@ -397,17 +424,16 @@ double Integrator::overlap_gto(const GTO& gto1, const GTO& gto2) const {
 }
 
 /**
- * @brief      Calculates the geometric derivative of overlap integral of
- *             two CGF
+ * @brief Calculate the geometric derivative of the overlap integral.
  *
- * @param[in]  cgf1     Gaussian Contracted Functional 1
- * @param[in]  cgf2     Gaussian Contracted Functional 2
- * @param[in]  nucleus  Nucleus position
- * @param[in]  coord    Cartesian direction
+ * @param cgf1     Contracted Gaussian Function 1
+ * @param cgf2     Contracted Gaussian Function 2
+ * @param nucleus  nucleus position
+ * @param coord    Cartesian direction (0=x,1=y,2=z)
  *
  * Calculates the value of d/dx < cgf1 | cgf2 >
  *
- * @return     double value of the nuclear integral
+ * @return value of the overlap derivative
  */
 double Integrator::overlap_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
@@ -448,14 +474,13 @@ double Integrator::overlap_deriv(const CGF& cgf1,
 }
 
 /**
- * @brief Calculates overlap integral of two GTO
+ * @brief Calculate the geometric derivative of the overlap integral for two GTOs.
  *
- * @param const GTO& gto1   Gaussian Type Orbital
- * @param const GTO& gto2   Gaussian Type Orbital
+ * @param gto1   Gaussian Type Orbital
+ * @param gto2   Gaussian Type Orbital
+ * @param coord  Cartesian direction (0=x,1=y,2=z)
  *
- * Calculates the value of < gto1 | gto2 >
- *
- * @return double value of the overlap integral
+ * @return value of the overlap derivative
  */
 double Integrator::overlap_deriv_gto(const GTO& gto1,
                                      const GTO& gto2,
@@ -501,16 +526,16 @@ double Integrator::overlap_deriv_gto(const GTO& gto1,
  **************************************************************************/
 
 /**
- * @brief      Calculates dipole integral of two CGF
+ * @brief Calculate dipole integral of two CGFs.
  *
- * @param[in]  cgf1  Contracted Gaussian Function
- * @param[in]  cgf2  Contracted Gaussian Function
- * @param[in]  cc    Cartesian direction
- * @param[in]  ref   Reference position
+ * @param cgf1  Contracted Gaussian Function
+ * @param cgf2  Contracted Gaussian Function
+ * @param cc    Cartesian direction (0=x,1=y,2=z)
+ * @param ref   Reference position
  *
  * Calculates the value of < cgf1 | (cc - ref) | cgf2 >
  *
- * @return     value of the dipole integral
+ * @return value of the dipole integral
  */
 double Integrator::dipole(const CGF& cgf1,
                           const CGF& cgf2,
@@ -537,16 +562,16 @@ double Integrator::dipole(const CGF& cgf1,
 }
 
 /**
- * @brief      Calculates dipole integral of two GTO
+ * @brief Calculate dipole integral of two GTOs.
  *
- * @param[in]  gto1   Gaussian Type Orbital
- * @param[in]  gto2   Gaussian Type Orbital
- * @param      cc     Cartesian direction
- * @param[in]  ref    The reference
+ * @param gto1  Gaussian Type Orbital
+ * @param gto2  Gaussian Type Orbital
+ * @param cc    Cartesian direction (0=x,1=y,2=z)
+ * @param ref   Reference position
  *
  * Calculates the value of < gto1 | (cc - ref) | gto2 >
  *
- * @return     value of the dipole integral
+ * @return value of the dipole integral
  */
 double Integrator::dipole_gto(const GTO& gto1,
                               const GTO& gto2,
@@ -562,14 +587,14 @@ double Integrator::dipole_gto(const GTO& gto1,
  **************************************************************************/
 
 /**
- * @brief      Calculates kinetic integral of two CGF
+ * @brief Calculate kinetic integral of two CGFs.
  *
- * @param[in]  cgf1  Contracted Gaussian Functional 1
- * @param[in]  cgf2  Contracted Gaussian Functional 2
+ * @param cgf1  Contracted Gaussian Function 1
+ * @param cgf2  Contracted Gaussian Function 2
  *
  * Calculates the value of < cgf1 | T | cgf2 >
  *
- * @return     double value of the kinetic integral
+ * @return value of the kinetic integral
  */
 double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) const {
     double sum = 0.0;
@@ -593,14 +618,14 @@ double Integrator::kinetic(const CGF& cgf1, const CGF& cgf2) const {
 }
 
 /**
- * @brief      Calculates kinetic integral of two GTO
+ * @brief Calculate kinetic integral of two GTOs.
  *
- * @param[in]  gto1  Gaussian Type Orbital 1
- * @param[in]  gto2  Gaussian Type Orbital 2
+ * @param gto1  Gaussian Type Orbital 1
+ * @param gto2  Gaussian Type Orbital 2
  *
  * Calculates the value of < gto1 | T | gto2 >
  *
- * @return     double value of the kinetic integral
+ * @return value of the kinetic integral
  */
 double Integrator::kinetic_gto(const GTO& gto1, const GTO& gto2) const {
     double term0 = gto2.get_alpha() *
@@ -623,16 +648,16 @@ double Integrator::kinetic_gto(const GTO& gto1, const GTO& gto2) const {
 }
 
 /**
- * @brief      Calculates derivative of kinetic integral of two CGF
+ * @brief Calculate derivative of kinetic integral of two CGFs.
  *
- * @param[in]  cgf1     Contracted Gaussian Functional 1
- * @param[in]  cgf2     Contracted Gaussian Functional 2
- * @param[in]  nucleus  nucleus position
- * @param[in]  coord    derivative coordinate
+ * @param cgf1     Contracted Gaussian Function 1
+ * @param cgf2     Contracted Gaussian Function 2
+ * @param nucleus  nucleus position
+ * @param coord    Cartesian direction (0=x,1=y,2=z)
  *
  * Calculates the value of d/dcx < cgf1 | -1/2 nabla^2 | cgf2 >
  *
- * @return     double value of the kinetic integral
+ * @return value of the kinetic integral derivative
  */
 double Integrator::kinetic_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
@@ -669,15 +694,15 @@ double Integrator::kinetic_deriv(const CGF& cgf1,
 }
 
 /**
- * @brief      Calculates derivative of kinetic integral of two GTOs
+ * @brief Calculate derivative of kinetic integral of two GTOs.
  *
- * @param[in]  gto1   The gto 1
- * @param[in]  gto2   The gto 2
- * @param      unsigned  int coord    Derivative direction
+ * @param gto1   Gaussian Type Orbital 1
+ * @param gto2   Gaussian Type Orbital 2
+ * @param coord  Cartesian direction (0=x,1=y,2=z)
  *
  * Calculates the value of < d/dx gto1 |-1/2 nabla^2 | gto2 >
  *
- * @return     double value of the derivative of the kinetic integral
+ * @return value of the kinetic integral derivative
  */
 double Integrator::kinetic_deriv_gto(const GTO& gto1, const GTO& gto2, unsigned int coord) const {
     std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
@@ -726,16 +751,16 @@ double Integrator::kinetic_deriv_gto(const GTO& gto1, const GTO& gto2, unsigned 
  **************************************************************************/
 
 /**
- * @brief      Calculates nuclear integral of two CGF
+ * @brief Calculate nuclear attraction integral of two CGFs.
  *
- * @param[in]  cgf1     Contracted Gaussian Functional 1
- * @param[in]  cgf2     Contracted Gaussian Functional 2
- * @param[in]  nucleus  nucleus position
- * @param[in]  charge   charge of the nucleus
+ * @param cgf1     Contracted Gaussian Function 1
+ * @param cgf2     Contracted Gaussian Function 2
+ * @param nucleus  nucleus position
+ * @param charge   charge of the nucleus
  *
  * Calculates the value of < cgf1 | V | cgf2 >
  *
- * @return     double value of the nuclear integral
+ * @return value of the nuclear integral
  */
 double Integrator::nuclear(const CGF& cgf1,
                            const CGF& cgf2,
@@ -760,15 +785,15 @@ double Integrator::nuclear(const CGF& cgf1,
 }
 
 /**
- * @brief      Calculates nuclear integral of two GTOs
+ * @brief Calculate nuclear attraction integral of two GTOs.
  *
- * @param[in]  gto1     Gaussian Type Orbital 1
- * @param[in]  gto2     Gaussian Type Orbital 2
- * @param[in]  nucleus  nucleus position
+ * @param gto1     Gaussian Type Orbital 1
+ * @param gto2     Gaussian Type Orbital 2
+ * @param nucleus  nucleus position
  *
  * Calculates the value of < gto1 | V | gto2 >
  *
- * @return     double value of the nuclear integral
+ * @return value of the nuclear integral
  */
 double Integrator::nuclear_gto(const GTO& gto1,
                                const GTO& gto2,
@@ -778,14 +803,14 @@ double Integrator::nuclear_gto(const GTO& gto1,
 }
 
 /**
- * @brief Calculates derivative of the nuclear attraction integral of two CGF
+ * @brief Calculate derivative of the nuclear attraction integral for two CGFs.
  *
- * @param const CGF& cgf1       Contracted Gaussian Function
- * @param const CGF& cgf2       Contracted Gaussian Function
- * @param const Vec3& nucleus   Position of the nucleus generating the potential
- * @param unsigned int charge   Charge of the nucleus in a.u.
- * @param const Vec3& nucderiv  Center with respect to which the derivative is taken
- * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
+ * @param cgf1     Contracted Gaussian Function
+ * @param cgf2     Contracted Gaussian Function
+ * @param nucleus  Position of the nucleus generating the potential
+ * @param charge   Charge of the nucleus in a.u.
+ * @param nucderiv Center with respect to which the derivative is taken
+ * @param coord    Cartesian direction of the derivative (0=x,1=y,2=z)
  *
  * Calculates the value of
  *
@@ -793,7 +818,7 @@ double Integrator::nuclear_gto(const GTO& gto1,
  *
  * where R is the selected Cartesian coordinate of the given center.
  *
- * @return double value of the nuclear attraction gradient
+ * @return value of the nuclear attraction gradient
  */
 double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& nucleus,
     unsigned int charge, const Vec3& nucderiv, unsigned int coord) const {
@@ -852,12 +877,12 @@ double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& n
 }
 
 /**
- * @brief Calculates derivative of the nuclear attraction integral of two GTO
+ * @brief Calculate derivative of the nuclear attraction integral for two GTOs.
  *
- * @param const GTO& gto1       Gaussian Type Orbital
- * @param const GTO& gto2       Gaussian Type Orbital
- * @param const Vec3& nucleus   Position of the nucleus generating the potential
- * @param unsigned int coord    Cartesian direction of the derivative (0=x,1=y,2=z)
+ * @param gto1     Gaussian Type Orbital
+ * @param gto2     Gaussian Type Orbital
+ * @param nucleus  Position of the nucleus generating the potential
+ * @param coord    Cartesian direction of the derivative (0=x,1=y,2=z)
  *
  * Calculates the value of
  *
@@ -868,7 +893,7 @@ double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& n
  * This routine evaluates the derivative of the nuclear attraction integral and
  * returns the corresponding energy gradient component.
  *
- * @return double value of the nuclear attraction gradient
+ * @return value of the nuclear attraction gradient
  */
 double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2,
                                  const Vec3& nucleus, unsigned int coord) const {
@@ -927,16 +952,16 @@ double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2,
  **************************************************************************/
 
 /**
- * @brief Calculates two-electron repulsion integral of four CGF
+ * @brief Calculate two-electron repulsion integral of four CGFs.
  *
- * @param const CGF& cgf1       Contracted Gaussian Function
- * @param const CGF& cgf2       Contracted Gaussian Function
- * @param const CGF& cgf3       Contracted Gaussian Function
- * @param const CGF& cgf4       Contracted Gaussian Function
+ * @param cgf1  Contracted Gaussian Function
+ * @param cgf2  Contracted Gaussian Function
+ * @param cgf3  Contracted Gaussian Function
+ * @param cgf4  Contracted Gaussian Function
  *
  * Calculates the value of < cgf1 | cgf2 | cgf3 | cgf4 >
  *
- * @return double value of the repulsion integral
+ * @return value of the repulsion integral
  */
 double Integrator::repulsion(const CGF& cgf1,const CGF& cgf2,const CGF& cgf3,const CGF& cgf4) const {
     double sum = 0;
@@ -966,18 +991,18 @@ double Integrator::repulsion(const CGF& cgf1,const CGF& cgf2,const CGF& cgf3,con
 }
 
 /**
- * @brief Calculates derivative of the two-electron repulsion integral of four CGF
+ * @brief Calculate derivative of the two-electron repulsion integral for four CGFs.
  *
- * @param const CGF& cgf1       Contracted Gaussian Function
- * @param const CGF& cgf2       Contracted Gaussian Function
- * @param const CGF& cgf3       Contracted Gaussian Function
- * @param const CGF& cgf4       Contracted Gaussian Function
- * @param const Vec3& nucleus   Nucleus coordinates
- * @param unsigned int coord    Derivative direction
+ * @param cgf1     Contracted Gaussian Function
+ * @param cgf2     Contracted Gaussian Function
+ * @param cgf3     Contracted Gaussian Function
+ * @param cgf4     Contracted Gaussian Function
+ * @param nucleus  Nucleus coordinates
+ * @param coord    Cartesian direction (0=x,1=y,2=z)
  *
  * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
  *
- * @return double value of the repulsion integral
+ * @return value of the repulsion integral derivative
  */
 double Integrator::repulsion_deriv(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4,
     const Vec3& nucleus, unsigned int coord) const {
@@ -1031,16 +1056,16 @@ double Integrator::repulsion_deriv(const CGF& cgf1, const CGF& cgf2, const CGF& 
 }
 
 /**
- * @brief Calculates two-electron repulsion integral of four CGF
+ * @brief Calculate two-electron repulsion integral of four GTOs.
  *
- * @param const GTO& gto1       Contracted Gaussian Function
- * @param const GTO& gto2       Contracted Gaussian Function
- * @param const GTO& gto3       Contracted Gaussian Function
- * @param const GTO& gto4       Contracted Gaussian Function
+ * @param gto1  Gaussian Type Orbital
+ * @param gto2  Gaussian Type Orbital
+ * @param gto3  Gaussian Type Orbital
+ * @param gto4  Gaussian Type Orbital
  *
  * Calculates the value of < gto1 | gto2 | gto3 | gto4 >
  *
- * @return double value of the repulsion integral
+ * @return value of the repulsion integral
  */
 double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
 
@@ -1054,17 +1079,17 @@ double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, 
 }
 
 /**
- * @brief Calculates repulsion derivative integral of four GTO
+ * @brief Calculate repulsion derivative integral of four GTOs.
  *
- * @param const GTO& gto1       Gaussian Type Orbital
- * @param const GTO& gto2       Gaussian Type Orbital
- * @param const GTO& gto3       Gaussian Type Orbital
- * @param const GTO& gto4       Gaussian Type Orbital
- * @param unsigned int coord    Derivative direction
+ * @param gto1   Gaussian Type Orbital
+ * @param gto2   Gaussian Type Orbital
+ * @param gto3   Gaussian Type Orbital
+ * @param gto4   Gaussian Type Orbital
+ * @param coord  Cartesian direction (0=x,1=y,2=z)
  *
  * Calculates the value of < d/dx gto1 | gto2 | gto3 | gto4 >
  *
- * @return double value of the overlap integral
+ * @return value of the overlap derivative integral
  */
 double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const {
     std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
@@ -1094,53 +1119,45 @@ double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &
 }
 
 /**
- * @brief Performs overlap integral evaluation
+ * @brief Perform overlap integral evaluation for two primitive GTOs.
  *
- * @param double alpha1     Gaussian exponent of the first GTO
- * @param unsigned int l1   Power of x component of the polynomial of the first GTO
- * @param unsigned int m1   Power of y component of the polynomial of the first GTO
- * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param Vec3 a            Center of the Gaussian orbital of the first GTO
- * @param double alpha2     Gaussian exponent of the second GTO
- * @param unsigned int l2   Power of x component of the polynomial of the second GTO
- * @param unsigned int m2   Power of y component of the polynomial of the second GTO
- * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param Vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param alpha1  Gaussian exponent of the first GTO
+ * @param l1      Power of x component of the polynomial of the first GTO
+ * @param m1      Power of y component of the polynomial of the first GTO
+ * @param n1      Power of z component of the polynomial of the first GTO
+ * @param a       Center of the first GTO
+ * @param alpha2  Gaussian exponent of the second GTO
+ * @param l2      Power of x component of the polynomial of the second GTO
+ * @param m2      Power of y component of the polynomial of the second GTO
+ * @param n2      Power of z component of the polynomial of the second GTO
+ * @param b       Center of the second GTO
  *
  * Calculates the value of < gto1 | gto2 >
  *
- * @return double value of the overlap integral
+ * @return value of the overlap integral
  */
 double Integrator::overlap(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
                            double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b) const {
-
-    double rab2 = (a-b).norm2();
-    double gamma = alpha1 + alpha2;
-    Vec3 p = this->gaussian_product_center(alpha1, a, alpha2, b);
-
-    double pre = std::pow(M_PI / gamma, 1.5) * std::exp(-alpha1 * alpha2 * rab2 / gamma);
-    double wx = this->overlap_1D(l1, l2, p[0]-a[0], p[0]-b[0], gamma);
-    double wy = this->overlap_1D(m1, m2, p[1]-a[1], p[1]-b[1], gamma);
-    double wz = this->overlap_1D(n1, n2, p[2]-a[2], p[2]-b[2], gamma);
-
-    return pre * wx * wy * wz;
+    return integrals::gaussian::overlap_gto(alpha1, l1, m1, n1, a, alpha2, l2, m2, n2, b);
 }
 
 /**
- * @brief Performs overlap integral evaluation
+ * @brief Perform dipole integral evaluation for two primitive GTOs.
  *
- * @param double alpha1     Gaussian exponent of the first GTO
- * @param unsigned int l1   Power of x component of the polynomial of the first GTO
- * @param unsigned int m1   Power of y component of the polynomial of the first GTO
- * @param unsigned int n1   Power of z component of the polynomial of the first GTO
- * @param Vec3 a            Center of the Gaussian orbital of the first GTO
- * @param double alpha2     Gaussian exponent of the second GTO
- * @param unsigned int l2   Power of x component of the polynomial of the second GTO
- * @param unsigned int m2   Power of y component of the polynomial of the second GTO
- * @param unsigned int n2   Power of z component of the polynomial of the second GTO
- * @param Vec3 b            Center of the Gaussian orbital of the second GTO
+ * @param alpha1  Gaussian exponent of the first GTO
+ * @param l1      Power of x component of the polynomial of the first GTO
+ * @param m1      Power of y component of the polynomial of the first GTO
+ * @param n1      Power of z component of the polynomial of the first GTO
+ * @param a       Center of the first GTO
+ * @param alpha2  Gaussian exponent of the second GTO
+ * @param l2      Power of x component of the polynomial of the second GTO
+ * @param m2      Power of y component of the polynomial of the second GTO
+ * @param n2      Power of z component of the polynomial of the second GTO
+ * @param b       Center of the second GTO
+ * @param cc      Cartesian direction (0=x,1=y,2=z)
+ * @param cref    Reference position
  *
- * @return double value of the overlap integral
+ * @return value of the dipole integral
  */
 double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsigned int n1, const Vec3 &a,
                           double alpha2, unsigned int l2, unsigned int m2, unsigned int n2, const Vec3 &b,
@@ -1174,70 +1191,84 @@ double Integrator::dipole(double alpha1, unsigned int l1, unsigned int m1, unsig
 }
 
 /**
- * @brief Calculates one dimensional overlap integral
+ * @brief Calculate one-dimensional overlap integral.
  *
- * @param int l1        Power of 'x' component of the polynomial of the first GTO
- * @param int l2        Power of 'x' component of the polynomial of the second GTO
- * @param double x1     'x' component of the position of the first GTO
- * @param double x2     'x' component of the position of the second GTO
- * @param double gamma  Sum of the two Gaussian exponents
+ * @param l1     Power of 'x' component of the polynomial of the first GTO
+ * @param l2     Power of 'x' component of the polynomial of the second GTO
+ * @param x1     'x' component of the position of the first GTO
+ * @param x2     'x' component of the position of the second GTO
+ * @param gamma  Sum of the two Gaussian exponents
  *
  * NOTE: in contrast to other places, here int has to be used rather than unsigned int
  *       because sometimes negative numbers are parsed
  *
- * @return double value of the one dimensional overlap integral
+ * @return value of the one dimensional overlap integral
  */
 double Integrator::overlap_1D(int l1, int l2, double x1, double x2, double gamma) const {
-    double sum = 0.0;
-
-    for(int i=0; i < (1 + std::floor(0.5 * (l1 + l2))); i++) {
-        sum += this->binomial_prefactor(2*i, l1, l2, x1, x2) *
-                     (i == 0 ? 1 : double_factorial(2 * i - 1) ) /
-                     std::pow(2 * gamma, i);
-    }
-
-    return sum;
+    return integrals::gaussian::overlap_1d(l1, l2, x1, x2, gamma);
 }
 
 /**
  * @brief Calculates the Gaussian product center of two GTOs
  *
- * @param double alpha1     Gaussian exponent of the first GTO
- * @param double alpha2     Gaussian exponent of the second GTO
- * @param const Vec3 a      Center of the first GTO
- * @param const Vec3 b      Center of the second GTO
+ * @param alpha1  Gaussian exponent of the first GTO
+ * @param a       Center of the first GTO
+ * @param alpha2  Gaussian exponent of the second GTO
+ * @param b       Center of the second GTO
  *
  *
  * @return new gaussian product center
  */
 Vec3 Integrator::gaussian_product_center(double alpha1, const Vec3& a,
                                          double alpha2, const Vec3& b) const {
-    return (alpha1 * a + alpha2 * b) / (alpha1 + alpha2);
+    return integrals::gaussian::gaussian_product_center(alpha1, a, alpha2, b);
 }
 
+/**
+ * @brief Compute the binomial prefactor for Hermite Gaussian recursion.
+ *
+ * @param s    Summation index
+ * @param ia   Angular momentum component of first Gaussian
+ * @param ib   Angular momentum component of second Gaussian
+ * @param xpa  Distance P_x - A_x
+ * @param xpb  Distance P_x - B_x
+ *
+ * @return binomial prefactor value
+ */
 double Integrator::binomial_prefactor(int s, int ia, int ib,
                                       double xpa, double xpb) const {
-    double sum = 0.0;
-
-    for (int t=0; t < s+1; t++) {
-        if ((s-ia <= t) && (t <= ib)) {
-            sum += this->binomial(ia, s-t)   *
-                   this->binomial(ib, t)     *
-                   std::pow(xpa, ia - s + t) *
-                   std::pow(xpb, ib - t);
-        }
-    }
-
-    return sum;
+    return integrals::gaussian::binomial_prefactor(s, ia, ib, xpa, xpb);
 }
 
+/**
+ * @brief Compute the binomial coefficient.
+ *
+ * @param a  Upper index
+ * @param b  Lower index
+ *
+ * @return binomial coefficient
+ */
 double Integrator::binomial(int a, int b) const {
-    if( (a < 0) || (b < 0) || (a-b < 0) ) {
-        return 1.0;
-    }
-    return factorial(a) / (factorial(b) * factorial(a-b));
+    return integrals::gaussian::binomial(a, b);
 }
 
+/**
+ * @brief Perform nuclear attraction integral evaluation for primitive GTOs.
+ *
+ * @param a       Center of the first GTO
+ * @param l1      Power of x component of the polynomial of the first GTO
+ * @param m1      Power of y component of the polynomial of the first GTO
+ * @param n1      Power of z component of the polynomial of the first GTO
+ * @param alpha1  Gaussian exponent of the first GTO
+ * @param b       Center of the second GTO
+ * @param l2      Power of x component of the polynomial of the second GTO
+ * @param m2      Power of y component of the polynomial of the second GTO
+ * @param n2      Power of z component of the polynomial of the second GTO
+ * @param alpha2  Gaussian exponent of the second GTO
+ * @param c       Nuclear position
+ *
+ * @return value of the nuclear integral
+ */
 double Integrator::nuclear(const Vec3& a, int l1, int m1, int n1, double alpha1,
                            const Vec3& b, int l2, int m2, int n2,
                            double alpha2, const Vec3& c) const {
@@ -1266,6 +1297,18 @@ double Integrator::nuclear(const Vec3& a, int l1, int m1, int n1, double alpha1,
     return -2.0 * M_PI / gamma * std::exp(-alpha1*alpha2*rab2/gamma) * sum;
 }
 
+/**
+ * @brief Build the Hermite A array.
+ *
+ * @param l1  Angular momentum component for center A
+ * @param l2  Angular momentum component for center B
+ * @param pa  P-A distance component
+ * @param pb  P-B distance component
+ * @param cp  C-P distance component
+ * @param g   Gaussian exponent sum
+ *
+ * @return Hermite A array
+ */
 std::vector<double> Integrator::A_array(const int l1, const int l2, const double pa, const double pb, const double cp, const double g) const {
     int imax = l1 + l2 + 1;
     std::vector<double> arrA(imax, 0);
@@ -1282,6 +1325,21 @@ std::vector<double> Integrator::A_array(const int l1, const int l2, const double
     return arrA;
 }
 
+/**
+ * @brief Evaluate a single Hermite A term.
+ *
+ * @param i      Hermite index
+ * @param r      recursion index
+ * @param u      Boys index
+ * @param l1     Angular momentum component for center A
+ * @param l2     Angular momentum component for center B
+ * @param pax    P-A distance component
+ * @param pbx    P-B distance component
+ * @param cpx    C-P distance component
+ * @param gamma  Gaussian exponent sum
+ *
+ * @return Hermite A term value
+ */
 double Integrator::A_term(const int i, const int r, const int u, const int l1, const int l2, const double pax, const double pbx, const double cpx, const double gamma) const {
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
             std::pow(-1,u) * factorial(i)*std::pow(cpx,i-2*r-2*u)*
@@ -1429,6 +1487,25 @@ double Integrator::repulsion_boys_cached(const Vec3 &a, const int la, const int 
                  std::exp(-alphac*alphad*rcd2/gamma2)*sum;
 }
 
+/**
+ * @brief Build the B array for the Obara–Saika recurrence.
+ *
+ * @param l1     Angular momentum component for center A
+ * @param l2     Angular momentum component for center B
+ * @param l3     Angular momentum component for center C
+ * @param l4     Angular momentum component for center D
+ * @param p      Gaussian exponent sum for the first pair
+ * @param a      Center A coordinate
+ * @param b      Center B coordinate
+ * @param q      Gaussian exponent sum for the second pair
+ * @param c      Center C coordinate
+ * @param d      Center D coordinate
+ * @param g1     Gaussian exponent sum gamma1
+ * @param g2     Gaussian exponent sum gamma2
+ * @param delta  delta parameter
+ *
+ * @return B array values
+ */
 std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,const int l4,
         const double p, const double a, const double b, const double q, const double c, const double d,
         const double g1, const double g2, const double delta) const {
@@ -1452,9 +1529,33 @@ std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,c
     return arrB;
 }
 
+/**
+ * @brief Evaluate a single B-term for the Obara–Saika recurrence.
+ *
+ * @param i1     Hermite index for the first pair
+ * @param i2     Hermite index for the second pair
+ * @param r1     Recursion index for the first pair
+ * @param r2     Recursion index for the second pair
+ * @param u      Boys index
+ * @param l1     Angular momentum component for center A
+ * @param l2     Angular momentum component for center B
+ * @param l3     Angular momentum component for center C
+ * @param l4     Angular momentum component for center D
+ * @param px     P coordinate component
+ * @param ax     A coordinate component
+ * @param bx     B coordinate component
+ * @param qx     Q coordinate component
+ * @param cx     C coordinate component
+ * @param dx     D coordinate component
+ * @param gamma1 Gaussian exponent sum gamma1
+ * @param gamma2 Gaussian exponent sum gamma2
+ * @param delta  delta parameter
+ *
+ * @return B-term value
+ */
 double Integrator::B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
-        const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
-        const double gamma2, const double delta) const {
+    const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
+    const double gamma2, const double delta) const {
     return fB(i1,l1,l2,px,ax,bx,r1,gamma1)*
         pow(-1,i2) * fB(i2,l3,l4,qx,cx,dx,r2,gamma2)*
         pow(-1,u)*fact_ratio2(i1+i2-2*(r1+r2),u)*
@@ -1462,18 +1563,59 @@ double Integrator::B_term(const int i1, const int i2, const int r1, const int r2
         pow(delta,i1+i2-2*(r1+r2)-u);
 }
 
+/**
+ * @brief Evaluate helper term used in B-array construction.
+ *
+ * @param i   Hermite index
+ * @param l1  Angular momentum component for center A
+ * @param l2  Angular momentum component for center B
+ * @param p   Gaussian exponent sum
+ * @param a   Center A coordinate
+ * @param b   Center B coordinate
+ * @param r   Recursion index
+ * @param g   Gaussian exponent sum for the second pair
+ *
+ * @return fB term value
+ */
 double Integrator::fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double g) const {
     return binomial_prefactor(i, l1, l2, p-a, p-b) * BB0(i, r, g);
 }
 
+/**
+ * @brief Evaluate the BB0 helper term.
+ *
+ * @param i  Hermite index
+ * @param r  Recursion index
+ * @param g  Gaussian exponent sum
+ *
+ * @return BB0 term value
+ */
 double Integrator::BB0(int i, int r, double g) const {
     return fact_ratio2(i,r) * pow(4*g,r-i);
 }
 
+/**
+ * @brief Compute factorial ratio used in recursion relations.
+ *
+ * @param a  first index
+ * @param b  second index
+ *
+ * @return factorial ratio
+ */
 double Integrator::fact_ratio2(unsigned int a, unsigned int b) const {
     return factorial(a) / factorial(b) / factorial(a - 2*b);
 }
 
+/**
+ * @brief Compute the flattened two-electron integral index.
+ *
+ * @param i  basis function index
+ * @param j  basis function index
+ * @param k  basis function index
+ * @param l  basis function index
+ *
+ * @return flattened index in the packed TEI array
+ */
 size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     if(i < j) {
         std::swap(i,j);
@@ -1492,6 +1634,14 @@ size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
     return ij * (ij + 1) / 2 + kl;
 }
 
+/**
+ * @brief Ensure the Hellsing cache supports the basis set.
+ *
+ * @param cgf1  Contracted Gaussian Function
+ * @param cgf2  Contracted Gaussian Function
+ * @param cgf3  Contracted Gaussian Function
+ * @param cgf4  Contracted Gaussian Function
+ */
 void Integrator::ensure_hellsing_cache(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4) {
     unsigned int lmax = std::max({cgf1.max_primitive_l(),
                                   cgf2.max_primitive_l(),

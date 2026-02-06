@@ -62,7 +62,8 @@ class ContourPlotter:
         fig, ax = plt.subplots(
             nrows, ncols,
             figsize=(2 * ncols + 1, 2 * nrows + 1),
-            dpi=dpi
+            dpi=dpi,
+            squeeze=False
         )
 
         for i in range(nrows):
@@ -71,7 +72,7 @@ class ContourPlotter:
                 orb_idx = i * ncols + j
 
                 # Stop if we run out of orbitals
-                if orb_idx >= len(res["cgfs"]):
+                if orb_idx >= res["orbc"].shape[1]:
                     continue
 
                 # --------------------------------------------------

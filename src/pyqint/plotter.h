@@ -27,16 +27,45 @@ class Plotter {
 private:
 
 public:
+    /**
+     * @brief Construct a Plotter instance.
+     */
     Plotter();
 
+    /**
+     * @brief Evaluate the wavefunction on a grid.
+     *
+     * @param grid   Flattened grid coordinates (x, y, z, x, y, z, ...)
+     * @param coeff  Basis coefficients
+     * @param cgfs   Contracted Gaussian functions
+     *
+     * @return Wavefunction values per grid point
+     */
     std::vector<double> plot_wavefunction(const std::vector<double>& grid, 
                                           const std::vector<double>& coeff, 
                                           const std::vector<CGF>& cgfs) const;
 
+    /**
+     * @brief Evaluate the wavefunction gradient on a grid.
+     *
+     * @param grid   Flattened grid coordinates (x, y, z, x, y, z, ...)
+     * @param coeff  Basis coefficients
+     * @param cgfs   Contracted Gaussian functions
+     *
+     * @return Gradient values per grid point (x, y, z, ...)
+     */
     std::vector<double> plot_gradient(const std::vector<double>& grid, 
                                       const std::vector<double>& coeff, 
                                       const std::vector<CGF>& cgfs) const;
 
+    /**
+     * @brief Evaluate a single basis function on a grid.
+     *
+     * @param grid  Flattened grid coordinates (x, y, z, x, y, z, ...)
+     * @param cgf   Contracted Gaussian function
+     *
+     * @return Basis function values per grid point
+     */
     std::vector<double> plot_basis_function(const std::vector<double>& grid, 
                                             const CGF& cgf) const;
 private:

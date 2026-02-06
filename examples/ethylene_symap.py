@@ -104,7 +104,7 @@ def main():
             g.c /= np.sqrt(S)
 
     # re-perform Hartree-Fock calculation using the symmetry adapted basis
-    res = HF().rhf(mol, cgfs_symad, verbose=True)
+    res = HF(mol, cgfs_symad).rhf(verbose=True)
     fig, ax = plt.subplots(1,1, dpi=144, figsize=(7,7))
     plot_matrix(ax, res['overlap'], symlabels, symlabels)
     plt.show()

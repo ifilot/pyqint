@@ -25,6 +25,14 @@
 inline constexpr double kEps = std::numeric_limits<double>::epsilon();
 
 // -------------------- Small-T series --------------------
+/**
+ * @brief Evaluate the small-T Boys function series expansion.
+ *
+ * @param n  Boys order
+ * @param T  argument
+ *
+ * @return series approximation for F_n(T)
+ */
 inline double boys_series(int n, double T) {
     double term = 1.0 / (2.0 * n + 1.0);
     double sum  = term;
@@ -44,6 +52,13 @@ inline double boys_series(int n, double T) {
 }
 
 // -------------------- Accurate F0 --------------------
+/**
+ * @brief Evaluate F0(T) with stable special-case handling.
+ *
+ * @param T  argument
+ *
+ * @return value of F0(T)
+ */
 inline double boys_F0(double T) {
     if (T == 0.0) return 1.0;
 
@@ -58,6 +73,11 @@ inline double boys_F0(double T) {
 
 // ==================== Construction ====================
 
+/**
+ * @brief Construct a Boys function evaluator.
+ *
+ * @param nu_max  Maximum Boys order to precompute.
+ */
 BoysFunction::BoysFunction(int nu_max)
     : nu_tab_max_(-1),
       logT_min_(0.0),
@@ -68,6 +88,14 @@ BoysFunction::BoysFunction(int nu_max)
 
 // ==================== Public API ====================
 
+/**
+ * @brief Evaluate the Boys function F_ν(T).
+ *
+ * @param nu  Boys order
+ * @param T   argument
+ *
+ * @return Boys function value
+ */
 double BoysFunction::operator()(int nu, double T) const
 {
     if (T < 0.0)
@@ -82,6 +110,13 @@ double BoysFunction::operator()(int nu, double T) const
     return Fgamma_exact(nu, T);
 }
 
+/**
+ * @brief Compute F_0(T) … F_νmax(T).
+ *
+ * @param nu_max  Maximum order
+ * @param T       argument
+ * @param F       output array (size ≥ nu_max+1)
+ */
 void BoysFunction::compute_block(int nu_max, double T, double* F) const
 {
     if (T < T_SMALL) {
@@ -110,6 +145,11 @@ void BoysFunction::compute_block(int nu_max, double T, double* F) const
     }
 }
 
+/**
+ * @brief Return the maximum order stored in the interpolation table.
+ *
+ * @return maximum Boys order
+ */
 int BoysFunction::max_order() const noexcept
 {
     return nu_tab_max_;
@@ -117,6 +157,11 @@ int BoysFunction::max_order() const noexcept
 
 // ==================== Table initialization ====================
 
+/**
+ * @brief Initialize the interpolation table for a maximum order.
+ *
+ * @param nu_max  maximum order
+ */
 void BoysFunction::init_table(int nu_max) {
     nu_tab_max_ = std::max(0, nu_max);
     Htab_.resize((nu_tab_max_ + 1) * NTABLE);
@@ -144,6 +189,14 @@ void BoysFunction::init_table(int nu_max) {
 
 // ==================== Interpolation ====================
 
+/**
+ * @brief Interpolate the Boys function using the precomputed table.
+ *
+ * @param nu  Boys order
+ * @param T   argument
+ *
+ * @return interpolated value
+ */
 double BoysFunction::interpolate(int nu, double T) const noexcept {
     const double x = (std::log(T) - logT_min_) * inv_dlogT_;
 
@@ -165,12 +218,28 @@ double BoysFunction::interpolate(int nu, double T) const noexcept {
     return H / (sqrtT * Tnu);
 }
 
+/**
+ * @brief Compute the flat index into the interpolation table.
+ *
+ * @param nu  Boys order
+ * @param i   table index
+ *
+ * @return flat array index
+ */
 int BoysFunction::idx(int nu, int i) const noexcept {
     return nu * NTABLE + i;
 }
 
 // ==================== Exact reference ====================
 
+/**
+ * @brief Compute the Boys function exactly via series/recurrence.
+ *
+ * @param nu  Boys order
+ * @param T   argument
+ *
+ * @return exact value
+ */
 double BoysFunction::Fgamma_exact(int nu, double T) {
     if (T < 0.1)
         return boys_series(nu, T);
@@ -186,6 +255,13 @@ double BoysFunction::Fgamma_exact(int nu, double T) {
     return F;
 }
 
+/**
+ * @brief Compute a block of exact Boys function values.
+ *
+ * @param nu_max  Maximum order
+ * @param T       argument
+ * @param F       output array (size ≥ nu_max+1)
+ */
 void BoysFunction::Fgamma_block_exact(int nu_max, double T, double* F) {
     if (T < 0.1) {
         for (int nu = 0; nu <= nu_max; ++nu)

@@ -20,8 +20,19 @@
  **************************************************************************/
 
 #include "cgf.h"
+#include "gaussian_integrals.h"
 #include <cassert>
 
+/**
+ * @brief Construct Gaussian Type Orbital.
+ *
+ * @param _c        coefficient
+ * @param _position position of the Gaussian
+ * @param _alpha    alpha value in the exponent
+ * @param _l        power of x in the polynomial
+ * @param _m        power of y in the polynomial
+ * @param _n        power of z in the polynomial
+ */
 GTO::GTO(double _c,
          const Vec3& _position,     // position (unit = Bohr)
          double _alpha,
@@ -39,6 +50,18 @@ GTO::GTO(double _c,
     this->calculate_normalization_constant();
 }
 
+/**
+ * @brief Construct Gaussian Type Orbital.
+ *
+ * @param _c        coefficient
+ * @param _x        position of the Gaussian
+ * @param _y        position of the Gaussian
+ * @param _z        position of the Gaussian
+ * @param _alpha    alpha value in the exponent
+ * @param _l        power of x in the polynomial
+ * @param _m        power of y in the polynomial
+ * @param _n        power of z in the polynomial
+ */
 GTO::GTO(double _c,
          double _x,
          double _y,
@@ -58,13 +81,12 @@ GTO::GTO(double _c,
     this->calculate_normalization_constant();
 }
 
-/*
- * @fn get_amp
- * @brief Gets the amplitude of the GTO
+/**
+ * @brief Get the amplitude of the GTO.
  *
- * @param Vec3 r    coordinates
+ * @param r    coordinates
  *
- * @return const double amplitude
+ * @return amplitude value
  */
 const double GTO::get_amp(const Vec3& r) const noexcept {
     const double dx = r[0] - this->position[0];
@@ -79,13 +101,12 @@ const double GTO::get_amp(const Vec3& r) const noexcept {
         std::exp(-alpha * r2);
 }
 
-/*
- * @fn get_gradient
- * @brief Gets the gradient of the GTO
+/**
+ * @brief Get the gradient of the GTO.
  *
- * @param Vec3 r    coordinates
+ * @param r    coordinates
  *
- * @return gradient
+ * @return gradient vector
  */
 Vec3 GTO::get_grad(const Vec3& r) const noexcept {
     // calculate exponential term and its product with the cartesian terms
@@ -125,11 +146,8 @@ Vec3 GTO::get_grad(const Vec3& r) const noexcept {
                 this->norm * fx * fy * gz);
 }
 
-/*
- * @fn calculate_normalization_constant
- * @brief Calculates the normalization constant so that <GTO|GTO>=1
- *
- * @return void
+/**
+ * @brief Calculate the normalization constant so that <GTO|GTO>=1.
  */
 void GTO::calculate_normalization_constant() {
     double nom =   std::pow(2.0, 2.0 * (l + m + n) + 3.0 / 2.0) *
@@ -143,44 +161,40 @@ void GTO::calculate_normalization_constant() {
     this->norm = std::sqrt(nom / denom);
 }
 
-/*
- * @fn CGF
- * @brief Constructor
- *
- * @return CGF
+/**
+ * @brief Construct an empty CGF at the origin.
  */
 CGF::CGF():
     r(Vec3(0,0,0)) {
         // do nothing
 }
 
-/*
- * @fn CGF
- * @brief Default constructor
+/**
+ * @brief Construct a CGF at the provided coordinates.
  *
- * @return CGF
+ * @param x  x coordinate
+ * @param y  y coordinate
+ * @param z  z coordinate
  */
 CGF::CGF(double x, double y, double z) :
     r(Vec3(x,y,z)) {}
 
-/*
- * @fn CGF
- * @brief Default constructor
+/**
+ * @brief Construct a CGF at the provided position.
  *
- * @return CGF
+ * @param _r  center position
  */
 CGF::CGF(const Vec3& _r):
     r(_r) {
         // do nothing
 }
 
-/*
- * @fn get_amp
- * @brief Gets the amplitude of the CGF
+/**
+ * @brief Get the amplitude of the CGF.
  *
- * @param Vec3 r    coordinates
+ * @param r    coordinates
  *
- * @return const double amplitude
+ * @return amplitude value
  */
 const double CGF::get_amp(const Vec3& r) const noexcept {
     double sum = 0.0;
@@ -192,13 +206,12 @@ const double CGF::get_amp(const Vec3& r) const noexcept {
     return sum;
 }
 
-/*
- * @fn get_grad
- * @brief Gets the gradient of the CGF
+/**
+ * @brief Get the gradient of the CGF.
  *
- * @param Vec3 r    coordinates
+ * @param r    coordinates
  *
- * @return gradient
+ * @return gradient components
  */
 std::vector<double> CGF::get_grad(const Vec3& r) const noexcept {
     Vec3 sum = Vec3(0,0,0);
@@ -210,16 +223,12 @@ std::vector<double> CGF::get_grad(const Vec3& r) const noexcept {
     return std::vector<double>({sum[0], sum[1], sum[2]});
 }
 
-/*
- * @fn add_GTO
- * @brief Add a GTO to the CGF
+/**
+ * @brief Add a GTO to the CGF.
  *
- * @param unsigned int type     type of the orbital (see above for the list)
- * @param double alpha          alpha value
- * @param double c              coefficient
- * @param const Vec3& Vec3      position
- *
- * @return void
+ * @param type   type of the orbital (see above for the list)
+ * @param alpha  alpha value
+ * @param c      coefficient
  */
 void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the list)
                   double alpha,       // alpha value
@@ -269,17 +278,14 @@ void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the 
     }
 }
 
-/*
- * @fn add_gto
- * @brief Add a GTO to the CGF
+/**
+ * @brief Add a GTO to the CGF.
  *
- * @param double c              coefficient
- * @param double alpha          alpha value
- * @param unsigned int l        l angular momentum x
- * @param unsigned int m        m angular momentum y
- * @param unsigned int n        n angular momentum z
- *
- * @return void
+ * @param c      coefficient
+ * @param alpha  alpha value
+ * @param l      l angular momentum x
+ * @param m      m angular momentum y
+ * @param n      n angular momentum z
  */
 void CGF::add_gto(double c,
                   double alpha,
@@ -289,20 +295,17 @@ void CGF::add_gto(double c,
     this->gtos.push_back(GTO(c, this->r, alpha, l, m, n));
 }
 
-/*
- * @fn add_gto_with_position
- * @brief Add a GTO to the CGF
+/**
+ * @brief Add a GTO to the CGF with an explicit position.
  *
- * @param double c              coefficient
- * @param double px             px value
- * @param double py             px value
- * @param double pz             px value
- * @param double alpha          alpha value
- * @param unsigned int l        l angular momentum x
- * @param unsigned int m        m angular momentum y
- * @param unsigned int n        n angular momentum z
- *
- * @return void
+ * @param c      coefficient
+ * @param px     px value
+ * @param py     py value
+ * @param pz     pz value
+ * @param alpha  alpha value
+ * @param l      l angular momentum x
+ * @param m      m angular momentum y
+ * @param n      n angular momentum z
  */
 void CGF::add_gto_with_position(double c,
                   double px,
@@ -315,13 +318,10 @@ void CGF::add_gto_with_position(double c,
     this->gtos.push_back(GTO(c, Vec3(px, py, pz), alpha, l, m, n));
 }
 
-/*
- * @fn set_position
- * @brief Set a (new) center for the CGF
+/**
+ * @brief Set a (new) center for the CGF.
  *
- * @param pos   center of the CGF
- *
- * @return void
+ * @param pos  center of the CGF
  */
 void CGF::set_position(const Vec3 &pos) {
     this->r = pos;
@@ -331,11 +331,10 @@ void CGF::set_position(const Vec3 &pos) {
     }
 }
 
-/*
- * @fn max_primitive_l
- * @brief Get maximum l value among GTOs
+/**
+ * @brief Get maximum l value among GTOs.
  *
- * @return unsigned int maximum l value among GTOs
+ * @return maximum l value among GTOs
  */
 unsigned int CGF::max_primitive_l() const noexcept {
     unsigned int max_l = 0;
@@ -351,58 +350,37 @@ unsigned int CGF::max_primitive_l() const noexcept {
     return max_l;
 }
 
-/*
- * @fn get_contraction_norm
- * @brief Get the normalization constant for the pair of CGFs
- *    N < φ_i | φ_i > = 1 => N = ...
- *    for φ_i is a CGF with angular momentum shell pair (l,m,n)
+/**
+ * @brief Get the normalization constant for the pair of CGFs.
+ *
+ * N < φ_i | φ_i > = 1 => N = ...
+ * for φ_i is a CGF with angular momentum shell pair (l,m,n)
  * see: https://arxiv.org/pdf/2007.12057 page 10 for more details
  *
  * @return normalization constant
  */
 double CGF::get_contraction_norm() const {
-    // NOTE: any GTO is fine for the same shell tuple (lmn)
-    assert(gtos.size() != 0LU && "No GTOs found!");
-
-    // Check if all GTOs have the same angular momentum
-    const auto& first = this->get_gto(0);
-    const auto l = first.get_l();
-    const auto m = first.get_m();
-    const auto n = first.get_n();
-
-    // NOTE: only needed for the spherical harmonics test; otherwise not needed...
-    for (size_t i = 1; i < this->size(); ++i) {
-        const auto& gto = this->get_gto(i);
-        if (gto.get_l() != l || gto.get_m() != m || gto.get_n() != n) {
-            // Mixed angular momentum (e.g., spherical harmonics)
-            // Coefficients are pre-normalised; no additional factor needed
-            return 1.0;
-        }
-    }
-
-    // Standard contraction: all primitives have same (l,m,n)
-    const int L = l + m + n;
-
-    static const double pi_three_half_pow = M_PI * std::sqrt(M_PI);
-    const double prefactor = pi_three_half_pow *
-                       (l < 1 ? 1.0 : double_factorial(2*l - 1)) *
-                       (m < 1 ? 1.0 : double_factorial(2*m - 1)) *
-                       (n < 1 ? 1.0 : double_factorial(2*n - 1)) /
-                       static_cast<double>(1 << L);
-
     double sum = 0.0;
     for (size_t i = 0; i < this->size(); ++i) {
         for (size_t j = 0; j < this->size(); ++j) {
-            // const double a_i = this->get_coefficient_gto(i);
-            // const double a_j = this->get_coefficient_gto(j);
             const double a_i = this->get_norm_gto(i) * this->get_coefficient_gto(i);
             const double a_j = this->get_norm_gto(j) * this->get_coefficient_gto(j);
-            const double alpha_i = this->get_gto(i).get_alpha();
-            const double alpha_j = this->get_gto(j).get_alpha();
+            const auto& gto_i = this->get_gto(i);
+            const auto& gto_j = this->get_gto(j);
 
-            sum += a_i * a_j / std::pow(alpha_i + alpha_j, L + 1.5);
+            sum += a_i * a_j *
+                   integrals::gaussian::overlap_gto(gto_i.get_alpha(),
+                                                    gto_i.get_l(),
+                                                    gto_i.get_m(),
+                                                    gto_i.get_n(),
+                                                    gto_i.get_position(),
+                                                    gto_j.get_alpha(),
+                                                    gto_j.get_l(),
+                                                    gto_j.get_m(),
+                                                    gto_j.get_n(),
+                                                    gto_j.get_position());
         }
     }
 
-    return 1.0 / std::sqrt(prefactor * sum);
+    return 1.0 / std::sqrt(sum);
 }
