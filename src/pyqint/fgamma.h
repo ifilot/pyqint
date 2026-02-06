@@ -67,7 +67,11 @@ public:
      */
     void compute_block(int nu_max, double T, double* F) const;
 
-    /// Maximum order stored in the interpolation table
+    /**
+     * @brief Return the maximum order stored in the interpolation table.
+     *
+     * @return maximum Boys order
+     */
     int max_order() const noexcept;
 
 private:
@@ -79,11 +83,50 @@ private:
     std::vector<double> Htab_;
 
     // ---- Internal helpers ----
+    /**
+     * @brief Initialize the interpolation table.
+     *
+     * @param nu_max  Maximum order to precompute
+     */
     void init_table(int nu_max);
+
+    /**
+     * @brief Interpolate the Boys function using the precomputed table.
+     *
+     * @param nu  Boys order
+     * @param T   Argument
+     *
+     * @return interpolated value
+     */
     double interpolate(int nu, double T) const noexcept;
+
+    /**
+     * @brief Compute flat table index.
+     *
+     * @param nu  Boys order
+     * @param i   table index
+     *
+     * @return flat index
+     */
     int idx(int nu, int i) const noexcept;
 
     // ---- Exact reference implementations ----
+    /**
+     * @brief Evaluate the Boys function exactly.
+     *
+     * @param nu  Boys order
+     * @param T   Argument
+     *
+     * @return exact value
+     */
     static double Fgamma_exact(int nu, double T);
+
+    /**
+     * @brief Evaluate a block of Boys function values exactly.
+     *
+     * @param nu_max  Maximum order
+     * @param T       Argument
+     * @param F       Output array (size ≥ nu_max+1)
+     */
     static void   Fgamma_block_exact(int nu_max, double T, double* F);
 };

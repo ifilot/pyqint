@@ -234,6 +234,28 @@ double Integrator::repulsion_hellsing_cached(
     return pref * s;
 }
 
+/**
+ * @brief Build the Hellsing B array terms.
+ *
+ * @param l1  Angular momentum component for center A
+ * @param l2  Angular momentum component for center B
+ * @param l3  Angular momentum component for center C
+ * @param l4  Angular momentum component for center D
+ * @param a1  Gaussian exponent of center A
+ * @param a2  Gaussian exponent of center B
+ * @param a3  Gaussian exponent of center C
+ * @param a4  Gaussian exponent of center D
+ * @param ax  A coordinate component
+ * @param bx  B coordinate component
+ * @param cx  C coordinate component
+ * @param dx  D coordinate component
+ * @param px  P coordinate component
+ * @param qx  Q coordinate component
+ * @param g1  Gaussian exponent sum gamma1
+ * @param g2  Gaussian exponent sum gamma2
+ *
+ * @return Hellsing B-term array
+ */
 std::vector<HellsingBTerm> Integrator::B_array_hellsing(
     int l1, int l2, int l3, int l4,
     double a1, double a2, double a3, double a4,

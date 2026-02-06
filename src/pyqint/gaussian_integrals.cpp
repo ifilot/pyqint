@@ -30,10 +30,10 @@ namespace integrals::gaussian {
 /**
  * @brief Computes the Gaussian product center of two primitive Gaussians
  *
- * @param double alpha1  Exponent of first Gaussian
- * @param const Vec3& a  Center of first Gaussian
- * @param double alpha2  Exponent of second Gaussian
- * @param const Vec3& b  Center of second Gaussian
+ * @param alpha1  Exponent of first Gaussian
+ * @param a       Center of first Gaussian
+ * @param alpha2  Exponent of second Gaussian
+ * @param b       Center of second Gaussian
  *
  * Calculates the position of the Gaussian product center P.
  *
@@ -47,8 +47,8 @@ Vec3 gaussian_product_center(double alpha1, const Vec3& a,
 /**
  * @brief Computes the binomial coefficient
  *
- * @param int a  Upper index
- * @param int b  Lower index
+ * @param a  Upper index
+ * @param b  Lower index
  *
  * Returns 1 if indices are outside valid range.
  *
@@ -64,11 +64,11 @@ double binomial(int a, int b) {
 /**
  * @brief Computes binomial prefactor used in Gaussian integral recursion
  *
- * @param int s      Summation index
- * @param int ia     Angular momentum component of first Gaussian
- * @param int ib     Angular momentum component of second Gaussian
- * @param double xpa Distance P_x - A_x
- * @param double xpb Distance P_x - B_x
+ * @param s    Summation index
+ * @param ia   Angular momentum component of first Gaussian
+ * @param ib   Angular momentum component of second Gaussian
+ * @param xpa  Distance P_x - A_x
+ * @param xpb  Distance P_x - B_x
  *
  * @return double Value of the binomial prefactor
  */
@@ -91,11 +91,11 @@ double binomial_prefactor(int s, int ia, int ib,
 /**
  * @brief Computes one-dimensional overlap integral component
  *
- * @param int l1     Angular momentum of first Gaussian along axis
- * @param int l2     Angular momentum of second Gaussian along axis
- * @param double x1  Distance P_x - A_x
- * @param double x2  Distance P_x - B_x
- * @param double gamma Sum of Gaussian exponents
+ * @param l1     Angular momentum of first Gaussian along axis
+ * @param l2     Angular momentum of second Gaussian along axis
+ * @param x1     Distance P_x - A_x
+ * @param x2     Distance P_x - B_x
+ * @param gamma  Sum of Gaussian exponents
  *
  * @return double Value of the 1D overlap contribution
  */
@@ -114,12 +114,16 @@ double overlap_1d(int l1, int l2, double x1, double x2, double gamma) {
 /**
  * @brief Computes overlap integral between two primitive Gaussian orbitals
  *
- * @param double alpha1  Exponent of first Gaussian
- * @param unsigned int l1,m1,n1 Angular momentum components of first Gaussian
- * @param const Vec3& a  Center of first Gaussian
- * @param double alpha2  Exponent of second Gaussian
- * @param unsigned int l2,m2,n2 Angular momentum components of second Gaussian
- * @param const Vec3& b  Center of second Gaussian
+ * @param alpha1  Exponent of first Gaussian
+ * @param l1      Angular momentum in x for first Gaussian
+ * @param m1      Angular momentum in y for first Gaussian
+ * @param n1      Angular momentum in z for first Gaussian
+ * @param a       Center of first Gaussian
+ * @param alpha2  Exponent of second Gaussian
+ * @param l2      Angular momentum in x for second Gaussian
+ * @param m2      Angular momentum in y for second Gaussian
+ * @param n2      Angular momentum in z for second Gaussian
+ * @param b       Center of second Gaussian
  *
  * @return double Value of the 3D overlap integral
  */
