@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use PyQInt, please cite the JOSE publication."
+title: "PyQInt: A Teaching-Oriented Hartree-Fock Implementation in Python"
+authors:
+  - family-names: Filot
+    given-names: I. A. W.
+    orcid: "https://orcid.org/0000-0003-1403-8379"
+doi: 10.21105/jose.00286
+url: "https://github.com/ifilot/pyqint"
+repository-code: "https://github.com/ifilot/pyqint"
+license: GPL-3.0-only
+preferred-citation:
+  type: article
+  title: "PyQInt: A Teaching-Oriented Hartree-Fock Implementation in Python"
+  authors:
+    - family-names: Filot
+      given-names: I. A. W.
+      orcid: "https://orcid.org/0000-0003-1403-8379"
+  doi: 10.21105/jose.00286
+  journal: "Journal of Open Source Education"
+  volume: 8
+  issue: 94
+  year: 2025
+  month: 12
+  start: 286
+  end: 286

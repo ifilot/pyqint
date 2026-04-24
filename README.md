@@ -46,6 +46,29 @@ of [Electronic Structure Theory](https://ifilot.pages.tue.nl/elements-of-electro
 PyQInt comes with detailed documentation and examples, which can be found
 at https://ifilot.github.io/pyqint/.
 
+## Citation
+
+If you use PyQInt in your work, please cite the JOSE publication:
+
+> Filot, I. A. W. (2025). PyQInt: A Teaching-Oriented Hartree–Fock
+> Implementation in Python. Journal of Open Source Education, 8(94), 286.
+> https://doi.org/10.21105/jose.00286
+
+```bibtex
+@article{Filot2025,
+  doi = {10.21105/jose.00286},
+  url = {https://doi.org/10.21105/jose.00286},
+  year = {2025},
+  publisher = {The Open Journal},
+  volume = {8},
+  number = {94},
+  pages = {286},
+  author = {Filot, I. A. W.},
+  title = {PyQInt: A Teaching-Oriented Hartree–Fock Implementation in Python},
+  journal = {Journal of Open Source Education}
+}
+```
+
 ## Features
 
 The following molecular integrals are supported by PyQInt
