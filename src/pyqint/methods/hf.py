@@ -284,9 +284,7 @@ class HF:
         Parameters
         ----------
         multiplicity
-            Spin multiplicity (number of unpaired electrons)
-        calc_forces
-            Whether analytic nuclear forces are computed. (Not implemented here.)
+            Spin multiplicity 2S + 1 (number of unpaired electrons plus one)
         itermax
             Maximum number of SCF iterations.
         use_diis
@@ -299,11 +297,20 @@ class HF:
             Optional initial MO coefficient matrices: {"alpha": Ca, "beta": Cb}.
         ortho
             Orthogonalization scheme ("canonical" or "symmetric").
+        nelec
+            Number of electrons; defaults to the number of electrons of the
+            neutral molecule.
 
         Returns
         -------
         dict
             Result dictionary containing energies, orbitals, matrices, etc.
+
+        Raises
+        ------
+        ValueError
+            If the multiplicity is incompatible with the number of electrons
+            or the basis set is too small to hold the alpha electrons.
         """
 
         # electron counts
@@ -311,16 +318,24 @@ class HF:
             nelec = int(self._nelec)
         if multiplicity < 1 or multiplicity > nelec + 1:
             raise ValueError(f"Invalid multiplicity={multiplicity} for nelec={nelec}.")
+        if (nelec + multiplicity - 1) % 2 != 0:
+            raise ValueError(
+                f"Multiplicity={multiplicity} is incompatible with nelec={nelec}: "
+                "an even number of electrons requires an odd multiplicity and "
+                "vice versa."
+            )
 
         # Nα - Nβ = 2S = multiplicity-1 ; Nα + Nβ = nelec
         nalpha = (nelec + (multiplicity - 1)) // 2
         nbeta  = nelec - nalpha
-        if nalpha < 0 or nbeta < 0:
-            raise ValueError("Computed negative Nalpha/Nbeta; check nelec/multiplicity.")
 
         # basis size and occupations
         time_stats = {}
         N = len(self._cgfs)
+        if nalpha > N:
+            raise ValueError(
+                f"Cannot place {nalpha} alpha electrons in {N} basis functions."
+            )
         occ_a = np.array([1 if i < nalpha else 0 for i in range(N)], dtype=float)
         occ_b = np.array([1 if i < nbeta  else 0 for i in range(N)], dtype=float)
 
@@ -504,6 +519,11 @@ class HF:
         E_elec = E_core + E_J + E_Ka + E_Kb
         E_tot  = E_elec + nuc_rep
 
+        # expectation value of the total spin <S^2>; deviation from the exact
+        # value S(S+1) measures spin contamination
+        Sz = 0.5 * (nalpha - nbeta)
+        s2 = Sz * (Sz + 1.0) + nbeta - np.einsum('ij,ji', Pa @ S, Pb @ S)
+
         sol = {
             "energy": E_tot,
             "nuclei": self._nuclei,
@@ -537,6 +557,8 @@ class HF:
             "nalpha": nalpha,
             "nbeta": nbeta,
             "multiplicity": multiplicity,
+            "s2": s2,
+            "s2_exact": Sz * (Sz + 1.0),
 
             "mol": self._mol,
             "forces": None, # Forces: not available for UHF

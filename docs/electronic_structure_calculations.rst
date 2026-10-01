@@ -329,13 +329,40 @@ explicit information about the spin state of the system.
      - Number of spin-down (:math:`\beta`) electrons
    * - :code:`multiplicity`
      - Spin multiplicity :math:`(2S + 1)`
+   * - :code:`s2`
+     - Expectation value :math:`\langle \hat{S}^{2} \rangle` of the UHF wavefunction
+   * - :code:`s2_exact`
+     - Exact value :math:`S(S+1)` for the requested spin state
 
 .. note::
 
    Unlike restricted Hartree-Fock, unrestricted Hartree-Fock allows for spin
    polarization. As a consequence, the resulting wavefunction is generally not
    an exact eigenfunction of the total spin operator, which may lead to spin
-   contamination.
+   contamination. The amount of spin contamination is given by the
+   difference between :code:`s2` and :code:`s2_exact`, where
+
+   .. math::
+
+      \langle \hat{S}^{2} \rangle = S_z(S_z + 1) + N_{\beta}
+      - \mathrm{Tr}\left(\mathbf{P}^{\alpha}\mathbf{S}\mathbf{P}^{\beta}\mathbf{S}\right)
+
+   with :math:`S_z = (N_{\alpha} - N_{\beta})/2`. For the methyl radical
+   above, :math:`\langle \hat{S}^{2} \rangle = 0.7652`, slightly above the
+   exact value of 0.75 for a doublet.
+
+The number of electrons may be set explicitly via the :code:`nelec` argument,
+e.g. to model ions. The multiplicity must be compatible with the number of
+electrons: an even number of electrons requires an odd multiplicity and vice
+versa. Otherwise, a :code:`ValueError` is raised.
+
+.. warning::
+
+   The UHF procedure starts from the core Hamiltonian guess. For some
+   open-shell systems, e.g. triplet O\ :sub:`2`, this guess may lead to a
+   self-consistent solution which is not the ground state. Comparing the
+   result with a calculation started from different initial orbitals (via the
+   :code:`orbc_init` argument) is advised in such cases.
 
 Custom basis sets
 -----------------
