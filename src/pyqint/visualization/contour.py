@@ -2,8 +2,8 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from .pyqint_core import PyQInt
-from .spin import get_spin_channel
+from ..pyqint_core import PyQInt
+from ..analysis.spin import get_spin_channel
 
 class ContourPlotter:
     """

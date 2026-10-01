@@ -2,11 +2,8 @@
 # cython: language=c++
 # cython: module_name=pyqint_core
 
-from .pyqint_core cimport Integrator, GTO, CGF
 import numpy as np
 from collections.abc import Iterable
-from . import gto
-from . import cgf
 import numpy.typing as npt
 
 cdef class PyGTO:

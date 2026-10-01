@@ -1,4 +1,4 @@
-from .pyqint_core import PyGTO
+from ..pyqint_core import PyGTO
 
 class GTO:
     """

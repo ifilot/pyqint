@@ -17,7 +17,8 @@ import numpy as np
 import numpy.typing as npt
 import scipy.optimize
 
-from . import HF, Molecule
+from .hf import HF
+from ..structure.molecule import Molecule
 
 
 BOHR_TO_ANGSTROM: float = 0.52917721092

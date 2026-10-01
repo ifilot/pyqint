@@ -12,20 +12,20 @@ else
     message('OpenMP not found')
 endif
 
-# Headers live in this directory
-inc = include_directories('.')
+# C++ / Cython sources and headers live in csrc/
+inc = include_directories('csrc')
 
 py.extension_module(
     'pyqint_core',
     [
-        'pyqint_core.pyx',
-        'integrals.cpp',
-        'plotter.cpp',
-        'cgf.cpp',
-        'fgamma.cpp',
-        'hellsing_cache.cpp',
-        'hellsing_eri.cpp',
-        'gaussian_integrals.cpp',
+        'csrc/pyqint_core.pyx',
+        'csrc/integrals.cpp',
+        'csrc/plotter.cpp',
+        'csrc/cgf.cpp',
+        'csrc/fgamma.cpp',
+        'csrc/hellsing_cache.cpp',
+        'csrc/hellsing_eri.cpp',
+        'csrc/gaussian_integrals.cpp',
     ],
     include_directories: inc,
     override_options: ['cython_language=cpp'],
@@ -34,33 +34,19 @@ py.extension_module(
     subdir: 'pyqint'
 )
 
-# Package data
-install_subdir('basissets', install_dir: py.get_install_dir() / 'pyqint')
-install_subdir('molecules', install_dir: py.get_install_dir() / 'pyqint')
-install_subdir('blender',   install_dir: py.get_install_dir() / 'pyqint')
+# Python subpackages and package data, installed as complete folders so
+# that new modules do not have to be listed here
+foreach d : ['analysis', 'basis', 'data', 'methods', 'structure', 'visualization']
+    install_subdir(
+        d,
+        install_dir: py.get_install_dir() / 'pyqint',
+        exclude_directories: ['__pycache__'],
+    )
+endforeach
 
-# Pure Python sources
+# Top-level Python sources
 py.install_sources(
     '__init__.py',
     '_version.py',
-
-    'blenderrender.py',
-    'cgf.py',
-    'contour.py',
-    'element.py',
-    'foster_boys.py',
-    'geometry_optimization.py',
-    'gto.py',
-    'hf.py',
-    'isosurface.py',
-    'matrix_plotter.py',
-    'molecule.py',
-    'molecule_builder.py',
-    'population_analysis.py',
-    'spherical_harmonics.py',
-    'spin.py',
-
-    'blender/blender_render_molecule.py',
-
     subdir: 'pyqint'
 )

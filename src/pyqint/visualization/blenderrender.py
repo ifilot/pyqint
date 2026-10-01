@@ -1,12 +1,13 @@
 import os
 import tempfile
-from .pyqint_core import PyQInt
+from importlib.resources import as_file, files
+from ..pyqint_core import PyQInt
 import numpy as np
 import json
 import subprocess
 import shutil
 from sys import platform
-from .element import Element
+from ..structure.element import Element
 
 try:
     from tqdm import tqdm
@@ -149,9 +150,10 @@ class BlenderRender:
                       camera_rot = (np.pi/2,0,-np.pi/2),
                       camera_scale = 10):
         # set path to xyz file
-        blendpysrc = os.path.join(os.path.dirname(__file__), 'blender', 'blender_render_molecule.py')
+        blendpysrc = files("pyqint") / "visualization" / "blender" / "blender_render_molecule.py"
         blendpydst = os.path.join(cwd, 'blender_render_molecule.py')
-        shutil.copyfile(blendpysrc, blendpydst)
+        with as_file(blendpysrc) as src:
+            shutil.copyfile(src, blendpydst)
 
         manifest = {
             'mo_colors' : {

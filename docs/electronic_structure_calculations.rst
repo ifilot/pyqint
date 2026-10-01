@@ -347,7 +347,7 @@ In the example code shown below, the latter is done.
 
 .. code-block:: python
 
-    from pyqint import Molecule, HF, cgf
+    from pyqint import Molecule, HF, CGF
     mol = Molecule()
     mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
     mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')        

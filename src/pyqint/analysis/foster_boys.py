@@ -17,7 +17,7 @@ import numpy as np
 import numpy.typing as npt
 import scipy.optimize
 
-from .pyqint_core import PyQInt
+from ..pyqint_core import PyQInt
 from .spin import get_spin_channel, is_unrestricted
 
 

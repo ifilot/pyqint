@@ -12,13 +12,13 @@ quantum-chemical calculations.
 from __future__ import annotations
 
 import json
-import os
+from importlib.resources import files
 from typing import List, Tuple, Optional, Iterator
 
 import numpy as np
 import numpy.typing as npt
 
-from .cgf import CGF
+from ..basis.cgf import CGF
 from .element import Element
 
 
@@ -188,7 +188,7 @@ class Molecule:
         Parameters
         ----------
         name : str
-            Basis-set label (corresponding to a JSON file in basissets/).
+            Basis-set label (corresponding to a JSON file in data/basissets/).
 
         Returns
         -------
@@ -197,14 +197,8 @@ class Molecule:
         nuclei : list[(Vec3, int)]
             Nuclear positions and charges.
         """
-        basis_filename = os.path.join(
-            os.path.dirname(__file__),
-            "basissets",
-            f"{name}.json",
-        )
-
-        with open(basis_filename, "r") as f:
-            basis = json.load(f)
+        basis_file = files("pyqint") / "data" / "basissets" / f"{name}.json"
+        basis = json.loads(basis_file.read_text())
 
         self.__cgfs = []
 

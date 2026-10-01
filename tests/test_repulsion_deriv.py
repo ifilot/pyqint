@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, gto, Molecule
+from pyqint import PyQInt, GTO, Molecule
 from copy import deepcopy
 import numpy as np
 
@@ -234,8 +234,8 @@ def calculate_deriv_gto(gto1, gto2, gto3, gto4, coord):
     p = np.zeros(3)
     p[coord] = diff
 
-    gto1_new1 = gto(gto1.c, gto1.p - 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
-    gto1_new2 = gto(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
+    gto1_new1 = GTO(gto1.c, gto1.p - 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
+    gto1_new2 = GTO(gto1.c, gto1.p + 0.5 * p, gto1.alpha, gto1.l, gto1.m, gto1.n)
 
     # build hydrogen molecule
     left = integrator.repulsion_gto(gto1_new1, gto2, gto3, gto4)

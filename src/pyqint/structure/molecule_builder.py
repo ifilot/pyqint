@@ -1,5 +1,7 @@
 import os
-from .molecule import Molecule 
+from importlib.resources import as_file, files
+
+from .molecule import Molecule
 
 class MoleculeBuilder:
     """
@@ -10,8 +12,9 @@ class MoleculeBuilder:
         """
         Build molecule from molname
         """
-        fname = os.path.join(os.path.dirname(__file__), 'molecules', molname.lower() + '.xyz')
-        return MoleculeBuilder.from_file(fname)
+        resource = files("pyqint") / "data" / "molecules" / (molname.lower() + ".xyz")
+        with as_file(resource) as fname:
+            return MoleculeBuilder.from_file(fname)
        
     @staticmethod
     def from_file(path:str) -> Molecule:
@@ -24,7 +27,7 @@ class MoleculeBuilder:
             line 3+: atom lines
         """
         if not os.path.isfile(path):
-            raise FileNotFoundError(f"Molecule file not found: {fname}")
+            raise FileNotFoundError(f"Molecule file not found: {path}")
 
         with open(path, "r") as f:
             # Read and clean header
@@ -78,18 +81,15 @@ class MoleculeBuilder:
         Molecule names are derived from .xyz filenames and can be
         passed directly to from_name().
         """
-        mol_dir = os.path.join(
-            os.path.dirname(__file__),
-            "molecules"
-        )
+        mol_dir = files("pyqint") / "data" / "molecules"
 
-        if not os.path.isdir(mol_dir):
+        if not mol_dir.is_dir():
             print("No molecules directory found.")
             return
 
         xyz_files = sorted(
-            f for f in os.listdir(mol_dir)
-            if f.lower().endswith(".xyz")
+            f.name for f in mol_dir.iterdir()
+            if f.name.lower().endswith(".xyz")
         )
 
         if not xyz_files:

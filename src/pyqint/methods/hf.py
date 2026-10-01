@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 
-from .pyqint_core import PyQInt
-from .molecule import Molecule
+from ..pyqint_core import PyQInt
+from ..structure.molecule import Molecule
 
 # These are assumed to exist elsewhere in your module
 SUBSPACE_START: int
