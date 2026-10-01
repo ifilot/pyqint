@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from .pyqint_core import PyQInt
+from .spin import get_spin_channel
 
 class ContourPlotter:
     """
@@ -25,6 +26,7 @@ class ContourPlotter:
         ngrid: int = 5,
         labels=None,
         plot_energies = True,
+        spin = None,
     ):
         """
         Generate a grid of contour plots for molecular orbitals.
@@ -32,11 +34,14 @@ class ContourPlotter:
         Parameters
         ----------
         res : dict
-            Results object containing at least:
+            Results object of an RHF or UHF calculation (or of a
+            Foster-Boys localization) containing at least:
             - 'cgfs'   : contracted Gaussian basis functions
             - 'orbc'   : orbital coefficients (n_basis, n_orbitals)
             - 'orbe'   : orbital energies
             - 'nuclei' : atomic coordinates
+            For UHF results, 'orbc_alpha'/'orbc_beta' and
+            'orbe_alpha'/'orbe_beta' are used instead.
         filename : str
             Output image filename.
         plane : str or tuple
@@ -56,7 +61,17 @@ class ContourPlotter:
             Number of tick marks per axis.
         labels : list of str, optional
             Custom labels for the orbitals.
+        plot_energies : bool, optional
+            Whether to add the orbital energy to the subplot titles.
+        spin : {'alpha', 'beta'}, optional
+            Spin channel to plot; required for UHF results and must be
+            omitted for RHF results.
         """
+
+        channel = get_spin_channel(res, spin)
+        orbc = channel["orbc"]
+        orbe = channel["orbe"]
+        spinlabel = '' if spin is None else (r'^{\alpha}' if spin == 'alpha' else r'^{\beta}')
 
         # Create the subplot grid
         fig, ax = plt.subplots(
@@ -72,7 +87,7 @@ class ContourPlotter:
                 orb_idx = i * ncols + j
 
                 # Stop if we run out of orbitals
-                if orb_idx >= res["orbc"].shape[1]:
+                if orb_idx >= orbc.shape[1]:
                     continue
 
                 # --------------------------------------------------
@@ -105,7 +120,7 @@ class ContourPlotter:
                 # --------------------------------------------------
                 dens = ContourPlotter.__plot_wavefunction(
                     res["cgfs"],
-                    res["orbc"][:, orb_idx],
+                    orbc[:, orb_idx],
                     grid,
                 )
 
@@ -150,10 +165,10 @@ class ContourPlotter:
                 if labels is not None:
                     orblabel = labels[orb_idx]
                 else:
-                    orblabel = r'$\psi_{%i}$' % (orb_idx + 1)
+                    orblabel = r'$\psi_{%i}%s$' % (orb_idx + 1, spinlabel)
 
                 if plot_energies:
-                    orblabel += r' (%.4f Ht)' % res["orbe"][orb_idx]
+                    orblabel += r' (%.4f Ht)' % orbe[orb_idx]
 
                 ax[i, j].set_title(orblabel)
 

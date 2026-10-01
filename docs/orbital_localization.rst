@@ -6,10 +6,12 @@ Orbital localization: Foster-Boys
 .. contents:: Table of Contents
     :depth: 3
 
-.. warning::
+.. note::
 
-    Orbital Localization methods currently only support **restricted**
-    Hartree-Fock calculations.
+    Both restricted (RHF) and unrestricted (UHF) Hartree-Fock results are
+    supported. For UHF results, the :math:`\alpha` and :math:`\beta`
+    orbitals are localized independently; see
+    :ref:`orbital_localization_uhf`.
 
 Background of FB
 ----------------
@@ -139,9 +141,62 @@ elements.
      - Initial sum of the squared dipole moment norm of the molecular orbitals.
    * - :code:`r2final`
      - Final sum of the squared dipole moment norm of the molecular orbitals.
+   * - :code:`fock`
+     - Fock matrix used to evaluate the orbital energies.
+   * - :code:`density`
+     - Density matrix (unaffected by the localization).
 
 .. hint::
 
     One can directly connect the output of a Foster-Boys calculation to a
     MOHP calculation. The details of the process are found in the
     `MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals section <#MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals>`_.
+
+.. _orbital_localization_uhf:
+
+Unrestricted Hartree-Fock
+-------------------------
+
+The result of an unrestricted Hartree-Fock calculation can be passed to
+:code:`FosterBoys` in exactly the same way. Because a unitary transformation
+may only mix orbitals of the same spin, the :math:`\alpha` and :math:`\beta`
+orbitals are localized independently, each over its own occupied subspace of
+:code:`nalpha` and :code:`nbeta` orbitals, respectively. A spin channel with
+fewer than two occupied orbitals is left unchanged.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, FosterBoys
+    import numpy as np
+
+    R = 2.039
+    sqrt3 = np.sqrt(3.0)
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, 0.0)
+    mol.add_atom('H',  R, 0.0, 0.0)
+    mol.add_atom('H', -0.5 * R,  0.5 * sqrt3 * R, 0.0)
+    mol.add_atom('H', -0.5 * R, -0.5 * sqrt3 * R, 0.0)
+
+    res = HF(mol, 'sto3g').uhf(multiplicity=2)
+    res_fb = FosterBoys(res, seed=0).run(nr_runners=3)
+
+    print(res_fb['orbe_alpha'][:res['nalpha']])
+    print(res_fb['orbe_beta'][:res['nbeta']])
+
+The output dictionary mirrors the one of the UHF procedure: the keys
+:code:`orbe`, :code:`orbc`, :code:`fock`, :code:`density`, :code:`nriter`,
+:code:`r2start` and :code:`r2final` are provided per spin channel with an
+:code:`_alpha` or :code:`_beta` suffix (e.g. :code:`orbc_alpha`,
+:code:`r2final_beta`). Furthermore, the total density matrix
+:code:`density` and the spin information :code:`nalpha`, :code:`nbeta` and
+:code:`multiplicity` are included. As such, the output can be passed directly
+to :code:`PopulationAnalysis` and :code:`ContourPlotter` (using the
+:code:`spin` argument).
+
+.. note::
+
+    For open-shell systems, the singly occupied orbital is part of the
+    occupied :math:`\alpha` subspace and may be mixed with other occupied
+    orbitals during localization. For example, for the methyl radical the
+    carbon 1s orbital and the singly occupied carbon 2p orbital are combined
+    into two hybrid orbitals in the :math:`\alpha` channel.

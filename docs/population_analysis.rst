@@ -6,10 +6,11 @@ Population Analysis
 .. contents:: Table of Contents
     :depth: 3
 
-.. warning::
+.. note::
 
-    Population Analysis methods currently only support **restricted**
-    Hartree-Fock calculations.
+    Population analysis supports both restricted (RHF) and unrestricted (UHF)
+    Hartree-Fock results. The specifics for UHF are discussed in
+    :ref:`population_analysis_uhf`.
 
 Single Atom Population Analysis
 -------------------------------
@@ -184,6 +185,8 @@ where:
   coefficient matrix :math:`\mathbf{C}`
 - :math:`H_{ij}` is an element of the Fock (Hamiltonian) matrix
 - the factor of 2 accounts for spin degeneracy in restricted Hartree-Fock theory
+  (for unrestricted Hartree-Fock, see
+  :ref:`population_analysis_uhf`)
 
 Analogously, the **MOOP coefficient** is defined as
 
@@ -308,3 +311,116 @@ the occupied subspace is invariant under unitary transformations**. This
 invariance reflects the fact that the total bonding character, electron density,
 and total energy of the system are preserved under orbital localization
 procedures.
+
+.. _population_analysis_uhf:
+
+Unrestricted Hartree-Fock
+-------------------------
+
+The :code:`PopulationAnalysis` class accepts the output of an unrestricted
+Hartree-Fock calculation (or of a Foster-Boys localization thereof) as well.
+
+Charges and spin populations
+****************************
+
+The Mulliken and Löwdin atomic charges are evaluated from the total density
+matrix :math:`\mathbf{P} = \mathbf{P}^{\alpha} + \mathbf{P}^{\beta}` and
+are thus obtained in exactly the same way as for RHF.
+
+For open-shell systems it is additionally insightful to determine where the
+unpaired electrons reside. This is captured by the *spin population*, which
+is obtained by applying the same partitioning to the spin density matrix
+:math:`\mathbf{P}^{\alpha} - \mathbf{P}^{\beta}`. For example, the Mulliken
+spin population of atom :math:`A` reads
+
+.. math::
+
+    \rho_A^{(\mathrm{M})} =
+    \sum_{i \in A} \left[(\mathbf{P}^{\alpha} - \mathbf{P}^{\beta})\mathbf{S}\right]_{ii}
+
+The spin populations sum to :math:`N_{\alpha} - N_{\beta}`. They are
+available via the :code:`mulliken_spin` and :code:`lowdin_spin` methods. For
+RHF results, these methods return zero.
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, PopulationAnalysis
+    import numpy as np
+
+    # planar methyl radical (doublet)
+    R = 2.039
+    sqrt3 = np.sqrt(3.0)
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, 0.0)
+    mol.add_atom('H',  R, 0.0, 0.0)
+    mol.add_atom('H', -0.5 * R,  0.5 * sqrt3 * R, 0.0)
+    mol.add_atom('H', -0.5 * R, -0.5 * sqrt3 * R, 0.0)
+
+    res = HF(mol, 'sto3g').uhf(multiplicity=2)
+    pa = PopulationAnalysis(res)
+
+    print('Atom   Charge (M)   Spin (M)   Charge (L)   Spin (L)')
+    for n, atom in enumerate(mol):
+        print('%2s  %12.6f %10.6f %12.6f %10.6f' % (atom[0],
+              pa.mulliken(n), pa.mulliken_spin(n),
+              pa.lowdin(n), pa.lowdin_spin(n)))
+
+Example output::
+
+    Atom   Charge (M)   Spin (M)   Charge (L)   Spin (L)
+     C     -0.176093   1.287492    -0.093135   1.206127
+     H      0.058698  -0.095831     0.031045  -0.068709
+     H      0.058698  -0.095831     0.031045  -0.068709
+     H      0.058698  -0.095831     0.031045  -0.068709
+
+The unpaired electron resides on the carbon atom. The small negative spin
+populations on the hydrogen atoms are a consequence of spin polarization,
+which compensates for a carbon spin population exceeding unity.
+
+MOHP, MOOP, and MOBI
+********************
+
+For UHF results, the orbital-resolved analyses are performed per spin channel,
+which is selected via the :code:`spin` argument (:code:`'alpha'` or
+:code:`'beta'`). This argument is mandatory for UHF results and not allowed
+for RHF results. As each spin orbital holds a single electron, the factor of 2
+in the definitions of MOHP and MOOP is dropped, and the spin-specific Fock
+matrix :math:`\mathbf{F}^{\sigma}` and orbital coefficients
+:math:`\mathbf{C}^{\sigma}` are used:
+
+.. math::
+
+    \mathrm{MOHP}^{\sigma}_k =
+    \sum_{i \in A} \sum_{j \in B}
+    C^{\sigma}_{ik} \, F^{\sigma}_{ij} \, C^{\sigma}_{jk}
+    \qquad
+    \mathrm{MOOP}^{\sigma}_k =
+    \sum_{i \in A} \sum_{j \in B}
+    C^{\sigma}_{ik} \, S_{ij} \, C^{\sigma}_{jk}
+
+For MOBI, the spin density matrix enters with a factor 2, consistent with the
+open-shell generalization of the Mayer bond order:
+
+.. math::
+
+    \mathrm{MOBI}^{\sigma}_k =
+    2 \sum_{i \in A} \sum_{j \in B}
+    C^{\sigma}_{ik} \, P^{\sigma}_{ij} \, C^{\sigma}_{jk}
+
+With these definitions, for a closed-shell system the :math:`\alpha` and
+:math:`\beta` contributions of a UHF calculation sum to the RHF result.
+
+.. code-block:: python
+
+    for spin in ('alpha', 'beta'):
+        nocc = res['n' + spin]
+        mohp = pa.mohp(0, 1, spin=spin)
+        print('Sum of MOHP (%5s):' % spin, np.sum(mohp[:nocc]))
+
+Example output::
+
+    Sum of MOHP (alpha): -0.1793903078632079
+    Sum of MOHP ( beta): -0.1745035734889992
+
+A complete example, including Foster-Boys localization of the spin orbitals,
+is found in :code:`docs/scripts/ch3_uhf_analysis.py`.

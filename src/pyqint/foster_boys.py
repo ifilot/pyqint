@@ -5,6 +5,8 @@ Foster-Boys orbital localization.
 
 This module implements the Foster-Boys procedure for constructing
 localized molecular orbitals from canonical Hartree-Fock orbitals.
+Both restricted (RHF) and unrestricted (UHF) results are supported; for
+the latter, the alpha and beta orbitals are localized independently.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import numpy.typing as npt
 import scipy.optimize
 
 from .pyqint_core import PyQInt
+from .spin import get_spin_channel, is_unrestricted
 
 
 Vec = npt.NDArray[np.float64]
@@ -47,30 +50,19 @@ class FosterBoys:
         maxiter
             Maximum number of Foster-Boys iterations.
         """
-        if 'orbe_alpha' in hf_result.keys():
-            raise Exception('PopulationAnalysis is not yet supported for UHF')
+        self._res = hf_result
+        self._unrestricted: bool = is_unrestricted(hf_result)
 
-        # Canonical HF quantities (read-only)
-        self._orbc_canonical: Mat = hf_result["orbc"]
-        self._orbe_canonical: Vec = hf_result["orbe"]
+        # Canonical HF quantities shared by all spin channels (read-only)
         self._mol = hf_result["mol"]
         self._nuclei = hf_result["nuclei"]
         self._nelec: int = hf_result["nelec"]
-        self._H: Mat = hf_result["fock"]
         self._cgfs = hf_result["cgfs"]
         self._overlap = hf_result["overlap"]
-        self._fock = hf_result["fock"]
-        self.__density = hf_result["density"]
 
         # Algorithm parameters
         self._maxiter: int = maxiter
         self._rng = np.random.default_rng(seed)
-
-        # Occupation mask (restricted closed-shell)
-        nocc = self._nelec // 2
-        self._occ: Vec = np.array(
-            [1.0 if i < nocc else 0.0 for i in range(len(self._cgfs))]
-        )
 
         # Precompute dipole tensor (dominant cost)
         self._dipole_tensor: Mat = self._build_dipole_tensor(self._cgfs)
@@ -94,66 +86,101 @@ class FosterBoys:
         Returns
         -------
         dict
-            Localization result.
+            Localization result. For RHF input, the keys 'orbc', 'orbe',
+            'fock', 'nriter', 'r2start' and 'r2final' are provided. For UHF
+            input, these keys carry an '_alpha' or '_beta' suffix, mirroring
+            the output of the UHF procedure.
         """
-        best_result: Optional[Dict[str, Any]] = None
-        best_r2: float = -np.inf
+        result: Dict[str, Any] = {
+            "overlap": self._overlap,
+            "mol": self._mol,
+            "nelec": self._nelec,
+            "cgfs": self._cgfs,
+            "nuclei": self._nuclei,
+            "density": self._res["density"],
+        }
 
-        for _ in range(nr_runners):
-            result = self._single_runner()
-            if result["r2final"] > best_r2:
-                best_r2 = result["r2final"]
-                best_result = result
+        if not self._unrestricted:
+            result.update(self._localize_channel(None, nr_runners))
+            return result
 
-        assert best_result is not None
-        return best_result
+        for spin in ("alpha", "beta"):
+            channel = self._localize_channel(spin, nr_runners)
+            for key, value in channel.items():
+                result[key + "_" + spin] = value
+
+        for key in ("nalpha", "nbeta", "multiplicity"):
+            result[key] = self._res[key]
+
+        return result
 
     # ------------------------------------------------------------------
     # Core algorithm
     # ------------------------------------------------------------------
 
-    def _single_runner(self) -> Dict[str, Any]:
+    def _localize_channel(self, spin: Optional[str], nr_runners: int) -> Dict[str, Any]:
+        """
+        Localize the occupied orbitals of a single spin channel, retaining
+        the best result out of `nr_runners` random initializations.
+        """
+        channel = get_spin_channel(self._res, spin)
+        C0: Mat = channel["orbc"]
+        F: Mat = channel["fock"]
+        nocc: int = channel["nocc"]
+
+        best_result: Optional[Dict[str, Any]] = None
+        best_r2: float = -np.inf
+
+        for _ in range(nr_runners):
+            result = self._single_runner(C0, F, nocc)
+            if result["r2final"] > best_r2:
+                best_r2 = result["r2final"]
+                best_result = result
+
+        assert best_result is not None
+        best_result["density"] = channel["density"]
+        return best_result
+
+    def _single_runner(self, C0: Mat, F: Mat, nocc: int) -> Dict[str, Any]:
         """
         Execute one Foster-Boys optimization run.
         """
-        C = self._random_orthogonal_initial_guess(self._orbc_canonical)
-
-        r2_old = 0.0
-        for niter in range(self._maxiter):
-            C, r2_new = self._mix_orbitals(C)
-            if abs(r2_new - r2_old) < 1e-7:
-                break
-            r2_old = r2_new
+        # with fewer than two occupied orbitals, there is nothing to rotate
+        if nocc < 2:
+            C = C0
+            niter = -1
         else:
-            raise RuntimeError("Foster-Boys localization did not converge.")
+            C = self._random_orthogonal_initial_guess(C0, nocc)
 
-        orbe, orbc = self._compute_orbital_energies(C)
+            r2_old = 0.0
+            for niter in range(self._maxiter):
+                C, r2_new = self._mix_orbitals(C, nocc)
+                if abs(r2_new - r2_old) < 1e-7:
+                    break
+                r2_old = r2_new
+            else:
+                raise RuntimeError("Foster-Boys localization did not converge.")
+
+        orbe, orbc = self._compute_orbital_energies(C, F)
 
         return {
             "orbe": orbe,
             "orbc": orbc,
-            "overlap": self._overlap,
-            "fock": self._fock,
+            "fock": F,
             "nriter": niter + 1,
-            "mol": self._mol,
-            "r2start": self._compute_r2(self._orbc_canonical),
-            "r2final": self._compute_r2(orbc),
-            "nelec": self._nelec,
-            "cgfs": self._cgfs,
-            "nuclei": self._nuclei,
-            "density": self.__density,
+            "r2start": self._compute_r2(C0, nocc),
+            "r2final": self._compute_r2(orbc, nocc),
         }
 
     # ------------------------------------------------------------------
     # Foster-Boys mechanics
     # ------------------------------------------------------------------
 
-    def _mix_orbitals(self, C: Mat) -> tuple[Mat, float]:
+    def _mix_orbitals(self, C: Mat, nocc: int) -> tuple[Mat, float]:
         """
         Perform pairwise orbital rotations to maximize the Boys functional.
         """
-        nocc = self._nelec // 2
-        r2_start = self._compute_r2(C)
+        r2_start = self._compute_r2(C, nocc)
         r2_best = r2_start
 
         for i in range(nocc):
@@ -161,7 +188,7 @@ class FosterBoys:
                 res = scipy.optimize.minimize(
                     self._evaluate_rotation,
                     0.0,
-                    args=(C, i, j),
+                    args=(C, i, j, nocc),
                     bounds=[(-np.pi, np.pi)],
                     tol=1e-12,
                 )
@@ -169,26 +196,29 @@ class FosterBoys:
                 alpha = res.x[0]
                 C_new = self._rotate_pair(C, i, j, alpha)
 
-                r2 = self._compute_r2(C_new)
+                r2 = self._compute_r2(C_new, nocc)
                 if r2 > r2_best:
                     C = C_new
                     r2_best = r2
 
         return C, r2_best
 
-    def _evaluate_rotation(self, alpha: float, C: Mat, i: int, j: int) -> float:
+    def _evaluate_rotation(self, alpha: float, C: Mat, i: int, j: int,
+                           nocc: int) -> float:
         """
         Objective function for a 2×2 orbital rotation.
         """
         C_new = self._rotate_pair(C, i, j, alpha)
-        return -self._compute_r2(C_new)
+        return -self._compute_r2(C_new, nocc)
 
-    def _compute_r2(self, C: Mat) -> float:
+    def _compute_r2(self, C: Mat, nocc: int) -> float:
         """
-        Compute the Foster-Boys localization functional.
+        Compute the Foster-Boys localization functional over the
+        `nocc` occupied orbitals.
         """
-        dip = np.einsum("ji,ki,jkl->il", C, C, self._dipole_tensor)
-        return float(np.einsum("ij,i->", dip**2, self._occ))
+        Cocc = C[:, :nocc]
+        dip = np.einsum("ji,ki,jkl->il", Cocc, Cocc, self._dipole_tensor)
+        return float(np.sum(dip**2))
 
     # ------------------------------------------------------------------
     # Linear algebra helpers
@@ -203,11 +233,11 @@ class FosterBoys:
         C_new[:, j] = -np.sin(alpha) * C[:, i] + np.cos(alpha) * C[:, j]
         return C_new
 
-    def _random_orthogonal_initial_guess(self, C: Mat, nops: int = 100) -> Mat:
+    def _random_orthogonal_initial_guess(self, C: Mat, nocc: int,
+                                         nops: int = 100) -> Mat:
         """
         Generate a randomized orthogonal transformation of occupied orbitals.
         """
-        nocc = self._nelec // 2
         for _ in range(nops):
             i, j = self._rng.choice(nocc, size=2, replace=False)
             angle = self._rng.uniform(0.0, 2.0 * np.pi)
@@ -233,10 +263,10 @@ class FosterBoys:
 
         return tensor
 
-    def _compute_orbital_energies(self, C: Mat) -> tuple[Vec, Mat]:
+    def _compute_orbital_energies(self, C: Mat, F: Mat) -> tuple[Vec, Mat]:
         """
         Compute MO energies in the localized basis.
         """
-        energies = np.array([C[:, i] @ self._H @ C[:, i] for i in range(C.shape[1])])
+        energies = np.array([C[:, i] @ F @ C[:, i] for i in range(C.shape[1])])
         idx = np.argsort(energies)
         return energies[idx], C[:, idx]

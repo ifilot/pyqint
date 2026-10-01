@@ -58,6 +58,7 @@ py.install_sources(
     'molecule_builder.py',
     'population_analysis.py',
     'spherical_harmonics.py',
+    'spin.py',
 
     'blender/blender_render_molecule.py',
 

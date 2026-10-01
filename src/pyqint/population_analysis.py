@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 import numpy as np
 import numpy.typing as npt
+
+from .spin import get_spin_channel, is_unrestricted
 
 Vec = npt.NDArray[np.float64]
 Mat = npt.NDArray[np.float64]
@@ -21,8 +23,10 @@ class PopulationAnalysis:
       - MOHP: Molecular Orbital Hamilton Population
       - MOBI: Molecular Orbital Bond Index
 
-    The analysis operates on the output of a restricted Hartree–Fock
-    calculation and assumes doubly occupied orbitals.
+    The analysis operates on the output of either a restricted (RHF) or an
+    unrestricted (UHF) Hartree–Fock calculation. For UHF results, the
+    orbital-resolved analyses (MOOP, MOHP, MOBI) require the spin channel
+    to be specified via ``spin='alpha'`` or ``spin='beta'``.
     """
 
     def __init__(self, res: Dict[str, Any]) -> None:
@@ -30,104 +34,80 @@ class PopulationAnalysis:
         Parameters
         ----------
         res
-            Result dictionary returned by a Hartree–Fock calculation.
+            Result dictionary returned by a Hartree–Fock calculation
+            (either RHF or UHF).
         """
-        if 'orbe_alpha' in res.keys():
-            raise Exception('PopulationAnalysis is not yet supported for UHF')
+        self.res = res
 
-        # Molecular orbital coefficients (AO -> MO)
-        self.orbc: Mat = res["orbc"]
+        # Whether the result originates from an unrestricted calculation
+        self.unrestricted: bool = is_unrestricted(res)
 
         # Overlap matrix
         self.S: Mat = res["overlap"]
 
-        # Orbital energies
-        self.orbe: Vec = res["orbe"]
-
-        # Density matrix
+        # Total density matrix
         self.P: Mat = res["density"]
 
-        # Number of electrons (restricted, closed-shell assumed)
+        # Spin density matrix (alpha - beta); vanishes for RHF
+        if self.unrestricted:
+            self.Pspin: Mat = res["density_alpha"] - res["density_beta"]
+        else:
+            self.Pspin = np.zeros_like(self.P)
+
+        # Number of electrons
         self.nelec: int = res["nelec"]
 
         # Nuclear positions: [(position, charge), ...]
         self.nuclei = res["nuclei"]
 
-        # Fock (Hamiltonian) matrix
-        self.H: Mat = res["fock"]
-
         # Contracted Gaussian basis functions
         self.cgfs = res["cgfs"]
-
-        # Occupation mask (2 electrons per occupied MO)
-        nocc = self.nelec // 2
-        self.occ: Vec = np.array(
-            [1.0 if i < nocc else 0.0 for i in range(len(self.cgfs))]
-        )
 
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 
-    def mulliken(self, n: int):
+    def mulliken(self, n: int) -> float:
         """
         Perform Mulliken Population Analysis
 
         n: index of nucleus
+
+        Returns the atomic charge of nucleus n.
         """
+        return self.nuclei[n][1] - self._mulliken_population(n, self.P)
 
-        # figure out which basis functions belongs to the nucleus
-        cgfs_n = []
-        nuc = self.nuclei[n][0]
-        for i,cgf in enumerate(self.cgfs):
-            if np.linalg.norm(cgf.p - nuc) < 1e-3:
-                cgfs_n.append(i)
-
-        # detemrine the overlap weighted density matrix
-        overlap_density = self.P @ self.S
-
-        # add up electrons in basis functions localized on nucleus
-        mulliken = 0
-        for i in cgfs_n: # loop over atom cgfs
-            mulliken += overlap_density[i,i]
-
-        atomic_charge = self.nuclei[n][1] - mulliken
-
-        return atomic_charge
-    
-    def lowdin(self, n: int):
+    def lowdin(self, n: int) -> float:
         """
         Perform Löwdin Population Analysis
 
         n: index of nucleus
+
+        Returns the atomic charge of nucleus n.
         """
+        return self.nuclei[n][1] - self._lowdin_population(n, self.P)
 
-        # diagonalize S
-        s, U = np.linalg.eigh(self.S)
+    def mulliken_spin(self, n: int) -> float:
+        """
+        Compute the Mulliken spin population (N_alpha - N_beta) of a nucleus.
 
-        # construct transformation matrix X, using Löwdin orthogonalization
-        X = U @ np.diag(np.sqrt(s)) @ U.transpose()
+        n: index of nucleus
 
-        # figure out which basis functions belongs to the nucleus
-        cgfs_n = []
-        nuc = self.nuclei[n][0]
-        for i,cgf in enumerate(self.cgfs):
-            if np.linalg.norm(cgf.p - nuc) < 1e-3:
-                cgfs_n.append(i)
+        For RHF results the spin population is identically zero.
+        """
+        return self._mulliken_population(n, self.Pspin)
 
-        # determine P in (local) orthonormalized basis
-        P_prime = X @ self.P @ X
+    def lowdin_spin(self, n: int) -> float:
+        """
+        Compute the Löwdin spin population (N_alpha - N_beta) of a nucleus.
 
-        # add up electrons in basis functions localized on nucleus
-        lowdin = 0
-        for i in cgfs_n: # loop over atoms cgfs
-            lowdin += P_prime[i,i]
+        n: index of nucleus
 
-        atomic_charge = self.nuclei[n][1] - lowdin
+        For RHF results the spin population is identically zero.
+        """
+        return self._lowdin_population(n, self.Pspin)
 
-        return atomic_charge
-
-    def moop(self, n1: int, n2: int) -> Vec:
+    def moop(self, n1: int, n2: int, spin: Optional[str] = None) -> Vec:
         """
         Compute the Molecular Orbital Overlap Population (MOOP).
 
@@ -135,15 +115,18 @@ class PopulationAnalysis:
         ----------
         n1, n2
             Indices of the two nuclei.
+        spin
+            Spin channel ('alpha' or 'beta'); required for UHF results
+            and must be omitted for RHF results.
 
         Returns
         -------
         ndarray
             MOOP values for each molecular orbital.
         """
-        return self._population_analysis(n1, n2, matrix=self.S)
+        return self._population_analysis(n1, n2, 'overlap', spin)
 
-    def mohp(self, n1: int, n2: int) -> Vec:
+    def mohp(self, n1: int, n2: int, spin: Optional[str] = None) -> Vec:
         """
         Compute the Molecular Orbital Hamilton Population (MOHP).
 
@@ -151,15 +134,18 @@ class PopulationAnalysis:
         ----------
         n1, n2
             Indices of the two nuclei.
+        spin
+            Spin channel ('alpha' or 'beta'); required for UHF results
+            and must be omitted for RHF results.
 
         Returns
         -------
         ndarray
             MOHP values for each molecular orbital.
         """
-        return self._population_analysis(n1, n2, matrix=self.H)
+        return self._population_analysis(n1, n2, 'fock', spin)
 
-    def mobi(self, n1: int, n2: int) -> Vec:
+    def mobi(self, n1: int, n2: int, spin: Optional[str] = None) -> Vec:
         """
         Compute the Molecular Orbital Bond Index (MOBI).
 
@@ -167,19 +153,23 @@ class PopulationAnalysis:
         ----------
         n1, n2
             Indices of the two nuclei.
+        spin
+            Spin channel ('alpha' or 'beta'); required for UHF results
+            and must be omitted for RHF results.
 
         Returns
         -------
         ndarray
             MOBI values for each molecular orbital.
         """
-        return self._population_analysis(n1, n2, matrix=self.P)
+        return self._population_analysis(n1, n2, 'density', spin)
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _population_analysis(self, n1: int, n2: int, matrix: Mat) -> Vec:
+    def _population_analysis(self, n1: int, n2: int, kind: str,
+                             spin: Optional[str]) -> Vec:
         """
         Shared implementation of MOHP/MOOP/MOBI.
 
@@ -187,29 +177,88 @@ class PopulationAnalysis:
         ----------
         n1, n2
             Indices of the two nuclei.
-        matrix
-            Either the overlap matrix (S), the Hamiltonian matrix (H), 
-            or density matrix (P).
+        kind
+            Either 'overlap' (S), 'fock' (H) or 'density' (P).
+        spin
+            Spin channel for UHF results, None for RHF results.
 
         Returns
         -------
         ndarray
             Population coefficients per molecular orbital.
+
+        Notes
+        -----
+        For UHF results each spin orbital holds a single electron and the
+        prefactor is halved with respect to RHF. For MOBI, the spin density
+        enters with a factor 2, consistent with the open-shell Mayer bond
+        order. As such, for a closed-shell system the alpha and beta
+        contributions sum to the RHF result.
         """
         if n1 == n2:
             raise ValueError(
                 "Population analysis requires two distinct atoms."
             )
 
+        channel = get_spin_channel(self.res, spin)
+        orbc = channel["orbc"]
+
+        if kind == 'overlap':
+            matrix = self.S
+        elif kind == 'fock':
+            matrix = channel["fock"]
+        else:
+            # scale spin densities to the closed-shell convention
+            matrix = channel["density"] * (2.0 / channel["occ_factor"])
+
         # Determine basis functions belonging to each nucleus
         idx1, idx2 = self._basis_indices_for_atoms(n1, n2)
 
-        C1 = self.orbc[idx1, :]
-        C2 = self.orbc[idx2, :]
+        C1 = orbc[idx1, :]
+        C2 = orbc[idx2, :]
         M12 = matrix[np.ix_(idx1, idx2)]
-        coeff = 2.0 * np.einsum('ik,ij,jk->k', C1, M12, C2, optimize=True)
+        coeff = channel["occ_factor"] * np.einsum('ik,ij,jk->k', C1, M12, C2,
+                                                  optimize=True)
 
         return coeff
+
+    def _basis_indices_for_atom(self, n: int) -> List[int]:
+        """
+        Determine which basis functions are centered on nucleus n.
+        """
+        nuc = self.nuclei[n][0]
+        return [i for i, cgf in enumerate(self.cgfs)
+                if np.linalg.norm(cgf.p - nuc) < 1e-3]
+
+    def _mulliken_population(self, n: int, P: Mat) -> float:
+        """
+        Number of electrons assigned to nucleus n by Mulliken partitioning
+        of the density matrix P.
+        """
+        # determine the overlap weighted density matrix
+        overlap_density = P @ self.S
+
+        # add up electrons in basis functions localized on nucleus
+        return float(sum(overlap_density[i, i]
+                         for i in self._basis_indices_for_atom(n)))
+
+    def _lowdin_population(self, n: int, P: Mat) -> float:
+        """
+        Number of electrons assigned to nucleus n by Löwdin partitioning
+        of the density matrix P.
+        """
+        # diagonalize S
+        s, U = np.linalg.eigh(self.S)
+
+        # construct transformation matrix X, using Löwdin orthogonalization
+        X = U @ np.diag(np.sqrt(s)) @ U.transpose()
+
+        # determine P in (local) orthonormalized basis
+        P_prime = X @ P @ X
+
+        # add up electrons in basis functions localized on nucleus
+        return float(sum(P_prime[i, i]
+                         for i in self._basis_indices_for_atom(n)))
 
     def _basis_indices_for_atoms(self, n1: int, n2: int) -> tuple[List[int], List[int]]:
         """

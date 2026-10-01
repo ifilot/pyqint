@@ -66,10 +66,9 @@ generating grids of contour plots for molecular orbitals obtained from a
 Hartree-Fock calculation. The class itself is intentionally stateless: all
 required information is passed explicitly via the Hartree-Fock results object.
 
-.. warning::
-
-    ContourPlotter methods currently only support **restricted**
-    Hartree-Fock calculations.
+Both restricted (RHF) and unrestricted (UHF) Hartree-Fock results are
+supported. For UHF results, the spin channel to visualize has to be specified;
+see :ref:`contourplotter_uhf`.
 
 Cartesian-aligned contour plots
 *******************************
@@ -121,6 +120,54 @@ orbitals in a :math:`2 \times 5` grid.
         )
 
     .. figure:: _static/img/co_contour_level15.png
+
+.. _contourplotter_uhf:
+
+Unrestricted Hartree-Fock results
+*********************************
+
+For unrestricted Hartree-Fock calculations, the :math:`\alpha` and
+:math:`\beta` electrons occupy different spatial orbitals. Use the
+:code:`spin` argument (either :code:`'alpha'` or :code:`'beta'`) to select
+which set of orbitals is plotted. The orbital labels are then decorated with
+the corresponding spin, e.g. :math:`\psi_{1}^{\beta}`. The argument is
+mandatory for UHF results and not allowed for RHF results.
+
+The example below plots the :math:`\beta` orbitals of the methyl radical
+after Foster-Boys localization (see :doc:`orbital_localization`).
+
+.. code-block:: python
+
+    from pyqint import Molecule, HF, FosterBoys, ContourPlotter
+    import numpy as np
+
+    R = 2.039
+    sqrt3 = np.sqrt(3.0)
+    mol = Molecule()
+    mol.add_atom('C', 0.0, 0.0, 0.0)
+    mol.add_atom('H',  R, 0.0, 0.0)
+    mol.add_atom('H', -0.5 * R,  0.5 * sqrt3 * R, 0.0)
+    mol.add_atom('H', -0.5 * R, -0.5 * sqrt3 * R, 0.0)
+
+    res = HF(mol, 'sto3g').uhf(multiplicity=2)
+    res_fb = FosterBoys(res, seed=0).run(nr_runners=3)
+
+    ContourPlotter.build_contourplot(
+        res_fb,
+        'ch3_fb_contour_beta.png',
+        plane='xy',
+        sz=4.0,
+        npts=101,
+        nrows=1,
+        ncols=5,
+        spin='beta',
+    )
+
+.. figure:: _static/img/ch3_fb_contour_beta.png
+
+    Localized :math:`\beta` orbitals of the methyl radical, showing the
+    carbon 1s core orbital, three equivalent C-H bonding orbitals and the
+    lowest virtual orbital.
 
 Arbitrary planar contour plots
 ******************************
