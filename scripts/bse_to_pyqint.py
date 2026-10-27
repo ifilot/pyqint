@@ -79,17 +79,21 @@ def convert_bse_to_custom(bse_data):
         }
 
         for shell in element_data["electron_shells"]:
-            ang_mom = shell["angular_momentum"][0]
-            shell_type = ANG_MOM_MAP[ang_mom]
-
+            angular_momenta = shell["angular_momentum"]
             exponents = [float(x) for x in shell["exponents"]]
             coeff_columns = shell["coefficients"]
+            if len(angular_momenta) > 1 and len(angular_momenta) != len(coeff_columns):
+                raise ValueError("Combined shell must have one coefficient column per angular momentum")
 
             # Each coefficient column becomes a separate CGF
-            for coeffs in coeff_columns:
+            for column, coeffs in enumerate(coeff_columns):
+                ang_mom = angular_momenta[0] if len(angular_momenta) == 1 else angular_momenta[column]
+                shell_type = ANG_MOM_MAP[ang_mom]
+                if len(coeffs) != len(exponents):
+                    raise ValueError("Coefficient and exponent counts must match")
                 cgto_list = []
                 for alpha, coeff in zip(exponents, coeffs):
-                    if abs(float(coeff)) < 1e-12:
+                    if float(coeff) == 0.0:
                         continue
                     cgto_list.append({
                         "alpha": float(alpha),
