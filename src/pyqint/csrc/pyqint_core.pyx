@@ -6,6 +6,19 @@ import numpy as np
 from collections.abc import Iterable
 import numpy.typing as npt
 
+cdef object vector_to_array(const vector[double]& v):
+    """Copy a C++ vector of doubles into a new NumPy array
+
+    Unlike ``np.array(v)``, this does not first convert the vector into a
+    Python list, which matters for vectors with millions of elements.
+    """
+    arr = np.empty(v.size(), dtype=np.float64)
+    cdef double[::1] view = arr
+    cdef size_t i
+    for i in range(v.size()):
+        view[i] = v[i]
+    return arr
+
 cdef class PyGTO:
     """
     Python representation of the Gaussian Type Orbital
@@ -668,7 +681,70 @@ cdef class PyQInt:
         res = plotter.plot_basis_function(c_grid, c_cgf)
 
         return np.array(res)
-    
+
+    def plot_basis_functions(self, grid:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+        """Calculates all basis functions on a grid in a single call
+
+        This is equivalent to calling :meth:`plot_basis_function` for every
+        basis function, but considerably faster because all basis functions
+        are evaluated within a single parallel loop over the grid points.
+
+        Args:
+            grid (npt.NDArray[np.float64]): grid coordinates (N x 3)
+            cgfs (Iterable[cgf]): list of CGFs
+
+        Returns:
+            npt.NDArray[np.float64]: basis function values; the element
+            [i,j] is the value of basis function i at grid point j
+        """
+        cdef vector[CGF] c_cgfs
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+
+        # make list of doubles
+        grid = np.asarray(grid, dtype=np.float64).reshape(-1, 3)
+        cdef vector[double] c_grid = grid.flatten()
+
+        # build plotter and plot grid
+        cdef Plotter plotter = Plotter()
+        cdef vector[double] res = plotter.plot_basis_functions(c_grid, c_cgfs)
+
+        return vector_to_array(res).reshape(len(cgfs), grid.shape[0])
+
+    def plot_basis_function_gradients(self, grid:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+        """Calculates the gradients of all basis functions on a grid in a single call
+
+        Args:
+            grid (npt.NDArray[np.float64]): grid coordinates (N x 3)
+            cgfs (Iterable[cgf]): list of CGFs
+
+        Returns:
+            npt.NDArray[np.float64]: basis function gradients; the element
+            [i,j,k] is the k-th Cartesian component of the gradient of basis
+            function i at grid point j
+        """
+        cdef vector[CGF] c_cgfs
+
+        # build CGFS objects
+        for cgf in cgfs:
+            c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
+            for gto in cgf.gtos:
+                c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+
+        # make list of doubles
+        grid = np.asarray(grid, dtype=np.float64).reshape(-1, 3)
+        cdef vector[double] c_grid = grid.flatten()
+
+        # build plotter and plot grid
+        cdef Plotter plotter = Plotter()
+        cdef vector[double] res = plotter.plot_basis_function_gradients(c_grid, c_cgfs)
+
+        return vector_to_array(res).reshape(len(cgfs), grid.shape[0], 3)
+
     def plot_gradient(self, grid:npt.NDArray[np.float64], coeff:npt.NDArray[np.float64], cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
         """Build the gradient on the grid
 

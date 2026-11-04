@@ -8,7 +8,25 @@ Entries for versions before 1.5.0 were reconstructed from the release notes and
 pull requests on GitHub. Versions before 1.0.0 are not covered; see the
 [git history](https://github.com/ifilot/pyqint/commits/master) for those.
 
-## [1.5.0] - Unreleased
+## [1.5.1] - Unreleased
+
+### Added
+
+- `PyQInt.plot_basis_functions(grid, cgfs)` evaluates all basis functions on a
+  grid in a single call and returns an array of shape
+  `(n_basis_functions, n_points)`.
+- `PyQInt.plot_basis_function_gradients(grid, cgfs)` evaluates the gradients
+  of all basis functions on a grid in a single call and returns an array of
+  shape `(n_basis_functions, n_points, 3)`.
+
+### Performance
+
+- The two new routines evaluate all basis functions within a single OpenMP
+  parallel region. Evaluating basis functions on a grid one at a time via
+  `plot_basis_function` or `plot_wavefunction` starts a parallel region per
+  basis function, whose overhead dominates for small grids and many threads.
+
+## [1.5.0] - 2026-11-04
 
 ### Added
 
@@ -225,7 +243,8 @@ pull requests on GitHub. Versions before 1.0.0 are not covered; see the
 
 First stable release.
 
-[1.5.0]: https://github.com/ifilot/pyqint/compare/v1.4.3...develop
+[1.5.1]: https://github.com/ifilot/pyqint/compare/v1.5.0...develop
+[1.5.0]: https://github.com/ifilot/pyqint/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/ifilot/pyqint/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/ifilot/pyqint/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/ifilot/pyqint/compare/v1.4.0...v1.4.1
