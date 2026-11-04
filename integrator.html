@@ -177,6 +177,15 @@ orbitals, and their gradients on three-dimensional grids:</p>
 </pre></div>
 </div>
 <p>These routines are primarily intended for visualization and analysis.</p>
+<p>To evaluate <em>all</em> basis functions (or their gradients) on the same grid, for
+example to build numerical integration grids for density functional theory,
+use the batched routines. These evaluate all basis functions within a single
+parallel loop over the grid points, which is considerably faster than calling
+<code class="code docutils literal notranslate"><span class="pre">plot_basis_function</span></code> once per basis function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">amps</span>  <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">plot_basis_functions</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span>           <span class="c1"># (nbf, npts)</span>
+<span class="n">grads</span> <span class="o">=</span> <span class="n">qint</span><span class="o">.</span><span class="n">plot_basis_function_gradients</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span>  <span class="c1"># (nbf, npts, 3)</span>
+</pre></div>
+</div>
 </section>
 <section id="notes">
 <h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>

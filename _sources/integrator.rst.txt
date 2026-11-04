@@ -107,6 +107,17 @@ orbitals, and their gradients on three-dimensional grids:
 
 These routines are primarily intended for visualization and analysis.
 
+To evaluate *all* basis functions (or their gradients) on the same grid, for
+example to build numerical integration grids for density functional theory,
+use the batched routines. These evaluate all basis functions within a single
+parallel loop over the grid points, which is considerably faster than calling
+:code:`plot_basis_function` once per basis function:
+
+.. code-block:: python
+
+   amps  = qint.plot_basis_functions(grid, cgfs)           # (nbf, npts)
+   grads = qint.plot_basis_function_gradients(grid, cgfs)  # (nbf, npts, 3)
+
 Notes
 -----
 
