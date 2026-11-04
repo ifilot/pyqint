@@ -105,6 +105,10 @@ object. This dictionary objects contains the following keys
      - Description
    * - :code:`energy`
      - Final energy of the electronic structure calculation
+   * - :code:`converged`
+     - Whether the convergence criteria were met
+   * - :code:`niter`
+     - Number of SCF iterations
    * - :code:`nuclei`
      - List of elements and their position in Bohr units
    * - :code:`cgfs`
@@ -112,9 +116,9 @@ object. This dictionary objects contains the following keys
    * - :code:`energies`
      - List of energies during the self-convergence procedure
    * - :code:`orbe`
-     - Orbital energies (converged) (array of N element)
+     - Orbital energies (converged) (array of M elements)
    * - :code:`orbc`
-     - Orbital coefficients (converted) (matrix of N x N elements)
+     - Orbital coefficients (converged) (matrix of N x M elements)
    * - :code:`density`
      - Density matrix :math:`\mathbf{P}`
    * - :code:`fock`
@@ -186,14 +190,46 @@ Hartree-Fock calculation.
 
 The output of the above script yields::
 
-    Kinetic energy:  39.42613774982387
-    Nuclear attraction energy:  -118.63789179775034
-    Electron-electron repulsion:  32.7324270326041
-    Exchange energy:  -6.609004673631048
+    Kinetic energy:  39.426137798761935
+    Nuclear attraction energy:  -118.63789212479075
+    Electron-electron repulsion:  32.73242708923475
+    Exchange energy:  -6.609004693243019
     Repulsion between nuclei:  13.362026647057352
 
-    Total energy:  -39.72630504189621
-    Sum of the individual terms:  -39.726305041896055
+    Total energy:  -39.726305282979084
+    Sum of the individual terms:  -39.72630528297975
+
+Convergence
+***********
+
+The self-consistent field procedure is considered converged when, between two
+subsequent iterations, the total energy changes by less than :code:`tolerance`
+(default :math:`10^{-9}` Ht) **and** the largest element of the commutator
+:math:`\mathbf{FPS} - \mathbf{SPF}`, expressed in the orthogonalized basis,
+is smaller than :code:`tolerance_grad` (default
+:math:`\sqrt{\texttt{tolerance}}`). This commutator vanishes only when the
+density matrix is self-consistent with the Fock matrix it produces, and it is
+also the error vector used by the DIIS procedure.
+
+When these criteria are not met within :code:`itermax` iterations (default 100),
+a :code:`RuntimeWarning` is issued. The :code:`converged` entry of the result
+dictionary reports the outcome and :code:`niter` the number of iterations used.
+
+.. code-block:: python
+
+    res = HF(mol, 'sto3g').rhf()
+    if not res['converged']:
+        raise RuntimeError('SCF did not converge')
+
+By default, canonical orthogonalization is used. It removes those linear
+combinations of basis functions whose overlap eigenvalue is smaller than
+:math:`10^{-7}`, as these make the calculation numerically unstable. In that
+case, there are fewer molecular orbitals :math:`M` than basis functions
+:math:`N`. Symmetric orthogonalization (:code:`ortho='symmetric'`) keeps all
+basis functions and warns when the basis set is nearly linearly dependent.
+
+The :code:`rhf` routine requires an even number of electrons; open-shell
+systems are treated with :code:`uhf`.
 
 Unrestricted Hartree-Fock (UHF)
 -------------------------------
@@ -252,6 +288,10 @@ Below, the most important entries of the UHF result dictionary are listed.
      - Description
    * - :code:`energy`
      - Final total electronic energy
+   * - :code:`converged`
+     - Whether the convergence criteria were met
+   * - :code:`niter`
+     - Number of SCF iterations
    * - :code:`nuclei`
      - List of elements and their position in Bohr units
    * - :code:`cgfs`

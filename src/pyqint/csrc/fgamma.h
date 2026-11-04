@@ -29,19 +29,20 @@
 #include <algorithm>
 
 /**
- * @brief Boys function evaluator with interpolation and exact fallbacks.
+ * @brief Boys function evaluator based on a tabulated Taylor expansion.
  *
  * Provides:
- *  - exact evaluation for small / large T
- *  - interpolation-based acceleration for moderate T
+ *  - F_ν(T) to near machine precision for all orders and arguments
+ *  - a Taylor expansion around tabulated points for T < T_TABLE
+ *  - erf-based upward recurrence for large T, where it is stable
  *  - efficient block evaluation using stable recurrence
  */
 class BoysFunction {
 public:
     // Tunable parameters
-    static constexpr double T_SMALL = 1e-6;
-    static constexpr double T_LARGE = 30.0;
-    static constexpr int    NTABLE  = 2048;
+    static constexpr double T_TABLE  = 40.0;    // tabulated range [0, T_TABLE)
+    static constexpr double DT_TABLE = 0.05;    // spacing of the tabulated points
+    static constexpr int    NTAYLOR  = 8;       // terms of the Taylor expansion
 
     /**
      * @brief Construct a Boys-function evaluator.
@@ -68,51 +69,41 @@ public:
     void compute_block(int nu_max, double T, double* F) const;
 
     /**
-     * @brief Return the maximum order stored in the interpolation table.
+     * @brief Return the maximum order stored in the table.
      *
      * @return maximum Boys order
      */
     int max_order() const noexcept;
 
 private:
-    // ---- Interpolation table state ----
-    int nu_tab_max_;
-    double logT_min_;
-    double logT_max_;
-    double inv_dlogT_;
-    std::vector<double> Htab_;
+    // ---- Table state ----
+    int nu_tab_max_;            // highest order evaluated from the table
+    int nrows_;                 // orders stored: 0 … nu_tab_max_ + NTAYLOR - 1
+    int npoints_;               // tabulated points T_i = i * DT_TABLE
+    std::vector<double> Ftab_;  // F_ν(T_i), stored per point
 
     // ---- Internal helpers ----
     /**
-     * @brief Initialize the interpolation table.
+     * @brief Initialize the table.
      *
      * @param nu_max  Maximum order to precompute
      */
     void init_table(int nu_max);
 
     /**
-     * @brief Interpolate the Boys function using the precomputed table.
+     * @brief Evaluate F_ν(T) by a Taylor expansion around the nearest
+     *        tabulated point.
      *
-     * @param nu  Boys order
-     * @param T   Argument
+     * @param nu  Boys order (≤ nu_tab_max_)
+     * @param T   Argument (< T_TABLE)
      *
-     * @return interpolated value
+     * @return Boys function value
      */
-    double interpolate(int nu, double T) const noexcept;
+    double taylor(int nu, double T) const noexcept;
 
+    // ---- Exact reference implementation ----
     /**
-     * @brief Compute flat table index.
-     *
-     * @param nu  Boys order
-     * @param i   table index
-     *
-     * @return flat index
-     */
-    int idx(int nu, int i) const noexcept;
-
-    // ---- Exact reference implementations ----
-    /**
-     * @brief Evaluate the Boys function exactly.
+     * @brief Evaluate the Boys function without the table.
      *
      * @param nu  Boys order
      * @param T   Argument
@@ -120,13 +111,4 @@ private:
      * @return exact value
      */
     static double Fgamma_exact(int nu, double T);
-
-    /**
-     * @brief Evaluate a block of Boys function values exactly.
-     *
-     * @param nu_max  Maximum order
-     * @param T       Argument
-     * @param F       Output array (size ≥ nu_max+1)
-     */
-    static void   Fgamma_block_exact(int nu_max, double T, double* F);
 };

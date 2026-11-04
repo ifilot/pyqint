@@ -213,6 +213,13 @@ class CGF { // Contracted Gaussian Function
 private:
     std::vector<GTO> gtos;  // vector holding all gtos
     Vec3 r;                 // position of the CGF
+    double cnorm = 0.0;     // contraction normalization constant
+
+    /**
+     * @brief Recalculate the contraction normalization constant; called
+     *        whenever the GTOs or their positions change.
+     */
+    void update_contraction_norm();
 
 public:
     /**
@@ -417,5 +424,7 @@ public:
      *
      * @return normalization constant
      */
-    double get_contraction_norm() const;
+    inline double get_contraction_norm() const noexcept {
+        return this->cnorm;
+    }
 };

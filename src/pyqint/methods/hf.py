@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import warnings
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -25,6 +26,10 @@ Nucleus = Tuple[Vec, int]
 # couple of hardcoded variables for the DIIS algorithm
 SUBSPACE_LENGTH = 4
 SUBSPACE_START = 1
+
+# overlap eigenvalues below this threshold are removed by canonical
+# orthogonalization (near-linear dependencies in the basis set)
+LINDEP_THRESHOLD = 1e-7
 
 class HF:
     """
@@ -62,9 +67,17 @@ class HF:
         tolerance: float = 1e-9,
         orbc_init: Optional[Mat] = None,
         ortho: str = "canonical",
+        tolerance_grad: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Perform a restricted Hartree-Fock calculation.
+
+        The calculation is converged when the change in energy is below
+        ``tolerance`` and the largest element of the commutator FPS - SPF,
+        expressed in the orthogonalized basis, is below ``tolerance_grad``.
+        A RuntimeWarning is issued when this is not reached within
+        ``itermax`` iterations; the ``converged`` entry of the result
+        reports the outcome.
 
         Parameters
         ----------
@@ -81,22 +94,40 @@ class HF:
         orbc_init
             Optional initial MO coefficient matrix.
         ortho
-            Orthogonalization scheme ("canonical" or "symmetric").
+            Orthogonalization scheme ("canonical" or "symmetric"). Canonical
+            orthogonalization removes the combinations of basis functions
+            whose overlap eigenvalue is below 1e-7, such that the number of
+            molecular orbitals can be smaller than the number of basis
+            functions.
+        tolerance_grad
+            Threshold for the commutator FPS - SPF; defaults to
+            sqrt(tolerance).
 
         Returns
         -------
         dict
             Result dictionary containing energies, orbitals, matrices, etc.
+
+        Raises
+        ------
+        ValueError
+            If the number of electrons is odd or exceeds the capacity of the
+            molecular orbitals.
         """
+        if self._nelec % 2 != 0:
+            raise ValueError(
+                f"RHF requires an even number of electrons, not {self._nelec}; "
+                "use uhf() for open-shell systems."
+            )
 
         # crank up the tolerance when calculating forces
         if calc_forces and tolerance > 1e-12:
             tolerance = 1e-12
+        if tolerance_grad is None:
+            tolerance_grad = np.sqrt(tolerance)
 
         # create empty dictionary for time tracking statistics
         time_stats = {}
-        N = len(self._cgfs)
-        occ = [2 if i < self._nelec//2 else 0 for i in range(N)]
 
         # build integrals
         integrator = PyQInt()
@@ -106,28 +137,25 @@ class HF:
         time_stats['integral_evaluation'] = end - start
 
         # calculate nuclear repulsion
-        nuc_rep = 0.0
-        for i in range(0, len(self._nuclei)):
-            for j in range(i+1, len(self._nuclei)):
-                r = np.linalg.norm(np.array(self._nuclei[i][0]) - np.array(self._nuclei[j][0]))
-                nuc_rep += self._nuclei[i][1] * self._nuclei[j][1] / r
+        nuc_rep = self.__nuclear_repulsion()
 
-        # diagonalize S
-        s, U = np.linalg.eigh(S)
+        # construct transformation matrix X; the number of molecular
+        # orbitals M is the number of columns of X
+        X = self.__transformation_matrix(S, ortho)
+        M = X.shape[1]
+        if self._nelec // 2 > M:
+            raise ValueError(
+                f"Cannot place {self._nelec} electrons in {M} molecular orbitals "
+                f"({len(self._cgfs)} basis functions)."
+            )
+        occ = [2 if i < self._nelec//2 else 0 for i in range(M)]
 
-        # construct transformation matrix X
-        if ortho == 'canonical': # perform canonical orthogonalization
-            X = U @ np.diag(1.0/np.sqrt(s))
-        elif ortho == 'symmetric':
-            X = U @ np.diag(1.0/np.sqrt(s)) @ U.transpose()
-        else:
-            raise Exception("Invalid orthogonalization option selected: ", ortho)
-        
         # create empty P matrix as initial guess
         if orbc_init is None:
             P = np.zeros(S.shape)
         else:
-            P = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ)
+            occ_init = [2 if i < self._nelec//2 else 0 for i in range(orbc_init.shape[1])]
+            P = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ_init)
 
         # keep track of time
         start = time.time()
@@ -138,6 +166,7 @@ class HF:
         fmats_diis = []
         pmat_diis = []
         evs_diis = []
+        converged = False
 
         # start iterations
         for niter in range(0,itermax):
@@ -174,9 +203,7 @@ class HF:
             C = X @ Cprime
 
             # calculate energy E
-            energy = 0.0
-            M = T + V + F
-            energy = 0.5 * np.einsum('ij,ji', P, M)
+            energy = 0.5 * np.einsum('ij,ji', P, T + V + F)
 
             # add nuclear repulsion
             energy += nuc_rep
@@ -184,18 +211,23 @@ class HF:
             # store energy for next iteration
             energies.append(energy)
 
+            # calculate the error vector from the density matrix that was
+            # used to build the Fock matrix; it vanishes at self-consistency
+            err = F.dot(P.dot(S)) - S.dot(P.dot(F))
+            errmax = np.max(np.abs(X.transpose() @ err @ X))
+
+            # store Fock matrix and error vector for DIIS; the zero initial
+            # guess is skipped as its error vector vanishes trivially
+            if niter > 0 or orbc_init is not None:
+                fmats_diis.append(F)                            # add Fock matrix to list
+                pmat_diis.append(P)                             # add density matrix to list
+                evs_diis.append(err.flatten())                  # add error vector to list
+
             # for the first few iterations, build a new density
             # matrix from the coefficients, else, resort to the DIIS
             # algorithm
             if niter <= SUBSPACE_START or not use_diis:
                 P = np.einsum('ik,jk,k->ij', C, C, occ)
-
-            # calculate DIIS coefficients
-            e = (F.dot(P.dot(S)) - S.dot(P.dot(F))).flatten()   # calculate error vector
-            #enorm = np.linalg.norm(e)                          # store error vector norm
-            fmats_diis.append(F)                                # add Fock matrix to list
-            pmat_diis.append(P)                                 # add density matrix to list
-            evs_diis.append(e)
 
             # prune size of the old Fock, density and error vector lists
             # only SUBSPACE_LENGTH iterations are used to guess the new
@@ -211,18 +243,16 @@ class HF:
 
             # print info for this iteration
             if verbose:
-                print("Iteration: %2i | Energy: %12.6f Ht | Time: %6.4f s" % (niter, energy, time_stats['iterations'][-1]))
+                print("Iteration: %2i | Energy: %12.6f Ht | Error: %8.2e | Time: %6.4f s" % (niter, energy, errmax, time_stats['iterations'][-1]))
 
             # calculate energy difference between this and the previous
-            # iteration; terminate the loop when energy difference is less
-            # than threshold
+            # iteration; terminate the loop when both the energy difference
+            # and the error vector are less than their thresholds
             if niter > 4: # require at least 4 steps
                 ediff = np.abs(energies[-2] - energies[-1])
 
-                if ediff < tolerance: # convergence criterion needs to be at least 1e-7!
-                    # store iteration time
-                    iterend = time.time()
-                    time_stats['iterations'].append(iterend - iterstart)
+                if ediff < tolerance and errmax < tolerance_grad:
+                    converged = True
 
                     # terminate self-convergence cycle
                     if verbose:
@@ -233,13 +263,26 @@ class HF:
         end = time.time()
         time_stats['self_convergence'] = end - start
 
-        # update density matrix and final energy
+        if itermax > 0 and not converged:
+            warnings.warn(
+                f"RHF did not converge within {itermax} iterations "
+                f"(last energy change {ediff if niter > 4 else float('nan'):.2e} Ht, "
+                f"error {errmax:.2e}).",
+                RuntimeWarning, stacklevel=2,
+            )
+
+        # build the density matrix from the final orbitals and the Fock
+        # matrix and energy that belong to it
         P = np.einsum('ik,jk,k->ij', C, C, occ)
+        G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
+        F = T + V + G
         energies[-1] = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
 
         # build solution dictionary
         sol = {
             "energy": energies[-1],
+            "converged": converged,
+            "niter": len(energies),
             "nuclei" : self._nuclei,
             "cgfs": self._cgfs,
             "energies": energies,
@@ -277,9 +320,13 @@ class HF:
             orbc_init: Optional[Dict[str, Mat]] = None,   # expects {"alpha": Ca, "beta": Cb}
             ortho: str = "canonical",
             nelec: Optional[int] = None,
+            tolerance_grad: Optional[float] = None,
         ) -> Dict[str, Any]:
         """
         Perform an unrestricted Hartree-Fock calculation.
+
+        Convergence is assessed as for :meth:`rhf`, using the larger of the
+        commutators of the alpha and beta Fock and density matrices.
 
         Parameters
         ----------
@@ -296,10 +343,14 @@ class HF:
         orbc_init
             Optional initial MO coefficient matrices: {"alpha": Ca, "beta": Cb}.
         ortho
-            Orthogonalization scheme ("canonical" or "symmetric").
+            Orthogonalization scheme ("canonical" or "symmetric"); see
+            :meth:`rhf`.
         nelec
             Number of electrons; defaults to the number of electrons of the
             neutral molecule.
+        tolerance_grad
+            Threshold for the commutators FPS - SPF; defaults to
+            sqrt(tolerance).
 
         Returns
         -------
@@ -329,15 +380,10 @@ class HF:
         nalpha = (nelec + (multiplicity - 1)) // 2
         nbeta  = nelec - nalpha
 
-        # basis size and occupations
+        if tolerance_grad is None:
+            tolerance_grad = np.sqrt(tolerance)
+
         time_stats = {}
-        N = len(self._cgfs)
-        if nalpha > N:
-            raise ValueError(
-                f"Cannot place {nalpha} alpha electrons in {N} basis functions."
-            )
-        occ_a = np.array([1 if i < nalpha else 0 for i in range(N)], dtype=float)
-        occ_b = np.array([1 if i < nbeta  else 0 for i in range(N)], dtype=float)
 
         # build integrals
         integrator = PyQInt()
@@ -347,22 +393,21 @@ class HF:
         time_stats['integral_evaluation'] = end - start
 
         # calculate nuclear repulsion
-        nuc_rep = 0.0
-        for i in range(0, len(self._nuclei)):
-            for j in range(i+1, len(self._nuclei)):
-                r = np.linalg.norm(np.array(self._nuclei[i][0]) - np.array(self._nuclei[j][0]))
-                nuc_rep += self._nuclei[i][1] * self._nuclei[j][1] / r
+        nuc_rep = self.__nuclear_repulsion()
 
-        # diagonalize S
-        s, U = np.linalg.eigh(S)
+        # construct transformation matrix X; the number of molecular
+        # orbitals M is the number of columns of X
+        X = self.__transformation_matrix(S, ortho)
+        M = X.shape[1]
+        if nalpha > M:
+            raise ValueError(
+                f"Cannot place {nalpha} alpha electrons in {M} molecular orbitals "
+                f"({len(self._cgfs)} basis functions)."
+            )
 
-        # construct transformation matrix X
-        if ortho == 'canonical':
-            X = U @ np.diag(1.0/np.sqrt(s))
-        elif ortho == 'symmetric':
-            X = U @ np.diag(1.0/np.sqrt(s)) @ U.transpose()
-        else:
-            raise Exception("Invalid orthogonalization option selected: ", ortho)
+        # occupations
+        occ_a = np.array([1 if i < nalpha else 0 for i in range(M)], dtype=float)
+        occ_b = np.array([1 if i < nbeta  else 0 for i in range(M)], dtype=float)
 
         # initial guess densities
         if orbc_init is None:
@@ -373,8 +418,8 @@ class HF:
             Cb0 = orbc_init.get("beta", None)
             if Ca0 is None or Cb0 is None:
                 raise ValueError("orbc_init for UHF must be a dict with keys {'alpha','beta'}.")
-            Pa = np.einsum('ik,jk,k->ij', Ca0, Ca0, occ_a)
-            Pb = np.einsum('ik,jk,k->ij', Cb0, Cb0, occ_b)
+            Pa = np.einsum('ik,jk,k->ij', Ca0, Ca0, (np.arange(Ca0.shape[1]) < nalpha).astype(float))
+            Pb = np.einsum('ik,jk,k->ij', Cb0, Cb0, (np.arange(Cb0.shape[1]) < nbeta).astype(float))
 
         # time tracking
         start = time.time()
@@ -386,6 +431,7 @@ class HF:
         # DIIS containers (separate DIIS for alpha and beta)
         fmats_diis_a, evs_diis_a = [], []
         fmats_diis_b, evs_diis_b = [], []
+        converged = False
 
         # predefine outputs in case itermax==0
         orbe_a = orbe_b = None
@@ -436,6 +482,19 @@ class HF:
             Fa = T + V + J - Ka
             Fb = T + V + J - Kb
 
+            # DIIS error vectors for alpha and beta, from the densities that
+            # were used to build the Fock matrices
+            err_a = Fa.dot(Pa.dot(S)) - S.dot(Pa.dot(Fa))
+            err_b = Fb.dot(Pb.dot(S)) - S.dot(Pb.dot(Fb))
+            errmax = max(np.max(np.abs(X.transpose() @ err_a @ X)),
+                         np.max(np.abs(X.transpose() @ err_b @ X)))
+
+            # store them for DIIS; the zero initial guess is skipped as its
+            # error vectors vanish trivially
+            if niter > 0 or orbc_init is not None:
+                fmats_diis_a.append(Fa); evs_diis_a.append(err_a.flatten())
+                fmats_diis_b.append(Fb); evs_diis_b.append(err_b.flatten())
+
             # Transform and diagonalize
             Fa_p = X.transpose() @ Fa @ X
             Fb_p = X.transpose() @ Fb @ X
@@ -468,13 +527,6 @@ class HF:
             # update densities for next iteration
             Pa, Pb = Pa_new, Pb_new
 
-            # DIIS error vectors for alpha and beta
-            ea = (Fa.dot(Pa.dot(S)) - S.dot(Pa.dot(Fa))).flatten()
-            eb = (Fb.dot(Pb.dot(S)) - S.dot(Pb.dot(Fb))).flatten()
-
-            fmats_diis_a.append(Fa); evs_diis_a.append(ea)
-            fmats_diis_b.append(Fb); evs_diis_b.append(eb)
-
             # prune DIIS subspace
             if len(fmats_diis_a) > SUBSPACE_LENGTH:
                 fmats_diis_a = fmats_diis_a[-SUBSPACE_LENGTH:]
@@ -488,20 +540,29 @@ class HF:
 
             if verbose:
                 print(
-                    "Iteration: %2i | Energy: %16.10f Ht | Time: %6.4f s"
-                    % (niter, energy, time_stats['iterations'][-1])
+                    "Iteration: %2i | Energy: %16.10f Ht | Error: %8.2e | Time: %6.4f s"
+                    % (niter, energy, errmax, time_stats['iterations'][-1])
                 )
 
             # convergence check
             if niter > 4:
                 ediff = abs(energies[-1] - energies[-2])
-                if ediff < tolerance:
+                if ediff < tolerance and errmax < tolerance_grad:
+                    converged = True
                     if verbose:
                         print("Stopping SCF cycle, convergence reached.")
                     break
 
         end = time.time()
         time_stats['self_convergence'] = end - start
+
+        if itermax > 0 and not converged:
+            warnings.warn(
+                f"UHF did not converge within {itermax} iterations "
+                f"(last energy change {ediff if niter > 4 else float('nan'):.2e} Ht, "
+                f"error {errmax:.2e}).",
+                RuntimeWarning, stacklevel=2,
+            )
 
         # Final recompute of common matrices for reporting
         Ptot = Pa + Pb
@@ -526,6 +587,8 @@ class HF:
 
         sol = {
             "energy": E_tot,
+            "converged": converged,
+            "niter": len(energies),
             "nuclei": self._nuclei,
             "cgfs": self._cgfs,
             "energies": energies,
@@ -565,6 +628,45 @@ class HF:
         }
 
         return sol
+
+    def __nuclear_repulsion(self) -> float:
+        """
+        Calculate the repulsion energy between the nuclei
+        """
+        nuc_rep = 0.0
+        for i in range(0, len(self._nuclei)):
+            for j in range(i+1, len(self._nuclei)):
+                r = np.linalg.norm(np.array(self._nuclei[i][0]) - np.array(self._nuclei[j][0]))
+                nuc_rep += self._nuclei[i][1] * self._nuclei[j][1] / r
+
+        return nuc_rep
+
+    def __transformation_matrix(self, S: Mat, ortho: str) -> Mat:
+        """
+        Construct the matrix X that orthogonalizes the basis, X^T S X = 1
+
+        Canonical orthogonalization drops the eigenvectors of S whose
+        eigenvalue is below LINDEP_THRESHOLD, such that X can have fewer
+        columns than rows; symmetric orthogonalization keeps all of them.
+        """
+        # diagonalize S
+        s, U = np.linalg.eigh(S)
+
+        if ortho == 'canonical': # perform canonical orthogonalization
+            keep = s > LINDEP_THRESHOLD
+            X = U[:,keep] @ np.diag(1.0/np.sqrt(s[keep]))
+        elif ortho == 'symmetric':
+            if s[0] < LINDEP_THRESHOLD:
+                warnings.warn(
+                    f"The basis set is nearly linearly dependent (smallest overlap "
+                    f"eigenvalue {s[0]:.2e}); use canonical orthogonalization.",
+                    RuntimeWarning, stacklevel=3,
+                )
+            X = U @ np.diag(1.0/np.sqrt(s)) @ U.transpose()
+        else:
+            raise Exception("Invalid orthogonalization option selected: ", ortho)
+
+        return X
 
     def __calculate_diis_coefficients(self, evs_diis):
         """
@@ -618,7 +720,7 @@ class HF:
         nelec = mol.get_nelec()
         forces = np.zeros((len(nuclei),3))
         N = len(cgfs)
-        occ = [2 if i < nelec//2 else 0 for i in range(N)]
+        occ = [2 if i < nelec//2 else 0 for i in range(C.shape[1])]
     
         # calculate energy weighted density matrix
         ew_density = np.einsum('ik,jk,k,k->ij', C, C, occ, e)

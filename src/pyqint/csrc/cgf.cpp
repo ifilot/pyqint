@@ -203,7 +203,7 @@ const double CGF::get_amp(const Vec3& r) const noexcept {
         sum += gto.get_coefficient() * gto.get_amp(r);
     }
 
-    return sum;
+    return this->cnorm * sum;
 }
 
 /**
@@ -220,6 +220,7 @@ std::vector<double> CGF::get_grad(const Vec3& r) const noexcept {
         sum += gto.get_coefficient() * gto.get_grad(r);
     }
 
+    sum = this->cnorm * sum;
     return std::vector<double>({sum[0], sum[1], sum[2]});
 }
 
@@ -276,6 +277,8 @@ void CGF::add_gto(unsigned int type,  // type of the orbital (see above for the 
             exit(-1);
         break;
     }
+
+    this->update_contraction_norm();
 }
 
 /**
@@ -293,6 +296,7 @@ void CGF::add_gto(double c,
                   unsigned int m,
                   unsigned int n) {
     this->gtos.push_back(GTO(c, this->r, alpha, l, m, n));
+    this->update_contraction_norm();
 }
 
 /**
@@ -316,6 +320,7 @@ void CGF::add_gto_with_position(double c,
                   unsigned int m,
                   unsigned int n) {
     this->gtos.push_back(GTO(c, Vec3(px, py, pz), alpha, l, m, n));
+    this->update_contraction_norm();
 }
 
 /**
@@ -329,6 +334,8 @@ void CGF::set_position(const Vec3 &pos) {
     for(unsigned int i=0; i<this->gtos.size(); i++) {
         this->gtos[i].set_position(pos);
     }
+
+    this->update_contraction_norm();
 }
 
 /**
@@ -351,15 +358,14 @@ unsigned int CGF::max_primitive_l() const noexcept {
 }
 
 /**
- * @brief Get the normalization constant for the pair of CGFs.
+ * @brief Recalculate the normalization constant N of the contraction,
  *
- * N < φ_i | φ_i > = 1 => N = ...
+ * N^2 < φ_i | φ_i > = 1
+ *
  * for φ_i is a CGF with angular momentum shell pair (l,m,n)
  * see: https://arxiv.org/pdf/2007.12057 page 10 for more details
- *
- * @return normalization constant
  */
-double CGF::get_contraction_norm() const {
+void CGF::update_contraction_norm() {
     double sum = 0.0;
     for (size_t i = 0; i < this->size(); ++i) {
         for (size_t j = 0; j < this->size(); ++j) {
@@ -382,5 +388,5 @@ double CGF::get_contraction_norm() const {
         }
     }
 
-    return 1.0 / std::sqrt(sum);
+    this->cnorm = 1.0 / std::sqrt(sum);
 }

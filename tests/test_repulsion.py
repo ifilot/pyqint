@@ -44,9 +44,9 @@ class TestRepulsion(unittest.TestCase):
         T2211 = integrator.repulsion(cgfs[1], cgfs[1], cgfs[0], cgfs[0])
 
         np.testing.assert_almost_equal(T1111, 0.7746056022391389, 8)
-        np.testing.assert_almost_equal(T1122, 0.5696753983165589, 8)
-        np.testing.assert_almost_equal(T1112, 0.444107896803155, 8)
-        np.testing.assert_almost_equal(T2121, 0.29702881305777407, 8)
+        np.testing.assert_almost_equal(T1122, 0.5696757322503992, 8)
+        np.testing.assert_almost_equal(T1112, 0.4441075714799183, 8)
+        np.testing.assert_almost_equal(T2121, 0.2970285371366259, 8)
 
         # test similarity between two-electron integrals
         np.testing.assert_almost_equal(T1222, T1112, 8)
