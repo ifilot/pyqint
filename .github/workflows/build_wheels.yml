@@ -3,13 +3,22 @@ name: PyPI pkg
 on:
   workflow_dispatch:
   pull_request:
+  # Pull request branches are built via the pull_request trigger; building
+  # them on push as well would run every commit twice.
   push:
-    branches: 
-      - "*"
+    branches:
+      - master
+      - develop
     tags:
       - "v**"
   release:
     types: [published]
+
+# When new commits are pushed to a pull request, cancel the builds of the
+# previous commits. Builds of master, develop and tags are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CIBW_ARCHS_MACOS: "x86_64 arm64"

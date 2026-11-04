@@ -102,6 +102,17 @@ skip = [
     "cp38-*",              # Python < 3.9 not supported
 ]
 
+# The macOS runners on GitHub are Apple Silicon (arm64). The x86_64 wheels are
+# cross-compiled on these runners and can only be tested under Rosetta
+# emulation, which makes the full test suite take about 6 minutes per wheel.
+# Because the x86_64 and arm64 wheels are built from the same source code, the
+# full test suite is run on the arm64 wheels, whereas the x86_64 wheels only
+# receive a quick smoke test to verify that the binary loads and computes
+# correct integrals.
+[[tool.cibuildwheel.overrides]]
+select = "*-macosx_x86_64"
+test-command = "pytest {project}/tests/test_plot_data.py {project}/tests/test_overlap.py {project}/tests/test_repulsion.py"
+
 
 # ---------------------------------------------------------------------------
 # Windows-specific wheel repair
