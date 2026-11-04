@@ -47,9 +47,9 @@ class TestNuclear(unittest.TestCase):
         V2[0,1] = V2[1,0] = integrator.nuclear(cgfs[0], cgfs[1], cgfs[1].p, 1)
         V2[1,1] = integrator.nuclear(cgfs[1], cgfs[1], cgfs[1].p, 1)
 
-        V11 = -1.2266134491129144
-        V12 = -0.5974172567253814
-        V22 = -0.653827026106611
+        V11 = -1.2266137303008748
+        V12 = -0.597417310984971
+        V22 = -0.6538271600902902
         np.testing.assert_almost_equal(V1[0,0], V11, 8)
         np.testing.assert_almost_equal(V1[1,1], V22, 8)
         np.testing.assert_almost_equal(V1[0,1], V12, 8)

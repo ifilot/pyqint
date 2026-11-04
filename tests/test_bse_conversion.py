@@ -1,6 +1,7 @@
 """Check BSE import cases that can silently change a basis definition."""
 
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -9,6 +10,13 @@ spec = importlib.util.spec_from_file_location(
     'bse_to_pyqint', Path(__file__).resolve().parents[1] / 'scripts/bse_to_pyqint.py')
 converter = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(converter)
+
+spec = importlib.util.spec_from_file_location(
+    'build_basis_sets', Path(__file__).resolve().parents[1] / 'scripts/build_basis_sets.py')
+builder = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(builder)
+
+HAS_BSE = importlib.util.find_spec('basis_set_exchange') is not None
 
 
 class TestBSEConversion(unittest.TestCase):
@@ -37,3 +45,17 @@ class TestBSEConversion(unittest.TestCase):
     def test_reject_ambiguous_combined_shell(self):
         with self.assertRaisesRegex(ValueError, 'one coefficient column'):
             self.convert([0, 1], [['0.1', '0.9']])
+
+    @unittest.skipUnless(HAS_BSE, 'requires the basis_set_exchange package')
+    def test_packaged_basis_sets_match_bse(self):
+        """
+        Test that every packaged basis set equals its Basis Set Exchange source
+        """
+        for stem in builder.PACKAGED:
+            with self.subTest(basis=stem):
+                packaged = json.loads((builder.BASIS_DIR / f'{stem}.json').read_text())
+                self.assertEqual(packaged, builder.build(stem))
+
+
+if __name__ == '__main__':
+    unittest.main()
