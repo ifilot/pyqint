@@ -116,7 +116,7 @@ can be evaluated using <strong class="program">PyQInt</strong>.</p>
 <p>Overlap integrals effectively probe the overlap between two CGFs and are given by</p>
 <div class="math notranslate nohighlight">
 \[S_{ij} = \left&lt; \phi_{i} | \phi_{j} \right&gt;\]</div>
-<p>CGFs should be normalized and as such, their self-overlap should be equal to
+<p>CGFs are normalized automatically and as such, their self-overlap is equal to
 1. In the code snippet below, the overlap matrix <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is
 calculated for a basis set composed of the two <span class="math notranslate nohighlight">\(1s\)</span> atomic orbitals on H which
 are separated by a distance of 1.4 Bohr.</p>
@@ -333,11 +333,11 @@ is collected in a three-dimensional array.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build water molecule</span>
-<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;H2O&quot;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span>  <span class="mf">0.00000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.07579</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span>  <span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
-<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">"H2O"</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'O'</span><span class="p">,</span>  <span class="mf">0.00000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.07579</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span>  <span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.86681</span><span class="p">,</span>  <span class="mf">0.60144</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">'sto3g'</span><span class="p">)</span>
 
 <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
 <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>

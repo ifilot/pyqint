@@ -60,6 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#background-of-fb">Background of FB</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#procedure-of-fb">Procedure of FB</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#foster-boys-output-object">Foster-Boys output object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unrestricted-hartree-fock">Unrestricted Hartree-Fock</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="matrix_visualization.html">Matrix visualization</a></li>
@@ -100,14 +101,17 @@
 <li><p><a class="reference internal" href="#background-of-fb" id="id5">Background of FB</a></p></li>
 <li><p><a class="reference internal" href="#procedure-of-fb" id="id6">Procedure of FB</a></p></li>
 <li><p><a class="reference internal" href="#foster-boys-output-object" id="id7">Foster-Boys output object</a></p></li>
+<li><p><a class="reference internal" href="#unrestricted-hartree-fock" id="id8">Unrestricted Hartree-Fock</a></p></li>
 </ul>
 </li>
 </ul>
 </nav>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Orbital Localization methods currently only support <strong>restricted</strong>
-Hartree-Fock calculations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both restricted (RHF) and unrestricted (UHF) Hartree-Fock results are
+supported. For UHF results, the <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span>
+orbitals are localized independently; see
+<a class="reference internal" href="#orbital-localization-uhf"><span class="std std-ref">Unrestricted Hartree-Fock</span></a>.</p>
 </div>
 <section id="background-of-fb">
 <h2><a class="toc-backref" href="#id5" role="doc-backlink">Background of FB</a><a class="headerlink" href="#background-of-fb" title="Link to this heading"></a></h2>
@@ -154,21 +158,21 @@ scalar fields. More information is given
     <span class="n">res</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">(</span><span class="mf">1.145414</span><span class="p">)</span>
     <span class="n">resfb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">])):</span>
-        <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">&#39;MO_</span><span class="si">%03i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
-                         <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span>
-                         <span class="n">resfb</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">][:,</span><span class="n">i</span><span class="p">],</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">])):</span>
+        <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">'MO_</span><span class="si">%03i</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                         <span class="n">res</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">],</span>
+                         <span class="n">resfb</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">][:,</span><span class="n">i</span><span class="p">],</span>
                          <span class="mf">0.1</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Full function for evaluation</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
-    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
-    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">result</span>
 
@@ -182,14 +186,14 @@ scalar fields. More information is given
 
     <span class="n">pytessel</span> <span class="o">=</span> <span class="n">PyTessel</span><span class="p">()</span>
     <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">isovalue</span><span class="p">)</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_pos.ply&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">'_pos.ply'</span>
     <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
 
     <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="o">-</span><span class="n">isovalue</span><span class="p">)</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;_neg.ply&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">'_neg.ply'</span>
     <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -243,6 +247,12 @@ elements.</p>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">r2final</span></code></p></td>
 <td><p>Final sum of the squared dipole moment norm of the molecular orbitals.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">fock</span></code></p></td>
+<td><p>Fock matrix used to evaluate the orbital energies.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density</span></code></p></td>
+<td><p>Density matrix (unaffected by the localization).</p></td>
+</tr>
 </tbody>
 </table>
 <div class="admonition hint">
@@ -250,6 +260,50 @@ elements.</p>
 <p>One can directly connect the output of a Foster-Boys calculation to a
 MOHP calculation. The details of the process are found in the
 <a class="reference external" href="#MOHP,MOOP,andMOBIanalysisofFoster-Boyslocalizedorbitals">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals section</a>.</p>
+</div>
+</section>
+<section id="unrestricted-hartree-fock">
+<span id="orbital-localization-uhf"></span><h2><a class="toc-backref" href="#id8" role="doc-backlink">Unrestricted Hartree-Fock</a><a class="headerlink" href="#unrestricted-hartree-fock" title="Link to this heading"></a></h2>
+<p>The result of an unrestricted Hartree-Fock calculation can be passed to
+<code class="code docutils literal notranslate"><span class="pre">FosterBoys</span></code> in exactly the same way. Because a unitary transformation
+may only mix orbitals of the same spin, the <span class="math notranslate nohighlight">\(\alpha\)</span> and <span class="math notranslate nohighlight">\(\beta\)</span>
+orbitals are localized independently, each over its own occupied subspace of
+<code class="code docutils literal notranslate"><span class="pre">nalpha</span></code> and <code class="code docutils literal notranslate"><span class="pre">nbeta</span></code> orbitals, respectively. A spin channel with
+fewer than two occupied orbitals is left unchanged.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">R</span> <span class="o">=</span> <span class="mf">2.039</span>
+<span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">res_fb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">nr_runners</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">res_fb</span><span class="p">[</span><span class="s1">'orbe_alpha'</span><span class="p">][:</span><span class="n">res</span><span class="p">[</span><span class="s1">'nalpha'</span><span class="p">]])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res_fb</span><span class="p">[</span><span class="s1">'orbe_beta'</span><span class="p">][:</span><span class="n">res</span><span class="p">[</span><span class="s1">'nbeta'</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>The output dictionary mirrors the one of the UHF procedure: the keys
+<code class="code docutils literal notranslate"><span class="pre">orbe</span></code>, <code class="code docutils literal notranslate"><span class="pre">orbc</span></code>, <code class="code docutils literal notranslate"><span class="pre">fock</span></code>, <code class="code docutils literal notranslate"><span class="pre">density</span></code>, <code class="code docutils literal notranslate"><span class="pre">nriter</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">r2start</span></code> and <code class="code docutils literal notranslate"><span class="pre">r2final</span></code> are provided per spin channel with an
+<code class="code docutils literal notranslate"><span class="pre">_alpha</span></code> or <code class="code docutils literal notranslate"><span class="pre">_beta</span></code> suffix (e.g. <code class="code docutils literal notranslate"><span class="pre">orbc_alpha</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">r2final_beta</span></code>). Furthermore, the total density matrix
+<code class="code docutils literal notranslate"><span class="pre">density</span></code> and the spin information <code class="code docutils literal notranslate"><span class="pre">nalpha</span></code>, <code class="code docutils literal notranslate"><span class="pre">nbeta</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">multiplicity</span></code> are included. As such, the output can be passed directly
+to <code class="code docutils literal notranslate"><span class="pre">PopulationAnalysis</span></code> and <code class="code docutils literal notranslate"><span class="pre">ContourPlotter</span></code> (using the
+<code class="code docutils literal notranslate"><span class="pre">spin</span></code> argument).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For open-shell systems, the singly occupied orbital is part of the
+occupied <span class="math notranslate nohighlight">\(\alpha\)</span> subspace and may be mixed with other occupied
+orbitals during localization. For example, for the methyl radical the
+carbon 1s orbital and the singly occupied carbon 2p orbital are combined
+into two hybrid orbitals in the <span class="math notranslate nohighlight">\(\alpha\)</span> channel.</p>
 </div>
 </section>
 </section>

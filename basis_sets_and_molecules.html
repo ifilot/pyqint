@@ -116,9 +116,9 @@ to build the H<sub>2</sub> molecule, one can run the script below.</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build hydrogen molecule</span>
-<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">'H2'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -141,7 +141,7 @@ to build the H<sub>2</sub> molecule, one can run the script below.</p>
 <p>To load any of these molecules, one uses the <code class="code docutils literal notranslate"><span class="pre">from_name</span></code> function
 as shown in the script below</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span>
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'ch4'</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -162,7 +162,7 @@ member of the <code class="code docutils literal notranslate"><span class="pre">
 </div>
 <p>Alternatively, one can load molecules from a <code class="code docutils literal notranslate"><span class="pre">.xyz</span></code> file via the
 <code class="code docutils literal notranslate"><span class="pre">from_file</span></code> routine.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;ch4.xyz&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">'ch4.xyz'</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -188,6 +188,16 @@ that are supported are given:</p>
 <li><p><code class="code docutils literal notranslate"><span class="pre">aug-cc-pVTZ</span></code> (H-Kr, excl. K and Ca)</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">aug-cc-pVQZ</span></code> (H-Kr, excl. K and Ca)</p></li>
 </ul>
+<p>All packaged basis sets are verbatim conversions of version 1 of the
+corresponding basis sets of the <a class="reference external" href="https://www.basissetexchange.org/">Basis Set Exchange</a>, retaining the full precision and the
+shell ordering of the Basis Set Exchange data. Combined (e.g. SP) shells and
+general contractions are expanded into separate contracted functions. The
+files are generated, and can be verified, using the
+<code class="code docutils literal notranslate"><span class="pre">basis_set_exchange</span></code> Python package via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">scripts</span><span class="o">/</span><span class="n">build_basis_sets</span><span class="o">.</span><span class="n">py</span>           <span class="c1"># regenerate</span>
+<span class="n">python</span> <span class="n">scripts</span><span class="o">/</span><span class="n">build_basis_sets</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">check</span>   <span class="c1"># verify</span>
+</pre></div>
+</div>
 <p>The example code below builds the basis functions for the H<sub>2</sub> molecule:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -196,10 +206,10 @@ that are supported are given:</p>
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build hydrogen molecule</span>
-<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
-<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">'H2'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">'sto3g'</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">cgf</span> <span class="ow">in</span> <span class="n">cgfs</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
@@ -246,9 +256,9 @@ the number of available cores to allocate for this process.</p>
 
 <span class="c1"># build hydrogen molecule</span>
 <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
-<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">'sto3g'</span><span class="p">)</span>
 
 <span class="c1"># evaluate all integrals</span>
 <span class="n">S</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">teint</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_integrals_openmp</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span><span class="p">)</span>

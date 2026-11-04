@@ -112,8 +112,8 @@ defines the principal quantum number and angular momentum and avoids any
 ambiguity associated with multiple shells of identical angular momentum.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># example to generate AO labels for CO</span>
 <span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
-    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
 <span class="p">])</span>
 </pre></div>
 </div>
@@ -126,42 +126,42 @@ computed at the Hartree–Fock/STO-3G level.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">MatrixPlotter</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
-        <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
     <span class="p">])</span>
 
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;overlap-co.png&#39;</span><span class="p">,</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">'overlap'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">'overlap-co.png'</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Overlap&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">'Overlap'</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;fock&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;fock-co.png&#39;</span><span class="p">,</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">'fock'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">'fock-co.png'</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Fock&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">'Fock'</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;coefficient-co.png&#39;</span><span class="p">,</span>
-        <span class="n">xlabels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\psi_{</span><span class="si">%i</span><span class="s1">}$&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">]))],</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">'coefficient-co.png'</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">'$\psi_{</span><span class="si">%i</span><span class="s1">}$'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">]))],</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Coefficient&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">'Coefficient'</span><span class="p">,</span>
     <span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -218,32 +218,32 @@ top of a matrix visualization.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">MatrixPlotter</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">labels</span> <span class="o">=</span> <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">generate_ao_labels</span><span class="p">([</span>
-        <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1s&#39;</span><span class="p">,</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span> <span class="s1">&#39;2p&#39;</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="p">(</span><span class="s1">'1s'</span><span class="p">,</span> <span class="s1">'2s'</span><span class="p">,</span> <span class="s1">'2p'</span><span class="p">)),</span>
     <span class="p">])</span>
 
     <span class="c1"># highlighting boxes</span>
     <span class="n">boxes</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;#BB0000&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;#00BB00&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;#0000BB&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'#BB0000'</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">'#00BB00'</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">'#0000BB'</span><span class="p">),</span>
     <span class="p">]</span>
 
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;overlap-co.png&#39;</span><span class="p">,</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">'overlap'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s1">'overlap-co.png'</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Overlap&#39;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">'Overlap'</span><span class="p">,</span>
         <span class="n">boxes</span><span class="o">=</span><span class="n">boxes</span>
     <span class="p">)</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>

@@ -66,7 +66,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#hellsing-kernel-cache">Hellsing Kernel Cache</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#boys-function-lookup-table-and-recurrence">Boys Function Lookup Table and Recurrence</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#lookup-table-construction">Lookup Table Construction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#interpolation-strategy">Interpolation Strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#taylor-expansion">Taylor Expansion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#recursive-evaluation-of-boys-function-blocks">Recursive Evaluation of Boys Function Blocks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#exact-and-fallback-evaluation">Exact and Fallback Evaluation</a></li>
 </ul>
@@ -109,7 +109,7 @@
 <li><p><a class="reference internal" href="#boys-function-lookup-table-and-recurrence" id="id4">Boys Function Lookup Table and Recurrence</a></p>
 <ul>
 <li><p><a class="reference internal" href="#lookup-table-construction" id="id5">Lookup Table Construction</a></p></li>
-<li><p><a class="reference internal" href="#interpolation-strategy" id="id6">Interpolation Strategy</a></p></li>
+<li><p><a class="reference internal" href="#taylor-expansion" id="id6">Taylor Expansion</a></p></li>
 <li><p><a class="reference internal" href="#recursive-evaluation-of-boys-function-blocks" id="id7">Recursive Evaluation of Boys Function Blocks</a></p></li>
 <li><p><a class="reference internal" href="#exact-and-fallback-evaluation" id="id8">Exact and Fallback Evaluation</a></p></li>
 </ul>
@@ -222,84 +222,71 @@ a hybrid strategy combining a precomputed lookup table with stable
 recurrence relations and exact fallback evaluation.</p>
 <section id="lookup-table-construction">
 <h3><a class="toc-backref" href="#id5" role="doc-backlink">Lookup Table Construction</a><a class="headerlink" href="#lookup-table-construction" title="Link to this heading"></a></h3>
-<p>Upon construction of the integrator, a lookup table for the Boys function
-is initialized up to a maximum order <span class="math notranslate nohighlight">\(\nu_{\max}\)</span>. The table spans
-a logarithmically spaced grid in <span class="math notranslate nohighlight">\(T\)</span> over the interval</p>
+<p>Upon construction of the integrator, the Boys function is tabulated on a
+uniform grid <span class="math notranslate nohighlight">\(T_i = i \, \Delta T\)</span> with <span class="math notranslate nohighlight">\(\Delta T = 0.05\)</span>,
+covering <span class="math notranslate nohighlight">\(0 \leq T &lt; T_{\mathrm{table}} = 40\)</span>. For every grid point,
+the orders <span class="math notranslate nohighlight">\(\nu = 0, \dots, \nu_{\max} + 7\)</span> are stored.</p>
+<p>The table entries are computed from the series of positive terms</p>
 <div class="math notranslate nohighlight">
-\[T \in [T_{\mathrm{small}}, T_{\mathrm{large}}].\]</div>
-<p>Rather than tabulating <span class="math notranslate nohighlight">\(F_\nu(T)\)</span> directly, the following scaled
-quantity is stored:</p>
-<div class="math notranslate nohighlight">
-\[H_\nu(T) = \sqrt{T} \, T^\nu \, F_\nu(T).\]</div>
-<p>This scaling removes the dominant asymptotic behavior of the Boys
-function and significantly improves interpolation accuracy.</p>
-<p>For each grid point <span class="math notranslate nohighlight">\(T_i\)</span>, the exact Boys function values
-<span class="math notranslate nohighlight">\(F_\nu(T_i)\)</span> are computed using a reference implementation and
-stored in the table as</p>
-<div class="math notranslate nohighlight">
-\[H_\nu(T_i) = \sqrt{T_i} \, T_i^\nu \, F_\nu(T_i),
-\qquad \nu = 0, \dots, \nu_{\max}.\]</div>
-<p>Linear interpolation is then used to approximate <span class="math notranslate nohighlight">\(H_\nu(T)\)</span>
-for intermediate values of <span class="math notranslate nohighlight">\(T\)</span>. The Boys function is recovered
-from the interpolated value via</p>
-<div class="math notranslate nohighlight">
-\[F_\nu(T) = \frac{H_\nu(T)}{\sqrt{T} \, T^\nu}.\]</div>
+\[F_\nu(T)
+=
+e^{-T}
+\sum_{k=0}^{\infty}
+\frac{(2T)^k}{(2\nu+1)(2\nu+3)\cdots(2\nu+2k+1)},\]</div>
+<p>which converges for all <span class="math notranslate nohighlight">\(T\)</span> without cancellation, for the highest
+order only; the lower orders follow from the downward recurrence given below,
+which is numerically stable.</p>
 </section>
-<section id="interpolation-strategy">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">Interpolation Strategy</a><a class="headerlink" href="#interpolation-strategy" title="Link to this heading"></a></h3>
-<p>For arguments within the tabulated range, the Boys function is evaluated
-by interpolating in logarithmic <span class="math notranslate nohighlight">\(T\)</span> space. Let</p>
+<section id="taylor-expansion">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Taylor Expansion</a><a class="headerlink" href="#taylor-expansion" title="Link to this heading"></a></h3>
+<p>Because the derivative of the Boys function is again a Boys function,</p>
 <div class="math notranslate nohighlight">
-\[x = \frac{\log T - \log T_{\mathrm{small}}}
-         {\log T_{\mathrm{large}} - \log T_{\mathrm{small}}}
-    (N_{\mathrm{table}} - 1),\]</div>
-<p>where <span class="math notranslate nohighlight">\(N_{\mathrm{table}}\)</span> is the number of grid points. The two
-nearest table entries are linearly interpolated to obtain
-<span class="math notranslate nohighlight">\(H_\nu(T)\)</span>.</p>
-<p>This approach provides a good compromise between accuracy and speed for
-the range of <span class="math notranslate nohighlight">\(T\)</span> values typically encountered in molecular
-integrals.</p>
+\[\frac{\mathrm{d}F_\nu(T)}{\mathrm{d}T} = -F_{\nu+1}(T),\]</div>
+<p>the value at an arbitrary <span class="math notranslate nohighlight">\(T\)</span> follows from a Taylor expansion around
+the nearest grid point <span class="math notranslate nohighlight">\(T_i\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[F_\nu(T)
+=
+\sum_{k=0}^{7}
+\frac{F_{\nu+k}(T_i) \, (T_i - T)^k}{k!}.\]</div>
+<p>As <span class="math notranslate nohighlight">\(|T - T_i| \leq \Delta T / 2\)</span>, the truncation error of these eight
+terms is below <span class="math notranslate nohighlight">\(10^{-16}\)</span> relative to <span class="math notranslate nohighlight">\(F_\nu(T)\)</span>, such that the
+Boys function is obtained to machine precision at the cost of a single table
+lookup and a short polynomial evaluation.</p>
 </section>
 <section id="recursive-evaluation-of-boys-function-blocks">
 <h3><a class="toc-backref" href="#id7" role="doc-backlink">Recursive Evaluation of Boys Function Blocks</a><a class="headerlink" href="#recursive-evaluation-of-boys-function-blocks" title="Link to this heading"></a></h3>
 <p>In practical integral evaluation, entire blocks of Boys function values</p>
 <div class="math notranslate nohighlight">
 \[\{ F_0(T), F_1(T), \dots, F_{\nu_{\max}}(T) \}\]</div>
-<p>are required. To compute these efficiently, <strong class="program">PyQInt</strong> combines
-table lookup with stable recurrence relations.</p>
-<p>For moderate to large values of <span class="math notranslate nohighlight">\(T\)</span>, upward recurrence is used:</p>
-<div class="math notranslate nohighlight">
-\[F_{\nu+1}(T)
-=
-\frac{(2\nu+1) F_\nu(T) - e^{-T}}{2T}.\]</div>
-<p>This recurrence is numerically stable when <span class="math notranslate nohighlight">\(T\)</span> is sufficiently
-large compared to <span class="math notranslate nohighlight">\(\nu\)</span>.</p>
-<p>For smaller values of <span class="math notranslate nohighlight">\(T\)</span>, downward recurrence is preferred:</p>
+<p>are required. To compute these efficiently, <strong class="program">PyQInt</strong> evaluates only
+the highest order and obtains the others by the downward recurrence</p>
 <div class="math notranslate nohighlight">
 \[F_{\nu-1}(T)
 =
 \frac{2T F_\nu(T) + e^{-T}}{2\nu - 1},\]</div>
-<p>starting from a reliably computed value of <span class="math notranslate nohighlight">\(F_{\nu_{\max}}(T)\)</span>.</p>
-<p>The direction of recurrence is chosen dynamically based on the relative
-sizes of <span class="math notranslate nohighlight">\(T\)</span> and <span class="math notranslate nohighlight">\(\nu_{\max}\)</span> to ensure numerical stability.</p>
+<p>which is stable for all <span class="math notranslate nohighlight">\(T\)</span>, as every term is positive.</p>
+<p>For large arguments, <span class="math notranslate nohighlight">\(T \geq T_{\mathrm{table}}\)</span> and
+<span class="math notranslate nohighlight">\(T &gt; 2\nu_{\max}\)</span>, the value of <span class="math notranslate nohighlight">\(F_0(T)\)</span> is computed from the
+error function,</p>
+<div class="math notranslate nohighlight">
+\[F_0(T) = \frac{1}{2} \sqrt{\frac{\pi}{T}} \, \mathrm{erf}\left(\sqrt{T}\right),\]</div>
+<p>and the higher orders are obtained via upward recurrence:</p>
+<div class="math notranslate nohighlight">
+\[F_{\nu+1}(T)
+=
+\frac{(2\nu+1) F_\nu(T) - e^{-T}}{2T}.\]</div>
+<p>This recurrence subtracts two numbers of similar size and is therefore only
+used where <span class="math notranslate nohighlight">\(T\)</span> is large compared to <span class="math notranslate nohighlight">\(\nu\)</span>.</p>
 </section>
 <section id="exact-and-fallback-evaluation">
 <h3><a class="toc-backref" href="#id8" role="doc-backlink">Exact and Fallback Evaluation</a><a class="headerlink" href="#exact-and-fallback-evaluation" title="Link to this heading"></a></h3>
 <p>If the requested order exceeds the tabulated maximum, or if <span class="math notranslate nohighlight">\(T\)</span>
-lies outside the interpolation range, the Boys function is evaluated
-using an exact reference implementation.</p>
-<p>For small <span class="math notranslate nohighlight">\(T\)</span>, a rapidly convergent power series expansion is used:</p>
-<div class="math notranslate nohighlight">
-\[F_\nu(T)
-=
-\sum_{k=0}^{\infty}
-\frac{(-T)^k}{k! (2\nu + 2k + 1)}.\]</div>
-<p>For larger <span class="math notranslate nohighlight">\(T\)</span>, the value of <span class="math notranslate nohighlight">\(F_0(T)\)</span> is computed using an
-error-function-based expression and higher orders are obtained via
-upward recurrence.</p>
-<p>This layered strategy guarantees both robustness and high performance
-across the full range of parameters encountered during integral
-evaluation.</p>
+lies outside the tabulated range, the Boys function is evaluated without the
+table: by the series of positive terms for <span class="math notranslate nohighlight">\(T &lt; 2\nu + 40\)</span>, and by the
+error function and upward recurrence otherwise.</p>
+<p>This layered strategy yields the Boys function to near machine precision
+across the full range of parameters encountered during integral evaluation.</p>
 </section>
 </section>
 <section id="integrator-construction-and-defaults">

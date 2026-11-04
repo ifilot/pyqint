@@ -156,8 +156,8 @@ visualization of the resulting SALCs.</p>
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># 1) Build the overlap matrix explicitly in the original AO basis</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
-    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s2">&quot;ethylene&quot;</span><span class="p">)</span>
-    <span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s2">"ethylene"</span><span class="p">)</span>
+    <span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">'sto3g'</span><span class="p">)</span>
 
     <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cgfs</span><span class="p">)</span>
@@ -229,33 +229,33 @@ visualization of the resulting SALCs.</p>
     <span class="c1">#    as new CGFs and perform a Hartree–Fock calculation</span>
     <span class="c1">#    directly in the SALC basis</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
-    <span class="n">cgfs_salc</span> <span class="o">=</span> <span class="n">build_salcs_from_transform</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">B_blk</span><span class="p">,</span> <span class="n">integrator</span><span class="p">)</span>
+    <span class="n">cgfs_salc</span> <span class="o">=</span> <span class="n">build_salcs_from_transform</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">B_blk</span><span class="p">)</span>
     <span class="n">res_salc</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">cgfs_salc</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># 6) Define labels for symmetry blocks</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="n">symfuncs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="sa">r</span><span class="s2">&quot;A$_</span><span class="si">{g}</span><span class="s2">$&quot;</span><span class="p">:</span>  <span class="mi">4</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;B$_</span><span class="si">{3u}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;B$_</span><span class="si">{2g}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;B$_</span><span class="si">{1u}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;B$_</span><span class="si">{1g}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="sa">r</span><span class="s2">&quot;B$_</span><span class="si">{2u}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"A$_</span><span class="si">{g}</span><span class="s2">$"</span><span class="p">:</span>  <span class="mi">4</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"B$_</span><span class="si">{3u}</span><span class="s2">$"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"B$_</span><span class="si">{2g}</span><span class="s2">$"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"B$_</span><span class="si">{1u}</span><span class="s2">$"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"B$_</span><span class="si">{1g}</span><span class="s2">$"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">"B$_</span><span class="si">{2u}</span><span class="s2">$"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">symlabels</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">symfuncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-            <span class="n">symlabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">symlabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># 7) Visualize block-structured matrices in the SALC basis</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># plot overlap matrix</span>
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;overlap&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;ethylene_overlap_salc.png&quot;</span><span class="p">,</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">'overlap'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s2">"ethylene_overlap_salc.png"</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">symlabels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">symlabels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
@@ -263,8 +263,8 @@ visualization of the resulting SALCs.</p>
 
     <span class="c1"># plot fock matrix</span>
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;fock&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;ethylene_fock_salc.png&quot;</span><span class="p">,</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">'fock'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s2">"ethylene_fock_salc.png"</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">symlabels</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">symlabels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
@@ -272,9 +272,9 @@ visualization of the resulting SALCs.</p>
 
     <span class="c1"># plot coefficient matrix</span>
     <span class="n">MatrixPlotter</span><span class="o">.</span><span class="n">plot_matrix</span><span class="p">(</span>
-        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;ethylene_coefficient_salc.png&quot;</span><span class="p">,</span>
-        <span class="n">xlabels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\psi_{</span><span class="si">%i</span><span class="s1">}$&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">]))],</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">],</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s2">"ethylene_coefficient_salc.png"</span><span class="p">,</span>
+        <span class="n">xlabels</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s1">'$\psi_{</span><span class="si">%i</span><span class="s1">}$'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">]))],</span>
         <span class="n">ylabels</span><span class="o">=</span><span class="n">symlabels</span><span class="p">,</span>
         <span class="n">xlabelrot</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
     <span class="p">)</span>
@@ -284,14 +284,14 @@ visualization of the resulting SALCs.</p>
     <span class="c1">#    as real-space contour plots</span>
     <span class="c1"># --------------------------------------------------------------------------</span>
     <span class="c1"># simple hack to visualize the basis functions</span>
-    <span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">res_salc</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">res_salc</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="c1"># custom defined planes</span>
-    <span class="n">planes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;yz&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">res_salc</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">planes</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xy&#39;</span>
-    <span class="n">planes</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xz&#39;</span>
+    <span class="n">planes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'yz'</span><span class="p">]</span> <span class="o">*</span> <span class="n">res_salc</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">planes</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'xy'</span>
+    <span class="n">planes</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'xz'</span>
     <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
         <span class="n">res</span><span class="o">=</span><span class="n">res_salc</span><span class="p">,</span>
-        <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;ethylene_salcs_yz.png&quot;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">=</span><span class="s2">"ethylene_salcs_yz.png"</span><span class="p">,</span>
         <span class="n">plane</span><span class="o">=</span><span class="n">planes</span><span class="p">,</span>
         <span class="n">sz</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
         <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
@@ -304,18 +304,18 @@ visualization of the resulting SALCs.</p>
 <span class="k">def</span><span class="w"> </span><span class="nf">build_salcs_from_transform</span><span class="p">(</span>
     <span class="n">cgfs_ao</span><span class="p">,</span>
     <span class="n">B</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">integrator</span><span class="p">:</span> <span class="n">PyQInt</span><span class="p">,</span>
     <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Construct SALC basis functions as CGFs using a linear transformation B.</span>
 
 <span class="sd">    Each SALC is a linear combination of AO CGFs. Since the contributing AO</span>
 <span class="sd">    primitives live on different atomic centers, primitives must be added</span>
 <span class="sd">    with explicit positions using `add_gto_with_position`.</span>
 
-<span class="sd">    The resulting SALCs are normalized individually.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Each SALC is a single CGF and is therefore normalized automatically</span>
+<span class="sd">    by PyQInt; no explicit normalization step is required.</span>
+<span class="sd">    """</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">cgfs_salc</span> <span class="o">=</span> <span class="p">[</span><span class="n">CGF</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
 
@@ -336,15 +336,9 @@ visualization of the resulting SALCs.</p>
                     <span class="n">g</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
                 <span class="p">)</span>
 
-        <span class="c1"># Normalize SALC i: χ ← χ / sqrt(&lt;χ|χ&gt;)</span>
-        <span class="n">s_ii</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">overlap</span><span class="p">(</span><span class="n">cgfs_salc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cgfs_salc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="n">norm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s_ii</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">cgfs_salc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">gtos</span><span class="p">:</span>
-            <span class="n">g</span><span class="o">.</span><span class="n">c</span> <span class="o">/=</span> <span class="n">norm</span>
-
     <span class="k">return</span> <span class="n">cgfs_salc</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>

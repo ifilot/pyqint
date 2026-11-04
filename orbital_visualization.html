@@ -59,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#contour-plots">Contour plots</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contourplotter-helper-class">ContourPlotter helper class</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#cartesian-aligned-contour-plots">Cartesian-aligned contour plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unrestricted-hartree-fock-results">Unrestricted Hartree-Fock results</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#arbitrary-planar-contour-plots">Arbitrary planar contour plots</a></li>
 </ul>
 </li>
@@ -96,21 +97,22 @@
            <div itemprop="articleBody">
              
   <section id="orbital-visualization">
-<span id="index-0"></span><h1><a class="toc-backref" href="#id1" role="doc-backlink">Orbital visualization</a><a class="headerlink" href="#orbital-visualization" title="Link to this heading"></a></h1>
+<span id="index-0"></span><h1><a class="toc-backref" href="#id2" role="doc-backlink">Orbital visualization</a><a class="headerlink" href="#orbital-visualization" title="Link to this heading"></a></h1>
 <nav class="contents" id="table-of-contents">
 <p class="topic-title">Table of Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#orbital-visualization" id="id1">Orbital visualization</a></p>
+<li><p><a class="reference internal" href="#orbital-visualization" id="id2">Orbital visualization</a></p>
 <ul>
-<li><p><a class="reference internal" href="#contour-plots" id="id2">Contour plots</a></p></li>
-<li><p><a class="reference internal" href="#contourplotter-helper-class" id="id3">ContourPlotter helper class</a></p>
+<li><p><a class="reference internal" href="#contour-plots" id="id3">Contour plots</a></p></li>
+<li><p><a class="reference internal" href="#contourplotter-helper-class" id="id4">ContourPlotter helper class</a></p>
 <ul>
-<li><p><a class="reference internal" href="#cartesian-aligned-contour-plots" id="id4">Cartesian-aligned contour plots</a></p></li>
-<li><p><a class="reference internal" href="#arbitrary-planar-contour-plots" id="id5">Arbitrary planar contour plots</a></p></li>
+<li><p><a class="reference internal" href="#cartesian-aligned-contour-plots" id="id5">Cartesian-aligned contour plots</a></p></li>
+<li><p><a class="reference internal" href="#unrestricted-hartree-fock-results" id="id6">Unrestricted Hartree-Fock results</a></p></li>
+<li><p><a class="reference internal" href="#arbitrary-planar-contour-plots" id="id7">Arbitrary planar contour plots</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#constructing-isosurfaces" id="id6">Constructing isosurfaces</a></p></li>
-<li><p><a class="reference internal" href="#constructing-abo-files" id="id7">Constructing ABO files</a></p></li>
+<li><p><a class="reference internal" href="#constructing-isosurfaces" id="id8">Constructing isosurfaces</a></p></li>
+<li><p><a class="reference internal" href="#constructing-abo-files" id="id9">Constructing ABO files</a></p></li>
 </ul>
 </li>
 </ul>
@@ -123,7 +125,7 @@ space that have this value can be tied together creating a so-called isosurface.
 <p>Contour plots can be easily created using <a class="reference external" href="https://matplotlib.org/">matplotlib</a>.
 For the creation of isosurfaces, we use <a class="reference external" href="https://ifilot.github.io/pytessel/">PyTessel</a>.</p>
 <section id="contour-plots">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">Contour plots</a><a class="headerlink" href="#contour-plots" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Contour plots</a><a class="headerlink" href="#contour-plots" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyQInt</span><span class="p">,</span> <span class="n">Molecule</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -135,11 +137,11 @@ For the creation of isosurfaces, we use <a class="reference external" href="http
 <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
 
 <span class="c1"># build water molecule</span>
-<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">&#39;H2O&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s1">'H2O'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7570</span><span class="p">,</span> <span class="mf">0.5860</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">cgfs</span><span class="p">,</span> <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">build_basis</span><span class="p">(</span><span class="s1">'sto3g'</span><span class="p">)</span>
 
 <span class="c1"># build grid</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
@@ -150,9 +152,9 @@ For the creation of isosurfaces, we use <a class="reference external" href="http
 <span class="n">res</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span>
 
 <span class="c1"># plot wave function</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;PiYG&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'PiYG'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;1b$_</span><span class="si">{2}</span><span class="s1">$ Molecular orbital of H$_</span><span class="si">{2}</span><span class="s1">$O&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">'1b$_</span><span class="si">{2}</span><span class="s1">$ Molecular orbital of H$_</span><span class="si">{2}</span><span class="s1">$O'</span><span class="p">)</span>
 </pre></div>
 </div>
 <figure class="align-default">
@@ -160,7 +162,7 @@ For the creation of isosurfaces, we use <a class="reference external" href="http
 </figure>
 </section>
 <section id="contourplotter-helper-class">
-<span id="contourplotter-helper"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">ContourPlotter helper class</a><a class="headerlink" href="#contourplotter-helper-class" title="Link to this heading"></a></h2>
+<span id="contourplotter-helper"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">ContourPlotter helper class</a><a class="headerlink" href="#contourplotter-helper-class" title="Link to this heading"></a></h2>
 <p>While contour plots can be constructed manually by explicitly building grids and
 evaluating molecular orbitals, <strong class="program">PyQInt</strong> provides the
 <code class="code docutils literal notranslate"><span class="pre">ContourPlotter</span></code> helper class to streamline this process.</p>
@@ -168,13 +170,11 @@ evaluating molecular orbitals, <strong class="program">PyQInt</strong> provides 
 generating grids of contour plots for molecular orbitals obtained from a
 Hartree-Fock calculation. The class itself is intentionally stateless: all
 required information is passed explicitly via the Hartree-Fock results object.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>ContourPlotter methods currently only support <strong>restricted</strong>
-Hartree-Fock calculations.</p>
-</div>
+<p>Both restricted (RHF) and unrestricted (UHF) Hartree-Fock results are
+supported. For UHF results, the spin channel to visualize has to be specified;
+see <a class="reference internal" href="#contourplotter-uhf"><span class="std std-ref">Unrestricted Hartree-Fock results</span></a>.</p>
 <section id="cartesian-aligned-contour-plots">
-<h3><a class="toc-backref" href="#id4" role="doc-backlink">Cartesian-aligned contour plots</a><a class="headerlink" href="#cartesian-aligned-contour-plots" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Cartesian-aligned contour plots</a><a class="headerlink" href="#cartesian-aligned-contour-plots" title="Link to this heading"></a></h3>
 <p>The simplest usage corresponds to contour plots aligned with one of the
 Cartesian coordinate planes (<span class="math notranslate nohighlight">\(xy\)</span>, <span class="math notranslate nohighlight">\(xz\)</span>, or <span class="math notranslate nohighlight">\(yz\)</span>). The plane
 is specified using a string identifier.</p>
@@ -182,13 +182,13 @@ is specified using a string identifier.</p>
 (CO) in the <span class="math notranslate nohighlight">\(yz\)</span> plane:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">ContourPlotter</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;co_contour.png&#39;</span><span class="p">,</span>
-    <span class="n">plane</span><span class="o">=</span><span class="s1">&#39;yz&#39;</span><span class="p">,</span>
+    <span class="s1">'co_contour.png'</span><span class="p">,</span>
+    <span class="n">plane</span><span class="o">=</span><span class="s1">'yz'</span><span class="p">,</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
     <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -207,8 +207,8 @@ orbitals in a <span class="math notranslate nohighlight">\(2 \times 5\)</span> g
 <p>Want more contour levels? Simply adjust the <code class="code docutils literal notranslate"><span class="pre">levels</span></code> argument.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;co_contour_level15.png&#39;</span><span class="p">,</span>
-    <span class="n">plane</span><span class="o">=</span><span class="s1">&#39;yz&#39;</span><span class="p">,</span>
+    <span class="s1">'co_contour_level15.png'</span><span class="p">,</span>
+    <span class="n">plane</span><span class="o">=</span><span class="s1">'yz'</span><span class="p">,</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
     <span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -222,8 +222,53 @@ orbitals in a <span class="math notranslate nohighlight">\(2 \times 5\)</span> g
 </figure>
 </div>
 </section>
+<section id="unrestricted-hartree-fock-results">
+<span id="contourplotter-uhf"></span><h3><a class="toc-backref" href="#id6" role="doc-backlink">Unrestricted Hartree-Fock results</a><a class="headerlink" href="#unrestricted-hartree-fock-results" title="Link to this heading"></a></h3>
+<p>For unrestricted Hartree-Fock calculations, the <span class="math notranslate nohighlight">\(\alpha\)</span> and
+<span class="math notranslate nohighlight">\(\beta\)</span> electrons occupy different spatial orbitals. Use the
+<code class="code docutils literal notranslate"><span class="pre">spin</span></code> argument (either <code class="code docutils literal notranslate"><span class="pre">'alpha'</span></code> or <code class="code docutils literal notranslate"><span class="pre">'beta'</span></code>) to select
+which set of orbitals is plotted. The orbital labels are then decorated with
+the corresponding spin, e.g. <span class="math notranslate nohighlight">\(\psi_{1}^{\beta}\)</span>. The argument is
+mandatory for UHF results and not allowed for RHF results.</p>
+<p>The example below plots the <span class="math notranslate nohighlight">\(\beta\)</span> orbitals of the methyl radical
+after Foster-Boys localization (see <a class="reference internal" href="orbital_localization.html"><span class="doc">Orbital localization: Foster-Boys</span></a>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span><span class="p">,</span> <span class="n">ContourPlotter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">R</span> <span class="o">=</span> <span class="mf">2.039</span>
+<span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">res_fb</span> <span class="o">=</span> <span class="n">FosterBoys</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">nr_runners</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
+    <span class="n">res_fb</span><span class="p">,</span>
+    <span class="s1">'ch3_fb_contour_beta.png'</span><span class="p">,</span>
+    <span class="n">plane</span><span class="o">=</span><span class="s1">'xy'</span><span class="p">,</span>
+    <span class="n">sz</span><span class="o">=</span><span class="mf">4.0</span><span class="p">,</span>
+    <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
+    <span class="n">nrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ncols</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">spin</span><span class="o">=</span><span class="s1">'beta'</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<img alt="_images/ch3_fb_contour_beta.png" src="_images/ch3_fb_contour_beta.png" />
+<figcaption>
+<p><span class="caption-text">Localized <span class="math notranslate nohighlight">\(\beta\)</span> orbitals of the methyl radical, showing the
+carbon 1s core orbital, three equivalent C-H bonding orbitals and the
+lowest virtual orbital.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
 <section id="arbitrary-planar-contour-plots">
-<h3><a class="toc-backref" href="#id5" role="doc-backlink">Arbitrary planar contour plots</a><a class="headerlink" href="#arbitrary-planar-contour-plots" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Arbitrary planar contour plots</a><a class="headerlink" href="#arbitrary-planar-contour-plots" title="Link to this heading"></a></h3>
 <p>In many situations, it is desirable to visualize molecular orbitals in planes
 that are <em>not</em> aligned with the Cartesian axes. Typical examples include planes
 defined by three atoms or planes aligned with molecular symmetry elements. The
@@ -244,13 +289,13 @@ in a plane defined by three hydrogen atoms, with the <span class="math notransla
 the up direction:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">ContourPlotter</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CH4&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CH4'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">up</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">ContourPlotter</span><span class="o">.</span><span class="n">build_contourplot</span><span class="p">(</span>
     <span class="n">res</span><span class="p">,</span>
-    <span class="s1">&#39;ch4_contour.png&#39;</span><span class="p">,</span>
+    <span class="s1">'ch4_contour.png'</span><span class="p">,</span>
     <span class="n">plane</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">up</span><span class="p">),</span> <span class="c1"># note: this needs to be a tuple</span>
     <span class="n">sz</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
     <span class="n">npts</span><span class="o">=</span><span class="mi">101</span><span class="p">,</span>
@@ -275,7 +320,7 @@ chemically meaningful plane, independent of the global coordinate system.</p>
 </section>
 </section>
 <section id="constructing-isosurfaces">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Constructing isosurfaces</a><a class="headerlink" href="#constructing-isosurfaces" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Constructing isosurfaces</a><a class="headerlink" href="#constructing-isosurfaces" title="Link to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
@@ -290,16 +335,20 @@ installed. Make sure you have installed <strong class="program">PyTessel</strong
 <span class="kn">from</span><span class="w"> </span><span class="nn">pytessel</span><span class="w"> </span><span class="kn">import</span> <span class="n">PyTessel</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="c1"># calculate sto3g coefficients for h2o</span>
+    <span class="c1"># calculate the sto3g molecular orbitals of CO</span>
     <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span> <span class="o">=</span> <span class="n">calculate_co</span><span class="p">()</span>
 
-    <span class="c1"># build isosurface of the fifth MO</span>
-    <span class="c1"># isovalue = 0.1</span>
-    <span class="c1"># store result as .ply file</span>
-    <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">&#39;co_04.ply&#39;</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
+    <span class="c1"># build the isosurfaces of the fifth molecular orbital at an isovalue</span>
+    <span class="c1"># of 0.1 and store these as .ply files</span>
+    <span class="n">build_isosurface</span><span class="p">(</span><span class="s1">'co_mo5'</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.1</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">build_isosurface</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">isovalue</span><span class="p">):</span>
-    <span class="c1"># generate some data</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Construct the isosurfaces of a molecular orbital at +isovalue and</span>
+<span class="sd">    -isovalue, i.e. its positive and negative lobes, and store these as</span>
+<span class="sd">    &lt;filename&gt;_pos.ply and &lt;filename&gt;_neg.ply</span>
+<span class="sd">    """</span>
+    <span class="c1"># evaluate the molecular orbital on a cubic grid</span>
     <span class="n">sz</span> <span class="o">=</span> <span class="mi">100</span>
     <span class="n">integrator</span> <span class="o">=</span> <span class="n">PyQInt</span><span class="p">()</span>
     <span class="n">grid</span> <span class="o">=</span> <span class="n">integrator</span><span class="o">.</span><span class="n">build_rectgrid3d</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span>
@@ -307,25 +356,26 @@ installed. Make sure you have installed <strong class="program">PyTessel</strong
     <span class="n">unitcell</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span><span class="p">)</span>
 
     <span class="n">pytessel</span> <span class="o">=</span> <span class="n">PyTessel</span><span class="p">()</span>
-    <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">isovalue</span><span class="p">)</span>
-    <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">'pos'</span><span class="p">,</span> <span class="n">isovalue</span><span class="p">),</span> <span class="p">(</span><span class="s1">'neg'</span><span class="p">,</span> <span class="o">-</span><span class="n">isovalue</span><span class="p">)):</span>
+        <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="n">pytessel</span><span class="o">.</span><span class="n">marching_cubes</span><span class="p">(</span><span class="n">scalarfield</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">scalarfield</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">unitcell</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">pytessel</span><span class="o">.</span><span class="n">write_ply</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">.ply'</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">suffix</span><span class="p">),</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">normals</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">():</span>
     <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
-    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'O'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">]</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="constructing-abo-files">
-<h2><a class="toc-backref" href="#id7" role="doc-backlink">Constructing ABO files</a><a class="headerlink" href="#constructing-abo-files" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Constructing ABO files</a><a class="headerlink" href="#constructing-abo-files" title="Link to this heading"></a></h2>
 <p><strong class="program">PyQInt</strong> can be interfaced with <a class="reference external" href="https://ifilot.github.io/abobuilder/">ABO Builder</a> to generate <code class="code docutils literal notranslate"><span class="pre">.abo</span></code> files that
 can be visualized using <a class="reference external" href="https://ifilot.github.io/managlyph/">Managlyph</a>.
 <a class="reference external" href="https://ifilot.github.io/managlyph/">Managlyph</a> enables straightforward
@@ -347,25 +397,25 @@ increase the sampling box size using the <code class="code docutils literal notr
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span>
 
 <span class="c1"># Build the molecule and perform a Hartree–Fock calculation</span>
-<span class="n">ch4</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CH4&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">ch4</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ch4</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CH4'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">ch4</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="c1"># Geometry frame description</span>
 <span class="n">desc</span> <span class="o">=</span> <span class="n">clean_multiline</span><span class="p">(</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Canonical molecular orbitals for CH4 (STO-3G), computed with PyQInt.</span>
 <span class="sd">    Generated with ABO Builder.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 <span class="p">)</span>
 
 <span class="c1"># Create the ABOF v1 file with compression enabled</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;ch4.abo&#39;</span><span class="p">):</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">'ch4.abo'</span><span class="p">):</span>
     <span class="n">AboBuilder</span><span class="p">()</span><span class="o">.</span><span class="n">build_abo_hf_v1</span><span class="p">(</span>
-        <span class="s1">&#39;ch4.abo&#39;</span><span class="p">,</span>
-        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;nuclei&#39;</span><span class="p">],</span>
-        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span>
-        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">],</span>
-        <span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span>
+        <span class="s1">'ch4.abo'</span><span class="p">,</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">'nuclei'</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">],</span>
+        <span class="n">res</span><span class="p">[</span><span class="s1">'orbe'</span><span class="p">],</span>
         <span class="n">nsamples</span><span class="o">=</span><span class="mi">51</span><span class="p">,</span>
         <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">geometry_descriptor</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>

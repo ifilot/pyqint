@@ -134,7 +134,7 @@ visualization of the resulting SALCs.
         #    as new CGFs and perform a Hartree–Fock calculation
         #    directly in the SALC basis
         # --------------------------------------------------------------------------
-        cgfs_salc = build_salcs_from_transform(cgfs, B_blk, integrator)
+        cgfs_salc = build_salcs_from_transform(cgfs, B_blk)
         res_salc = HF(mol, cgfs_salc).rhf(verbose=True)
 
         # --------------------------------------------------------------------------
@@ -209,7 +209,6 @@ visualization of the resulting SALCs.
     def build_salcs_from_transform(
         cgfs_ao,
         B: np.ndarray,
-        integrator: PyQInt,
         threshold: float = 1e-2,
     ):
         """
@@ -219,7 +218,8 @@ visualization of the resulting SALCs.
         primitives live on different atomic centers, primitives must be added
         with explicit positions using `add_gto_with_position`.
 
-        The resulting SALCs are normalized individually.
+        Each SALC is a single CGF and is therefore normalized automatically
+        by PyQInt; no explicit normalization step is required.
         """
         n = B.shape[0]
         cgfs_salc = [CGF([0.0, 0.0, 0.0]) for _ in range(n)]
@@ -240,12 +240,6 @@ visualization of the resulting SALCs.
                         g.m,
                         g.n,
                     )
-
-            # Normalize SALC i: χ ← χ / sqrt(<χ|χ>)
-            s_ii = integrator.overlap(cgfs_salc[i], cgfs_salc[i])
-            norm = float(np.sqrt(s_ii))
-            for g in cgfs_salc[i].gtos:
-                g.c /= norm
 
         return cgfs_salc
 

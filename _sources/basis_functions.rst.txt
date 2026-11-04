@@ -48,9 +48,10 @@ explicitly when needed via::
     - The normalization constant :math:`N` is computed automatically by
       :program:`PyQInt` based on the values of :math:`\alpha` and
       :math:`(l, m, n)` and must not be supplied explicitly.
-    - When working with individual GTOs (i.e. not as part of a CGF), the
-      coefficient should be set to ``1.0``. This parameter represents the
-      linear expansion coefficient used internally by CGFs.
+    - The coefficient is the linear expansion coefficient used when the GTO
+      is part of a CGF. It plays no role for an individual GTO: neither its
+      amplitude nor the GTO integrals (see :ref:`below <gto-integrals>`)
+      include it. By convention, set it to ``1.0`` for individual GTOs.
 
 Retrieving GTO Data Members
 ***************************
@@ -101,6 +102,37 @@ This separation between *data members* and *evaluation routines* allows users
 to both inspect the orbital parameters and efficiently compute values when
 needed.
 
+The amplitude includes the normalization constant :math:`N`, but not the
+expansion coefficient :math:`c`.
+
+.. _gto-integrals:
+
+Integrals over GTOs
+*******************
+
+The integrator provides integrals over individual GTOs
+(:code:`overlap_gto`, :code:`kinetic_gto`, :code:`nuclear_gto`,
+:code:`dipole_gto`, :code:`repulsion_gto` and :code:`repulsion_gto_deriv`).
+These are the *raw* building blocks from which the integrals over CGFs are
+assembled and, unlike the GTO amplitude, they are evaluated over the
+**unnormalized** primitives: neither the normalization constants :math:`N`
+nor the expansion coefficients :math:`c` are included. To obtain the integral
+over normalized GTOs, multiply by the normalization constants of all GTOs
+involved::
+
+    from pyqint import PyQInt, GTO
+
+    integrator = PyQInt()
+    gto = GTO(1.0, (0.0, 0.0, 0.0), 0.8, 0, 0, 0)
+
+    raw = integrator.overlap_gto(gto, gto)          # 2.7513...
+    normalized = gto.get_norm()**2 * raw            # 1.0
+
+For a two-electron integral, the product of the four normalization constants
+is required. In contrast, the integrals over CGFs (:code:`overlap`,
+:code:`kinetic`, etc.) always refer to normalized basis functions (see
+below).
+
 Contracted Gaussian Functions (CGF)
 ===================================
 
@@ -125,6 +157,24 @@ add GTOs to it::
 .. note::
     The first argument of the :code:`add_gto` function is the linear expansion coefficient
     :math:`c_{i}` and the second argument is :math:`\alpha`.
+
+.. note::
+    :program:`PyQInt` always normalizes a CGF as a whole: the linear combination
+    above is multiplied by a constant :math:`N` chosen such that
+    :math:`\langle \phi \mid \phi \rangle = 1`,
+
+    .. math::
+
+        N = \left( \sum_{ij} c_{i} c_{j}
+            \left< \Phi_{i} | \Phi_{j} \right> \right)^{-1/2}.
+
+    This normalization is applied consistently to all integrals and to the
+    amplitudes and gradients (:code:`get_amp`, :code:`get_grad`,
+    :code:`plot_wavefunction`, :code:`plot_gradient`). Consequently, only the
+    *ratios* of the coefficients :math:`c_{i}` are meaningful; scaling all of
+    them by the same factor yields the same basis function. This also holds
+    for CGFs composed of GTOs on different centers (see
+    :code:`add_gto_with_position`), such as symmetry-adapted basis functions.
 
 Position Handling and Advanced Usage
 ************************************

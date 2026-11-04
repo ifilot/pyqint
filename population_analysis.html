@@ -72,6 +72,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#unrestricted-hartree-fock">Unrestricted Hartree-Fock</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#charges-and-spin-populations">Charges and spin populations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mohp-moop-and-mobi">MOHP, MOOP, and MOBI</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="symmetry_adapted_basis.html">Symmetry-adapted basis sets</a></li>
@@ -120,14 +125,21 @@
 <li><p><a class="reference internal" href="#mohp-moop-and-mobi-analysis-of-foster-boys-localized-orbitals" id="id9">MOHP, MOOP, and MOBI analysis of Foster-Boys localized orbitals</a></p></li>
 </ul>
 </li>
+<li><p><a class="reference internal" href="#unrestricted-hartree-fock" id="id10">Unrestricted Hartree-Fock</a></p>
+<ul>
+<li><p><a class="reference internal" href="#charges-and-spin-populations" id="id11">Charges and spin populations</a></p></li>
+<li><p><a class="reference internal" href="#mohp-moop-and-mobi" id="id12">MOHP, MOOP, and MOBI</a></p></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </nav>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Population Analysis methods currently only support <strong>restricted</strong>
-Hartree-Fock calculations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Population analysis supports both restricted (RHF) and unrestricted (UHF)
+Hartree-Fock results. The specifics for UHF are discussed in
+<a class="reference internal" href="#population-analysis-uhf"><span class="std std-ref">Unrestricted Hartree-Fock</span></a>.</p>
 </div>
 <section id="single-atom-population-analysis">
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">Single Atom Population Analysis</a><a class="headerlink" href="#single-atom-population-analysis" title="Link to this heading"></a></h2>
@@ -197,16 +209,16 @@ are often regarded as more physically meaningful than Mulliken populations.</p>
 for methane (CH<sub>4</sub>) using a minimal STO-3G basis set.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CH4&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CH4'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 <span class="n">pa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
 <span class="n">charges_mulliken</span> <span class="o">=</span> <span class="p">[</span><span class="n">pa</span><span class="o">.</span><span class="n">mulliken</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="p">))]</span>
 <span class="n">charges_lowdin</span>   <span class="o">=</span> <span class="p">[</span><span class="n">pa</span><span class="o">.</span><span class="n">lowdin</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>   <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="p">))]</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Symbol  Lowdin        Mulliken&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Symbol  Lowdin        Mulliken'</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">cl</span><span class="p">,</span> <span class="n">cm</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">charges_lowdin</span><span class="p">,</span> <span class="n">charges_mulliken</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%2s</span><span class="s1">  </span><span class="si">%12.6f</span><span class="s1">  </span><span class="si">%12.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cl</span><span class="p">,</span> <span class="n">cm</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="si">%2s</span><span class="s1">  </span><span class="si">%12.6f</span><span class="s1">  </span><span class="si">%12.6f</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cl</span><span class="p">,</span> <span class="n">cm</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Example output:</p>
@@ -261,7 +273,9 @@ C_{ik} \, H_{ij} \, C_{jk}\]</div>
 <li><p><span class="math notranslate nohighlight">\(C_{ik}\)</span> and <span class="math notranslate nohighlight">\(C_{jk}\)</span> are elements of the molecular orbital
 coefficient matrix <span class="math notranslate nohighlight">\(\mathbf{C}\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(H_{ij}\)</span> is an element of the Fock (Hamiltonian) matrix</p></li>
-<li><p>the factor of 2 accounts for spin degeneracy in restricted Hartree-Fock theory</p></li>
+<li><p>the factor of 2 accounts for spin degeneracy in restricted Hartree-Fock theory
+(for unrestricted Hartree-Fock, see
+<a class="reference internal" href="#population-analysis-uhf"><span class="std std-ref">Unrestricted Hartree-Fock</span></a>)</p></li>
 </ul>
 <p>Analogously, the <strong>MOOP coefficient</strong> is defined as</p>
 <div class="math notranslate nohighlight">
@@ -289,17 +303,17 @@ which takes the output of a Hartree-Fock calculation as input.</p>
 <p>The example below demonstrates MOHP, MOOP, and MOBI analysis for the CO molecule.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 <span class="n">mopa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 
 <span class="n">mohp</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">moop</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">mobi</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;orbe&#39;</span><span class="p">],</span> <span class="n">mohp</span><span class="p">,</span> <span class="n">moop</span><span class="p">,</span> <span class="n">mobi</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'MOHP, MOOP, and MOBI values of canonical Hartree-Fock orbitals'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'orbe'</span><span class="p">],</span> <span class="n">mohp</span><span class="p">,</span> <span class="n">moop</span><span class="p">,</span> <span class="n">mobi</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="si">%3i</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1"> </span><span class="si">%12.4f</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>Example output:</p>
@@ -328,8 +342,8 @@ Foster-Boys localized orbitals.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">FosterBoys</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 <span class="n">mopa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 <span class="n">mohp</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">moop</span> <span class="o">=</span> <span class="n">mopa</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -341,19 +355,19 @@ Foster-Boys localized orbitals.</p>
 <span class="n">moop_fb</span> <span class="o">=</span> <span class="n">mopa_fb</span><span class="o">.</span><span class="n">moop</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">mobi_fb</span> <span class="o">=</span> <span class="n">mopa_fb</span><span class="o">.</span><span class="n">mobi</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOHP (canonical orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOHP (canonical orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mohp</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOHP (Foster-Boys orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOHP (Foster-Boys orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mohp_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOOP (canonical orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOOP (canonical orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">moop</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOOP (Foster-Boys orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOOP (Foster-Boys orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">moop_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOBI (canonical orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOBI (canonical orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mobi</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of MOBI (Foster-Boys orbitals):&#39;</span><span class="p">,</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOBI (Foster-Boys orbitals):'</span><span class="p">,</span>
       <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mobi_fb</span><span class="p">[:</span><span class="mi">7</span><span class="p">]))</span>
 </pre></div>
 </div>
@@ -372,6 +386,100 @@ the occupied subspace is invariant under unitary transformations</strong>. This
 invariance reflects the fact that the total bonding character, electron density,
 and total energy of the system are preserved under orbital localization
 procedures.</p>
+</section>
+</section>
+<section id="unrestricted-hartree-fock">
+<span id="population-analysis-uhf"></span><h2><a class="toc-backref" href="#id10" role="doc-backlink">Unrestricted Hartree-Fock</a><a class="headerlink" href="#unrestricted-hartree-fock" title="Link to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">PopulationAnalysis</span></code> class accepts the output of an unrestricted
+Hartree-Fock calculation (or of a Foster-Boys localization thereof) as well.</p>
+<section id="charges-and-spin-populations">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Charges and spin populations</a><a class="headerlink" href="#charges-and-spin-populations" title="Link to this heading"></a></h3>
+<p>The Mulliken and Löwdin atomic charges are evaluated from the total density
+matrix <span class="math notranslate nohighlight">\(\mathbf{P} = \mathbf{P}^{\alpha} + \mathbf{P}^{\beta}\)</span> and
+are thus obtained in exactly the same way as for RHF.</p>
+<p>For open-shell systems it is additionally insightful to determine where the
+unpaired electrons reside. This is captured by the <em>spin population</em>, which
+is obtained by applying the same partitioning to the spin density matrix
+<span class="math notranslate nohighlight">\(\mathbf{P}^{\alpha} - \mathbf{P}^{\beta}\)</span>. For example, the Mulliken
+spin population of atom <span class="math notranslate nohighlight">\(A\)</span> reads</p>
+<div class="math notranslate nohighlight">
+\[\rho_A^{(\mathrm{M})} =
+\sum_{i \in A} \left[(\mathbf{P}^{\alpha} - \mathbf{P}^{\beta})\mathbf{S}\right]_{ii}\]</div>
+<p>The spin populations sum to <span class="math notranslate nohighlight">\(N_{\alpha} - N_{\beta}\)</span>. They are
+available via the <code class="code docutils literal notranslate"><span class="pre">mulliken_spin</span></code> and <code class="code docutils literal notranslate"><span class="pre">lowdin_spin</span></code> methods. For
+RHF results, these methods return zero.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">PopulationAnalysis</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># planar methyl radical (doublet)</span>
+<span class="n">R</span> <span class="o">=</span> <span class="mf">2.039</span>
+<span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">pa</span> <span class="o">=</span> <span class="n">PopulationAnalysis</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Atom   Charge (M)   Spin (M)   Charge (L)   Spin (L)'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="si">%2s</span><span class="s1">  </span><span class="si">%12.6f</span><span class="s1"> </span><span class="si">%10.6f</span><span class="s1"> </span><span class="si">%12.6f</span><span class="s1"> </span><span class="si">%10.6f</span><span class="s1">'</span> <span class="o">%</span> <span class="p">(</span><span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+          <span class="n">pa</span><span class="o">.</span><span class="n">mulliken</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">pa</span><span class="o">.</span><span class="n">mulliken_spin</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+          <span class="n">pa</span><span class="o">.</span><span class="n">lowdin</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">pa</span><span class="o">.</span><span class="n">lowdin_spin</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Example output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Atom</span>   <span class="n">Charge</span> <span class="p">(</span><span class="n">M</span><span class="p">)</span>   <span class="n">Spin</span> <span class="p">(</span><span class="n">M</span><span class="p">)</span>   <span class="n">Charge</span> <span class="p">(</span><span class="n">L</span><span class="p">)</span>   <span class="n">Spin</span> <span class="p">(</span><span class="n">L</span><span class="p">)</span>
+ <span class="n">C</span>     <span class="o">-</span><span class="mf">0.176093</span>   <span class="mf">1.287492</span>    <span class="o">-</span><span class="mf">0.093135</span>   <span class="mf">1.206127</span>
+ <span class="n">H</span>      <span class="mf">0.058698</span>  <span class="o">-</span><span class="mf">0.095831</span>     <span class="mf">0.031045</span>  <span class="o">-</span><span class="mf">0.068709</span>
+ <span class="n">H</span>      <span class="mf">0.058698</span>  <span class="o">-</span><span class="mf">0.095831</span>     <span class="mf">0.031045</span>  <span class="o">-</span><span class="mf">0.068709</span>
+ <span class="n">H</span>      <span class="mf">0.058698</span>  <span class="o">-</span><span class="mf">0.095831</span>     <span class="mf">0.031045</span>  <span class="o">-</span><span class="mf">0.068709</span>
+</pre></div>
+</div>
+<p>The unpaired electron resides on the carbon atom. The small negative spin
+populations on the hydrogen atoms are a consequence of spin polarization,
+which compensates for a carbon spin population exceeding unity.</p>
+</section>
+<section id="mohp-moop-and-mobi">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">MOHP, MOOP, and MOBI</a><a class="headerlink" href="#mohp-moop-and-mobi" title="Link to this heading"></a></h3>
+<p>For UHF results, the orbital-resolved analyses are performed per spin channel,
+which is selected via the <code class="code docutils literal notranslate"><span class="pre">spin</span></code> argument (<code class="code docutils literal notranslate"><span class="pre">'alpha'</span></code> or
+<code class="code docutils literal notranslate"><span class="pre">'beta'</span></code>). This argument is mandatory for UHF results and not allowed
+for RHF results. As each spin orbital holds a single electron, the factor of 2
+in the definitions of MOHP and MOOP is dropped, and the spin-specific Fock
+matrix <span class="math notranslate nohighlight">\(\mathbf{F}^{\sigma}\)</span> and orbital coefficients
+<span class="math notranslate nohighlight">\(\mathbf{C}^{\sigma}\)</span> are used:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{MOHP}^{\sigma}_k =
+\sum_{i \in A} \sum_{j \in B}
+C^{\sigma}_{ik} \, F^{\sigma}_{ij} \, C^{\sigma}_{jk}
+\qquad
+\mathrm{MOOP}^{\sigma}_k =
+\sum_{i \in A} \sum_{j \in B}
+C^{\sigma}_{ik} \, S_{ij} \, C^{\sigma}_{jk}\]</div>
+<p>For MOBI, the spin density matrix enters with a factor 2, consistent with the
+open-shell generalization of the Mayer bond order:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{MOBI}^{\sigma}_k =
+2 \sum_{i \in A} \sum_{j \in B}
+C^{\sigma}_{ik} \, P^{\sigma}_{ij} \, C^{\sigma}_{jk}\]</div>
+<p>With these definitions, for a closed-shell system the <span class="math notranslate nohighlight">\(\alpha\)</span> and
+<span class="math notranslate nohighlight">\(\beta\)</span> contributions of a UHF calculation sum to the RHF result.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">spin</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'alpha'</span><span class="p">,</span> <span class="s1">'beta'</span><span class="p">):</span>
+    <span class="n">nocc</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s1">'n'</span> <span class="o">+</span> <span class="n">spin</span><span class="p">]</span>
+    <span class="n">mohp</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">mohp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of MOHP (</span><span class="si">%5s</span><span class="s1">):'</span> <span class="o">%</span> <span class="n">spin</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mohp</span><span class="p">[:</span><span class="n">nocc</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Example output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sum</span> <span class="n">of</span> <span class="n">MOHP</span> <span class="p">(</span><span class="n">alpha</span><span class="p">):</span> <span class="o">-</span><span class="mf">0.1793903078632079</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">MOHP</span> <span class="p">(</span> <span class="n">beta</span><span class="p">):</span> <span class="o">-</span><span class="mf">0.1745035734889992</span>
+</pre></div>
+</div>
+<p>A complete example, including Foster-Boys localization of the spin orbitals,
+is found in <code class="code docutils literal notranslate"><span class="pre">docs/scripts/ch3_uhf_analysis.py</span></code>.</p>
 </section>
 </section>
 </section>

@@ -56,6 +56,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Electronic structure calculations</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#restricted-hartree-fock">Restricted Hartree-Fock</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#result-dictionary-rhf">Result dictionary (RHF)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#convergence">Convergence</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#unrestricted-hartree-fock-uhf">Unrestricted Hartree-Fock (UHF)</a><ul>
@@ -106,14 +107,15 @@
 <li><p><a class="reference internal" href="#restricted-hartree-fock" id="id7">Restricted Hartree-Fock</a></p>
 <ul>
 <li><p><a class="reference internal" href="#result-dictionary-rhf" id="id8">Result dictionary (RHF)</a></p></li>
+<li><p><a class="reference internal" href="#convergence" id="id9">Convergence</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#unrestricted-hartree-fock-uhf" id="id9">Unrestricted Hartree-Fock (UHF)</a></p>
+<li><p><a class="reference internal" href="#unrestricted-hartree-fock-uhf" id="id10">Unrestricted Hartree-Fock (UHF)</a></p>
 <ul>
-<li><p><a class="reference internal" href="#result-dictionary-uhf" id="id10">Result dictionary (UHF)</a></p></li>
+<li><p><a class="reference internal" href="#result-dictionary-uhf" id="id11">Result dictionary (UHF)</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#custom-basis-sets" id="id11">Custom basis sets</a></p></li>
+<li><p><a class="reference internal" href="#custom-basis-sets" id="id12">Custom basis sets</a></p></li>
 </ul>
 </li>
 </ul>
@@ -145,27 +147,27 @@ contributions throughout the self-consistent field (SCF) procedure.</p>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
             <span class="n">dens</span> <span class="o">=</span> <span class="n">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">[:,</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="o">+</span><span class="n">j</span><span class="p">],</span> <span class="n">sz</span><span class="o">=</span><span class="n">sz</span><span class="p">)</span>
             <span class="n">limit</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dens</span><span class="p">)),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dens</span><span class="p">))</span> <span class="p">)</span>
-            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
-              <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;PiYG&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">,</span>
+              <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">'PiYG'</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
               <span class="n">levels</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">dens</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">'lower'</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">'black'</span><span class="p">,</span>
               <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="o">-</span><span class="n">sz</span><span class="p">,</span> <span class="n">sz</span><span class="p">],</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">limit</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
               <span class="n">levels</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x [Bohr]&#39;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;z [Bohr]&#39;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;box&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'x [Bohr]'</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'z [Bohr]'</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">'equal'</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">'box'</span><span class="p">)</span>
             <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
             <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
-            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">calculate_co</span><span class="p">():</span>
-    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;CO&#39;</span><span class="p">)</span>
+    <span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'CO'</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cgfs&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;orbc&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="s1">'cgfs'</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s1">'orbc'</span><span class="p">]</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">plot_wavefunction</span><span class="p">(</span><span class="n">cgfs</span><span class="p">,</span> <span class="n">coeff</span><span class="p">,</span> <span class="n">sz</span><span class="o">=</span><span class="mf">3.5</span><span class="p">):</span>
     <span class="c1"># build integrator</span>
@@ -181,7 +183,7 @@ contributions throughout the self-consistent field (SCF) procedure.</p>
 
     <span class="k">return</span> <span class="n">res</span>
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -219,6 +221,12 @@ object. This dictionary objects contains the following keys</p>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">energy</span></code></p></td>
 <td><p>Final energy of the electronic structure calculation</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">converged</span></code></p></td>
+<td><p>Whether the convergence criteria were met</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">niter</span></code></p></td>
+<td><p>Number of SCF iterations</p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclei</span></code></p></td>
 <td><p>List of elements and their position in Bohr units</p></td>
 </tr>
@@ -229,10 +237,10 @@ object. This dictionary objects contains the following keys</p>
 <td><p>List of energies during the self-convergence procedure</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">orbe</span></code></p></td>
-<td><p>Orbital energies (converged) (array of N element)</p></td>
+<td><p>Orbital energies (converged) (array of M elements)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">orbc</span></code></p></td>
-<td><p>Orbital coefficients (converted) (matrix of N x N elements)</p></td>
+<td><p>Orbital coefficients (converged) (matrix of N x M elements)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">density</span></code></p></td>
 <td><p>Density matrix <span class="math notranslate nohighlight">\(\mathbf{P}\)</span></p></td>
@@ -301,37 +309,64 @@ electron-electron repulsion, exchange and nuclear repulsion energies within a
 Hartree-Fock calculation.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeBuilder</span><span class="p">,</span><span class="n">HF</span>
 
-<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">&#39;ch4&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;CH4&#39;</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">MoleculeBuilder</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="s1">'ch4'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">'CH4'</span>
 
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Kinetic energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Nuclear attraction energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Electron-electron repulsion: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Exchange energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Repulsion between nuclei: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Kinetic energy: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'ekin'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Nuclear attraction energy: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'enuc'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Electron-electron repulsion: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'erep'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Exchange energy: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'ex'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Repulsion between nuclei: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'enucrep'</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total energy: &#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sum of the individual terms: &#39;</span><span class="p">,</span>
-      <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ekin&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enuc&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;erep&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;ex&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;enucrep&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Total energy: '</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'energy'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Sum of the individual terms: '</span><span class="p">,</span>
+      <span class="n">res</span><span class="p">[</span><span class="s1">'ekin'</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">'enuc'</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">'erep'</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">'ex'</span><span class="p">]</span> <span class="o">+</span> <span class="n">res</span><span class="p">[</span><span class="s1">'enucrep'</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>The output of the above script yields:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kinetic</span> <span class="n">energy</span><span class="p">:</span>  <span class="mf">39.42613774982387</span>
-<span class="n">Nuclear</span> <span class="n">attraction</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">118.63789179775034</span>
-<span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">32.7324270326041</span>
-<span class="n">Exchange</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">6.609004673631048</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Kinetic</span> <span class="n">energy</span><span class="p">:</span>  <span class="mf">39.426137798761935</span>
+<span class="n">Nuclear</span> <span class="n">attraction</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">118.63789212479075</span>
+<span class="n">Electron</span><span class="o">-</span><span class="n">electron</span> <span class="n">repulsion</span><span class="p">:</span>  <span class="mf">32.73242708923475</span>
+<span class="n">Exchange</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">6.609004693243019</span>
 <span class="n">Repulsion</span> <span class="n">between</span> <span class="n">nuclei</span><span class="p">:</span>  <span class="mf">13.362026647057352</span>
 
-<span class="n">Total</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.72630504189621</span>
-<span class="n">Sum</span> <span class="n">of</span> <span class="n">the</span> <span class="n">individual</span> <span class="n">terms</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.726305041896055</span>
+<span class="n">Total</span> <span class="n">energy</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.726305282979084</span>
+<span class="n">Sum</span> <span class="n">of</span> <span class="n">the</span> <span class="n">individual</span> <span class="n">terms</span><span class="p">:</span>  <span class="o">-</span><span class="mf">39.72630528297975</span>
 </pre></div>
 </div>
 </section>
+<section id="convergence">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Convergence</a><a class="headerlink" href="#convergence" title="Link to this heading"></a></h3>
+<p>The self-consistent field procedure is considered converged when, between two
+subsequent iterations, the total energy changes by less than <code class="code docutils literal notranslate"><span class="pre">tolerance</span></code>
+(default <span class="math notranslate nohighlight">\(10^{-9}\)</span> Ht) <strong>and</strong> the largest element of the commutator
+<span class="math notranslate nohighlight">\(\mathbf{FPS} - \mathbf{SPF}\)</span>, expressed in the orthogonalized basis,
+is smaller than <code class="code docutils literal notranslate"><span class="pre">tolerance_grad</span></code> (default
+<span class="math notranslate nohighlight">\(\sqrt{\texttt{tolerance}}\)</span>). This commutator vanishes only when the
+density matrix is self-consistent with the Fock matrix it produces, and it is
+also the error vector used by the DIIS procedure.</p>
+<p>When these criteria are not met within <code class="code docutils literal notranslate"><span class="pre">itermax</span></code> iterations (default 100),
+a <code class="code docutils literal notranslate"><span class="pre">RuntimeWarning</span></code> is issued. The <code class="code docutils literal notranslate"><span class="pre">converged</span></code> entry of the result
+dictionary reports the outcome and <code class="code docutils literal notranslate"><span class="pre">niter</span></code> the number of iterations used.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">rhf</span><span class="p">()</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">[</span><span class="s1">'converged'</span><span class="p">]:</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">'SCF did not converge'</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, canonical orthogonalization is used. It removes those linear
+combinations of basis functions whose overlap eigenvalue is smaller than
+<span class="math notranslate nohighlight">\(10^{-7}\)</span>, as these make the calculation numerically unstable. In that
+case, there are fewer molecular orbitals <span class="math notranslate nohighlight">\(M\)</span> than basis functions
+<span class="math notranslate nohighlight">\(N\)</span>. Symmetric orthogonalization (<code class="code docutils literal notranslate"><span class="pre">ortho='symmetric'</span></code>) keeps all
+basis functions and warns when the basis set is nearly linearly dependent.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">rhf</span></code> routine requires an even number of electrons; open-shell
+systems are treated with <code class="code docutils literal notranslate"><span class="pre">uhf</span></code>.</p>
+</section>
 </section>
 <section id="unrestricted-hartree-fock-uhf">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Unrestricted Hartree-Fock (UHF)</a><a class="headerlink" href="#unrestricted-hartree-fock-uhf" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Unrestricted Hartree-Fock (UHF)</a><a class="headerlink" href="#unrestricted-hartree-fock-uhf" title="Link to this heading"></a></h2>
 <p>For systems containing unpaired electrons, such as radicals or atoms with open
 shells, the restricted Hartree-Fock approximation is no longer appropriate.
 In such cases, <strong class="program">PyQInt</strong> provides an <strong>unrestricted Hartree-Fock (UHF)</strong>
@@ -352,19 +387,19 @@ bond length of 2.039 Bohr.</p>
 <span class="n">sqrt3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'C'</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span>  <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span>  <span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">sqrt3</span> <span class="o">*</span> <span class="n">R</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
 <span class="c1"># CH3 is a doublet (multiplicity = 2)</span>
-<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">&#39;sto3g&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">HF</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="s1">'sto3g'</span><span class="p">)</span><span class="o">.</span><span class="n">uhf</span><span class="p">(</span><span class="n">multiplicity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total energy:&#39;</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Total energy:'</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="s1">'energy'</span><span class="p">])</span>
 </pre></div>
 </div>
 <section id="result-dictionary-uhf">
-<h3><a class="toc-backref" href="#id10" role="doc-backlink">Result dictionary (UHF)</a><a class="headerlink" href="#result-dictionary-uhf" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Result dictionary (UHF)</a><a class="headerlink" href="#result-dictionary-uhf" title="Link to this heading"></a></h3>
 <p>The result of an unrestricted Hartree-Fock (UHF) calculation is likewise captured
 inside a dictionary object. Compared to restricted Hartree-Fock, the UHF result
 dictionary contains <strong>spin-resolved quantities</strong>, reflecting the fact that
@@ -385,6 +420,12 @@ different spatial orbitals are used for spin-up (<span class="math notranslate n
 <tbody>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">energy</span></code></p></td>
 <td><p>Final total electronic energy</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">converged</span></code></p></td>
+<td><p>Whether the convergence criteria were met</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">niter</span></code></p></td>
+<td><p>Number of SCF iterations</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">nuclei</span></code></p></td>
 <td><p>List of elements and their position in Bohr units</p></td>
@@ -503,6 +544,12 @@ explicit information about the spin state of the system.</p>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">multiplicity</span></code></p></td>
 <td><p>Spin multiplicity <span class="math notranslate nohighlight">\((2S + 1)\)</span></p></td>
 </tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">s2</span></code></p></td>
+<td><p>Expectation value <span class="math notranslate nohighlight">\(\langle \hat{S}^{2} \rangle\)</span> of the UHF wavefunction</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">s2_exact</span></code></p></td>
+<td><p>Exact value <span class="math notranslate nohighlight">\(S(S+1)\)</span> for the requested spin state</p></td>
+</tr>
 </tbody>
 </table>
 <div class="admonition note">
@@ -510,20 +557,39 @@ explicit information about the spin state of the system.</p>
 <p>Unlike restricted Hartree-Fock, unrestricted Hartree-Fock allows for spin
 polarization. As a consequence, the resulting wavefunction is generally not
 an exact eigenfunction of the total spin operator, which may lead to spin
-contamination.</p>
+contamination. The amount of spin contamination is given by the
+difference between <code class="code docutils literal notranslate"><span class="pre">s2</span></code> and <code class="code docutils literal notranslate"><span class="pre">s2_exact</span></code>, where</p>
+<div class="math notranslate nohighlight">
+\[\langle \hat{S}^{2} \rangle = S_z(S_z + 1) + N_{\beta}
+- \mathrm{Tr}\left(\mathbf{P}^{\alpha}\mathbf{S}\mathbf{P}^{\beta}\mathbf{S}\right)\]</div>
+<p>with <span class="math notranslate nohighlight">\(S_z = (N_{\alpha} - N_{\beta})/2\)</span>. For the methyl radical
+above, <span class="math notranslate nohighlight">\(\langle \hat{S}^{2} \rangle = 0.7652\)</span>, slightly above the
+exact value of 0.75 for a doublet.</p>
+</div>
+<p>The number of electrons may be set explicitly via the <code class="code docutils literal notranslate"><span class="pre">nelec</span></code> argument,
+e.g. to model ions. The multiplicity must be compatible with the number of
+electrons: an even number of electrons requires an odd multiplicity and vice
+versa. Otherwise, a <code class="code docutils literal notranslate"><span class="pre">ValueError</span></code> is raised.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The UHF procedure starts from the core Hamiltonian guess. For some
+open-shell systems, e.g. triplet O<sub>2</sub>, this guess may lead to a
+self-consistent solution which is not the ground state. Comparing the
+result with a calculation started from different initial orbitals (via the
+<code class="code docutils literal notranslate"><span class="pre">orbc_init</span></code> argument) is advised in such cases.</p>
 </div>
 </section>
 </section>
 <section id="custom-basis-sets">
-<h2><a class="toc-backref" href="#id11" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Custom basis sets</a><a class="headerlink" href="#custom-basis-sets" title="Link to this heading"></a></h2>
 <p>Besides the basis sets offered by <strong class="program">PyQInt</strong>, one can also use a custom
 basis set defined by the user. The <code class="code docutils literal notranslate"><span class="pre">rhf</span></code> routine accepts either a basis set
 for its <code class="code docutils literal notranslate"><span class="pre">basis</span></code> argument, or alternatively a list of <code class="code docutils literal notranslate"><span class="pre">cgf</span></code> objects.
 In the example code shown below, the latter is done.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">cgf</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqint</span><span class="w"> </span><span class="kn">import</span> <span class="n">Molecule</span><span class="p">,</span> <span class="n">HF</span><span class="p">,</span> <span class="n">CGF</span>
 <span class="n">mol</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">()</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;angstrom&#39;</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">add_atom</span><span class="p">(</span><span class="s1">'H'</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3561150187</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'angstrom'</span><span class="p">)</span>
 <span class="n">nuclei</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">get_nuclei</span><span class="p">()</span>
 
 <span class="n">cgfs</span> <span class="o">=</span> <span class="p">[]</span>
