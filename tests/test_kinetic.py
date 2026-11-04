@@ -43,8 +43,8 @@ class TestKinetic(unittest.TestCase):
         T[0,1] = T[1,0] = integrator.kinetic(cgfs[0], cgfs[1])
         T[1,1] = integrator.kinetic(cgfs[1], cgfs[1])
 
-        T11 = 0.7600315315362414
-        T12 = 0.23645443591648982
+        T11 = 0.7600318799223889
+        T12 = 0.2364546582742431
         np.testing.assert_almost_equal(T[0,0], T11, 8)
         np.testing.assert_almost_equal(T[1,1], T11, 8)
         np.testing.assert_almost_equal(T[0,1], T12, 8)

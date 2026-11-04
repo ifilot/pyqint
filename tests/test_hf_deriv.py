@@ -22,6 +22,22 @@ class TestHFDeriv(unittest.TestCase):
 
             np.testing.assert_almost_equal(res['forces'], forces, decimal=4)
 
+    def test_hartree_fock_forces_cgf_list(self):
+        """
+        Test that forces are also available when the basis set is supplied
+        as a list of CGFs rather than by name
+        """
+        mol = Molecule()
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.7570, 0.5860, 0.0, unit='angstrom')
+        mol.add_atom('H', -0.7570, 0.5860, 0.0, unit='angstrom')
+
+        ref = HF(mol, 'sto3g').rhf(calc_forces=True)
+        cgfs, _ = mol.build_basis('sto3g')
+        res = HF(mol, cgfs).rhf(calc_forces=True)
+
+        np.testing.assert_almost_equal(res['forces'], ref['forces'], decimal=10)
+
     def test_hartree_fock_forces_h2o(self):
         """
         Test Hartree-Fock calculation on water using STO-3G basis set

@@ -99,6 +99,17 @@ that are supported are given:
 * :code:`aug-cc-pVTZ` (H-Kr, excl. K and Ca)
 * :code:`aug-cc-pVQZ` (H-Kr, excl. K and Ca)
 
+All packaged basis sets are verbatim conversions of version 1 of the
+corresponding basis sets of the `Basis Set Exchange
+<https://www.basissetexchange.org/>`_, retaining the full precision and the
+shell ordering of the Basis Set Exchange data. Combined (e.g. SP) shells and
+general contractions are expanded into separate contracted functions. The
+files are generated, and can be verified, using the
+:code:`basis_set_exchange` Python package via::
+
+    python scripts/build_basis_sets.py           # regenerate
+    python scripts/build_basis_sets.py --check   # verify
+
 The example code below builds the basis functions for the H\ :sub:`2` molecule:
 
 .. code-block:: python

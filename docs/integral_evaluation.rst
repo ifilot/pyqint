@@ -19,7 +19,7 @@ Overlap integrals effectively probe the overlap between two CGFs and are given b
 
     S_{ij} = \left< \phi_{i} | \phi_{j} \right>
 
-CGFs should be normalized and as such, their self-overlap should be equal to
+CGFs are normalized automatically and as such, their self-overlap is equal to
 1. In the code snippet below, the overlap matrix :math:`\mathbf{S}` is
 calculated for a basis set composed of the two :math:`1s` atomic orbitals on H which
 are separated by a distance of 1.4 Bohr.

@@ -105,6 +105,10 @@ object. This dictionary objects contains the following keys
      - Description
    * - :code:`energy`
      - Final energy of the electronic structure calculation
+   * - :code:`converged`
+     - Whether the convergence criteria were met
+   * - :code:`niter`
+     - Number of SCF iterations
    * - :code:`nuclei`
      - List of elements and their position in Bohr units
    * - :code:`cgfs`
@@ -112,9 +116,9 @@ object. This dictionary objects contains the following keys
    * - :code:`energies`
      - List of energies during the self-convergence procedure
    * - :code:`orbe`
-     - Orbital energies (converged) (array of N element)
+     - Orbital energies (converged) (array of M elements)
    * - :code:`orbc`
-     - Orbital coefficients (converted) (matrix of N x N elements)
+     - Orbital coefficients (converged) (matrix of N x M elements)
    * - :code:`density`
      - Density matrix :math:`\mathbf{P}`
    * - :code:`fock`
@@ -186,14 +190,46 @@ Hartree-Fock calculation.
 
 The output of the above script yields::
 
-    Kinetic energy:  39.42613774982387
-    Nuclear attraction energy:  -118.63789179775034
-    Electron-electron repulsion:  32.7324270326041
-    Exchange energy:  -6.609004673631048
+    Kinetic energy:  39.426137798761935
+    Nuclear attraction energy:  -118.63789212479075
+    Electron-electron repulsion:  32.73242708923475
+    Exchange energy:  -6.609004693243019
     Repulsion between nuclei:  13.362026647057352
 
-    Total energy:  -39.72630504189621
-    Sum of the individual terms:  -39.726305041896055
+    Total energy:  -39.726305282979084
+    Sum of the individual terms:  -39.72630528297975
+
+Convergence
+***********
+
+The self-consistent field procedure is considered converged when, between two
+subsequent iterations, the total energy changes by less than :code:`tolerance`
+(default :math:`10^{-9}` Ht) **and** the largest element of the commutator
+:math:`\mathbf{FPS} - \mathbf{SPF}`, expressed in the orthogonalized basis,
+is smaller than :code:`tolerance_grad` (default
+:math:`\sqrt{\texttt{tolerance}}`). This commutator vanishes only when the
+density matrix is self-consistent with the Fock matrix it produces, and it is
+also the error vector used by the DIIS procedure.
+
+When these criteria are not met within :code:`itermax` iterations (default 100),
+a :code:`RuntimeWarning` is issued. The :code:`converged` entry of the result
+dictionary reports the outcome and :code:`niter` the number of iterations used.
+
+.. code-block:: python
+
+    res = HF(mol, 'sto3g').rhf()
+    if not res['converged']:
+        raise RuntimeError('SCF did not converge')
+
+By default, canonical orthogonalization is used. It removes those linear
+combinations of basis functions whose overlap eigenvalue is smaller than
+:math:`10^{-7}`, as these make the calculation numerically unstable. In that
+case, there are fewer molecular orbitals :math:`M` than basis functions
+:math:`N`. Symmetric orthogonalization (:code:`ortho='symmetric'`) keeps all
+basis functions and warns when the basis set is nearly linearly dependent.
+
+The :code:`rhf` routine requires an even number of electrons; open-shell
+systems are treated with :code:`uhf`.
 
 Unrestricted Hartree-Fock (UHF)
 -------------------------------
@@ -252,6 +288,10 @@ Below, the most important entries of the UHF result dictionary are listed.
      - Description
    * - :code:`energy`
      - Final total electronic energy
+   * - :code:`converged`
+     - Whether the convergence criteria were met
+   * - :code:`niter`
+     - Number of SCF iterations
    * - :code:`nuclei`
      - List of elements and their position in Bohr units
    * - :code:`cgfs`
@@ -329,13 +369,40 @@ explicit information about the spin state of the system.
      - Number of spin-down (:math:`\beta`) electrons
    * - :code:`multiplicity`
      - Spin multiplicity :math:`(2S + 1)`
+   * - :code:`s2`
+     - Expectation value :math:`\langle \hat{S}^{2} \rangle` of the UHF wavefunction
+   * - :code:`s2_exact`
+     - Exact value :math:`S(S+1)` for the requested spin state
 
 .. note::
 
    Unlike restricted Hartree-Fock, unrestricted Hartree-Fock allows for spin
    polarization. As a consequence, the resulting wavefunction is generally not
    an exact eigenfunction of the total spin operator, which may lead to spin
-   contamination.
+   contamination. The amount of spin contamination is given by the
+   difference between :code:`s2` and :code:`s2_exact`, where
+
+   .. math::
+
+      \langle \hat{S}^{2} \rangle = S_z(S_z + 1) + N_{\beta}
+      - \mathrm{Tr}\left(\mathbf{P}^{\alpha}\mathbf{S}\mathbf{P}^{\beta}\mathbf{S}\right)
+
+   with :math:`S_z = (N_{\alpha} - N_{\beta})/2`. For the methyl radical
+   above, :math:`\langle \hat{S}^{2} \rangle = 0.7652`, slightly above the
+   exact value of 0.75 for a doublet.
+
+The number of electrons may be set explicitly via the :code:`nelec` argument,
+e.g. to model ions. The multiplicity must be compatible with the number of
+electrons: an even number of electrons requires an odd multiplicity and vice
+versa. Otherwise, a :code:`ValueError` is raised.
+
+.. warning::
+
+   The UHF procedure starts from the core Hamiltonian guess. For some
+   open-shell systems, e.g. triplet O\ :sub:`2`, this guess may lead to a
+   self-consistent solution which is not the ground state. Comparing the
+   result with a calculation started from different initial orbitals (via the
+   :code:`orbc_init` argument) is advised in such cases.
 
 Custom basis sets
 -----------------
@@ -347,7 +414,7 @@ In the example code shown below, the latter is done.
 
 .. code-block:: python
 
-    from pyqint import Molecule, HF, cgf
+    from pyqint import Molecule, HF, CGF
     mol = Molecule()
     mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
     mol.add_atom('H', 0.0000, 0.0000, -0.3561150187, unit='angstrom')        

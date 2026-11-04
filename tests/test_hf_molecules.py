@@ -8,7 +8,8 @@ class TestHFMolecules(unittest.TestCase):
         """
         Test Hartree-Fock calculation for H2
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('H', 0.0000, 0.0000, 0.3561150187, unit='angstrom')
@@ -17,13 +18,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -1.1175053456568793, 7)
+        np.testing.assert_almost_equal(results['energy'], -1.1175059406527286, 7)
 
     def testC2H4(self):
         """
         Test Hartree-Fock calculation for Ethylene
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('C', -0.6530176758,  0.0000000000 ,0.0000000000, unit='angstrom')
@@ -36,13 +38,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -77.07390203525122, 5)
+        np.testing.assert_almost_equal(results['energy'], -77.07395445083031, 5)
 
     def testBF3(self):
         """
         Test Hartree-Fock calculation for BF3
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('B', 0.0,  0.0, 0.0, unit='angstrom')
@@ -53,13 +56,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -318.66187490027113, 5)
+        np.testing.assert_almost_equal(results['energy'], -318.66193630165697, 5)
 
     def testCH4(self):
         """
         Test Hartree-Fock calculation for CH4
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('C', 0.0,  0.0, 0.0, unit='angstrom')
@@ -71,13 +75,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -39.72684082274519, 6)
+        np.testing.assert_almost_equal(results['energy'], -39.72686376054208, 6)
 
     def testCO(self):
         """
         Test Hartree-Fock calculation for CO
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('O', 0.0,  0.0, 0.4909201273, unit='angstrom')
@@ -86,13 +91,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -111.22540898697989, 5)
+        np.testing.assert_almost_equal(results['energy'], -111.22544895746933, 5)
 
     def testCO2(self):
         """
         Test Hartree-Fock calculation for CO2
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('C', 0.0,  0.0, 0.0, unit='angstrom')
@@ -102,13 +108,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -185.0683324688419, 5)
+        np.testing.assert_almost_equal(results['energy'], -185.06838962819273, 5)
 
     def testH2O(self):
         """
         Test Hartree-Fock calculation for H2O
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('O', 0.0,  0.0, -0.1271310707, unit='angstrom')
@@ -118,13 +125,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -74.96587833201312, 5)
+        np.testing.assert_almost_equal(results['energy'], -74.96590055602627, 5)
 
     def testLIH(self):
         """
         Test Hartree-Fock calculation for LIH
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('Li', 0.0,  0.0, 0.377702853, unit='angstrom')
@@ -133,15 +141,14 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -7.863381809687618, 7)
+        np.testing.assert_almost_equal(results['energy'], -7.8633821055508255, 7)
 
-    def testNH3(self):
+    def testNH4(self):
         """
-        Test Hartree-Fock calculation for NH3
+        Test Hartree-Fock calculation for the ammonium ion NH4+
 
-        Note: a lower energy is found here as compared to Gaussian, so I reckon
-        (might be wrong!) that this result is better.
-        Using Gaussian: EHF = -55.7433617 Ht is found
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('H', -3.4e-09,  -2.6e-09, 1.1944430032, unit='angstrom')
@@ -149,17 +156,19 @@ class TestHFMolecules(unittest.TestCase):
         mol.add_atom('H', -0.9752586265,  0.5630658334, -0.3981476693, unit='angstrom')
         mol.add_atom('H', 0.9752586299,  0.5630658315, -0.3981476637, unit='angstrom')
         mol.add_atom('N', 0.0,  0.0, 0.0, unit='angstrom')
+        mol.set_charge(1)
 
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -55.79981538065868, 5)
+        np.testing.assert_almost_equal(results['energy'], -55.79983369694494, 5)
 
     def testC6H6(self):
         """
         Test Hartree-Fock calculation for Ethylene
 
-        Data is compared to results obtained from Gaussian
+        The reference energy agrees with PySCF, using the same basis set and
+        geometry, to within 1e-10 Ht
         """
         mol = Molecule()
         mol.add_atom('C',  0.0000000015, -1.3868467444, 0.0000000000, unit='angstrom')
@@ -178,7 +187,7 @@ class TestHFMolecules(unittest.TestCase):
         results = HF(mol, 'sto3g').rhf()
 
         # check that energy matches
-        np.testing.assert_almost_equal(results['energy'], -227.8912671406505, 5)
+        np.testing.assert_almost_equal(results['energy'], -227.89136053868847, 5)
 
 if __name__ == '__main__':
     unittest.main()

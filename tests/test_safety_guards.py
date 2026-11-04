@@ -1,5 +1,5 @@
 import unittest
-from pyqint import PyQInt, Molecule
+from pyqint import PyQInt, Molecule, HF
 import numpy as np
 
 class TestSafetyGuards(unittest.TestCase):
@@ -88,6 +88,39 @@ class TestSafetyGuards(unittest.TestCase):
 
         exception = raises_cm.exception
         self.assertEqual(exception.args, ('Dimensions of cgf list and coefficient matrix do not match (2 != 3)',))
+
+    def test_safety_uhf_multiplicity(self):
+        """
+        Test that impossible spin states are rejected by UHF
+        """
+        mol = Molecule()
+        mol.add_atom('O', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.7570, 0.5860, 0.0)
+        mol.add_atom('H', -0.7570, 0.5860, 0.0)
+
+        # multiplicity out of range (10 electrons)
+        for multiplicity in (0, -1, 12):
+            with self.assertRaises(ValueError):
+                HF(mol, 'sto3g').uhf(multiplicity=multiplicity)
+
+        # parity of the multiplicity does not match the number of electrons
+        for multiplicity, nelec in ((2, None), (4, None), (1, 9), (3, 11)):
+            with self.assertRaises(ValueError) as raises_cm:
+                HF(mol, 'sto3g').uhf(multiplicity=multiplicity, nelec=nelec)
+            self.assertIn('incompatible', raises_cm.exception.args[0])
+
+    def test_safety_uhf_basis_size(self):
+        """
+        Test that UHF rejects spin states that do not fit in the basis set
+        """
+        # triplet He would require two alpha electrons in a single 1s
+        # basis function
+        mol = Molecule()
+        mol.add_atom('He', 0.0, 0.0, 0.0)
+
+        with self.assertRaises(ValueError) as raises_cm:
+            HF(mol, 'sto3g').uhf(multiplicity=3)
+        self.assertIn('basis functions', raises_cm.exception.args[0])
 
 if __name__ == '__main__':
     unittest.main()

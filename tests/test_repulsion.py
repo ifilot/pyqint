@@ -2,6 +2,17 @@ import unittest
 from pyqint import PyQInt, GTO, Molecule, MoleculeBuilder
 import numpy as np
 
+def cartesian(cgf):
+    """Cartesian orders (l, m, n) of a CGF"""
+    gto = cgf.gtos[0]
+    return (gto.l, gto.m, gto.n)
+
+def d_indices(cgfs):
+    """Indices of the first dxx, dxy and dxz functions"""
+    i = [cartesian(c) for c in cgfs].index((2, 0, 0))
+    assert [cartesian(c) for c in cgfs[i:i+3]] == [(2, 0, 0), (1, 1, 0), (1, 0, 1)]
+    return i, i + 1, i + 2
+
 class TestRepulsion(unittest.TestCase):
 
     def test_gto_repulsion(self):
@@ -43,10 +54,10 @@ class TestRepulsion(unittest.TestCase):
         T1222 = integrator.repulsion(cgfs[0], cgfs[1], cgfs[1], cgfs[1])
         T2211 = integrator.repulsion(cgfs[1], cgfs[1], cgfs[0], cgfs[0])
 
-        np.testing.assert_almost_equal(T1111, 0.7746056022391389, 8)
-        np.testing.assert_almost_equal(T1122, 0.5696753983165589, 8)
-        np.testing.assert_almost_equal(T1112, 0.444107896803155, 8)
-        np.testing.assert_almost_equal(T2121, 0.29702881305777407, 8)
+        np.testing.assert_almost_equal(T1111, 0.7746059442114874, 8)
+        np.testing.assert_almost_equal(T1122, 0.5696759264718783, 8)
+        np.testing.assert_almost_equal(T1112, 0.444107658891185, 8)
+        np.testing.assert_almost_equal(T2121, 0.29702854118104927, 8)
 
         # test similarity between two-electron integrals
         np.testing.assert_almost_equal(T1222, T1112, 8)
@@ -65,9 +76,9 @@ class TestRepulsion(unittest.TestCase):
         px_py_px_py = integrator.repulsion(cgfs[2], cgfs[3], cgfs[2], cgfs[3])
         px_py_pz_s =  integrator.repulsion(cgfs[2], cgfs[3], cgfs[4], cgfs[0])
 
-        np.testing.assert_almost_equal(px_px_py_py, 0.785270228645895, 8)
+        np.testing.assert_almost_equal(px_px_py_py, 0.7852702009215765, 8)
         np.testing.assert_almost_equal(px_px_px_py, 0.00000000000000000, 8)
-        np.testing.assert_almost_equal(px_py_px_py, 0.047444455984311705, 8)
+        np.testing.assert_almost_equal(px_py_px_py, 0.04744444436276907, 8)
         np.testing.assert_almost_equal(px_py_pz_s,  0.00000000000000000, 8)
 
     def test_cgf_repulsion_d(self):
@@ -80,17 +91,21 @@ class TestRepulsion(unittest.TestCase):
         mol.add_atom('C', 0.0, 0.0, 1.4)
         cgfs, nuclei = mol.build_basis('sto3g')
 
-        print(cgfs[9])
+        # Fe 3d (xx, xy, xz) functions and the Fe 2px, 2py and 3pz functions
+        dxx, dxy, dxz = d_indices(cgfs)
+        px2, py2, pz3 = 2, 3, 8
+        self.assertEqual(cartesian(cgfs[pz3]), (0, 0, 1))
 
-        T1 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[9], cgfs[9])
-        T2 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[8], cgfs[8])
-        T3 = integrator.repulsion(cgfs[10], cgfs[10], cgfs[2], cgfs[2])
-        T4 = integrator.repulsion(cgfs[11], cgfs[11], cgfs[3], cgfs[3])
+        T1 = integrator.repulsion(cgfs[dxx], cgfs[dxx], cgfs[dxx], cgfs[dxx])
+        T2 = integrator.repulsion(cgfs[dxx], cgfs[dxx], cgfs[pz3], cgfs[pz3])
+        T3 = integrator.repulsion(cgfs[dxy], cgfs[dxy], cgfs[px2], cgfs[px2])
+        T4 = integrator.repulsion(cgfs[dxz], cgfs[dxz], cgfs[py2], cgfs[py2])
 
-        np.testing.assert_almost_equal(T1, 1.139718392998638, 8)
-        np.testing.assert_almost_equal(T2, 0.9716113017282908, 8)
-        np.testing.assert_almost_equal(T3, 1.2524694056556624, 8)
-        np.testing.assert_almost_equal(T4, 1.2197180696919803, 8)
+        # reference values verified against PySCF 2.14
+        np.testing.assert_almost_equal(T1, 1.1397183799612702, 8)
+        np.testing.assert_almost_equal(T2, 0.9716112348728463, 8)
+        np.testing.assert_almost_equal(T3, 1.2524693412052625, 8)
+        np.testing.assert_almost_equal(T4, 1.2197180065968953, 8)
 
     def test_cgf_repulsion_d_fallback(self):
         # construct integrator object without any caching
@@ -102,15 +117,21 @@ class TestRepulsion(unittest.TestCase):
         mol.add_atom('C', 0.0, 0.0, 1.4)
         cgfs, nuclei = mol.build_basis('sto3g')
 
-        T1 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[9], cgfs[9])
-        T2 = integrator.repulsion(cgfs[9], cgfs[9], cgfs[8], cgfs[8])
-        T3 = integrator.repulsion(cgfs[10], cgfs[10], cgfs[2], cgfs[2])
-        T4 = integrator.repulsion(cgfs[11], cgfs[11], cgfs[3], cgfs[3])
+        # Fe 3d (xx, xy, xz) functions and the Fe 2px, 2py and 3pz functions
+        dxx, dxy, dxz = d_indices(cgfs)
+        px2, py2, pz3 = 2, 3, 8
+        self.assertEqual(cartesian(cgfs[pz3]), (0, 0, 1))
 
-        np.testing.assert_almost_equal(T1, 1.139718392998638, 8)
-        np.testing.assert_almost_equal(T2, 0.9716113017282908, 8)
-        np.testing.assert_almost_equal(T3, 1.2524694056556624, 8)
-        np.testing.assert_almost_equal(T4, 1.2197180696919803, 8)
+        T1 = integrator.repulsion(cgfs[dxx], cgfs[dxx], cgfs[dxx], cgfs[dxx])
+        T2 = integrator.repulsion(cgfs[dxx], cgfs[dxx], cgfs[pz3], cgfs[pz3])
+        T3 = integrator.repulsion(cgfs[dxy], cgfs[dxy], cgfs[px2], cgfs[px2])
+        T4 = integrator.repulsion(cgfs[dxz], cgfs[dxz], cgfs[py2], cgfs[py2])
+
+        # reference values verified against PySCF 2.14
+        np.testing.assert_almost_equal(T1, 1.1397183799612702, 8)
+        np.testing.assert_almost_equal(T2, 0.9716112348728463, 8)
+        np.testing.assert_almost_equal(T3, 1.2524693412052625, 8)
+        np.testing.assert_almost_equal(T4, 1.2197180065968953, 8)
 
     def test_two_electron_indices(self):
         """
