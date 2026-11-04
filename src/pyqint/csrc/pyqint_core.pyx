@@ -127,6 +127,11 @@ cdef class PyQInt:
     def overlap_gto(self, gto1:gto, gto2:gto) -> float:
         """Calculates overlap integral between two GTOs
 
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 to obtain the integral over normalized GTOs.
+
         Args:
             gto1 (gto): gto1
             gto2 (gto): gto2
@@ -161,6 +166,11 @@ cdef class PyQInt:
 
     def dipole_gto(self, gto1:gto, gto2:gto, cc:int, cref:float = 0.0) -> float:
         """Calculates dipole integral between two GTOs
+
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 to obtain the integral over normalized GTOs.
 
         Args:
             gto1 (gto): gto1
@@ -219,6 +229,11 @@ cdef class PyQInt:
     def kinetic_gto(self, gto1:gto, gto2:gto) -> float:
         """Calculate kinetic integral between two GTOs
 
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 to obtain the integral over normalized GTOs.
+
         Args:
             gto1 (gto): gto1
             gto2 (gto): gto2
@@ -271,13 +286,18 @@ cdef class PyQInt:
     def nuclear_gto(self, gto1:gto, gto2:gto, rc:Iterable[float]) -> float:
         """Calculates nuclear integral between two GTOs (assuming unit charge)
 
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 to obtain the integral over normalized GTOs.
+
         Args:
             gto1 (gto): gto1
             gto2 (gto): gto2
             rc (Iterable[float]): nuclear coordinate
 
         Returns:
-            float: nuclear coordinate
+            float: nuclear attraction integral
         """
 
         cdef GTO c_gto1
@@ -326,6 +346,11 @@ cdef class PyQInt:
 
     def repulsion_gto(self, gto1:gto, gto2:gto, gto3:gto, gto4:gto) -> float:
         """Calculates repulsion integral between GTOs
+
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 * N3 * N4 to obtain the integral over normalized GTOs.
 
         Args:
             gto1 (gto): gto1
@@ -417,6 +442,11 @@ cdef class PyQInt:
 
     def repulsion_gto_deriv(self, gto1:gto, gto2:gto, gto3:gto, gto4:gto, coord:int) -> float:
         """Calculate repulsion integral derivative between GTOs
+
+        The integral is evaluated over the raw, unnormalized primitives:
+        neither the normalization constants N of the GTOs (see
+        GTO.get_norm()) nor their expansion coefficients c are included.
+        Multiply by N1 * N2 * N3 * N4 to obtain the integral over normalized GTOs.
 
         Args:
             gto1 (gto): gto1

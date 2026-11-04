@@ -3,6 +3,14 @@ from ..pyqint_core import PyGTO
 class GTO:
     """
     Primitive Gaussian Type Orbital
+
+    A GTO is a "raw" building block of a CGF. Its expansion coefficient c is
+    only used when the GTO is part of a CGF; :meth:`get_amp` and the
+    ``PyQInt.*_gto`` integrals ignore it. :meth:`get_amp` includes the
+    normalization constant N of the primitive (see :meth:`get_norm`), whereas
+    the ``PyQInt.*_gto`` integrals are evaluated over the unnormalized
+    primitive and have to be multiplied by the product of the normalization
+    constants to obtain integrals over normalized GTOs.
     """
     def __init__(self, _c, _p, _alpha, _l, _m, _n):
         """
@@ -42,6 +50,11 @@ class GTO:
         return (self.__class__, (self.c, self.p, self.alpha, self.l, self.m, self.n))
 
     def get_amp(self, x, y, z):
+        """
+        Returns the amplitude of the normalized primitive, N * x^l y^m z^n
+        exp(-alpha r^2), relative to its center; the coefficient c is not
+        included
+        """
         return self.gto.get_amp(x, y, z)
 
     def get_norm(self):
