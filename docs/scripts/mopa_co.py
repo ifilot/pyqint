@@ -1,11 +1,11 @@
-from pyqint import MoleculeBuilder, HF, MOPA
+from pyqint import MoleculeBuilder, HF, PopulationAnalysis
 
 mol = MoleculeBuilder.from_name('CO')
-res = HF().rhf(mol, 'sto3g')
-mopa = MOPA(res)
+res = HF(mol, 'sto3g').rhf()
+pa = PopulationAnalysis(res)
 
-mohp = mopa.mohp(0, 1)
-moop = mopa.moop(0, 1)
+mohp = pa.mohp(0, 1)
+moop = pa.moop(0, 1)
 
 print('MOHP and MOOP values of canonical Hartree–Fock orbitals')
 for i, (e, h, o) in enumerate(zip(res['orbe'], mohp, moop)):

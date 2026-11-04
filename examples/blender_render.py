@@ -1,5 +1,6 @@
 from pyqint import MoleculeBuilder, FosterBoys, GeometryOptimization, HF, BlenderRender
 import os
+import subprocess
 
 #
 # Plot the isosurfaces for a number of molecules, prior and after
@@ -129,7 +130,7 @@ def store_energies(filename, orbe, orbe_fb):
     :type       orbe_fb:   list or numpy array
     """
     f = open(filename, 'w')
-    f.write('id    localized    canonical\n')
+    f.write('id    canonical    localized\n')
     f.write('----------------------------\n')
     for i in range(len(orbe)):
         f.write("%02i %12.4f %12.4f\n" % (i+1, orbe[i], orbe_fb[i]))
