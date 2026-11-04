@@ -66,7 +66,33 @@ public:
      *
      * @return Basis function values per grid point
      */
-    std::vector<double> plot_basis_function(const std::vector<double>& grid, 
+    std::vector<double> plot_basis_function(const std::vector<double>& grid,
                                             const CGF& cgf) const;
+
+    /**
+     * @brief Evaluate a set of basis functions on a grid.
+     *
+     * All basis functions are evaluated in a single parallel loop over the
+     * grid points, which is considerably faster than evaluating the basis
+     * functions one at a time.
+     *
+     * @param grid  Flattened grid coordinates (x, y, z, x, y, z, ...)
+     * @param cgfs  Contracted Gaussian functions
+     *
+     * @return Basis function values, ordered as [basis function][grid point]
+     */
+    std::vector<double> plot_basis_functions(const std::vector<double>& grid,
+                                             const std::vector<CGF>& cgfs) const;
+
+    /**
+     * @brief Evaluate the gradients of a set of basis functions on a grid.
+     *
+     * @param grid  Flattened grid coordinates (x, y, z, x, y, z, ...)
+     * @param cgfs  Contracted Gaussian functions
+     *
+     * @return Gradient values, ordered as [basis function][grid point][x, y, z]
+     */
+    std::vector<double> plot_basis_function_gradients(const std::vector<double>& grid,
+                                                      const std::vector<CGF>& cgfs) const;
 private:
 };
