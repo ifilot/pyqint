@@ -19,13 +19,15 @@ class CGF:
         Set the state using tuple d
 
         Rebuilds the PyCGF C++ class and
-        adds gto object to the class
+        adds gto object to the class, retaining the position of each GTO
+        (which can differ from the CGF position, see add_gto_with_position)
         """
         self.p = d[0]
         self.gtos = d[1]
         self.cgf = PyCGF(self.p)
         for gto in self.gtos:
-            self.cgf.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
+            self.cgf.add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2],
+                                           gto.alpha, gto.l, gto.m, gto.n)
 
     def __reduce__(self):
         """

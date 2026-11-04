@@ -12,11 +12,6 @@ import numpy.typing as npt
 from ..pyqint_core import PyQInt
 from ..structure.molecule import Molecule
 
-# These are assumed to exist elsewhere in your module
-SUBSPACE_START: int
-SUBSPACE_LENGTH: int
-
-
 Vec = npt.NDArray[np.float64]
 Mat = npt.NDArray[np.float64]
 
@@ -119,6 +114,8 @@ class HF:
                 f"RHF requires an even number of electrons, not {self._nelec}; "
                 "use uhf() for open-shell systems."
             )
+        if calc_forces and itermax < 1:
+            raise ValueError("Calculating forces requires at least one SCF iteration.")
 
         # crank up the tolerance when calculating forces
         if calc_forces and tolerance > 1e-12:
@@ -164,9 +161,11 @@ class HF:
         energies = []
         time_stats['iterations'] = []
         fmats_diis = []
-        pmat_diis = []
         evs_diis = []
         converged = False
+
+        # predefine outputs in case itermax==0
+        orbe = C = None
 
         # start iterations
         for niter in range(0,itermax):
@@ -177,15 +176,17 @@ class HF:
                 try:
                     diis_coeff = self.__calculate_diis_coefficients(evs_diis)
                 except np.linalg.LinAlgError:
-                    # stop diis procedure and revert to linear stepping
+                    # stop diis procedure and revert to linear stepping,
+                    # i.e. continue from the orbitals of the previous
+                    # iteration
                     use_diis = False
-                    continue
-
-                F = self.__extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
-                Fprime = X.transpose() @ F @ X
-                e, Cprime = np.linalg.eigh(Fprime)
-                C = X @ Cprime
-                P = np.einsum('ik,jk,k->ij', C, C, occ)
+                    P = np.einsum('ik,jk,k->ij', C, C, occ)
+                else:
+                    F = self.__extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
+                    Fprime = X.transpose() @ F @ X
+                    e, Cprime = np.linalg.eigh(Fprime)
+                    C = X @ Cprime
+                    P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
             G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
@@ -220,7 +221,6 @@ class HF:
             # guess is skipped as its error vector vanishes trivially
             if niter > 0 or orbc_init is not None:
                 fmats_diis.append(F)                            # add Fock matrix to list
-                pmat_diis.append(P)                             # add density matrix to list
                 evs_diis.append(err.flatten())                  # add error vector to list
 
             # for the first few iterations, build a new density
@@ -234,7 +234,6 @@ class HF:
             # solution
             if len(fmats_diis) > SUBSPACE_LENGTH:
                 fmats_diis = fmats_diis[-SUBSPACE_LENGTH:]
-                pmat_diis = pmat_diis[-SUBSPACE_LENGTH:]
                 evs_diis = evs_diis[-SUBSPACE_LENGTH:]
 
             # store iteration time
@@ -272,15 +271,19 @@ class HF:
             )
 
         # build the density matrix from the final orbitals and the Fock
-        # matrix and energy that belong to it
-        P = np.einsum('ik,jk,k->ij', C, C, occ)
+        # matrix and energy that belong to it; without any iterations, the
+        # initial guess density is retained
+        if C is not None:
+            P = np.einsum('ik,jk,k->ij', C, C, occ)
         G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
         F = T + V + G
-        energies[-1] = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
+        energy = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
+        if energies:
+            energies[-1] = energy
 
         # build solution dictionary
         sol = {
-            "energy": energies[-1],
+            "energy": energy,
             "converged": converged,
             "niter": len(energies),
             "nuclei" : self._nuclei,
@@ -305,7 +308,7 @@ class HF:
             "enucrep": nuc_rep,
             "nelec": self._nelec,
             "mol": self._mol,
-            "forces": self.__rhf_forces(self._mol, self._basis, C, P, orbe) if calc_forces else None
+            "forces": self.__rhf_forces(C, P, orbe) if calc_forces else None
         }
 
         return sol
@@ -701,13 +704,14 @@ class HF:
 
         return fguess
 
-    def __rhf_forces(self, mol, basis, C, P, e):
+    def __rhf_forces(self, C, P, e):
         """
         Calculate derivatives of nuclear coordinates to obtain forces.
-        
+
+        The basis functions and nuclei of the calculation are used, such that
+        forces are also available when a list of CGFs was supplied as basis.
+
         Parameters:
-        mol:    Molecule object to be evaluated
-        basis:  string identifier of the basis
         C:      matrix of orbital coefficients
         P:      density matrix
         e:      orbital energies
@@ -716,8 +720,8 @@ class HF:
         """
         # intialization
         integrator = PyQInt()
-        cgfs, nuclei = mol.build_basis(basis)
-        nelec = mol.get_nelec()
+        cgfs, nuclei = self._cgfs, self._nuclei
+        nelec = self._nelec
         forces = np.zeros((len(nuclei),3))
         N = len(cgfs)
         occ = [2 if i < nelec//2 else 0 for i in range(C.shape[1])]

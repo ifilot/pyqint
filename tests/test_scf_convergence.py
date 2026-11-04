@@ -86,5 +86,54 @@ class TestSCFConvergence(unittest.TestCase):
         res = HF(mol, 'sto3g').uhf(multiplicity=2)
         self.assertTrue(res['converged'])
 
+    def test_zero_iterations(self):
+        """
+        Test that RHF and UHF without any SCF iterations return the result
+        for the initial guess density (zero density: nuclear repulsion only)
+        """
+        mol = water()
+
+        res = HF(mol, 'sto3g').rhf(itermax=0)
+        self.assertFalse(res['converged'])
+        self.assertEqual(res['niter'], 0)
+        self.assertIsNone(res['orbc'])
+        np.testing.assert_almost_equal(res['energy'], res['enucrep'], 12)
+
+        res = HF(mol, 'sto3g').uhf(multiplicity=1, itermax=0)
+        self.assertEqual(res['niter'], 0)
+        np.testing.assert_almost_equal(res['energy'], res['enucrep'], 12)
+
+        # forces require converged orbitals
+        with self.assertRaises(ValueError):
+            HF(mol, 'sto3g').rhf(itermax=0, calc_forces=True)
+
+    def test_diis_failure_fallback(self):
+        """
+        Test that RHF still converges to the same solution when the DIIS
+        extrapolation fails and the procedure falls back to plain iterations
+        """
+        ref = HF(water(), 'sto3g').rhf()
+
+        def failing_diis(self, evs_diis):
+            raise np.linalg.LinAlgError('singular DIIS matrix')
+
+        hf = HF(water(), 'sto3g')
+        hf._HF__calculate_diis_coefficients = failing_diis.__get__(hf)
+        res = hf.rhf()
+
+        self.assertTrue(res['converged'])
+        np.testing.assert_almost_equal(res['energy'], ref['energy'], 8)
+
+        # each iteration does the work of a single SCF step and contributes
+        # one energy; a failed extrapolation does not consume an iteration
+        self.assertEqual(res['niter'], len(res['energies']))
+        self.assertEqual(len(res['time_stats']['iterations']), len(res['energies']))
+
+        hf = HF(water(), 'sto3g')
+        hf._HF__calculate_diis_coefficients = failing_diis.__get__(hf)
+        with self.assertWarns(RuntimeWarning):
+            res = hf.rhf(itermax=6)
+        self.assertEqual(res['niter'], 6)
+
 if __name__ == '__main__':
     unittest.main()
