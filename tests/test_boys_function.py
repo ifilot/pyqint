@@ -86,5 +86,29 @@ class TestBoysFunction(unittest.TestCase):
         self.assertTrue(res['converged'])
         np.testing.assert_almost_equal(res['energy'], -26.07101412913098, 8)
 
+    def test_no_variational_collapse(self):
+        """
+        Regression test: inaccurate two-electron integrals (as produced by the
+        interpolated Boys function of PyQInt <= 1.4.3) render the matrix of
+        two-electron integrals indefinite. For a compressed BH3 molecule in a
+        diffuse basis set, the SCF then collapses to a nonphysical energy
+        (-7501 Ht instead of -25.02 Ht). The two-electron integral matrix
+        must be positive semidefinite and the energy must match PySCF.
+        """
+        mol = Molecule()
+        mol.add_atom('B', 0.0, 0.0, 0.0)
+        mol.add_atom('H', 0.0, 1.1855010, 0.0)
+        mol.add_atom('H', 1.0266740, -0.5927500, 0.0)
+        mol.add_atom('H', -1.0266740, -0.5927500, 0.0)
+
+        res = HF(mol, 'aug-cc-pVDZ').rhf()
+        n = len(res['cgfs'])
+        eigvals = np.linalg.eigvalsh(res['tetensor'].reshape(n * n, n * n))
+        self.assertGreater(eigvals.min(), -1e-10)
+
+        # reference value obtained with PySCF 2.14 (RHF, Cartesian basis)
+        self.assertTrue(res['converged'])
+        np.testing.assert_almost_equal(res['energy'], -25.0205271054132, 7)
+
 if __name__ == '__main__':
     unittest.main()
