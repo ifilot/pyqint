@@ -75,6 +75,9 @@ cdef class PyCGF:
     def get_grad(self, r:Iterable[float]):
         return self.cgf.get_grad(r[0], r[1], r[2])
 
+    def _contraction_norm(self):
+        return self.cgf.get_contraction_norm()
+
 cdef class PyQInt:
     """
     Python representation of the Integrator class
@@ -164,6 +167,10 @@ cdef class PyQInt:
                 gto.l, gto.m, gto.n
             )
         return c_cgf
+
+    @staticmethod
+    def _contraction_norm(cgf):
+        return PyQInt.build_c_cgf(cgf).get_contraction_norm()
 
     def get_num_threads(self) -> int:
         """

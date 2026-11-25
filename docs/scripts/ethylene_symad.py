@@ -4,7 +4,7 @@ from pyqint import (
     MoleculeBuilder,
     HF,
     PyQInt,
-    CGF,
+    build_salcs,
     MatrixPlotter,
     ContourPlotter,
 )
@@ -14,7 +14,7 @@ def main():
     # 1) Build the overlap matrix explicitly in the original AO basis
     # --------------------------------------------------------------------------
     mol = MoleculeBuilder.from_name("ethylene")
-    cgfs, nuclei = mol.build_basis('sto3g')
+    cgfs, _ = mol.build_basis('sto3g')
 
     integrator = PyQInt()
     N = len(cgfs)
@@ -55,15 +55,7 @@ def main():
     B_blk = P @ B # construct block-diagonalized basis matrix
 
     # --------------------------------------------------------------------------
-    # 5) Construct symmetry-adapted basis functions (SALCs)
-    #    as new CGFs and perform a Hartree–Fock calculation
-    #    directly in the SALC basis
-    # --------------------------------------------------------------------------
-    cgfs_salc = build_salcs_from_transform(cgfs, B_blk)
-    res_salc = HF(mol, cgfs_salc).rhf(verbose=True)
-
-    # --------------------------------------------------------------------------
-    # 6) Define labels for symmetry blocks
+    # 5) Define labels for symmetry blocks
     # --------------------------------------------------------------------------
     symfuncs = {
         r"A$_{g}$":  4,
@@ -80,11 +72,19 @@ def main():
             symlabels.append(f"{k}({i+1})")
 
     # --------------------------------------------------------------------------
+    # 6) Run Hartree-Fock in the normalized SALC basis.
+    # --------------------------------------------------------------------------
+    salcs = build_salcs(cgfs, B_blk, labels=symlabels)
+    res_salc = HF(mol, salcs.cgfs).rhf(verbose=True)
+    S_salc = salcs.transform @ S_ao @ salcs.transform.T
+    symlabels = salcs.labels
+
+    # --------------------------------------------------------------------------
     # 7) Visualize block-structured matrices in the SALC basis
     # --------------------------------------------------------------------------
     # plot overlap matrix
     MatrixPlotter.plot_matrix(
-        mat=res_salc['overlap'],
+        mat=S_salc,
         filename="ethylene_overlap_salc.png",
         xlabels=symlabels,
         ylabels=symlabels,
@@ -128,6 +128,7 @@ def main():
         nrows=2,
         ncols=7,
         labels=symlabels,
+        plot_energies=False,
     )
 
 def ethylene_transform():
@@ -162,43 +163,6 @@ def ethylene_transform():
     B[13, -1] = 1.0
     return B
 
-
-def build_salcs_from_transform(
-    cgfs_ao,
-    B: np.ndarray,
-    threshold: float = 1e-2,
-):
-    """
-    Construct SALC basis functions as CGFs using a linear transformation B.
-
-    Each SALC is a linear combination of AO CGFs. Since the contributing AO
-    primitives live on different atomic centers, primitives must be added
-    with explicit positions using `add_gto_with_position`.
-
-    Each SALC is a single CGF and is therefore normalized automatically
-    by PyQInt; no explicit normalization step is required.
-    """
-    n = B.shape[0]
-    cgfs_salc = [CGF([0.0, 0.0, 0.0]) for _ in range(n)]
-
-    for i in range(n):                 # new basis function index
-        for j in range(len(cgfs_ao)):  # old AO basis function index
-            w = float(B[i, j])
-            if abs(w) < threshold:
-                continue
-
-            # Add all primitives of AO function j into SALC i
-            for g in cgfs_ao[j].gtos:
-                cgfs_salc[i].add_gto_with_position(
-                    g.c * w,
-                    g.p,
-                    g.alpha,
-                    g.l,
-                    g.m,
-                    g.n,
-                )
-
-    return cgfs_salc
 
 if __name__ == "__main__":
     main()

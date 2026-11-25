@@ -8,7 +8,7 @@ from time import perf_counter
 
 import numpy as np
 
-from pyqint import MoleculeBuilder, PyQInt
+from pyqint import MoleculeBuilder, PyQInt, build_salcs
 
 
 ENGINES = ("hellsing", "hellsing_direct", "huzinaga", "huzinaga_scalar", "rys")
@@ -36,7 +36,7 @@ def main():
         molecule = MoleculeBuilder.from_name("ethylene")
         aos, _ = molecule.build_basis("sto3g")
         example = runpy.run_path(str(Path(__file__).resolve().parents[1] / "docs/scripts/ethylene_symad.py"))
-        cgfs = example["build_salcs_from_transform"](aos, example["ethylene_transform"]())
+        cgfs = build_salcs(aos, example["ethylene_transform"]()).cgfs
         label = "ethylene/STO-3G SALCs"
     else:
         molecule = MoleculeBuilder.from_name(args.molecule)

@@ -12,6 +12,10 @@ pull requests on GitHub. Versions before 1.0.0 are not covered; see the
 
 ### Added
 
+- `build_salcs` constructs normalized CGFs from a matrix of AO coefficients.
+  It preserves primitive centers and returns the effective normalized
+  transformation and optional labels alongside CGFs ready for `HF`.
+  [#77](https://github.com/ifilot/pyqint/issues/77)
 - Select the electron-repulsion integral (ERI) engine through `eri_engine`
   in `PyQInt` and `HF`. The available engines are cached Hellsing (`hellsing`),
   direct Hellsing (`hellsing_direct`), block and scalar Huzinaga (`huzinaga`
