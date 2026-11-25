@@ -56,10 +56,12 @@ class TestBoysFunction(unittest.TestCase):
             (2, 21, 2, 21):   0.0006440697028811094,# (g_xxxz f_yyy | g_xxxz f_yyy)
         }
 
-        integrator = PyQInt()
-        for idx, ref in ans.items():
-            repulsion = integrator.repulsion(*[cgfs[i] for i in idx])
-            np.testing.assert_allclose(repulsion, ref, rtol=1e-12, atol=1e-16)
+        for engine in ("hellsing", "rys"):
+            integrator = PyQInt(eri_engine=engine)
+            for idx, ref in ans.items():
+                with self.subTest(engine=engine, indices=idx):
+                    repulsion = integrator.repulsion(*[cgfs[i] for i in idx])
+                    np.testing.assert_allclose(repulsion, ref, rtol=1e-12, atol=1e-16)
 
     def test_diffuse_basis_bh3(self):
         """

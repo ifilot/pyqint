@@ -29,34 +29,7 @@ def main():
     #    (This matrix is molecule- and AO-ordering-specific.)
     # --------------------------------------------------------------------------
     # Ethylene STO-3G yields 14 basis functions in this setup.
-    B = np.zeros((14, 14))
-
-    # Manally construct the SALCs (this is based on group theory)
-    for i in range(0, 5):
-        B[i * 2, i] = 1.0
-        B[i * 2, i + 7] = 1.0
-        B[i * 2 + 1, i] = 1.0
-        B[i * 2 + 1, i + 7] = -1.0
-
-    B[10, 5] = 1.0
-    B[10, 6] = 1.0
-    B[10, -2] = 1.0
-    B[10, -1] = 1.0
-
-    B[11, 5] = 1.0
-    B[11, 6] = -1.0
-    B[11, -2] = 1.0
-    B[11, -1] = -1.0
-
-    B[12, 5] = 1.0
-    B[12, 6] = 1.0
-    B[12, -2] = -1.0
-    B[12, -1] = -1.0
-
-    B[13, 5] = 1.0
-    B[13, 6] = -1.0
-    B[13, -2] = -1.0
-    B[13, -1] = 1.0
+    B = ethylene_transform()
 
     # --------------------------------------------------------------------------
     # 3) Transform the overlap matrix to the SALC basis:
@@ -156,6 +129,39 @@ def main():
         ncols=7,
         labels=symlabels,
     )
+
+def ethylene_transform():
+    """Return the SALC transformation for ethylene in the STO-3G AO order."""
+    B = np.zeros((14, 14))
+
+    # Manually construct the SALCs (this is based on group theory)
+    for i in range(0, 5):
+        B[i * 2, i] = 1.0
+        B[i * 2, i + 7] = 1.0
+        B[i * 2 + 1, i] = 1.0
+        B[i * 2 + 1, i + 7] = -1.0
+
+    B[10, 5] = 1.0
+    B[10, 6] = 1.0
+    B[10, -2] = 1.0
+    B[10, -1] = 1.0
+
+    B[11, 5] = 1.0
+    B[11, 6] = -1.0
+    B[11, -2] = 1.0
+    B[11, -1] = -1.0
+
+    B[12, 5] = 1.0
+    B[12, 6] = 1.0
+    B[12, -2] = -1.0
+    B[12, -1] = -1.0
+
+    B[13, 5] = 1.0
+    B[13, 6] = -1.0
+    B[13, -2] = -1.0
+    B[13, -1] = 1.0
+    return B
+
 
 def build_salcs_from_transform(
     cgfs_ao,

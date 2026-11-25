@@ -24,6 +24,8 @@ env:
   CIBW_ARCHS_MACOS: "x86_64 arm64"
   CIBW_ARCHS_WINDOWS: "AMD64"
   CIBW_BUILD_VERBOSITY: 1
+  # Keep nested numerical libraries from oversubscribing the wheel test runners.
+  CIBW_ENVIRONMENT: "OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1"
 
 jobs:
 

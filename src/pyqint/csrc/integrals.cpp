@@ -22,18 +22,24 @@
 #include "integrals.h"
 #include "gaussian_integrals.h"
 
+#include <exception>
+
+using integrals::eri::EriOrchestrator;
+
 /**
  * @brief Construct an Integrator instance and capture build-time information.
  *
  * The compile information (compiler, version, OpenMP, date, time) is
  * captured once at construction time using compile-time macros.
  *
- * @param lmax    Maximum angular momentum
- * @param nu_max  Maximum Boys function order
+ * @param lmax        Maximum angular momentum to cache initially
+ * @param nu_max      Maximum Boys function order to tabulate
+ * @param eri_engine  Primitive electron repulsion engine
  */
-Integrator::Integrator(int lmax, int nu_max)
+Integrator::Integrator(int lmax, int nu_max, EriEngine eri_engine)
     : boys_function(nu_max),
-      hellsing_cache(lmax)
+      eri_engine(eri_engine),
+      hellsing_cache(EriOrchestrator::baseline_engine(eri_engine) == EriEngine::Hellsing ? lmax : 0)
 {
     // ---------------------------------------------------------------------
     // Compile date & time
@@ -88,6 +94,7 @@ Integrator::Integrator(int lmax, int nu_max)
  * @param px       Nuclear x coordinates
  * @param py       Nuclear y coordinates
  * @param pz       Nuclear z coordinates
+ * @param planner_budget  Bytes available for ERI quartet planning
  *
  * @return packed vector of overlap, kinetic, nuclear, and TEI values
  */
@@ -95,9 +102,19 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
                                               const std::vector<int>& charges,
                                               const std::vector<double>& px,
                                               const std::vector<double>& py,
-                                              const std::vector<double>& pz) const {
-    std::vector<double> results;
+                                              const std::vector<double>& pz,
+                                              size_t planner_budget) const {
+    auto results = this->evaluate_one_electron_integrals(cgfs, charges, px, py, pz);
+    const auto tetensor = this->evaluate_tei(cgfs, planner_budget);
+    results.insert(results.end(), tetensor.begin(), tetensor.end());
+    return results;
+}
 
+std::vector<double> Integrator::evaluate_one_electron_integrals(const std::vector<CGF>& cgfs,
+                                                                const std::vector<int>& charges,
+                                                                const std::vector<double>& px,
+                                                                const std::vector<double>& py,
+                                                                const std::vector<double>& pz) const {
     const size_t sz = cgfs.size();
 
     std::vector<double> S(sz*sz, 0.0);
@@ -127,116 +144,87 @@ std::vector<double> Integrator::evaluate_cgfs(const std::vector<CGF>& cgfs,
         }
     }
 
-    // calculate all two-electron integrals
-    std::vector<double> tetensor(std::pow(sz,4));
-    this->calculate_two_electron_integrals(cgfs, tetensor);
-
-    // package everything into results vector, will be unpacked in
-    // connected Python class
-    std::vector<double> Svec(S.data(), S.data()+sz*sz);
-    results.insert(results.end(), Svec.begin(), Svec.end());
-
-    // kinetic integrals
-    std::vector<double> Tvec(T.data(), T.data() + sz*sz);
-    results.insert(results.end(), Tvec.begin(), Tvec.end());
-
-    // nuclear integrals
-    std::vector<double> Vvec(V.data(), V.data() + sz*sz);
-    results.insert(results.end(), Vvec.begin(), Vvec.end());
-
-    // two electron in tegrals
-    results.insert(results.end(), tetensor.begin(), tetensor.end());
-
-    return results;
-}
-
-/**
- * @brief Evaluate all two-electron integrals within the basis set.
- *
- * @param cgfs  Contracted Gaussian functions
- *
- * @return packed vector of two-electron integrals
- */
-std::vector<double> Integrator::evaluate_tei(const std::vector<CGF>& cgfs) const {
-    const size_t sz = cgfs.size();
+    // Matrices occupy consecutive slices in the Python interface.
     std::vector<double> results;
-
-    // calculate all two-electron integrals
-    std::vector<double> tetensor(std::pow(sz,4));
-    this->calculate_two_electron_integrals(cgfs, tetensor);
-
-    // two electron in tegrals
-    results.insert(results.end(), tetensor.begin(), tetensor.end());
-
+    results.reserve(3 * sz * sz);
+    results.insert(results.end(), S.begin(), S.end());
+    results.insert(results.end(), T.begin(), T.end());
+    results.insert(results.end(), V.begin(), V.end());
     return results;
 }
 
-/**
- * @brief Compute and pack all two-electron integrals.
- *
- * @param cgfs      Contracted Gaussian functions
- * @param tetensor  Output tensor of two-electron integrals
- */
-void Integrator::calculate_two_electron_integrals(const std::vector<CGF>& cgfs,
-                                                  std::vector<double>& tetensor) const {
-    const size_t sz = cgfs.size();
-    std::vector<double> tedouble(this->teindex(sz-1,sz-1,sz-1,sz-1) + 1, -1.0);
-
-    // expand cache if needed
-    unsigned int max_l = 0;
-    for (const auto& cgf : cgfs) {
-        max_l = std::max(max_l, cgf.max_primitive_l());
+Integrator::CgfDerivative Integrator::prepare_cgf_derivative(const CGF& cgf, const Vec3& nucleus,
+                                                            const std::optional<Vec3>& shared_center) const {
+    if (shared_center) {
+        return {cgf, same_center(*shared_center, nucleus), {}, {}};
     }
-    hellsing_cache.ensure_lmax(max_l);
 
-    // it is more efficient to first 'unroll' the fourfold nested loop
-    // into a single vector of jobs to execute
-    std::vector<std::array<size_t, 5>> jobs;
-    for(size_t i=0; i<sz; i++) {
-        for(size_t j=0; j<sz; j++) {
-            size_t ij = i*(i+1)/2 + j;
-            for(size_t k=0; k<sz; k++) {
-                for(size_t l=0; l<sz; l++) {
-                    size_t kl = k * (k+1)/2 + l;
-                    if(ij <= kl) {
-                        const size_t idx = this->teindex(i,j,k,l);
+    const bool first_moves = cgf.size() != 0 && same_center(cgf.get_gto(0).get_position(), nucleus);
+    CgfDerivative result{cgf, first_moves, {}, {}};
+    unsigned int i = 1;
+    while (i < cgf.size() && same_center(cgf.get_gto(i).get_position(), nucleus) == first_moves) {
+        ++i;
+    }
+    if (i >= cgf.size()) {
+        return result;
+    }
 
-                        if(idx >= tedouble.size()) {
-                            throw std::runtime_error("Process tried to access illegal array position");
-                        }
+    result.primitive_moves.resize(cgf.size(), first_moves);
+    for (; i < cgf.size(); ++i) {
+        result.primitive_moves[i] = same_center(cgf.get_gto(i).get_position(), nucleus);
+    }
 
-                        if(tedouble[idx] < 0.0) {
-                            tedouble[idx] = 1.0;
-                            jobs.emplace_back(std::array<size_t,5>({idx, i, j, k, l}));
-                        }
-                    }
-                }
+    // N = <phi|phi>^(-1/2). Only moving/fixed pairs contribute to d(log N).
+    // Counting each such pair once cancels the 1/2 from differentiation.
+    const double norm = cgf.get_contraction_norm();
+    for (unsigned int i = 0; i < cgf.size(); ++i) {
+        if (!result.moves(i)) {
+            continue;
+        }
+        const GTO& moving = cgf.get_gto(i);
+        for (unsigned int j = 0; j < cgf.size(); ++j) {
+            if (result.moves(j)) {
+                continue;
+            }
+            const GTO& fixed = cgf.get_gto(j);
+            const double weight = (norm * moving.get_norm() * moving.get_coefficient()) *
+                                  (norm * fixed.get_norm() * fixed.get_coefficient());
+            for (unsigned int coord = 0; coord < 3; ++coord) {
+                result.log_norm_deriv[coord] -= weight * this->overlap_deriv_gto(moving, fixed, coord);
             }
         }
     }
+    return result;
+}
 
-    // evaluate jobs
-    #pragma omp parallel for schedule(dynamic)
-    for(int s=0; s<(int)jobs.size(); s++) {  // have to use signed int for MSVC OpenMP here
-        const size_t idx = jobs[s][0];
-        const size_t i = jobs[s][1];
-        const size_t j = jobs[s][2];
-        const size_t k = jobs[s][3];
-        const size_t l = jobs[s][4];
-        tedouble[idx] = this->repulsion(cgfs[i], cgfs[j], cgfs[k], cgfs[l]);
+double Integrator::two_center_deriv(const CgfDerivative& bra, const CgfDerivative& ket, unsigned int coord,
+                                    ContractedIntegral integral, PrimitiveDerivative derivative) const {
+    if ((bra.none_move() && ket.none_move()) || (bra.all_move() && ket.all_move())) {
+        return 0.0;
     }
 
-    // reorganize everything into a tensor object
-    for(size_t i=0; i<sz; i++) {
-        for(size_t j=0; j<sz; j++) {
-            for(size_t k=0; k<sz; k++) {
-                for(size_t l=0; l<sz; l++) {
-                    const size_t idx = this->teindex(i,j,k,l);
-                    tetensor[i*sz*sz*sz + j*sz*sz + k*sz + l] = tedouble[idx];
-                }
+    double sum = 0.0;
+    for (unsigned int i = 0; i < bra.cgf.size(); ++i) {
+        const bool bra_moves = bra.moves(i);
+        const GTO& g1 = bra.cgf.get_gto(i);
+        const double weight1 = g1.get_norm() * g1.get_coefficient();
+        for (unsigned int j = 0; j < ket.cgf.size(); ++j) {
+            if (bra_moves == ket.moves(j)) {
+                continue;
             }
+            const GTO& g2 = ket.cgf.get_gto(j);
+            const double deriv = bra_moves ? (this->*derivative)(g1, g2, coord) :
+                                             (this->*derivative)(g2, g1, coord);
+            sum += weight1 * g2.get_norm() * g2.get_coefficient() * deriv;
         }
     }
+
+    double result = sum * bra.cgf.get_contraction_norm() * ket.cgf.get_contraction_norm();
+    const double log_norm_deriv = bra.log_norm_deriv[coord] + ket.log_norm_deriv[coord];
+    if (log_norm_deriv != 0.0) {
+        result += log_norm_deriv * (this->*integral)(bra.cgf, ket.cgf);
+    }
+    return result;
 }
 
 /**
@@ -255,17 +243,38 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
                                                                const std::vector<double>& px,
                                                                const std::vector<double>& py,
                                                                const std::vector<double>& pz) const {
-    // expand cache if needed
-    unsigned int max_l = 0;
-    for (const auto& cgf : cgfs) {
-        max_l = std::max(max_l, cgf.max_primitive_l());
+    if (cgfs.empty() || charges.empty()) {
+        return {};
     }
-    hellsing_cache.ensure_lmax(max_l+1);
+    if (EriOrchestrator::baseline_engine(eri_engine) == EriEngine::Hellsing) {
+        unsigned int max_l = 0;
+        for (const auto& cgf : cgfs) {
+            max_l = std::max(max_l, cgf.max_primitive_l());
+        }
+        // Derivatives can raise one Cartesian power by one.
+        hellsing_cache.ensure_lmax(max_l + 1);
+    }
 
     const size_t sz = cgfs.size();
+    std::optional<EriOrchestrator> orchestrator;
+    if (eri_engine == EriEngine::Auto) {
+        orchestrator.emplace(cgfs);
+    }
+    const std::optional<Vec3> no_shared_center;
 
-    // Construct 2x2 matrices to hold values for the overlap,
-    // kinetic and two nuclear integral values, respectively.
+    std::vector<Vec3> nuclei;
+    nuclei.reserve(charges.size());
+    std::vector<CgfDerivative> derivatives;
+    derivatives.reserve(charges.size() * sz);
+    for (size_t n = 0; n < charges.size(); ++n) {
+        nuclei.emplace_back(px[n], py[n], pz[n]);
+        for (size_t i = 0; i < sz; ++i) {
+            const auto& center = orchestrator ? orchestrator->contraction(i).shared_center : no_shared_center;
+            derivatives.push_back(prepare_cgf_derivative(cgfs[i], nuclei.back(), center));
+        }
+    }
+
+    // One matrix per integral, nucleus, and Cartesian direction.
     const size_t datasz = charges.size() * 3 * sz * sz;
     std::vector<double> S(datasz, 0.0);
     std::vector<double> T(datasz, 0.0);
@@ -282,16 +291,14 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
             for(int i=0; i<(int)sz; i++) {  // have to use signed int for MSVC OpenMP here
                 for(int j=0; j<(int)sz; j++) {
                     const size_t idx = (n*3+k) * sz * sz + i * sz + j;
-                    S[idx] = this->overlap_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
-                    T[idx] = this->kinetic_deriv(cgfs[i], cgfs[j], Vec3(px[n], py[n], pz[n]), k);
-
+                    const CgfDerivative& bra = derivatives[n * sz + i];
+                    const CgfDerivative& ket = derivatives[n * sz + j];
+                    S[idx] = this->two_center_deriv(bra, ket, k, &Integrator::overlap, &Integrator::overlap_deriv_gto);
+                    T[idx] = this->two_center_deriv(bra, ket, k, &Integrator::kinetic, &Integrator::kinetic_deriv_gto);
 
                     for(unsigned int l=0; l<charges.size(); l++) {
-                        Vn[l*sz*sz + i*sz + j] = this->nuclear_deriv(cgfs[i], cgfs[j],
-                                                         Vec3(px[l], py[l], pz[l]),
-                                                         charges[l],
-                                                         Vec3(px[n], py[n], pz[n]),
-                                                         k);
+                        Vn[l*sz*sz + i*sz + j] = this->nuclear_deriv(
+                            bra, ket, nuclei[l], charges[l], same_center(nuclei[l], nuclei[n]), k);
                     }
                 }
             }
@@ -308,12 +315,13 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
     }
 
     // // calculate all two-electron integrals
-    const unsigned int max_teints = this->teindex(sz-1,sz-1,sz-1,sz-1) + 1;
+    const size_t max_teints = this->teindex(sz-1,sz-1,sz-1,sz-1) + 1;
     std::vector<double> tedouble(max_teints * charges.size() * 3, -1.0);
 
     // it is more efficient to first 'unroll' the fourfold nested loop
     // into a single vector of jobs to execute
     std::vector<std::array<size_t, 7>> jobs;
+    jobs.reserve(tedouble.size());
     for(size_t n=0; n<charges.size(); n++) {        // nuclear derivatives
         for(size_t d=0; d<3; d++) {                 // directions
             for(size_t i=0; i<sz; i++) {
@@ -341,9 +349,10 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
         }
     }
 
-    // // evaluate jobs
+    // Keep exceptions on their OpenMP thread until the parallel region ends.
+    std::exception_ptr eri_error;
     #pragma omp parallel for schedule(dynamic)
-    for(int s=0; s<(int)jobs.size(); s++) {  // have to use signed int for MSVC OpenMP here
+    for (std::ptrdiff_t s = 0; s < static_cast<std::ptrdiff_t>(jobs.size()); ++s) {
         const size_t idx = jobs[s][0];
         const size_t i = jobs[s][1];
         const size_t j = jobs[s][2];
@@ -351,7 +360,21 @@ std::vector<double> Integrator::evaluate_geometric_derivatives(const std::vector
         const size_t l = jobs[s][4];
         const size_t n = jobs[s][5];
         const size_t d = jobs[s][6];
-        tedouble[idx] = this->repulsion_deriv(cgfs[i], cgfs[j], cgfs[k], cgfs[l], Vec3(px[n], py[n], pz[n]), d);
+        try {
+            tedouble[idx] = this->repulsion_deriv(
+                derivatives[n * sz + i], derivatives[n * sz + j],
+                derivatives[n * sz + k], derivatives[n * sz + l], d);
+        } catch (...) {
+            #pragma omp critical
+            {
+                if (!eri_error) {
+                    eri_error = std::current_exception();
+                }
+            }
+        }
+    }
+    if (eri_error) {
+        std::rethrow_exception(eri_error);
     }
 
     // package everything into results vector, will be unpacked in
@@ -439,38 +462,8 @@ double Integrator::overlap_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
                                  const Vec3& nucleus,
                                  unsigned int coord) const {
-    double sum = 0.0;
-
-    // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
-
-    if(cgf1_nuc == cgf2_nuc) { // early exit
-        return 0.0;
-    }
-
-    for(unsigned int k = 0; k < cgf1.size(); k++) {
-        for(unsigned int l = 0; l < cgf2.size(); l++) {
-
-            double t1 = cgf1_nuc ? this->overlap_deriv_gto(cgf1.get_gto(k),
-                                                           cgf2.get_gto(l),
-                                                           coord) : 0.0;
-            double t2 = cgf2_nuc ? this->overlap_deriv_gto(cgf2.get_gto(l),
-                                                           cgf1.get_gto(k),
-                                                           coord) : 0.0;
-
-            sum += cgf1.get_norm_gto(k) *
-                   cgf2.get_norm_gto(l) *
-                   cgf1.get_coefficient_gto(k) *
-                   cgf2.get_coefficient_gto(l) *
-                   (t1 + t2);
-        }
-    }
-
-    const auto norm1 = cgf1.get_contraction_norm();
-    const auto norm2 = cgf2.get_contraction_norm();
-
-    return sum * norm1 * norm2;
+    return this->two_center_deriv(prepare_cgf_derivative(cgf1, nucleus), prepare_cgf_derivative(cgf2, nucleus),
+                                  coord, &Integrator::overlap, &Integrator::overlap_deriv_gto);
 }
 
 /**
@@ -524,6 +517,25 @@ double Integrator::overlap_deriv_gto(const GTO& gto1,
 /**************************************************************************
  * DIPOLE INTEGRALS
  **************************************************************************/
+
+std::vector<double> Integrator::evaluate_dipoles(const std::vector<CGF>& cgfs,
+                                                 double x, double y, double z) const {
+    const size_t n = cgfs.size();
+    const std::array<double, 3> origin{x, y, z};
+    std::vector<double> values(3 * n * n);
+    #pragma omp parallel for schedule(dynamic) if(n >= 16)
+    for (std::ptrdiff_t row = 0; row < static_cast<std::ptrdiff_t>(n); ++row) {
+        const auto i = static_cast<size_t>(row);
+        for (size_t j = 0; j <= i; ++j) {
+            for (unsigned int axis = 0; axis < origin.size(); ++axis) {
+                const size_t offset = axis * n * n;
+                const double value = this->dipole(cgfs[i], cgfs[j], axis, origin[axis]);
+                values[offset + i * n + j] = values[offset + j * n + i] = value;
+            }
+        }
+    }
+    return values;
+}
 
 /**
  * @brief Calculate dipole integral of two CGFs.
@@ -663,34 +675,8 @@ double Integrator::kinetic_deriv(const CGF& cgf1,
                                  const CGF& cgf2,
                                  const Vec3& nucleus,
                                  unsigned int coord) const {
-    double sum = 0.0;
-
-    // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
-
-    if(cgf1_nuc == cgf2_nuc) { // early exit
-        return 0.0;
-    }
-
-    for(unsigned int k = 0; k < cgf1.size(); k++) {
-        for(unsigned int l = 0; l < cgf2.size(); l++) {
-
-            double t1 = cgf1_nuc ? this->kinetic_deriv_gto(cgf1.get_gto(k), cgf2.get_gto(l), coord) : 0.0;
-            double t2 = cgf2_nuc ? this->kinetic_deriv_gto(cgf2.get_gto(l), cgf1.get_gto(k), coord) : 0.0;
-
-            sum += cgf1.get_norm_gto(k) *
-                   cgf2.get_norm_gto(l) *
-                   cgf1.get_coefficient_gto(k) *
-                   cgf2.get_coefficient_gto(l) *
-                   (t1 + t2);
-        }
-    }
-
-    const auto norm1 = cgf1.get_contraction_norm();
-    const auto norm2 = cgf2.get_contraction_norm();
-
-    return sum * norm1 * norm2;
+    return this->two_center_deriv(prepare_cgf_derivative(cgf1, nucleus), prepare_cgf_derivative(cgf2, nucleus),
+                                  coord, &Integrator::kinetic, &Integrator::kinetic_deriv_gto);
 }
 
 /**
@@ -822,58 +808,45 @@ double Integrator::nuclear_gto(const GTO& gto1,
  */
 double Integrator::nuclear_deriv(const CGF& cgf1, const CGF& cgf2, const Vec3& nucleus,
     unsigned int charge, const Vec3& nucderiv, unsigned int coord) const {
-    double sum = 0.0;
+    return this->nuclear_deriv(prepare_cgf_derivative(cgf1, nucderiv), prepare_cgf_derivative(cgf2, nucderiv),
+                               nucleus, charge, same_center(nucleus, nucderiv), coord);
+}
 
-    // Identify derivative target
-    const bool cgf1_nuc = (cgf1.get_r() - nucderiv).norm2() < 0.0001;
-    const bool cgf2_nuc = (cgf2.get_r() - nucderiv).norm2() < 0.0001;
-    const bool nuc_nuc  = (nucleus    - nucderiv).norm2() < 0.0001;
-
-    if (cgf1_nuc == cgf2_nuc && cgf2_nuc == nuc_nuc) {
+double Integrator::nuclear_deriv(const CgfDerivative& bra, const CgfDerivative& ket, const Vec3& nucleus,
+                                 unsigned int charge, bool nucleus_moves, unsigned int coord) const {
+    if ((!nucleus_moves && bra.none_move() && ket.none_move()) ||
+        (nucleus_moves && bra.all_move() && ket.all_move())) {
         return 0.0;
     }
 
-    for (unsigned int i = 0; i < cgf1.size(); ++i) {
-        const double c1 =
-            cgf1.get_coefficient_gto(i) *
-            cgf1.get_norm_gto(i);
-        const GTO& g1 = cgf1.get_gto(i);
+    double sum = 0.0;
+    for (unsigned int i = 0; i < bra.cgf.size(); ++i) {
+        const GTO& g1 = bra.cgf.get_gto(i);
+        const bool bra_moves_relative = bra.moves(i) != nucleus_moves;
+        const double weight1 = g1.get_norm() * g1.get_coefficient();
 
-        for (unsigned int j = 0; j < cgf2.size(); ++j) {
-            const double pre =
-                c1 *
-                cgf2.get_coefficient_gto(j) *
-                cgf2.get_norm_gto(j);
-            const GTO& g2 = cgf2.get_gto(j);
-
+        for (unsigned int j = 0; j < ket.cgf.size(); ++j) {
+            const GTO& g2 = ket.cgf.get_gto(j);
             double deriv = 0.0;
-
-            // derivative w.r.t. center of cgf1
-            if (cgf1_nuc) {
+            if (bra_moves_relative) {
                 deriv += this->nuclear_deriv(g1, g2, nucleus, coord);
             }
-
-            // derivative w.r.t. center of cgf2 (swap trick)
-            if (cgf2_nuc) {
+            if (ket.moves(j) != nucleus_moves) {
                 deriv += this->nuclear_deriv(g2, g1, nucleus, coord);
             }
-
-            // derivative w.r.t. nucleus via translational invariance
-            if (nuc_nuc) {
-                const double dA = this->nuclear_deriv(g1, g2, nucleus, coord);
-                const double dB = this->nuclear_deriv(g2, g1, nucleus, coord);
-                deriv += -(dA + dB);
-            }
-
-            sum += pre * deriv;
+            sum += weight1 * g2.get_norm() * g2.get_coefficient() * deriv;
         }
     }
 
-    const auto norm1 = cgf1.get_contraction_norm();
-    const auto norm2 = cgf2.get_contraction_norm();
-
-    // charge factor (nuclear attraction)
-    return static_cast<double>(charge) * sum * norm1 * norm2;
+    // In the potential nucleus's frame, stationary primitives move backwards
+    // when that nucleus is displaced.
+    const double signed_charge = nucleus_moves ? -static_cast<double>(charge) : static_cast<double>(charge);
+    double result = signed_charge * sum * bra.cgf.get_contraction_norm() * ket.cgf.get_contraction_norm();
+    const double log_norm_deriv = bra.log_norm_deriv[coord] + ket.log_norm_deriv[coord];
+    if (log_norm_deriv != 0.0) {
+        result += log_norm_deriv * this->nuclear(bra.cgf, ket.cgf, nucleus, charge);
+    }
+    return result;
 }
 
 /**
@@ -944,177 +917,6 @@ double Integrator::nuclear_deriv(const GTO& gto1, const GTO& gto2,
     else {
         // s-type along this axis
         return 2.0 * gto1.get_alpha() * term_plus;
-    }
-}
-
-/**************************************************************************
- * TWO-ELECTRON INTEGRALS
- **************************************************************************/
-
-/**
- * @brief Calculate two-electron repulsion integral of four CGFs.
- *
- * @param cgf1  Contracted Gaussian Function
- * @param cgf2  Contracted Gaussian Function
- * @param cgf3  Contracted Gaussian Function
- * @param cgf4  Contracted Gaussian Function
- *
- * Calculates the value of < cgf1 | cgf2 | cgf3 | cgf4 >
- *
- * @return value of the repulsion integral
- */
-double Integrator::repulsion(const CGF& cgf1,const CGF& cgf2,const CGF& cgf3,const CGF& cgf4) const {
-    double sum = 0;
-
-    for(unsigned int i=0; i< cgf1.size(); i++) {
-        for(unsigned int j=0; j< cgf2.size(); j++) {
-            for(unsigned int k=0; k < cgf3.size(); k++) {
-                for(unsigned int l=0; l < cgf4.size(); l++) {
-                    const double n1 = cgf1.get_norm_gto(i);
-                    const double n2 = cgf2.get_norm_gto(j);
-                    const double n3 = cgf3.get_norm_gto(k);
-                    const double n4 = cgf4.get_norm_gto(l);
-
-                    double pre = cgf1.get_coefficient_gto(i) * cgf2.get_coefficient_gto(j) * cgf3.get_coefficient_gto(k) * cgf4.get_coefficient_gto(l);
-                    sum += n1 * n2 * n3 * n4 * pre * this->repulsion(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l));
-                }
-            }
-        }
-    }
-
-    const auto norm1 = cgf1.get_contraction_norm();
-    const auto norm2 = cgf2.get_contraction_norm();
-    const auto norm3 = cgf3.get_contraction_norm();
-    const auto norm4 = cgf4.get_contraction_norm();
-
-    return sum * norm1 * norm2 * norm3 * norm4;
-}
-
-/**
- * @brief Calculate derivative of the two-electron repulsion integral for four CGFs.
- *
- * @param cgf1     Contracted Gaussian Function
- * @param cgf2     Contracted Gaussian Function
- * @param cgf3     Contracted Gaussian Function
- * @param cgf4     Contracted Gaussian Function
- * @param nucleus  Nucleus coordinates
- * @param coord    Cartesian direction (0=x,1=y,2=z)
- *
- * Calculates the value of d/dcx < cgf1 | cgf2 | cgf3 | cgf4 >
- *
- * @return value of the repulsion integral derivative
- */
-double Integrator::repulsion_deriv(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4,
-    const Vec3& nucleus, unsigned int coord) const {
-    double sum = 0;
-
-    // check if cgf originates from nucleus
-    bool cgf1_nuc = (cgf1.get_r() - nucleus).norm2() < 0.0001;
-    bool cgf2_nuc = (cgf2.get_r() - nucleus).norm2() < 0.0001;
-    bool cgf3_nuc = (cgf3.get_r() - nucleus).norm2() < 0.0001;
-    bool cgf4_nuc = (cgf4.get_r() - nucleus).norm2() < 0.0001;
-
-    // Early exit:
-    // If all CGFs are centered on this nucleus, the ERI is invariant under
-    // rigid translation of the entire quartet (derivative = 0).
-    // If none of the CGFs are centered on this nucleus, the ERI does not
-    // depend on this nuclear coordinate (derivative = 0).
-    // These two cases are exactly captured by all cgf*_nuc flags being equal.
-    if(cgf1_nuc == cgf2_nuc && cgf2_nuc == cgf3_nuc && cgf3_nuc == cgf4_nuc) {
-        return 0.0;
-    }
-
-    for(unsigned int i=0; i< cgf1.size(); i++) {
-        const double c1 = cgf1.get_coefficient_gto(i) * cgf1.get_norm_gto(i);
-        for(unsigned int j=0; j< cgf2.size(); j++) {
-            const double c2 = c1 * cgf2.get_coefficient_gto(j) * cgf2.get_norm_gto(j);
-            for(unsigned int k=0; k < cgf3.size(); k++) {
-                const double c3 = c2 * cgf3.get_coefficient_gto(k) * cgf3.get_norm_gto(k);
-                for(unsigned int l=0; l < cgf4.size(); l++) {
-
-                    // calculate product of coefficients
-                    const double pre = c3 * cgf4.get_coefficient_gto(l) * cgf4.get_norm_gto(l);
-
-                    // take the derivative towards the basis functions
-                    const double t1 = cgf1_nuc ? this->repulsion_deriv(cgf1.get_gto(i), cgf2.get_gto(j), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
-                    const double t2 = cgf2_nuc ? this->repulsion_deriv(cgf2.get_gto(j), cgf1.get_gto(i), cgf3.get_gto(k), cgf4.get_gto(l), coord) : 0.0;
-                    const double t3 = cgf3_nuc ? this->repulsion_deriv(cgf3.get_gto(k), cgf4.get_gto(l), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
-                    const double t4 = cgf4_nuc ? this->repulsion_deriv(cgf4.get_gto(l), cgf3.get_gto(k), cgf1.get_gto(i), cgf2.get_gto(j), coord) : 0.0;
-
-                    sum += pre * (t1 + t2 + t3 + t4);
-                }
-            }
-        }
-    }
-
-    const auto norm1 = cgf1.get_contraction_norm();
-    const auto norm2 = cgf2.get_contraction_norm();
-    const auto norm3 = cgf3.get_contraction_norm();
-    const auto norm4 = cgf4.get_contraction_norm();
-
-    return sum * norm1 * norm2 * norm3 * norm4;
-}
-
-/**
- * @brief Calculate two-electron repulsion integral of four GTOs.
- *
- * @param gto1  Gaussian Type Orbital
- * @param gto2  Gaussian Type Orbital
- * @param gto3  Gaussian Type Orbital
- * @param gto4  Gaussian Type Orbital
- *
- * Calculates the value of < gto1 | gto2 | gto3 | gto4 >
- *
- * @return value of the repulsion integral
- */
-double Integrator::repulsion(const GTO &gto1, const GTO &gto2, const GTO &gto3, const GTO &gto4) const {
-
-    // we here opt for cached Hellsing engine, which is currently the fastest implementation
-    double rep = this->repulsion_hellsing_cached(gto1.get_position(), gto1.get_l(), gto1.get_m(), gto1.get_n(), gto1.get_alpha(),
-                                                 gto2.get_position(), gto2.get_l(), gto2.get_m(), gto2.get_n(), gto2.get_alpha(),
-                                                 gto3.get_position(), gto3.get_l(), gto3.get_m(), gto3.get_n(), gto3.get_alpha(),
-                                                 gto4.get_position(), gto4.get_l(), gto4.get_m(), gto4.get_n(), gto4.get_alpha());
-
-    return rep;
-}
-
-/**
- * @brief Calculate repulsion derivative integral of four GTOs.
- *
- * @param gto1   Gaussian Type Orbital
- * @param gto2   Gaussian Type Orbital
- * @param gto3   Gaussian Type Orbital
- * @param gto4   Gaussian Type Orbital
- * @param coord  Cartesian direction (0=x,1=y,2=z)
- *
- * Calculates the value of < d/dx gto1 | gto2 | gto3 | gto4 >
- *
- * @return value of the overlap derivative integral
- */
-double Integrator::repulsion_deriv(const GTO& gto1, const GTO& gto2, const GTO &gto3, const GTO &gto4, unsigned int coord) const {
-    std::array<unsigned int, 3> gto_ang = {gto1.get_l(), gto1.get_m(), gto1.get_n()};
-
-    if(gto_ang[coord] != 0) {
-
-        gto_ang[coord] += 1; // calculate l+1 term
-        GTO gto1_new1(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
-                      gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
-        double term_plus = this->repulsion(gto1_new1, gto2, gto3, gto4);
-
-        gto_ang[coord] -= 2; // calculate l-1 term
-        GTO gto1_new2(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
-                      gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
-        double term_min = this->repulsion(gto1_new2, gto2, gto3, gto4);
-
-        gto_ang[coord] += 1; // recover l
-
-        return 2.0 * gto1.get_alpha() * term_plus - gto_ang[coord] * term_min;
-    } else { // s-type GTO
-        gto_ang[coord] += 1;
-        GTO gto1_new(gto1.get_coefficient(), gto1.get_position()[0], gto1.get_position()[1], gto1.get_position()[2],
-                     gto1.get_alpha(), gto_ang[0], gto_ang[1], gto_ang[2]);
-        double term = this->repulsion(gto1_new, gto2, gto3, gto4);
-        return 2.0 * gto1.get_alpha() * term;
     }
 }
 
@@ -1344,310 +1146,4 @@ double Integrator::A_term(const int i, const int r, const int u, const int l1, c
     return  std::pow(-1,i) * this->binomial_prefactor(i,l1,l2,pax,pbx)*
             std::pow(-1,u) * factorial(i)*std::pow(cpx,i-2*r-2*u)*
             std::pow(0.25/gamma,r+u)/factorial(r)/factorial(u)/factorial(i-2*r-2*u);
-}
-
-/**
- * @brief Evaluates a four-center electron–electron repulsion integral (ERI).
- *
- * Computes the Coulomb repulsion integral
- *
- *   (ab | cd)
- *
- * between four Cartesian Gaussian Type Orbitals (GTOs), each defined by
- * a center, angular momentum tuple, and Gaussian exponent.
- *
- * @param a        Center of the first GTO
- * @param la       x-angular momentum of the first GTO
- * @param ma       y-angular momentum of the first GTO
- * @param na       z-angular momentum of the first GTO
- * @param alphaa  Gaussian exponent of the first GTO
- *
- * @param b        Center of the second GTO
- * @param lb       x-angular momentum of the second GTO
- * @param mb       y-angular momentum of the second GTO
- * @param nb       z-angular momentum of the second GTO
- * @param alphab  Gaussian exponent of the second GTO
- *
- * @param c        Center of the third GTO
- * @param lc       x-angular momentum of the third GTO
- * @param mc       y-angular momentum of the third GTO
- * @param nc       z-angular momentum of the third GTO
- * @param alphac  Gaussian exponent of the third GTO
- *
- * @param d        Center of the fourth GTO
- * @param ld       x-angular momentum of the fourth GTO
- * @param md       y-angular momentum of the fourth GTO
- * @param nd       z-angular momentum of the fourth GTO
- * @param alphad  Gaussian exponent of the fourth GTO
- *
- * @return Value of the electron–electron repulsion integral (ab | cd)
- */
-double Integrator::repulsion(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                             const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                             const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                             const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
-
-    double rab2 = (a-b).norm2();
-    double rcd2 = (c-d).norm2();
-
-    Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
-    Vec3 q = gaussian_product_center(alphac, c, alphad, d);
-
-    double rpq2 = (p-q).norm2();
-
-    double gamma1 = alphaa + alphab;
-    double gamma2 = alphac + alphad;
-    double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
-
-    std::vector<double> bx = B_array(la, lb, lc, ld, p[0], a[0], b[0], q[0], c[0], d[0], gamma1, gamma2, delta);
-    std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
-    std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
-
-    double sum = 0.0;
-    for(int i=0; i<=(la+lb+lc+ld); i++) {
-        for(int j=0; j<=(ma+mb+mc+md); j++) {
-            for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k] * this->boys_function(i+j+k,0.25*rpq2/delta);
-            }
-        }
-    }
-
-    return 2.0 * std::pow(M_PI,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
-                 std::exp(-alphaa*alphab*rab2/gamma1)*
-                 std::exp(-alphac*alphad*rcd2/gamma2)*sum;
-}
-
-/**
- * @brief Performs electron repulsion integral (ERI) evaluation with cached Boys function
- *
- * @param a        Center of the first Gaussian-type orbital (GTO)
- * @param la       Power of x component of the polynomial of the first GTO
- * @param ma       Power of y component of the polynomial of the first GTO
- * @param na       Power of z component of the polynomial of the first GTO
- * @param alphaa  Gaussian exponent of the first GTO
- *
- * @param b        Center of the second Gaussian-type orbital (GTO)
- * @param lb       Power of x component of the polynomial of the second GTO
- * @param mb       Power of y component of the polynomial of the second GTO
- * @param nb       Power of z component of the polynomial of the second GTO
- * @param alphab  Gaussian exponent of the second GTO
- *
- * @param c        Center of the third Gaussian-type orbital (GTO)
- * @param lc       Power of x component of the polynomial of the third GTO
- * @param mc       Power of y component of the polynomial of the third GTO
- * @param nc       Power of z component of the polynomial of the third GTO
- * @param alphac  Gaussian exponent of the third GTO
- *
- * @param d        Center of the fourth Gaussian-type orbital (GTO)
- * @param ld       Power of x component of the polynomial of the fourth GTO
- * @param md       Power of y component of the polynomial of the fourth GTO
- * @param nd       Power of z component of the polynomial of the fourth GTO
- * @param alphad  Gaussian exponent of the fourth GTO
- *
- * @return Value of the electron repulsion integral
- */
-double Integrator::repulsion_boys_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                         const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                         const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                         const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const {
-
-    const double rab2 = (a-b).norm2();
-    const double rcd2 = (c-d).norm2();
-
-    const Vec3 p = gaussian_product_center(alphaa, a, alphab, b);
-    const Vec3 q = gaussian_product_center(alphac, c, alphad, d);
-
-    const double rpq2 = (p-q).norm2();
-
-    const double gamma1 = alphaa + alphab;
-    const double gamma2 = alphac + alphad;
-    const double delta = 0.25 * (1.0 / gamma1 + 1.0 / gamma2);
-    const double T = 0.25*rpq2/delta;
-
-    std::vector<double> bx = B_array(la, lb, lc, ld, p[0], a[0], b[0], q[0], c[0], d[0], gamma1, gamma2, delta);
-    std::vector<double> by = B_array(ma, mb, mc, md, p[1], a[1], b[1], q[1], c[1], d[1], gamma1, gamma2, delta);
-    std::vector<double> bz = B_array(na, nb, nc, nd, p[2], a[2], b[2], q[2], c[2], d[2], gamma1, gamma2, delta);
-
-    // pre-calculate all Fgamma values
-    const int lmax = la + lb + lc + ld + ma + mb + mc + md + na + nb + nc + nd;
-    std::vector<double> fg(la+lb+lc+ld+ma+mb+mc+md+na+nb+nc+nd+1);
-    this->boys_function.compute_block(lmax, T, fg.data());
-
-    double sum = 0.0;
-    for(int i=0; i<=(la+lb+lc+ld); i++) {
-        for(int j=0; j<=(ma+mb+mc+md); j++) {
-            for(int k=0; k<=(na+nb+nc+nd); k++) {
-                sum += bx[i]*by[j]*bz[k]*fg[i+j+k];
-            }
-        }
-    }
-
-    return 2.0 * std::pow(M_PI,2.5)/(gamma1*gamma2*std::sqrt(gamma1+gamma2))*
-                 std::exp(-alphaa*alphab*rab2/gamma1)*
-                 std::exp(-alphac*alphad*rcd2/gamma2)*sum;
-}
-
-/**
- * @brief Build the B array for the Obara–Saika recurrence.
- *
- * @param l1     Angular momentum component for center A
- * @param l2     Angular momentum component for center B
- * @param l3     Angular momentum component for center C
- * @param l4     Angular momentum component for center D
- * @param p      Gaussian exponent sum for the first pair
- * @param a      Center A coordinate
- * @param b      Center B coordinate
- * @param q      Gaussian exponent sum for the second pair
- * @param c      Center C coordinate
- * @param d      Center D coordinate
- * @param g1     Gaussian exponent sum gamma1
- * @param g2     Gaussian exponent sum gamma2
- * @param delta  delta parameter
- *
- * @return B array values
- */
-std::vector<double> Integrator::B_array(const int l1,const int l2,const int l3,const int l4,
-        const double p, const double a, const double b, const double q, const double c, const double d,
-        const double g1, const double g2, const double delta) const {
-
-    int imax = l1 + l2 + l3 + l4 + 1;
-    std::vector<double> arrB(imax,0);
-
-    for(int i1=0; i1<l1+l2+1; i1++) {
-        for(int i2=0; i2<l3+l4+1; i2++) {
-            for(int r1=0; r1 < i1/2+1; r1++) {
-                for(int r2=0; r2 < i2/2+1; r2++) {
-                    for(int u=0; u<(i1+i2)/2-r1-r2+1; u++) {
-                        int i = i1+i2-2*(r1+r2)-u;
-                        arrB[i] += this->B_term(i1,i2,r1,r2,u,l1,l2,l3,l4,
-                                                            p,a,b,q,c,d,g1,g2,delta);
-                    }
-                }
-            }
-        }
-    }
-    return arrB;
-}
-
-/**
- * @brief Evaluate a single B-term for the Obara–Saika recurrence.
- *
- * @param i1     Hermite index for the first pair
- * @param i2     Hermite index for the second pair
- * @param r1     Recursion index for the first pair
- * @param r2     Recursion index for the second pair
- * @param u      Boys index
- * @param l1     Angular momentum component for center A
- * @param l2     Angular momentum component for center B
- * @param l3     Angular momentum component for center C
- * @param l4     Angular momentum component for center D
- * @param px     P coordinate component
- * @param ax     A coordinate component
- * @param bx     B coordinate component
- * @param qx     Q coordinate component
- * @param cx     C coordinate component
- * @param dx     D coordinate component
- * @param gamma1 Gaussian exponent sum gamma1
- * @param gamma2 Gaussian exponent sum gamma2
- * @param delta  delta parameter
- *
- * @return B-term value
- */
-double Integrator::B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
-    const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
-    const double gamma2, const double delta) const {
-    return fB(i1,l1,l2,px,ax,bx,r1,gamma1)*
-        pow(-1,i2) * fB(i2,l3,l4,qx,cx,dx,r2,gamma2)*
-        pow(-1,u)*fact_ratio2(i1+i2-2*(r1+r2),u)*
-        pow(qx-px,i1+i2-2*(r1+r2)-2*u)/
-        pow(delta,i1+i2-2*(r1+r2)-u);
-}
-
-/**
- * @brief Evaluate helper term used in B-array construction.
- *
- * @param i   Hermite index
- * @param l1  Angular momentum component for center A
- * @param l2  Angular momentum component for center B
- * @param p   Gaussian exponent sum
- * @param a   Center A coordinate
- * @param b   Center B coordinate
- * @param r   Recursion index
- * @param g   Gaussian exponent sum for the second pair
- *
- * @return fB term value
- */
-double Integrator::fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double g) const {
-    return binomial_prefactor(i, l1, l2, p-a, p-b) * BB0(i, r, g);
-}
-
-/**
- * @brief Evaluate the BB0 helper term.
- *
- * @param i  Hermite index
- * @param r  Recursion index
- * @param g  Gaussian exponent sum
- *
- * @return BB0 term value
- */
-double Integrator::BB0(int i, int r, double g) const {
-    return fact_ratio2(i,r) * pow(4*g,r-i);
-}
-
-/**
- * @brief Compute factorial ratio used in recursion relations.
- *
- * @param a  first index
- * @param b  second index
- *
- * @return factorial ratio
- */
-double Integrator::fact_ratio2(unsigned int a, unsigned int b) const {
-    return factorial(a) / factorial(b) / factorial(a - 2*b);
-}
-
-/**
- * @brief Compute the flattened two-electron integral index.
- *
- * @param i  basis function index
- * @param j  basis function index
- * @param k  basis function index
- * @param l  basis function index
- *
- * @return flattened index in the packed TEI array
- */
-size_t Integrator::teindex(size_t i, size_t j, size_t k, size_t l) const {
-    if(i < j) {
-        std::swap(i,j);
-    }
-    if(k < l) {
-        std::swap(k,l);
-    }
-
-    size_t ij = i * (i + 1) / 2 + j;
-    size_t kl = k * (k + 1) / 2 + l;
-
-    if(ij < kl) {
-        std::swap(ij,kl);
-    }
-
-    return ij * (ij + 1) / 2 + kl;
-}
-
-/**
- * @brief Ensure the Hellsing cache supports the basis set.
- *
- * @param cgf1  Contracted Gaussian Function
- * @param cgf2  Contracted Gaussian Function
- * @param cgf3  Contracted Gaussian Function
- * @param cgf4  Contracted Gaussian Function
- */
-void Integrator::ensure_hellsing_cache(const CGF& cgf1, const CGF& cgf2, const CGF& cgf3, const CGF& cgf4) {
-    unsigned int lmax = std::max({cgf1.max_primitive_l(),
-                                  cgf2.max_primitive_l(),
-                                  cgf3.max_primitive_l(),
-                                  cgf4.max_primitive_l()});
-
-    // one more to also include derivatives
-    this->hellsing_cache.ensure_lmax(lmax+1);
 }

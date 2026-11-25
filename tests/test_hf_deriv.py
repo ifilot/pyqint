@@ -1,9 +1,42 @@
 import unittest
-from pyqint import Molecule, HF
+from pyqint import CGF, HF, Molecule, MoleculeBuilder
 from copy import deepcopy
 import numpy as np
 
 class TestHFDeriv(unittest.TestCase):
+
+    def test_closed_shell_uhf_gradient_matches_rhf(self):
+        solver = HF(MoleculeBuilder.from_name("h2o"), "sto3g")
+        rhf = solver.rhf(calc_forces=True, tolerance_grad=1e-8)
+        uhf = solver.uhf(multiplicity=1, calc_forces=True, tolerance_grad=1e-8)
+
+        self.assertTrue(rhf["converged"] and uhf["converged"])
+        np.testing.assert_allclose(uhf["forces"], rhf["forces"], atol=1e-8)
+        self.assertIsNone(solver.uhf(multiplicity=1)["forces"])
+
+    def test_open_shell_uhf_gradient_matches_energy_difference(self):
+        mol = MoleculeBuilder.from_name("h2o")
+        mol.set_charge(1)
+        mol.get_atoms()[1][1][:] += np.array([0.12, -0.04, 0.08])
+        options = dict(multiplicity=2, use_diis=False, tolerance=1e-13, tolerance_grad=1e-9)
+        result = HF(mol, "sto3g", eri_storage="packed", eri_engine="auto").uhf(calc_forces=True, **options)
+        self.assertTrue(result["converged"])
+        orbitals = {"alpha": result["orbc_alpha"], "beta": result["orbc_beta"]}
+
+        step = 1e-4
+        expected = np.zeros_like(result["forces"])
+        for i, j in np.ndindex(expected.shape):
+            energies = []
+            for sign in (-1, 1):
+                displaced = deepcopy(mol)
+                displaced.get_atoms()[i][1][j] += sign * step
+                state = HF(displaced, "sto3g").uhf(orbc_init=orbitals, **options)
+                self.assertTrue(state["converged"])
+                energies.append(state["energy"])
+            expected[i, j] = (energies[1] - energies[0]) / (2 * step)
+
+        np.testing.assert_allclose(result["forces"], expected, rtol=1e-6, atol=5e-7)
+        np.testing.assert_allclose(result["forces"].sum(axis=0), 0, atol=1e-10)
 
     def test_hartree_fock_forces_h2(self):
         """
@@ -37,6 +70,42 @@ class TestHFDeriv(unittest.TestCase):
         res = HF(mol, cgfs).rhf(calc_forces=True)
 
         np.testing.assert_almost_equal(res['forces'], ref['forces'], decimal=10)
+
+    def test_hartree_fock_forces_multicenter_salcs(self):
+        """H2 gradients agree in the atom-centered and symmetry-adapted bases."""
+        def calculate_salc_hf(mol, calc_forces=False, eri_storage="dense"):
+            aos, _ = mol.build_basis("sto3g")
+            salcs = []
+            for phase in (1.0, -1.0):
+                salc = CGF()
+                for ao, weight in zip(aos, (1.0, phase)):
+                    for gto in ao.gtos:
+                        salc.add_gto_with_position(weight * gto.c, gto.p, gto.alpha, gto.l, gto.m, gto.n)
+                salcs.append(salc)
+            return HF(mol, salcs, eri_storage=eri_storage, eri_engine="auto").rhf(
+                calc_forces=calc_forces, tolerance=1e-13)
+
+        mol = Molecule()
+        mol.add_atom("H", 0.0, 0.0, -0.7)
+        mol.add_atom("H", 0.0, 0.0, 0.9)
+        result = calculate_salc_hf(mol, calc_forces=True)
+        reference = HF(mol, "sto3g").rhf(calc_forces=True)
+        self.assertAlmostEqual(result["energy"], reference["energy"], places=12)
+        np.testing.assert_allclose(result["forces"], reference["forces"], atol=1e-10)
+
+        packed = calculate_salc_hf(mol, calc_forces=True, eri_storage="packed")
+        self.assertTrue(packed["converged"])
+        self.assertIsNone(packed["tetensor"])
+        self.assertEqual(packed["packed_tei"].size, 6)
+        for key in ("energy", "fock", "density", "erep", "ex", "forces"):
+            np.testing.assert_allclose(packed[key], result[key], atol=1e-12, rtol=1e-11, err_msg=key)
+
+        step = 1e-4
+        plus, minus = deepcopy(mol), deepcopy(mol)
+        plus.get_atoms()[0][1][2] += step
+        minus.get_atoms()[0][1][2] -= step
+        expected = (calculate_salc_hf(plus)["energy"] - calculate_salc_hf(minus)["energy"]) / (2.0 * step)
+        self.assertAlmostEqual(result["forces"][0, 2], expected, places=8)
 
     def test_hartree_fock_forces_h2o(self):
         """
@@ -100,12 +169,7 @@ def perform_hf(mol):
     return sol
 
 def calculate_forces_finite_difference(mol):
-    """
-    Finite-difference reference forces using a 5-point central stencil.
-
-    Forces are defined as:
-        F = - dE / dR
-    """
+    """Reference energy gradient from a five-point central stencil."""
     forces = np.zeros((len(mol.get_atoms()), 3), dtype=float)
 
     h = 2e-2   # larger step is fine with 5-point stencil
@@ -141,7 +205,6 @@ def calculate_forces_finite_difference(mol):
                 + e_m2
             ) / (12.0*h)
 
-            # Convert gradient → force
             forces[i, j] = dE
 
     return forces

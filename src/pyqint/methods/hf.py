@@ -8,15 +8,21 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
+from scipy import constants
 
+from .._memory import check_hf_gradient_memory
 from ..pyqint_core import PyQInt
+from ..structure.element import ELEMENTS_DATA
 from ..structure.molecule import Molecule
+from .vibrations import displace_basis, harmonic_analysis
 
 Vec = npt.NDArray[np.float64]
 Mat = npt.NDArray[np.float64]
 
 # nucleus entry: (position, charge)
 Nucleus = Tuple[Vec, int]
+
+AU_TO_DEBYE = constants.elementary_charge * constants.value("Bohr radius") / (1e-21 / constants.c)
 
 # couple of hardcoded variables for the DIIS algorithm
 SUBSPACE_LENGTH = 4
@@ -30,7 +36,17 @@ class HF:
     """
     Perform Hartree-Fock calculations
     """
-    def __init__(self, mol: Molecule, basis: Union[str, Sequence[Any]]) -> None:
+    _eri_storage = "dense"
+    _eri_engine = "hellsing"
+
+    def __init__(
+        self,
+        mol: Molecule,
+        basis: Union[str, Sequence[Any]],
+        *,
+        eri_storage: str = "dense",
+        eri_engine: str = "hellsing",
+    ) -> None:
         """
         Initialize the Hartree-Fock solver.
 
@@ -40,7 +56,17 @@ class HF:
             Molecule object.
         basis
             Basis set name or a list of CGF objects.
+        eri_storage
+            Use ``"dense"`` to return the four-dimensional ERI tensor, or
+            ``"packed"`` to contract unique ERIs directly in RHF and UHF.
+            Packed results contain ``packed_tei`` and set ``tetensor`` to None.
+        eri_engine
+            PyQInt engine used for the SCF integrals, such as ``"auto"``.
         """
+        if eri_storage not in ("dense", "packed"):
+            raise ValueError(f"Unknown ERI storage: {eri_storage!r}")
+        self._eri_storage = eri_storage
+        self._eri_engine = eri_engine
         self._mol: Molecule = mol
         self._basis: Union[str, Sequence[Any]] = basis
 
@@ -63,6 +89,9 @@ class HF:
         orbc_init: Optional[Mat] = None,
         ortho: str = "canonical",
         tolerance_grad: Optional[float] = None,
+        *,
+        calc_dipole: bool = False,
+        dipole_origin: Sequence[float] = (0.0, 0.0, 0.0),
     ) -> Dict[str, Any]:
         """
         Perform a restricted Hartree-Fock calculation.
@@ -77,7 +106,8 @@ class HF:
         Parameters
         ----------
         calc_forces
-            Whether analytic nuclear forces are computed.
+            Include the analytic nuclear energy gradient under ``forces``.
+            The physical nuclear force is the negative of this gradient.
         itermax
             Maximum number of SCF iterations.
         use_diis
@@ -97,6 +127,10 @@ class HF:
         tolerance_grad
             Threshold for the commutator FPS - SPF; defaults to
             sqrt(tolerance).
+        calc_dipole
+            Include the molecular dipole vector in debye under ``dipole``.
+        dipole_origin
+            Cartesian origin of the dipole moment in bohr.
 
         Returns
         -------
@@ -114,12 +148,8 @@ class HF:
                 f"RHF requires an even number of electrons, not {self._nelec}; "
                 "use uhf() for open-shell systems."
             )
-        if calc_forces and itermax < 1:
-            raise ValueError("Calculating forces requires at least one SCF iteration.")
-
-        # crank up the tolerance when calculating forces
-        if calc_forces and tolerance > 1e-12:
-            tolerance = 1e-12
+        if calc_forces:
+            tolerance = self.__gradient_tolerance(itermax, tolerance)
         if tolerance_grad is None:
             tolerance_grad = np.sqrt(tolerance)
 
@@ -127,9 +157,10 @@ class HF:
         time_stats = {}
 
         # build integrals
-        integrator = PyQInt()
+        integrator = PyQInt(eri_engine=self._eri_engine)
         start = time.time()
-        S, T, V, tetensor = integrator.build_integrals_openmp(self._cgfs, self._nuclei)
+        packed = self._eri_storage == "packed"
+        S, T, V, tei = integrator.build_integrals_openmp(self._cgfs, self._nuclei, packed=packed)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 
@@ -189,7 +220,8 @@ class HF:
                     P = np.einsum('ik,jk,k->ij', C, C, occ)
 
             # calculate G
-            G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
+            J, K = self.__coulomb_exchange(integrator, tei, P)
+            G = J - 0.5 * K
 
             # build Fock matrix
             F = T + V + G
@@ -275,11 +307,17 @@ class HF:
         # initial guess density is retained
         if C is not None:
             P = np.einsum('ik,jk,k->ij', C, C, occ)
-        G = (np.einsum('kl,ijlk->ij', P, tetensor) - 0.5 * np.einsum('kl,iklj->ij', P, tetensor))
+        J, K = self.__coulomb_exchange(integrator, tei, P)
+        G = J - 0.5 * K
         F = T + V + G
         energy = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
         if energies:
             energies[-1] = energy
+
+        gradient = None
+        if calc_forces:
+            ew_density = np.einsum('ik,jk,k,k->ij', C, C, occ, orbe)
+            gradient = self.__nuclear_gradient(P, ew_density)
 
         # build solution dictionary
         sol = {
@@ -298,19 +336,23 @@ class HF:
             "kinetic": T,
             "nuclear": V,
             'hcore': T+V,
-            'tetensor': tetensor,
+            'tetensor': None if packed else tei,
             "time_stats" : time_stats,
             "ecore": np.sum(P * (T + V)),
             "ekin": np.einsum('ij,ji', T, P),
             "enuc": np.einsum('ij,ji', V, P),
-            "erep": 0.5 * np.einsum('ijlk,ij,kl', tetensor, P, P),
-            "ex": -0.25 * np.einsum('iklj,ij,kl', tetensor, P, P),
+            "erep": 0.5 * np.einsum('ij,ij', P, J),
+            "ex": -0.25 * np.einsum('ij,ij', P, K),
             "enucrep": nuc_rep,
             "nelec": self._nelec,
             "mol": self._mol,
-            "forces": self.__rhf_forces(C, P, orbe) if calc_forces else None
+            "forces": gradient,
         }
 
+        if packed:
+            sol["packed_tei"] = tei
+        if calc_dipole:
+            sol["dipole"] = self.__molecular_dipole(integrator, P, dipole_origin)
         return sol
 
     def uhf(
@@ -324,6 +366,10 @@ class HF:
             ortho: str = "canonical",
             nelec: Optional[int] = None,
             tolerance_grad: Optional[float] = None,
+            *,
+            calc_forces: bool = False,
+            calc_dipole: bool = False,
+            dipole_origin: Sequence[float] = (0.0, 0.0, 0.0),
         ) -> Dict[str, Any]:
         """
         Perform an unrestricted Hartree-Fock calculation.
@@ -354,6 +400,13 @@ class HF:
         tolerance_grad
             Threshold for the commutators FPS - SPF; defaults to
             sqrt(tolerance).
+        calc_forces
+            Include the analytic nuclear energy gradient under ``forces``.
+            The physical nuclear force is the negative of this gradient.
+        calc_dipole
+            Include the molecular dipole vector in debye under ``dipole``.
+        dipole_origin
+            Cartesian origin of the dipole moment in bohr.
 
         Returns
         -------
@@ -383,15 +436,18 @@ class HF:
         nalpha = (nelec + (multiplicity - 1)) // 2
         nbeta  = nelec - nalpha
 
+        if calc_forces:
+            tolerance = self.__gradient_tolerance(itermax, tolerance)
         if tolerance_grad is None:
             tolerance_grad = np.sqrt(tolerance)
 
         time_stats = {}
 
         # build integrals
-        integrator = PyQInt()
+        integrator = PyQInt(eri_engine=self._eri_engine)
         start = time.time()
-        S, T, V, tetensor = integrator.build_integrals_openmp(self._cgfs, self._nuclei)
+        packed = self._eri_storage == "packed"
+        S, T, V, tei = integrator.build_integrals_openmp(self._cgfs, self._nuclei, packed=packed)
         end = time.time()
         time_stats['integral_evaluation'] = end - start
 
@@ -476,10 +532,7 @@ class HF:
                     did_diis = True
 
             # Build Coulomb/exchange from current densities
-            Ptot = Pa + Pb
-            J = np.einsum('kl,ijlk->ij', Ptot, tetensor)
-            Ka = np.einsum('kl,iklj->ij', Pa, tetensor)
-            Kb = np.einsum('kl,iklj->ij', Pb, tetensor)
+            J, Ka, Kb = self.__coulomb_exchange(integrator, tei, Pa, Pb)
 
             # Build Fock matrices
             Fa = T + V + J - Ka
@@ -514,9 +567,7 @@ class HF:
 
             # Calculate energy
             Ptot_new = Pa_new + Pb_new
-            J_new = np.einsum('kl,ijlk->ij', Ptot_new, tetensor)
-            Ka_new = np.einsum('kl,iklj->ij', Pa_new, tetensor)
-            Kb_new = np.einsum('kl,iklj->ij', Pb_new, tetensor)
+            J_new, Ka_new, Kb_new = self.__coulomb_exchange(integrator, tei, Pa_new, Pb_new)
 
             E_elec = (
                 np.einsum('ij,ji', Ptot_new, (T + V))
@@ -569,9 +620,7 @@ class HF:
 
         # Final recompute of common matrices for reporting
         Ptot = Pa + Pb
-        J = np.einsum('kl,ijlk->ij', Ptot, tetensor)
-        Ka = np.einsum('kl,iklj->ij', Pa, tetensor)
-        Kb = np.einsum('kl,iklj->ij', Pb, tetensor)
+        J, Ka, Kb = self.__coulomb_exchange(integrator, tei, Pa, Pb)
         Fa = T + V + J - Ka
         Fb = T + V + J - Kb
 
@@ -587,6 +636,12 @@ class HF:
         # value S(S+1) measures spin contamination
         Sz = 0.5 * (nalpha - nbeta)
         s2 = Sz * (Sz + 1.0) + nbeta - np.einsum('ij,ji', Pa @ S, Pb @ S)
+
+        gradient = None
+        if calc_forces:
+            # At self-consistency P F P is the energy-weighted density of a spin channel.
+            ew_density = Pa @ Fa @ Pa + Pb @ Fb @ Pb
+            gradient = self.__nuclear_gradient(Ptot, ew_density, Pa, Pb)
 
         sol = {
             "energy": E_tot,
@@ -609,7 +664,7 @@ class HF:
             "kinetic": T,
             "nuclear": V,
             "hcore": T + V,
-            "tetensor": tetensor,
+            "tetensor": None if packed else tei,
             "time_stats": time_stats,
 
             # energy breakdown
@@ -627,10 +682,140 @@ class HF:
             "s2_exact": Sz * (Sz + 1.0),
 
             "mol": self._mol,
-            "forces": None, # Forces: not available for UHF
+            "forces": gradient,
         }
 
+        if packed:
+            sol["packed_tei"] = tei
+        if calc_dipole:
+            sol["dipole"] = self.__molecular_dipole(integrator, Ptot, dipole_origin)
         return sol
+
+    def vibrational_frequencies(
+        self,
+        *,
+        multiplicity: Optional[int] = None,
+        step: float = 1e-3,
+        masses: Optional[Sequence[float]] = None,
+        itermax: int = 100,
+        use_diis: bool = True,
+        tolerance: float = 1e-12,
+        tolerance_grad: float = 1e-8,
+        ortho: str = "canonical",
+        orbc_init: Optional[Union[Mat, Dict[str, Mat]]] = None,
+    ) -> Dict[str, Any]:
+        """Calculate harmonic frequencies at the supplied geometry.
+
+        Central differences of analytic energy gradients build the Cartesian
+        Hessian. Use a stationary geometry to interpret the harmonic modes.
+
+        Parameters
+        ----------
+        multiplicity
+            Spin multiplicity for UHF. The default ``None`` selects RHF.
+        step
+            Cartesian displacement in bohr.
+        masses
+            Atomic masses in unified atomic mass units, in molecule order.
+            Defaults to the element masses stored by PyQInt.
+        itermax, use_diis, tolerance, tolerance_grad, ortho
+            SCF options for the reference and all displaced geometries.
+        orbc_init
+            Optional initial orbitals for the reference calculation, using
+            the same format as ``rhf`` or ``uhf`` for the chosen method.
+
+        Returns
+        -------
+        dict
+            ``frequencies`` in cm⁻¹, with negative values denoting imaginary
+            frequencies, normalized Cartesian ``normal_modes`` with shape
+            (modes, atoms, 3), the Cartesian ``hessian`` in hartree/bohr²,
+            and the ``masses`` used for mass weighting.
+        """
+        if not np.isfinite(step) or step <= 0:
+            raise ValueError("Vibrational displacement must be finite and positive.")
+        if not self._nuclei:
+            raise ValueError("Vibrational analysis requires at least one nucleus.")
+        if itermax < 1:
+            raise ValueError("Vibrational analysis requires at least one SCF iteration.")
+        coordinates = np.asarray([position for position, _ in self._nuclei], dtype=float)
+        if not np.all(np.isfinite(coordinates)):
+            raise ValueError("Nuclear coordinates must be finite.")
+        if masses is None:
+            masses = [ELEMENTS_DATA[charge]["atomic-mass"] for _, charge in self._nuclei]
+        masses = np.array(masses, dtype=float)
+        if masses.shape != (len(coordinates),) or not np.all(np.isfinite(masses) & (masses > 0)):
+            raise ValueError("Supply one finite, positive mass per nucleus.")
+
+        tolerance = self.__gradient_tolerance(itermax, tolerance)
+        options = dict(itermax=itermax, use_diis=use_diis, tolerance=tolerance,
+                       tolerance_grad=tolerance_grad, ortho=ortho)
+        method = "rhf" if multiplicity is None else "uhf"
+        if multiplicity is not None:
+            options["multiplicity"] = multiplicity
+        reference = getattr(self, method)(orbc_init=orbc_init, **options)
+        if not reference["converged"]:
+            raise RuntimeError(f"Reference {method.upper()} calculation did not converge for vibrational analysis.")
+        if multiplicity is None:
+            orbitals = reference["orbc"]
+        else:
+            orbitals = {"alpha": reference["orbc_alpha"], "beta": reference["orbc_beta"]}
+        del reference
+
+        def gradient(displacement):
+            molecule = Molecule(self._mol.get_name())
+            molecule.set_charge(self._mol.get_charge())
+            for (symbol, _), position in zip(self._mol, coordinates + displacement):
+                molecule.add_atom(symbol, *position)
+            basis = self._basis
+            if not isinstance(basis, str):
+                basis = displace_basis(self._cgfs, coordinates, displacement)
+            solver = HF(molecule, basis, eri_storage=self._eri_storage, eri_engine=self._eri_engine)
+            result = getattr(solver, method)(calc_forces=True, orbc_init=orbitals, **options)
+            if not result["converged"]:
+                atom, axis = divmod(np.argmax(np.abs(displacement)), 3)
+                delta = displacement[atom, axis]
+                raise RuntimeError(
+                    f"{method.upper()} did not converge for atom {atom + 1} displaced {delta:+g} bohr along {'xyz'[axis]}."
+                )
+            # The legacy result key "forces" contains the energy gradient.
+            return result["forces"].ravel()
+
+        hessian = np.empty((coordinates.size, coordinates.size))
+        displacement = np.zeros_like(coordinates)
+        for i in range(coordinates.size):
+            displacement.flat[i] = step
+            plus = gradient(displacement)
+            displacement.flat[i] = -step
+            minus = gradient(displacement)
+            displacement.flat[i] = 0
+            hessian[:, i] = (plus - minus) / (2 * step)
+        hessian = (hessian + hessian.T) / 2
+        frequencies, modes = harmonic_analysis(hessian, coordinates, masses)
+        return {"frequencies": frequencies, "normal_modes": modes, "hessian": hessian, "masses": masses}
+
+    def __molecular_dipole(self, integrator, density, origin):
+        """Combine nuclear and electronic dipoles relative to the same origin."""
+        origin = np.asarray(origin, dtype=np.float64)
+        integrals = integrator.build_dipole_openmp(self._cgfs, origin=origin)
+        nuclear = np.zeros(3)
+        for position, charge in self._nuclei:
+            nuclear += charge * (position - origin)
+        electronic = np.einsum('ij,dij->d', density, integrals)
+        return AU_TO_DEBYE * (nuclear - electronic)
+
+    def __coulomb_exchange(self, integrator, tei, density_alpha, density_beta=None):
+        """Contract the ERIs with the restricted or spin-resolved densities."""
+        if self._eri_storage == "packed":
+            return integrator.contract_packed_tei(tei, density_alpha, density_beta)
+
+        density = density_alpha if density_beta is None else density_alpha + density_beta
+        J = np.einsum('kl,ijlk->ij', density, tei)
+        Ka = np.einsum('kl,iklj->ij', density_alpha, tei)
+        if density_beta is None:
+            return J, Ka
+        Kb = np.einsum('kl,iklj->ij', density_beta, tei)
+        return J, Ka, Kb
 
     def __nuclear_repulsion(self) -> float:
         """
@@ -704,63 +889,43 @@ class HF:
 
         return fguess
 
-    def __rhf_forces(self, C, P, e):
-        """
-        Calculate derivatives of nuclear coordinates to obtain forces.
+    def __gradient_tolerance(self, itermax: int, tolerance: float) -> float:
+        """Check derivative workspace and tighten the SCF energy tolerance."""
+        if itermax < 1:
+            raise ValueError("Calculating forces requires at least one SCF iteration.")
+        check_hf_gradient_memory(len(self._cgfs), len(self._nuclei), packed=self._eri_storage == "packed")
+        return min(tolerance, 1e-12)
 
-        The basis functions and nuclei of the calculation are used, such that
-        forces are also available when a list of CGFs was supplied as basis.
-
-        Parameters:
-        C:      matrix of orbital coefficients
-        P:      density matrix
-        e:      orbital energies
-
-        Returns array of forces with shape [Natoms, 3]
-        """
-        # intialization
+    def __nuclear_gradient(self, density: Mat, ew_density: Mat,
+                           density_a: Optional[Mat] = None, density_b: Optional[Mat] = None) -> Mat:
+        """Contract analytic derivative integrals into the Cartesian energy gradient."""
         integrator = PyQInt()
-        cgfs, nuclei = self._cgfs, self._nuclei
-        nelec = self._nelec
-        forces = np.zeros((len(nuclei),3))
-        N = len(cgfs)
-        occ = [2 if i < nelec//2 else 0 for i in range(C.shape[1])]
-    
-        # calculate energy weighted density matrix
-        ew_density = np.einsum('ik,jk,k,k->ij', C, C, occ, e)
+        overlap, kinetic, attraction, repulsion = integrator.build_geometric_derivatives_openmp(
+            self._cgfs, self._nuclei,
+        )
+        gradient = np.einsum('adij,ij->ad', kinetic, density)
+        gradient += np.einsum('adij,ij->ad', attraction, density)
+        gradient -= np.einsum('adij,ij->ad', overlap, ew_density)
 
-        # collect derivatives
-        S, T, V, teints = integrator.build_geometric_derivatives_openmp(cgfs, nuclei)
+        # Derivative ERIs share the packed ordering used for the SCF integrals.
+        for atom, derivatives in enumerate(repulsion):
+            for axis, packed in enumerate(derivatives):
+                if density_b is None:
+                    J, K = integrator.contract_packed_tei(packed, density)
+                    exchange = 0.5 * np.sum(density * K)
+                else:
+                    J, Ka, Kb = integrator.contract_packed_tei(packed, density_a, density_b)
+                    exchange = np.sum(density_a * Ka) + np.sum(density_b * Kb)
+                gradient[atom, axis] += 0.5 * (np.sum(density * J) - exchange)
 
-        # Loop over all cartesian direction for every nucleus
-        # This could be made more efficient by incorporating symmetry
-        for n, deriv_nucleus in enumerate(nuclei):
-            for d in range(3):
-
-                # derivate nucleus-nucleus repulsion
-                term_nn = 0
-                for nucleus in nuclei:
-                    if np.linalg.norm(nucleus[0] - deriv_nucleus[0]) > 0.0001:
-                        term_nn += deriv_nucleus[1] * nucleus[1] * \
-                                   (nucleus[0][d] - deriv_nucleus[0][d]) / \
-                                   (np.linalg.norm(nucleus[0]- deriv_nucleus[0])**3)
-
-                hcore = T[n,d] + V[n,d]
-                term_hcore = np.sum(np.multiply(P, hcore))
-
-                term_repulsion = 0
-                for i in range(N):
-                    for j in range(N):
-                        for k in range(N):
-                            for l in range(N):
-                                idx1 = integrator.teindex(i,j,k,l)
-                                idx2 = integrator.teindex(i,k,j,l)
-
-                                term_repulsion += 0.5 * P[i,j] * P[k,l] * (teints[n,d,idx1] - 0.5 * teints[n,d,idx2])
-                
-                term_overlap = - np.sum(np.multiply(ew_density, S[n,d]))
-           
-                # F = - d/dR E
-                forces[n,d] = term_hcore + term_repulsion + term_overlap + term_nn
-
-        return forces
+        # Each nuclear pair contributes equal and opposite energy derivatives.
+        for atom, (position, charge) in enumerate(self._nuclei):
+            for other in range(atom + 1, len(self._nuclei)):
+                other_position, other_charge = self._nuclei[other]
+                delta = other_position - position
+                distance = np.linalg.norm(delta)
+                if distance > 1e-4:
+                    derivative = charge * other_charge * delta / distance ** 3
+                    gradient[atom] += derivative
+                    gradient[other] -= derivative
+        return gradient

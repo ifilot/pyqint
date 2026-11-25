@@ -23,9 +23,16 @@ py.extension_module(
         'csrc/plotter.cpp',
         'csrc/cgf.cpp',
         'csrc/fgamma.cpp',
-        'csrc/hellsing_cache.cpp',
-        'csrc/hellsing_eri.cpp',
         'csrc/gaussian_integrals.cpp',
+        'csrc/eri/contraction.cpp',
+        'csrc/eri/orchestrator.cpp',
+        'csrc/eri/repulsion.cpp',
+        'csrc/eri/hellsing/cached.cpp',
+        'csrc/eri/hellsing/direct.cpp',
+        'csrc/eri/hellsing/hellsing_cache.cpp',
+        'csrc/eri/huzinaga/huzinaga.cpp',
+        'csrc/eri/rys/roots.cpp',
+        'csrc/eri/rys/rys.cpp',
     ],
     include_directories: inc,
     override_options: ['cython_language=cpp'],
@@ -47,6 +54,7 @@ endforeach
 # Top-level Python sources
 py.install_sources(
     '__init__.py',
+    '_memory.py',
     '_version.py',
     subdir: 'pyqint'
 )

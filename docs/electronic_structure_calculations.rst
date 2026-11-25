@@ -16,6 +16,71 @@ Both approaches expose detailed intermediate results, allowing the user to
 inspect orbital coefficients, density matrices, Fock matrices, and energy
 contributions throughout the self-consistent field (SCF) procedure.
 
+Packed two-electron integrals
+-----------------------------
+
+RHF and UHF can use the unique two-electron integrals directly throughout
+the SCF iterations. Select ``eri_storage="packed"`` to reduce memory use.
+The engine can be selected independently.
+
+.. code-block:: python
+
+    from pyqint import HF, MoleculeBuilder
+
+    mol = MoleculeBuilder.from_name("benzene")
+    result = HF(mol, "aug-cc-pVDZ", eri_storage="packed", eri_engine="auto").rhf()
+
+Packed results contain a one-dimensional ``packed_tei`` array in ``teindex``
+order and set ``tetensor`` to ``None``. By default, ``eri_storage="dense"``
+returns the four-dimensional tensor under ``tetensor``.
+
+Molecular dipole moments
+------------------------
+
+Pass ``calc_dipole=True`` to ``rhf()`` or ``uhf()`` to include the molecular
+dipole under ``result["dipole"]``. The three Cartesian components are in
+debye and include the nuclear and electronic contributions. Use
+``dipole_origin`` to specify the origin in bohr. For a charged system, the
+dipole depends on that origin.
+
+.. code-block:: python
+
+    mol = MoleculeBuilder.from_name("h2o")
+    result = HF(mol, "sto3g").rhf(calc_dipole=True)
+    print(result["dipole"])
+
+Analytic nuclear gradients
+--------------------------
+
+Pass ``calc_forces=True`` to ``rhf()`` or ``uhf()`` to include the analytic
+nuclear energy gradient under ``result["forces"]`` in hartree/bohr. The
+physical force is ``-result["forces"]``. For example, a UHF doublet gradient
+can be obtained with ``hf.uhf(multiplicity=2, calc_forces=True)``.
+
+Vibrational frequencies
+-----------------------
+
+Use ``HF.vibrational_frequencies()`` at a stationary geometry to obtain
+harmonic frequencies. The method defaults to RHF. Supply ``multiplicity``
+to select UHF, for example ``hf.vibrational_frequencies(multiplicity=2)`` for
+a doublet. The method computes central differences of analytic gradients
+and projects out rigid translations and rotations. It performs two
+displaced gradient calculations per Cartesian coordinate.
+
+.. code-block:: python
+
+    analysis = HF(optimized_mol, "sto3g", eri_storage="packed").vibrational_frequencies()
+    print(analysis["frequencies"])
+
+The result includes signed ``frequencies`` in cm⁻¹, with
+negative values denoting imaginary modes, normalized Cartesian
+``normal_modes`` with shape ``(modes, atoms, 3)``, the Cartesian ``hessian``
+in hartree/bohr², and the ``masses`` used for mass weighting. Pass ``masses``
+in unified atomic mass units for isotope substitutions, or ``step`` to
+override the default displacement of 0.001 bohr. For custom CGFs, every
+primitive follows its associated nucleus with its exponent and coefficient
+held fixed.
+
 Restricted Hartree-Fock
 -----------------------
 
@@ -134,7 +199,7 @@ object. This dictionary objects contains the following keys
    * - :code:`hcore`
      - Core Hamiltonian matrix :math:`\mathbf{H_\textrm{core}}`
    * - :code:`tetensor`
-     - Two-electron tensor object :math:`(i,j,k,l)`
+     - Two-electron tensor :math:`(i,j,k,l)`, or :code:`None` in packed mode
    * - :code:`time_stats`
      - Time statistics object
    * - :code:`ecore`
@@ -154,7 +219,7 @@ object. This dictionary objects contains the following keys
    * - :code:`mol`
      - Molecule class
    * - :code:`forces`
-     - Forces on the atoms (if calculated, else :code:`None`)
+     - Nuclear energy gradient (if calculated, else :code:`None`)
 
 To provide an example how one can use the above data, let us consider the
 situation wherein the user wants to decompose the individual components of the
@@ -327,9 +392,11 @@ Below, the most important entries of the UHF result dictionary are listed.
    * - :code:`hcore`
      - Core Hamiltonian matrix :math:`\mathbf{H_{\textrm{core}}}`
    * - :code:`tetensor`
-     - Two-electron integral tensor :math:`(i,j,k,l)`
+     - Two-electron integral tensor :math:`(i,j,k,l)`, or :code:`None` in packed mode
    * - :code:`time_stats`
      - Time statistics object
+   * - :code:`forces`
+     - Nuclear energy gradient (if calculated, else :code:`None`)
 
 In unrestricted Hartree-Fock, the exchange contribution is spin-dependent.
 Accordingly, the exchange energy is split into separate :math:`\alpha` and

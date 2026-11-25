@@ -1,8 +1,37 @@
 import unittest
-from pyqint import MoleculeBuilder, HF, Molecule
+from pyqint import MoleculeBuilder, HF, Molecule, PyQInt
 import numpy as np
 
 class TestEnergyDecomposition(unittest.TestCase):
+
+    def test_packed_coulomb_exchange(self):
+        # Exercise diagonal pairs and every distinct orientation, including
+        # asymmetric densities to check which index each update contracts.
+        n = 32
+        rng = np.random.default_rng(26)
+        rows = np.arange(n)[:, None]
+        cols = rows.T
+        high = np.maximum(rows, cols)
+        pair = high * (high + 1) // 2 + np.minimum(rows, cols)
+        bra = pair[:, :, None, None]
+        ket = pair[None, None, :, :]
+        high = np.maximum(bra, ket)
+        pair_count = n * (n + 1) // 2
+        packed = rng.standard_normal(pair_count * (pair_count + 1) // 2)
+        packed[::5] = 0.0
+        packed.flags.writeable = False
+        dense = packed[high * (high + 1) // 2 + np.minimum(bra, ket)]
+        pa = rng.standard_normal((n, n))
+        pb = rng.standard_normal((n, n))
+        integrator = PyQInt()
+
+        J, K = integrator.contract_packed_tei(packed, pa)
+        np.testing.assert_allclose(J, np.einsum('kl,ijlk->ij', pa, dense), atol=1e-12)
+        np.testing.assert_allclose(K, np.einsum('kl,iklj->ij', pa, dense), atol=1e-12)
+        J, Ka, Kb = integrator.contract_packed_tei(packed, pa, pb)
+        np.testing.assert_allclose(J, np.einsum('kl,ijlk->ij', pa + pb, dense), atol=1e-12)
+        np.testing.assert_allclose(Ka, K, atol=1e-12)
+        np.testing.assert_allclose(Kb, np.einsum('kl,iklj->ij', pb, dense), atol=1e-12)
 
     def test_hartree_fock_h2o(self):
         """
@@ -65,6 +94,13 @@ class TestEnergyDecomposition(unittest.TestCase):
         # exchange stabilizes; the alpha channel holds the unpaired electron
         self.assertLess(res['ex_alpha'], res['ex_beta'])
         self.assertLess(res['ex_beta'], 0.0)
+
+        packed = HF(mol, 'sto3g', eri_storage='packed').uhf(multiplicity=2)
+        self.assertTrue(packed['converged'])
+        self.assertIsNone(packed['tetensor'])
+        self.assertEqual(packed['packed_tei'].ndim, 1)
+        for key in ('energy', 'ej', 'ex_alpha', 'ex_beta', 'fock_alpha', 'fock_beta', 's2'):
+            np.testing.assert_allclose(packed[key], res[key], rtol=1e-9, atol=1e-9, err_msg=key)
 
     def test_unrestricted_hartree_fock_closed_shell(self):
         """

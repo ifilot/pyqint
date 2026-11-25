@@ -8,6 +8,88 @@ Entries for versions before 1.5.0 were reconstructed from the release notes and
 pull requests on GitHub. Versions before 1.0.0 are not covered; see the
 [git history](https://github.com/ifilot/pyqint/commits/master) for those.
 
+## 1.6.0 - Unreleased
+
+### Added
+
+- Select the electron-repulsion integral (ERI) engine through `eri_engine`
+  in `PyQInt` and `HF`. The available engines are cached Hellsing (`hellsing`),
+  direct Hellsing (`hellsing_direct`), block and scalar Huzinaga (`huzinaga`
+  and `huzinaga_scalar`), and Rys quadrature (`rys`). Cached Hellsing remains
+  the default. The opt-in `auto` orchestrator chooses an engine per quartet
+  or shell batch using the actual primitive centers and angular momenta.
+  Standalone ERIs and geometric derivatives use cached Hellsing in `auto` mode.
+- `build_tei_openmp(cgfs, profile=True)` builds ERIs and reports timings for
+  pair setup, quartet planning, integral evaluation, tensor assembly, and
+  NumPy conversion, along with counts for the automatic routes.
+- `build_tei_openmp` and `build_integrals_openmp` accept `packed=True` to
+  return unique ERIs in `teindex` order. `contract_packed_tei` builds Coulomb
+  and exchange matrices from this representation. `HF(..., eri_storage="packed")`
+  uses it throughout RHF and UHF, returning `packed_tei` and setting `tetensor`
+  to `None`. Dense storage remains the default.
+- Memory preflight checks raise `MemoryError` with the estimated requirement
+  and available memory for bulk ERI, dipole, and geometric derivative builds.
+  The new runtime dependency `psutil` measures available RAM. The checks also
+  consider readable Linux cgroup limits and finite process address-space
+  limits where supported. The automatic planner checks its workspace as it
+  grows. Hartree-Fock checks derivative memory before an SCF run that requests
+  gradients.
+- `HF.uhf(multiplicity=2, calc_forces=True)` evaluates analytic nuclear energy
+  gradients for a doublet using the same integral derivatives as RHF. The
+  `forces` result contains the energy gradient in hartree/bohr. Negate it
+  to obtain the physical force, as with RHF.
+- `calc_dipole=True` adds a molecular dipole vector in debye to RHF and UHF
+  results. `dipole_origin` sets the reference origin in bohr. The integrator
+  also exposes the Cartesian position integral matrices through
+  `build_dipole_openmp`.
+- `HF.vibrational_frequencies()` computes harmonic frequencies and normal
+  modes by central finite differences of analytic gradients. It defaults to
+  RHF and accepts `multiplicity` for UHF. Results include the Cartesian
+  Hessian, and negative wavenumbers represent imaginary modes. The analysis
+  removes rigid translations and rotations, accepts isotope masses, and
+  supports custom CGFs whose primitives follow their associated nuclei.
+  [#80](https://github.com/ifilot/pyqint/issues/80)
+
+### Changed
+
+- The C++ ERI implementations are grouped into Hellsing, Huzinaga, and Rys
+  subdirectories, with shared dispatch and contraction code.
+
+### Performance
+
+- The automatic ERI planner reuses eligible primitive pairs, skips exact
+  zeros from Cartesian reflection symmetry, and batches Rys shell components
+  to share quadrature roots and recurrences. It generates each unique quartet
+  from canonical CGF pairs. Dense builds expand the packed result in parallel
+  for larger tensors.
+- Packed builds write directly into a NumPy buffer. For benzene/aug-cc-pVDZ,
+  the packed ERI array occupies 1.63 GiB versus 12.90 GiB for the dense array.
+  Dense and derivative builds also copy native doubles directly into NumPy.
+- RHF and UHF gradients contract packed derivative ERIs with the native
+  Coulomb and exchange routine.
+- `scripts/bench.py` compares ERI engines on selected molecules and basis
+  sets or the ethylene SALC example. It reports stage timings and checks
+  agreement with cached Hellsing.
+
+### Fixed
+
+- Contracted `repulsion` and `repulsion_deriv` now preserve the individual
+  primitive centers of the third and fourth arguments.
+- Analytic overlap, kinetic, nuclear attraction, and ERI derivatives now
+  account for multicenter contractions, including symmetry-adapted linear
+  combinations (SALCs). Each primitive follows its associated nucleus, and
+  the derivatives include the change in contraction normalization. Gaussian
+  exponents and contraction coefficients are held fixed.
+- Packed ERI indices use the native index width through the Python binding,
+  so `teindex` can return indices beyond the 32-bit signed range on 64-bit
+  builds.
+
+### Documentation
+
+- Expanded the integrator and Hartree-Fock guides and updated the ethylene
+  SALC example. Added C++ formatting and commenting conventions to the
+  contributor guide.
+
 ## [1.5.1] - 2026-11-04
 
 ### Added

@@ -16,6 +16,16 @@ Please note we have a code of conduct, please follow it in all your interactions
 4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you
    do not have permission to do that, you may request the second reviewer to merge it for you.
 
+## C++ style
+
+- Use the four-space indentation in `.editorconfig` and follow the naming and
+  brace placement of the surrounding C++ code.
+- Document function interfaces with Doxygen blocks using `@brief`, `@param`,
+  and `@return` where applicable. Include normalization conventions and input
+  requirements when callers depend on them.
+- Use short `//` comments to explain recurrences, numerical choices, and
+  assumptions that are hard to infer from the code.
+
 ## Code of Conduct
 
 ### Our Pledge

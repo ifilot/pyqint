@@ -6,8 +6,7 @@
 #include <cstddef>
 #include <limits>
 
-#include "mathfuncs.h"
-#include "factorials.h"
+namespace integrals::eri::hellsing {
 
 /**
  * @brief One-dimensional Hellsing kernel cache
@@ -219,3 +218,5 @@ private:
     /// Flat storage of all precomputed kernels
     std::vector<HellsingCache1D> table_;
 };
+
+}  // namespace integrals::eri::hellsing

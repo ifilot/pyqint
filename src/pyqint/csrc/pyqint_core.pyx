@@ -5,6 +5,13 @@
 import numpy as np
 from collections.abc import Iterable
 import numpy.typing as npt
+from time import perf_counter
+
+from ._memory import check_derivative_memory, check_dipole_memory, check_eri_memory
+
+cdef inline size_t packed_tei_size(size_t n) noexcept:
+    cdef size_t pairs = n * (n + 1) // 2
+    return pairs * (pairs + 1) // 2
 
 cdef object vector_to_array(const vector[double]& v):
     """Copy a C++ vector of doubles into a new NumPy array
@@ -75,13 +82,35 @@ cdef class PyQInt:
     cdef Integrator* integrator
     cdef int _lmax
     cdef int _nu_max
+    cdef str _eri_engine
 
-    def __cinit__(self, int lmax=4, int nu_max=12):
+    def __cinit__(self, int lmax=4, int nu_max=12, *, str eri_engine="hellsing"):
         self.integrator = NULL
+        self._initialize(lmax, nu_max, eri_engine)
+
+    cdef void _initialize(self, int lmax, int nu_max, str eri_engine) except *:
+        cdef EriEngine engine
+        if eri_engine == "hellsing":
+            engine = EriEngine.Hellsing
+        elif eri_engine == "hellsing_direct":
+            engine = EriEngine.HellsingDirect
+        elif eri_engine == "huzinaga":
+            engine = EriEngine.Huzinaga
+        elif eri_engine == "huzinaga_scalar":
+            engine = EriEngine.HuzinagaScalar
+        elif eri_engine == "rys":
+            engine = EriEngine.Rys
+        elif eri_engine == "auto":
+            engine = EriEngine.Auto
+        else:
+            raise ValueError(f"Unknown ERI engine: {eri_engine!r}")
+
+        cdef Integrator* integrator = new Integrator(lmax, nu_max, engine)
+        del self.integrator
+        self.integrator = integrator
         self._lmax = lmax
         self._nu_max = nu_max
-
-        self.integrator = new Integrator(lmax, nu_max)
+        self._eri_engine = eri_engine
 
     def __dealloc__(self):
         if self.integrator != NULL:
@@ -90,11 +119,16 @@ cdef class PyQInt:
 
     # -------- pickling --------
     def __getstate__(self):
-        return (self._lmax, self._nu_max)
+        if self._eri_engine == "hellsing":
+            return (self._lmax, self._nu_max)
+        return (self._lmax, self._nu_max, self._eri_engine)
 
     def __setstate__(self, state):
-        self._lmax, self._nu_max = state
-        self.integrator = new Integrator(self._lmax, self._nu_max)
+        if len(state) == 2:
+            self._initialize(state[0], state[1], "hellsing")
+        else:
+            lmax, nu_max, eri_engine = state
+            self._initialize(lmax, nu_max, eri_engine)
 
     # -------- API --------
     def get_compile_info(self):
@@ -220,6 +254,23 @@ cdef class PyQInt:
         cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
 
         return self.integrator.dipole(c_cgf1, c_cgf2, cc, cref)
+
+    def build_dipole_openmp(self, cgfs, *, origin=(0.0, 0.0, 0.0)):
+        """Build the three Cartesian position integral matrices in bohr.
+
+        The result has shape (3, N, N). The origin is specified in bohr.
+        """
+        reference = np.asarray(origin, dtype=np.float64)
+        if reference.shape != (3,) or not np.all(np.isfinite(reference)):
+            raise ValueError("Dipole origin must contain three finite coordinates in bohr.")
+
+        cdef vector[CGF] c_cgfs
+        for cgf in cgfs:
+            c_cgfs.push_back(PyQInt.build_c_cgf(cgf))
+        n = c_cgfs.size()
+        check_dipole_memory(n)
+        values = vector_to_array(self.integrator.evaluate_dipoles(c_cgfs, reference[0], reference[1], reference[2]))
+        return values.reshape((3, n, n))
 
     def overlap_deriv(self, cgf1:cgf, cgf2:cgf, nuc:Iterable[float], coord:int) -> float:
         """Calculate derivative of overlap integral between two CGFs
@@ -404,16 +455,6 @@ cdef class PyQInt:
         cdef CGF c_cgf3 = PyQInt.build_c_cgf(cgf3)
         cdef CGF c_cgf4 = PyQInt.build_c_cgf(cgf4)
 
-        # build cgf3
-        c_cgf3 = CGF(cgf3.p[0], cgf3.p[1], cgf3.p[2])
-        for gto in cgf3.gtos:
-            c_cgf3.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf4
-        c_cgf4 = CGF(cgf4.p[0], cgf4.p[1], cgf4.p[2])
-        for gto in cgf4.gtos:
-            c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
         # ensure Hellsing has enough cache
         self.integrator.ensure_hellsing_cache(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
 
@@ -437,16 +478,6 @@ cdef class PyQInt:
         cdef CGF c_cgf2 = PyQInt.build_c_cgf(cgf2)
         cdef CGF c_cgf3 = PyQInt.build_c_cgf(cgf3)
         cdef CGF c_cgf4 = PyQInt.build_c_cgf(cgf4)
-
-        # build cgf3
-        c_cgf3 = CGF(cgf3.p[0], cgf3.p[1], cgf3.p[2])
-        for gto in cgf3.gtos:
-            c_cgf3.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
-
-        # build cgf4
-        c_cgf4 = CGF(cgf4.p[0], cgf4.p[1], cgf4.p[2])
-        for gto in cgf4.gtos:
-            c_cgf4.add_gto(gto.c, gto.alpha, gto.l, gto.m, gto.n)
 
         # ensure Hellsing has enough cache
         self.integrator.ensure_hellsing_cache(c_cgf1, c_cgf2, c_cgf3, c_cgf4)
@@ -509,27 +540,31 @@ cdef class PyQInt:
         """
         return self.integrator.teindex(i, j, k, l)
 
-    def build_integrals_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]]) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
+    def build_integrals_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]], *, packed:bool=False) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
         """Build overlap matrix, nuclear attraction matrix, kinetic energy matrix and four-dimensional two-electron array
 
         Args:
             cgfs (Iterable[cgf]): list of contracted gaussian functions
             nuclei (Iterable[tuple[Iterable[float], float]]): list of nuclei
+            packed (bool): return the unique two-electron integrals in teindex order
 
         Returns:
-            tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]: overlap matrix, kinetic energy matrix, nuclear attraction matrix, four-dimensional two-electron array
+            Overlap, kinetic energy, and nuclear attraction matrices followed by
+            the two-electron integrals as a dense tensor or a packed vector.
         """
         cdef vector[CGF] c_cgfs
         cdef vector[int] charges
         cdef vector[double] px
         cdef vector[double] py
         cdef vector[double] pz
+        cdef size_t primitives = 0
 
         # build CGFS objects
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
                 c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+            primitives += c_cgfs.back().size()
 
         # add nuclei to buffer
         for nucleus in nuclei:
@@ -538,39 +573,122 @@ cdef class PyQInt:
             py.push_back(nucleus[0][1])
             pz.push_back(nucleus[0][2])
 
-        results = np.array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz))
+        cdef size_t sz = c_cgfs.size()
+        cdef size_t budget = check_eri_memory(sz, packed=packed, automatic=self._eri_engine == "auto",
+                                              nuclei=charges.size(), primitives=primitives)
+        if packed:
+            results = vector_to_array(self.integrator.evaluate_one_electron_integrals(c_cgfs, charges, px, py, pz))
+            tei = self._build_packed_tei(c_cgfs, NULL, budget)
+        else:
+            results = vector_to_array(self.integrator.evaluate_cgfs(c_cgfs, charges, px, py, pz, budget))
+            tei = results[3 * sz * sz:].reshape((sz, sz, sz, sz))
 
-        sz = len(cgfs)
         S = results[0:sz*sz].reshape((sz,sz))
         T = results[sz*sz:sz*sz*2].reshape((sz,sz))
         V = results[sz*sz*2:sz*sz*3].reshape((sz,sz))
-        tetensor = results[sz*sz*3:].reshape((sz,sz,sz,sz))
 
-        return S, T, V, tetensor
+        return S, T, V, tei
 
-    def build_tei_openmp(self, cgfs:Iterable[cgf]) -> npt.NDArray[np.float64]:
+    cdef object _build_packed_tei(self, const vector[CGF]& cgfs, EriBuildProfile* profile, size_t budget):
+        cdef size_t count = packed_tei_size(cgfs.size())
+        values = np.zeros(count, dtype=np.float64)
+        cdef double[::1] view = values
+        cdef double* output = &view[0] if count else NULL
+        self.integrator.evaluate_packed_tei(cgfs, output, profile, budget)
+        return values
+
+    def build_tei_openmp(self, cgfs:Iterable[cgf], *, profile:bool=False, packed:bool=False):
         """Build two-electron tensor
 
         Args:
             cgfs (Iterable[cgf]): list of contracted gaussian functions
+            profile (bool): include stage timings in seconds and route counts
+            packed (bool): return the unique integrals in teindex order
 
         Returns:
-            npt.NDArray[np.float64]: two-electron tensor
+            Two-electron integrals, or an (integrals, statistics) pair when profiling.
         """
         cdef vector[CGF] c_cgfs
+        cdef vector[double] values
+        cdef EriBuildProfile stats
+        cdef double conversion = 0.0
+        cdef size_t primitives = 0
 
         # build CGFS objects
         for cgf in cgfs:
             c_cgfs.push_back(CGF(cgf.p[0], cgf.p[1], cgf.p[2]))
             for gto in cgf.gtos:
                 c_cgfs.back().add_gto_with_position(gto.c, gto.p[0], gto.p[1], gto.p[2], gto.alpha, gto.l, gto.m, gto.n)
+            primitives += c_cgfs.back().size()
 
-        results = np.array(self.integrator.evaluate_tei(c_cgfs))
+        sz = c_cgfs.size()
+        cdef size_t budget = check_eri_memory(sz, packed=packed, automatic=self._eri_engine == "auto",
+                                              primitives=primitives)
+        if packed:
+            tei = self._build_packed_tei(c_cgfs, &stats if profile else NULL, budget)
+        else:
+            if profile:
+                values = self.integrator.evaluate_tei(c_cgfs, stats, budget)
+                conversion_start = perf_counter()
+            else:
+                values = self.integrator.evaluate_tei(c_cgfs, budget)
+            tei = vector_to_array(values).reshape((sz, sz, sz, sz))
+            if profile:
+                conversion = perf_counter() - conversion_start
 
-        sz = len(cgfs)
-        tetensor = results.reshape((sz,sz,sz,sz))
+        if profile:
+            return tei, {
+                "pair_setup": stats.pair_setup,
+                "quartet_planning": stats.quartet_planning,
+                "integral_evaluation": stats.integral_evaluation,
+                "tensor_assembly": stats.tensor_assembly,
+                "numpy_conversion": conversion,
+                "parity_zero_quartets": stats.parity_zero_quartets,
+                "prepared_hellsing_quartets": stats.prepared_hellsing_quartets,
+                "rys_quartets": stats.rys_quartets,
+                "rys_shell_batches": stats.rys_shell_batches,
+            }
+        return tei
 
-        return tetensor
+    def contract_packed_tei(self, packed_tei, density_alpha, density_beta=None):
+        """Build Coulomb and exchange matrices from unique ERIs in teindex order.
+
+        With one finite density matrix, return (J, K). With alpha and beta
+        densities, return (J, K_alpha, K_beta), with J using the total density.
+        """
+        cdef const double[::1] values = packed_tei
+        cdef const double[:, ::1] pa = np.ascontiguousarray(density_alpha, dtype=np.float64)
+        cdef const double[:, ::1] pb
+        cdef size_t n = pa.shape[0]
+        cdef const double* beta_input = NULL
+        cdef double* beta_output = NULL
+
+        if pa.shape[1] != n:
+            raise ValueError("Density matrix must be square.")
+        if values.shape[0] != packed_tei_size(n):
+            raise ValueError("Packed ERI array length does not match the density size.")
+
+        coulomb = np.empty((n, n), dtype=np.float64)
+        exchange_alpha = np.empty_like(coulomb)
+        cdef double[:, ::1] j = coulomb
+        cdef double[:, ::1] ka = exchange_alpha
+        cdef double[:, ::1] kb
+        if density_beta is not None:
+            pb = np.ascontiguousarray(density_beta, dtype=np.float64)
+            if pb.shape[0] != n or pb.shape[1] != n:
+                raise ValueError("Alpha and beta density matrices must have the same shape.")
+            exchange_beta = np.empty_like(coulomb)
+            kb = exchange_beta
+            if n:
+                beta_input = &pb[0, 0]
+                beta_output = &kb[0, 0]
+
+        if n:
+            self.integrator.contract_packed_tei(n, &values[0], &pa[0, 0], beta_input,
+                                                 &j[0, 0], &ka[0, 0], beta_output)
+        if density_beta is not None:
+            return coulomb, exchange_alpha, exchange_beta
+        return coulomb, exchange_alpha
 
     def build_geometric_derivatives_openmp(self, cgfs:Iterable[cgf], nuclei:Iterable[tuple[Iterable[float], float]]) -> tuple[npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64],npt.NDArray[np.float64]]:
         cdef vector[CGF] c_cgfs
@@ -592,17 +710,16 @@ cdef class PyQInt:
             py.push_back(nucleus[0][1])
             pz.push_back(nucleus[0][2])
 
-        results = np.array(self.integrator.evaluate_geometric_derivatives(c_cgfs, charges, px, py, pz))
+        cdef size_t sz = c_cgfs.size()
+        cdef size_t nnuc = charges.size()
+        check_derivative_memory(sz, nnuc)
+        results = vector_to_array(self.integrator.evaluate_geometric_derivatives(c_cgfs, charges, px, py, pz))
 
-        sz = len(cgfs)
-        ntei = self.teindex(sz-1,sz-1,sz-1,sz-1)+1 # calculate number of two-electron integrals
-
-        tsize = len(nuclei) * 3 * sz * sz
-        S = results[0:tsize].reshape((len(nuclei), 3, sz,sz))
-        T = results[tsize:2*tsize].reshape((len(nuclei), 3, sz,sz))
-        V = results[2*tsize:3*tsize].reshape((len(nuclei), 3, sz,sz))
-
-        teints = results[3*tsize:].reshape(len(nuclei), 3, ntei)
+        tsize = nnuc * 3 * sz * sz
+        S = results[0:tsize].reshape((nnuc, 3, sz, sz))
+        T = results[tsize:2*tsize].reshape((nnuc, 3, sz, sz))
+        V = results[2*tsize:3*tsize].reshape((nnuc, 3, sz, sz))
+        teints = results[3*tsize:].reshape((nnuc, 3, packed_tei_size(sz)))
 
         return S, T, V, teints
 

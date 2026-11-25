@@ -168,9 +168,9 @@ class GeometryOptimization:
 
     def _jacobian(self, x: Vec) -> Vec:
         """
-        Return forces (negative gradient) for the optimizer.
+        Return the energy gradient for the optimizer.
 
-        If forces were already computed at these coordinates,
+        If the gradient was already computed at these coordinates,
         they are reused to avoid an extra SCF call.
         """
         if self.coord is not None and np.max(np.abs(x - self.coord)) < 1e-5:

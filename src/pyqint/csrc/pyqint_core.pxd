@@ -32,6 +32,7 @@ cdef extern from "cgf.h":
     cdef cppclass CGF:
         CGF() except +
         CGF(double, double, double) except +
+        size_t size() const
         void add_gto(double, double, int, int, int) except +
         void add_gto_with_position(double, double, double, double, double, int, int, int) except +
         double get_amp(double, double, double) except +
@@ -47,10 +48,29 @@ cdef extern from "plotter.h":
         vector[double] plot_basis_functions(vector[double], vector[CGF]) except+
         vector[double] plot_basis_function_gradients(vector[double], vector[CGF]) except+
 
+cdef extern from "integrals.h" namespace "integrals::eri":
+    cdef cppclass EriBuildProfile:
+        double pair_setup
+        double quartet_planning
+        double integral_evaluation
+        double tensor_assembly
+        size_t parity_zero_quartets
+        size_t prepared_hellsing_quartets
+        size_t rys_quartets
+        size_t rys_shell_batches
+
 # Integrator class
 cdef extern from "integrals.h":
+    cdef enum class EriEngine:
+        Hellsing
+        HellsingDirect
+        Huzinaga
+        HuzinagaScalar
+        Rys
+        Auto
+
     cdef cppclass Integrator:
-        Integrator(int, int) except +
+        Integrator(int, int, EriEngine) except +
 
         int get_num_threads() except +
 
@@ -64,6 +84,7 @@ cdef extern from "integrals.h":
         # dipole integrals
         double dipole(CGF, CGF, int, double) except +
         double dipole_gto(GTO, GTO, int, double) except +
+        vector[double] evaluate_dipoles(const vector[CGF]&, double, double, double) except +
 
         # kinetic integrals
         double kinetic_gto(GTO, GTO) except +
@@ -90,14 +111,18 @@ cdef extern from "integrals.h":
         double repulsion_deriv(GTO, GTO, GTO, GTO, int) except +
 
         # two-electron indexing
-        int teindex(int, int, int, int) except +
+        size_t teindex(size_t, size_t, size_t, size_t) except +
         void ensure_hellsing_cache(CGF, CGF, CGF, CGF) except +
 
         # openmp routine for integral evaluation
-        vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
+        vector[double] evaluate_cgfs(vector[CGF], vector[int], vector[double], vector[double], vector[double], size_t) except +
+        vector[double] evaluate_one_electron_integrals(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +
 
         # openmp routine for tei evaluation
-        vector[double] evaluate_tei(vector[CGF]) except +
+        vector[double] evaluate_tei(vector[CGF], size_t) except +
+        vector[double] evaluate_tei(vector[CGF], EriBuildProfile&, size_t) except +
+        void evaluate_packed_tei(const vector[CGF]&, double*, EriBuildProfile*, size_t) except +
+        void contract_packed_tei(size_t, const double*, const double*, const double*, double*, double*, double*) except +
 
         # openmp routine for geometric derivatives evaluation
         vector[double] evaluate_geometric_derivatives(vector[CGF], vector[int], vector[double], vector[double], vector[double]) except +

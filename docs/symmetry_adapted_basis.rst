@@ -37,6 +37,11 @@ often useful to:
    basis* (i.e. performing the SCF iterations per symmetry block) is a natural
    extension, but is not currently exposed as a separate high-level workflow.
 
+For geometric derivatives, each primitive follows the nucleus at its center.
+The derivatives include the change in normalization of each multicenter
+contraction. The Gaussian exponents and SALC coefficients are held fixed during
+the displacement.
+
 Ethylene example
 ----------------
 

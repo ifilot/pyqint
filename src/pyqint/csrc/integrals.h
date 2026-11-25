@@ -36,17 +36,12 @@
 #include "cgf.h"
 #include "factorials.h"
 #include "mathfuncs.h"
-#include "hellsing_cache.h"
+#include "eri/hellsing/hellsing_cache.h"
+#include "eri/orchestrator.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-struct HellsingBTerm {
-    double c;  // coefficient
-    int mu;    // mu
-    int u;     // u
-};
 
 class Integrator {
 private:
@@ -57,16 +52,18 @@ private:
     std::string compiler_type;
 
     BoysFunction boys_function;
-    mutable HellsingCacheTable1D hellsing_cache;
+    EriEngine eri_engine;
+    mutable integrals::eri::hellsing::HellsingCacheTable1D hellsing_cache;
 
 public:
     /**
      * @brief Construct an Integrator instance.
      *
-     * @param lmax    Maximum angular momentum
-     * @param nu_max  Maximum Boys function order
+     * @param lmax        Maximum angular momentum to cache initially
+     * @param nu_max      Maximum Boys function order to tabulate
+     * @param eri_engine  Primitive electron repulsion engine
      */
-    Integrator(int lmax=4, int nu_max=12);
+    Integrator(int lmax=4, int nu_max=12, EriEngine eri_engine=EriEngine::Hellsing);
 
     /**
      * @brief Return the number of OpenMP threads available.
@@ -140,23 +137,66 @@ public:
      * @param px       Nuclear x coordinates
      * @param py       Nuclear y coordinates
      * @param pz       Nuclear z coordinates
+     * @param planner_budget  Bytes available for ERI quartet planning
      *
-     * @return packed vector of overlap, kinetic, nuclear, and TEI values
+     * @return flat vector of overlap, kinetic, nuclear, and dense TEI values
      */
     std::vector<double> evaluate_cgfs(const std::vector<CGF>& cgfs,
                                       const std::vector<int>& charges,
                                       const std::vector<double>& px,
                                       const std::vector<double>& py,
-                                      const std::vector<double>& pz) const;
+                                      const std::vector<double>& pz,
+                                      size_t planner_budget) const;
+
+    /** @brief Evaluate overlap, kinetic, and nuclear attraction matrices in sequence. */
+    std::vector<double> evaluate_one_electron_integrals(const std::vector<CGF>& cgfs,
+                                                        const std::vector<int>& charges,
+                                                        const std::vector<double>& px,
+                                                        const std::vector<double>& py,
+                                                        const std::vector<double>& pz) const;
+
+    /** @brief Evaluate Cartesian position integrals relative to an origin. */
+    std::vector<double> evaluate_dipoles(const std::vector<CGF>& cgfs, double x, double y, double z) const;
 
     /**
      * @brief Evaluate all two-electron integrals within the basis set.
      *
      * @param cgfs  Contracted Gaussian functions
+     * @param planner_budget  Bytes available for ERI quartet planning
      *
-     * @return packed vector of two-electron integrals
+     * @return dense vector of two-electron integrals
      */
-    std::vector<double> evaluate_tei(const std::vector<CGF>& cgfs) const;
+    std::vector<double> evaluate_tei(const std::vector<CGF>& cgfs, size_t planner_budget) const;
+
+    /**
+     * @brief Evaluate the ERI tensor and record separate setup and kernel timings.
+     */
+    std::vector<double> evaluate_tei(const std::vector<CGF>& cgfs, integrals::eri::EriBuildProfile& profile,
+                                     size_t planner_budget) const;
+
+    /**
+     * @brief Evaluate each unique ERI in teindex order.
+     * @param cgfs    Contracted Gaussian functions
+     * @param values  Zero-initialized array with one element per unique ERI
+     * @param profile Optional setup and evaluation timings
+     * @param planner_budget  Bytes available for ERI quartet planning
+     */
+    void evaluate_packed_tei(const std::vector<CGF>& cgfs, double* values,
+                             integrals::eri::EriBuildProfile* profile, size_t planner_budget) const;
+
+    /**
+     * @brief Contract packed ERIs into dense Coulomb and exchange matrices.
+     * @param n          Number of basis functions
+     * @param values     Unique ERIs in teindex order
+     * @param density_a  Restricted or alpha density matrix in row-major order
+     * @param density_b  Beta density matrix, or nullptr for restricted contraction
+     * @param coulomb    Coulomb matrix from the total density
+     * @param exchange_a Restricted or alpha exchange matrix
+     * @param exchange_b Beta exchange matrix, or nullptr for restricted contraction
+     */
+    void contract_packed_tei(size_t n, const double* values, const double* density_a,
+                             const double* density_b, double* coulomb, double* exchange_a,
+                             double* exchange_b) const;
 
     /**
      * @brief Evaluate geometric derivatives for all cgfs in buffer.
@@ -624,6 +664,78 @@ public:
 
 private:
     /**
+     * @brief Describe how a contracted function responds to moving one nucleus.
+     *
+     * Uniform motion uses one flag for the full contraction. A mixed contraction
+     * uses per-primitive flags and has a geometry-dependent normalization.
+     */
+    struct CgfDerivative {
+        const CGF& cgf;
+        bool first_moves;
+        std::vector<bool> primitive_moves;
+        std::array<double, 3> log_norm_deriv;
+
+        bool moves(unsigned int i) const {
+            return primitive_moves.empty() ? first_moves : primitive_moves[i];
+        }
+
+        bool all_move() const { return primitive_moves.empty() && first_moves; }
+        bool none_move() const { return primitive_moves.empty() && !first_moves; }
+    };
+
+    /**
+     * @brief Identify the moving primitives and differentiate their contraction norm.
+     *
+     * @param cgf      Contracted Gaussian function
+     * @param nucleus  Position of the nucleus being displaced
+     * @param shared_center  Verified common center when available
+     *
+     * @return Primitive motion and the derivatives of the logarithmic normalization
+     */
+    CgfDerivative prepare_cgf_derivative(const CGF& cgf, const Vec3& nucleus,
+                                         const std::optional<Vec3>& shared_center = std::nullopt) const;
+
+    /**
+     * @brief Match a Gaussian or operator center to a nuclear position.
+     */
+    static bool same_center(const Vec3& center, const Vec3& nucleus) {
+        return (center - nucleus).norm2() < 0.0001;
+    }
+
+    using ContractedIntegral = double (Integrator::*)(const CGF&, const CGF&) const;
+    using PrimitiveDerivative = double (Integrator::*)(const GTO&, const GTO&, unsigned int) const;
+
+    /**
+     * @brief Differentiate a contracted overlap or kinetic integral.
+     */
+    double two_center_deriv(const CgfDerivative& bra, const CgfDerivative& ket, unsigned int coord,
+                            ContractedIntegral integral, PrimitiveDerivative derivative) const;
+
+    /**
+     * @brief Differentiate nuclear attraction using prepared contraction derivatives.
+     */
+    double nuclear_deriv(const CgfDerivative& bra, const CgfDerivative& ket, const Vec3& nucleus,
+                         unsigned int charge, bool nucleus_moves, unsigned int coord) const;
+
+    /**
+     * @brief Differentiate electron repulsion using prepared contraction derivatives.
+     */
+    double repulsion_deriv(const CgfDerivative& a, const CgfDerivative& b,
+                           const CgfDerivative& c, const CgfDerivative& d, unsigned int coord) const;
+
+    /**
+     * @brief Evaluate a contracted quartet with its selected kernel and optional prepared pairs.
+     */
+    double repulsion(const CGF& a, const CGF& b, const CGF& c, const CGF& d, EriEngine engine,
+                     const integrals::eri::EriOrchestrator::Pair* bra = nullptr,
+                     const integrals::eri::EriOrchestrator::Pair* ket = nullptr) const;
+
+    /**
+     * @brief Evaluate a primitive quartet using the selected ERI kernel.
+     */
+    double repulsion(const GTO& a, const GTO& b, const GTO& c, const GTO& d, EriEngine engine) const;
+
+    /**
      * @brief Performs overlap integral evaluation
      *
      * @param alpha1  Gaussian exponent of the first GTO
@@ -710,139 +822,6 @@ private:
     double nuclear_deriv_op(const Vec3& a, int l1, int m1, int n1, double alpha1,
                             const Vec3& b, int l2, int m2, int n2,
                             double alpha2, const Vec3& c, unsigned int coord) const;
-
-    /**
-     * @brief Performs electron repulsion integral evaluation.
-     *
-     * @param a       Center of the first GTO
-     * @param la      Power of x component of the polynomial of the first GTO
-     * @param ma      Power of y component of the polynomial of the first GTO
-     * @param na      Power of z component of the polynomial of the first GTO
-     * @param alphaa  Gaussian exponent of the first GTO
-     * @param b       Center of the second GTO
-     * @param lb      Power of x component of the polynomial of the second GTO
-     * @param mb      Power of y component of the polynomial of the second GTO
-     * @param nb      Power of z component of the polynomial of the second GTO
-     * @param alphab  Gaussian exponent of the second GTO
-     * @param c       Center of the third GTO
-     * @param lc      Power of x component of the polynomial of the third GTO
-     * @param mc      Power of y component of the polynomial of the third GTO
-     * @param nc      Power of z component of the polynomial of the third GTO
-     * @param alphac  Gaussian exponent of the third GTO
-     * @param d       Center of the fourth GTO
-     * @param ld      Power of x component of the polynomial of the fourth GTO
-     * @param md      Power of y component of the polynomial of the fourth GTO
-     * @param nd      Power of z component of the polynomial of the fourth GTO
-     * @param alphad  Gaussian exponent of the fourth GTO
-     *
-     * @return Value of the electron repulsion integral
-     */
-    double repulsion(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                     const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                     const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                     const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
-
-    /**
-     * @brief Performs electron repulsion integral (ERI) evaluation with cached Boys function
-     *
-     * @param a        Center of the first Gaussian-type orbital (GTO)
-     * @param la       Power of x component of the polynomial of the first GTO
-     * @param ma       Power of y component of the polynomial of the first GTO
-     * @param na       Power of z component of the polynomial of the first GTO
-     * @param alphaa  Gaussian exponent of the first GTO
-     *
-     * @param b        Center of the second Gaussian-type orbital (GTO)
-     * @param lb       Power of x component of the polynomial of the second GTO
-     * @param mb       Power of y component of the polynomial of the second GTO
-     * @param nb       Power of z component of the polynomial of the second GTO
-     * @param alphab  Gaussian exponent of the second GTO
-     *
-     * @param c        Center of the third Gaussian-type orbital (GTO)
-     * @param lc       Power of x component of the polynomial of the third GTO
-     * @param mc       Power of y component of the polynomial of the third GTO
-     * @param nc       Power of z component of the polynomial of the third GTO
-     * @param alphac  Gaussian exponent of the third GTO
-     *
-     * @param d        Center of the fourth Gaussian-type orbital (GTO)
-     * @param ld       Power of x component of the polynomial of the fourth GTO
-     * @param md       Power of y component of the polynomial of the fourth GTO
-     * @param nd       Power of z component of the polynomial of the fourth GTO
-     * @param alphad  Gaussian exponent of the fourth GTO
-     *
-     * @return Value of the electron repulsion integral
-     */
-    double repulsion_boys_cached(const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                 const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                 const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                 const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
-
-    /**
-     * @brief Performs electron repulsion integral (ERI) evaluation with in-situ Hellsing engine
-     *
-     * @param a        Center of the first Gaussian-type orbital (GTO)
-     * @param la       Power of x component of the polynomial of the first GTO
-     * @param ma       Power of y component of the polynomial of the first GTO
-     * @param na       Power of z component of the polynomial of the first GTO
-     * @param alphaa  Gaussian exponent of the first GTO
-     *
-     * @param b        Center of the second Gaussian-type orbital (GTO)
-     * @param lb       Power of x component of the polynomial of the second GTO
-     * @param mb       Power of y component of the polynomial of the second GTO
-     * @param nb       Power of z component of the polynomial of the second GTO
-     * @param alphab  Gaussian exponent of the second GTO
-     *
-     * @param c        Center of the third Gaussian-type orbital (GTO)
-     * @param lc       Power of x component of the polynomial of the third GTO
-     * @param mc       Power of y component of the polynomial of the third GTO
-     * @param nc       Power of z component of the polynomial of the third GTO
-     * @param alphac  Gaussian exponent of the third GTO
-     *
-     * @param d        Center of the fourth Gaussian-type orbital (GTO)
-     * @param ld       Power of x component of the polynomial of the fourth GTO
-     * @param md       Power of y component of the polynomial of the fourth GTO
-     * @param nd       Power of z component of the polynomial of the fourth GTO
-     * @param alphad  Gaussian exponent of the fourth GTO
-     *
-     * @return Value of the electron repulsion integral
-     */
-    double repulsion_hellsing (const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                               const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                               const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                               const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
-
-    /**
-     * @brief Performs electron repulsion integral (ERI) evaluation with cached Hellsing engine
-     *
-     * @param a        Center of the first Gaussian-type orbital (GTO)
-     * @param la       Power of x component of the polynomial of the first GTO
-     * @param ma       Power of y component of the polynomial of the first GTO
-     * @param na       Power of z component of the polynomial of the first GTO
-     * @param alphaa  Gaussian exponent of the first GTO
-     *
-     * @param b        Center of the second Gaussian-type orbital (GTO)
-     * @param lb       Power of x component of the polynomial of the second GTO
-     * @param mb       Power of y component of the polynomial of the second GTO
-     * @param nb       Power of z component of the polynomial of the second GTO
-     * @param alphab  Gaussian exponent of the second GTO
-     *
-     * @param c        Center of the third Gaussian-type orbital (GTO)
-     * @param lc       Power of x component of the polynomial of the third GTO
-     * @param mc       Power of y component of the polynomial of the third GTO
-     * @param nc       Power of z component of the polynomial of the third GTO
-     * @param alphac  Gaussian exponent of the third GTO
-     *
-     * @param d        Center of the fourth Gaussian-type orbital (GTO)
-     * @param ld       Power of x component of the polynomial of the fourth GTO
-     * @param md       Power of y component of the polynomial of the fourth GTO
-     * @param nd       Power of z component of the polynomial of the fourth GTO
-     * @param alphad  Gaussian exponent of the fourth GTO
-     *
-     * @return Value of the electron repulsion integral
-     */
-    double repulsion_hellsing_cached (const Vec3 &a, const int la, const int ma, const int na, const double alphaa,
-                                      const Vec3 &b, const int lb, const int mb, const int nb, const double alphab,
-                                      const Vec3 &c, const int lc, const int mc, const int nc, const double alphac,
-                                      const Vec3 &d, const int ld, const int md, const int nd, const double alphad) const;
 
     /**
      * @brief Calculates one dimensional overlap integral
@@ -963,127 +942,11 @@ private:
     double gamma(const double m, double x) const;
 
     /**
-     * @brief Build the B array for the Obara–Saika recurrence.
-     *
-     * @param l1     Angular momentum component for center A
-     * @param l2     Angular momentum component for center B
-     * @param l3     Angular momentum component for center C
-     * @param l4     Angular momentum component for center D
-     * @param p      Gaussian exponent sum for the first pair
-     * @param a      Center A coordinate
-     * @param b      Center B coordinate
-     * @param q      Gaussian exponent sum for the second pair
-     * @param c      Center C coordinate
-     * @param d      Center D coordinate
-     * @param g1     Gaussian exponent sum gamma1
-     * @param g2     Gaussian exponent sum gamma2
-     * @param delta  delta parameter
-     *
-     * @return B array values
-     */
-    std::vector<double> B_array(const int l1,const int l2,const int l3,const int l4,
-                                const double p, const double a, const double b, const double q, const double c, const double d,
-                                const double g1, const double g2, const double delta) const;
-
-    /**
-     * @brief Build the Hellsing B array terms.
-     *
-     * @param l1  Angular momentum component for center A
-     * @param l2  Angular momentum component for center B
-     * @param l3  Angular momentum component for center C
-     * @param l4  Angular momentum component for center D
-     * @param a1  Gaussian exponent of center A
-     * @param a2  Gaussian exponent of center B
-     * @param a3  Gaussian exponent of center C
-     * @param a4  Gaussian exponent of center D
-     * @param ax  A coordinate component
-     * @param bx  B coordinate component
-     * @param cx  C coordinate component
-     * @param dx  D coordinate component
-     * @param px  P coordinate component
-     * @param qx  Q coordinate component
-     * @param g1  Gaussian exponent sum gamma1
-     * @param g2  Gaussian exponent sum gamma2
-     *
-     * @return Hellsing B-term array
-     */
-    std::vector<HellsingBTerm> B_array_hellsing(
-        int l1, int l2, int l3, int l4,
-        double a1, double a2, double a3, double a4,
-        double ax, double bx, double cx, double dx,
-        double px, double qx,
-        double g1, double g2) const;
-
-    /**
-     * @brief Evaluate a single B-term for the Obara–Saika recurrence.
-     *
-     * @param i1     Hermite index for the first pair
-     * @param i2     Hermite index for the second pair
-     * @param r1     Recursion index for the first pair
-     * @param r2     Recursion index for the second pair
-     * @param u      Boys index
-     * @param l1     Angular momentum component for center A
-     * @param l2     Angular momentum component for center B
-     * @param l3     Angular momentum component for center C
-     * @param l4     Angular momentum component for center D
-     * @param px     P coordinate component
-     * @param ax     A coordinate component
-     * @param bx     B coordinate component
-     * @param qx     Q coordinate component
-     * @param cx     C coordinate component
-     * @param dx     D coordinate component
-     * @param gamma1 Gaussian exponent sum gamma1
-     * @param gamma2 Gaussian exponent sum gamma2
-     * @param delta  delta parameter
-     *
-     * @return B-term value
-     */
-    double B_term(const int i1, const int i2, const int r1, const int r2, const int u, const int l1, const int l2, const int l3, const int l4,
-    const double px, const double ax, const double bx, const double qx, const double cx, const double dx, const double gamma1,
-    const double gamma2, const double delta) const;
-
-    /**
-     * @brief Evaluate helper term used in B-array construction.
-     *
-     * @param i   Hermite index
-     * @param l1  Angular momentum component for center A
-     * @param l2  Angular momentum component for center B
-     * @param p   Gaussian exponent sum
-     * @param a   Center A coordinate
-     * @param b   Center B coordinate
-     * @param r   Recursion index
-     * @param q   Gaussian exponent sum for the second pair
-     *
-     * @return fB term value
-     */
-    double fB(const int i, const int l1, const int l2, const double p, const double a, const double b, const int r, const double q) const;
-
-    /**
-     * @brief Evaluate the BB0 helper term.
-     *
-     * @param i  Hermite index
-     * @param r  Recursion index
-     * @param q  Gaussian exponent sum
-     *
-     * @return BB0 term value
-     */
-    double BB0(int i, int r, double q) const;
-
-    /**
-     * @brief Compute factorial ratio used in recursion relations.
-     *
-     * @param a  first index
-     * @param b  second index
-     *
-     * @return factorial ratio
-     */
-    double fact_ratio2(unsigned int a, unsigned int b) const;
-
-    /**
-     * @brief Compute and pack all two-electron integrals.
+     * @brief Compute all two-electron integrals and expand them into a dense tensor.
      *
      * @param cgfs      Contracted Gaussian functions
      * @param tetensor  Output tensor of two-electron integrals
      */
-    void calculate_two_electron_integrals(const std::vector<CGF>& cgfs, std::vector<double>& tetensor) const;
+    void calculate_two_electron_integrals(const std::vector<CGF>& cgfs, std::vector<double>& tetensor,
+                                         integrals::eri::EriBuildProfile* profile, size_t planner_budget) const;
 };

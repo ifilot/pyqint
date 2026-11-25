@@ -1,5 +1,12 @@
 #include "hellsing_cache.h"
 
+#include "factorials.h"
+#include "mathfuncs.h"
+
+#include <utility>
+
+namespace integrals::eri::hellsing {
+
 /**
  * @brief Compute the flat index into the kernel table
  *
@@ -222,3 +229,5 @@ HellsingCache1D HellsingCacheTable1D::build_kernel_1d(int l1, int l2, int l3, in
 
     return K;
 }
+
+}  // namespace integrals::eri::hellsing
