@@ -4,16 +4,21 @@ from __future__ import annotations
 
 import time
 import warnings
+from functools import partial
+from operator import index
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
 from scipy import constants
+from scipy.sparse.linalg import ArpackNoConvergence
 
 from .._memory import check_hf_gradient_memory
 from ..pyqint_core import PyQInt
 from ..structure.element import ELEMENTS_DATA
 from ..structure.molecule import Molecule
+from .initial_guess import LINDEP_THRESHOLD, sad_density
+from .stability import lowest_rhf_mode, rotate_rhf_occupied
 from .vibrations import displace_basis, harmonic_analysis
 
 Vec = npt.NDArray[np.float64]
@@ -28,9 +33,7 @@ AU_TO_DEBYE = constants.elementary_charge * constants.value("Bohr radius") / (1e
 SUBSPACE_LENGTH = 4
 SUBSPACE_START = 1
 
-# overlap eigenvalues below this threshold are removed by canonical
-# orthogonalization (near-linear dependencies in the basis set)
-LINDEP_THRESHOLD = 1e-7
+STABILITY_THRESHOLD = -1e-5
 
 class HF:
     """
@@ -90,6 +93,9 @@ class HF:
         ortho: str = "canonical",
         tolerance_grad: Optional[float] = None,
         *,
+        guess: str = "sad",
+        stability: bool = True,
+        stability_max_restarts: int = 3,
         calc_dipole: bool = False,
         dipole_origin: Sequence[float] = (0.0, 0.0, 0.0),
     ) -> Dict[str, Any]:
@@ -109,7 +115,7 @@ class HF:
             Include the analytic nuclear energy gradient under ``forces``.
             The physical nuclear force is the negative of this gradient.
         itermax
-            Maximum number of SCF iterations.
+            Maximum number of SCF iterations per attempt.
         use_diis
             Enable DIIS acceleration.
         verbose
@@ -127,6 +133,25 @@ class HF:
         tolerance_grad
             Threshold for the commutator FPS - SPF; defaults to
             sqrt(tolerance).
+        guess
+            Initial density used to build the first Fock matrix. ``"sad"``
+            adds the densities of neutral atoms in their own basis functions.
+            Each open atomic shell shares its electrons equally among its
+            degenerate orbitals. This default accounts for electronic
+            repulsion from the first Fock build and can reach lower-energy
+            solutions. The first molecular diagonalization sets the actual
+            occupations, including for ions. ``"core"`` starts with zero
+            density, so the first Fock matrix is the core Hamiltonian T + V.
+            Supplied ``orbc_init`` takes precedence. Multicenter or
+            off-nucleus basis functions fall back to the core guess.
+        stability
+            Check the converged determinant for a downhill real RHF orbital
+            rotation. Follow a downhill mode and restart if one is found.
+            Use ``guess="core", stability=False`` to reproduce the original
+            core-start SCF trajectory.
+        stability_max_restarts
+            Maximum number of stability restarts. Set to zero to diagnose
+            an instability without following it.
         calc_dipole
             Include the molecular dipole vector in debye under ``dipole``.
         dipole_origin
@@ -135,19 +160,29 @@ class HF:
         Returns
         -------
         dict
-            Result dictionary containing energies, orbitals, matrices, etc.
+            Includes ``stable`` (True or False after a completed check,
+            otherwise None), ``stability_eigenvalue`` (lowest eigenvalue of
+            A + B, or None if unavailable), and ``stability_restarts``.
+            The iteration history includes all SCF attempts. With zero
+            iterations the result contains the chosen initial density.
 
         Raises
         ------
         ValueError
             If the number of electrons is odd or exceeds the capacity of the
-            molecular orbitals.
+            molecular orbitals, the guess is unknown, or the restart limit
+            is negative.
         """
         if self._nelec % 2 != 0:
             raise ValueError(
                 f"RHF requires an even number of electrons, not {self._nelec}; "
                 "use uhf() for open-shell systems."
             )
+        if guess not in ("core", "sad"):
+            raise ValueError(f"Unknown initial guess: {guess!r}")
+        stability_max_restarts = index(stability_max_restarts)
+        if stability_max_restarts < 0:
+            raise ValueError("stability_max_restarts must be nonnegative.")
         if calc_forces:
             tolerance = self.__gradient_tolerance(itermax, tolerance)
         if tolerance_grad is None:
@@ -178,141 +213,59 @@ class HF:
             )
         occ = [2 if i < self._nelec//2 else 0 for i in range(M)]
 
-        # create empty P matrix as initial guess
         if orbc_init is None:
-            P = np.zeros(S.shape)
+            initial_density = sad_density(self._cgfs, self._nuclei) if guess == "sad" else None
         else:
-            occ_init = [2 if i < self._nelec//2 else 0 for i in range(orbc_init.shape[1])]
-            P = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ_init)
+            occ_init = [2 if i < self._nelec // 2 else 0 for i in range(orbc_init.shape[1])]
+            initial_density = np.einsum('ik,jk,k->ij', orbc_init, orbc_init, occ_init)
+        P = np.zeros_like(S) if initial_density is None else initial_density
 
-        # keep track of time
-        start = time.time()
-
-        # build containers to store per-iteration data
+        hcore = T + V
+        coulomb_exchange = partial(self.__coulomb_exchange, integrator, tei)
         energies = []
         time_stats['iterations'] = []
-        fmats_diis = []
-        evs_diis = []
-        converged = False
+        time_stats['self_convergence'] = 0.0
+        stable = lowest_eigenvalue = None
+        restarts = 0
 
-        # predefine outputs in case itermax==0
-        orbe = C = None
+        for attempt in range(1 + stability_max_restarts):
+            start = time.time()
+            P, F, J, K, energy, orbe, C, converged = self.__rhf_scf(
+                hcore, S, X, nuc_rep, coulomb_exchange, P, occ,
+                itermax, use_diis, verbose, tolerance, tolerance_grad,
+                initial_density is not None or attempt > 0, energies, time_stats['iterations'],
+            )
+            time_stats['self_convergence'] += time.time() - start
+            if not stability or not converged:
+                stable = lowest_eigenvalue = None
+                if restarts:
+                    warnings.warn("RHF stability restart did not converge.", RuntimeWarning, stacklevel=2)
+                break
 
-        # start iterations
-        for niter in range(0,itermax):
-            # keep track of iterations
-            iterstart = time.time()
+            try:
+                lowest_eigenvalue, direction = lowest_rhf_mode(C, F, self._nelec // 2, coulomb_exchange)
+            except ArpackNoConvergence:
+                stable = lowest_eigenvalue = None
+                warnings.warn("RHF stability eigensolver did not converge.", RuntimeWarning, stacklevel=2)
+                break
 
-            if niter > SUBSPACE_START and use_diis:
-                try:
-                    diis_coeff = self.__calculate_diis_coefficients(evs_diis)
-                except np.linalg.LinAlgError:
-                    # stop diis procedure and revert to linear stepping,
-                    # i.e. continue from the orbitals of the previous
-                    # iteration
-                    use_diis = False
-                    P = np.einsum('ik,jk,k->ij', C, C, occ)
-                else:
-                    F = self.__extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
-                    Fprime = X.transpose() @ F @ X
-                    e, Cprime = np.linalg.eigh(Fprime)
-                    C = X @ Cprime
-                    P = np.einsum('ik,jk,k->ij', C, C, occ)
-
-            # calculate G
-            J, K = self.__coulomb_exchange(integrator, tei, P)
-            G = J - 0.5 * K
-
-            # build Fock matrix
-            F = T + V + G
-
-            # transform Fock matrix
-            Fprime = X.transpose() @ F @ X
-
-            # diagonalize F
-            orbe, Cprime = np.linalg.eigh(Fprime)
-
-            # back-transform
-            C = X @ Cprime
-
-            # calculate energy E
-            energy = 0.5 * np.einsum('ij,ji', P, T + V + F)
-
-            # add nuclear repulsion
-            energy += nuc_rep
-
-            # store energy for next iteration
-            energies.append(energy)
-
-            # calculate the error vector from the density matrix that was
-            # used to build the Fock matrix; it vanishes at self-consistency
-            err = F.dot(P.dot(S)) - S.dot(P.dot(F))
-            errmax = np.max(np.abs(X.transpose() @ err @ X))
-
-            # store Fock matrix and error vector for DIIS; the zero initial
-            # guess is skipped as its error vector vanishes trivially
-            if niter > 0 or orbc_init is not None:
-                fmats_diis.append(F)                            # add Fock matrix to list
-                evs_diis.append(err.flatten())                  # add error vector to list
-
-            # for the first few iterations, build a new density
-            # matrix from the coefficients, else, resort to the DIIS
-            # algorithm
-            if niter <= SUBSPACE_START or not use_diis:
-                P = np.einsum('ik,jk,k->ij', C, C, occ)
-
-            # prune size of the old Fock, density and error vector lists
-            # only SUBSPACE_LENGTH iterations are used to guess the new
-            # solution
-            if len(fmats_diis) > SUBSPACE_LENGTH:
-                fmats_diis = fmats_diis[-SUBSPACE_LENGTH:]
-                evs_diis = evs_diis[-SUBSPACE_LENGTH:]
-
-            # store iteration time
-            iterend = time.time()
-            time_stats['iterations'].append(iterend - iterstart)
-
-            # print info for this iteration
+            stable = lowest_eigenvalue is None or lowest_eigenvalue >= STABILITY_THRESHOLD
+            if stable or attempt == stability_max_restarts:
+                break
+            restarted_density = self.__follow_rhf_mode(C, direction, energy, hcore, nuc_rep, coulomb_exchange)
+            if restarted_density is None:
+                break
+            P = restarted_density
+            restarts += 1
             if verbose:
-                print("Iteration: %2i | Energy: %12.6f Ht | Error: %8.2e | Time: %6.4f s" % (niter, energy, errmax, time_stats['iterations'][-1]))
+                print(f"Restarting RHF along an unstable mode (eigenvalue {lowest_eigenvalue:.2e} Ht).")
 
-            # calculate energy difference between this and the previous
-            # iteration; terminate the loop when both the energy difference
-            # and the error vector are less than their thresholds
-            if niter > 4: # require at least 4 steps
-                ediff = np.abs(energies[-2] - energies[-1])
-
-                if ediff < tolerance and errmax < tolerance_grad:
-                    converged = True
-
-                    # terminate self-convergence cycle
-                    if verbose:
-                        print("Stopping SCF cycle, convergence reached.")
-                    break
-
-        # store time for self-converging iterations
-        end = time.time()
-        time_stats['self_convergence'] = end - start
-
-        if itermax > 0 and not converged:
+        if stable is False:
             warnings.warn(
-                f"RHF did not converge within {itermax} iterations "
-                f"(last energy change {ediff if niter > 4 else float('nan'):.2e} Ht, "
-                f"error {errmax:.2e}).",
+                f"RHF solution is internally unstable (lowest eigenvalue {lowest_eigenvalue:.2e} Ht) "
+                f"after {restarts} stability restart(s).",
                 RuntimeWarning, stacklevel=2,
             )
-
-        # build the density matrix from the final orbitals and the Fock
-        # matrix and energy that belong to it; without any iterations, the
-        # initial guess density is retained
-        if C is not None:
-            P = np.einsum('ik,jk,k->ij', C, C, occ)
-        J, K = self.__coulomb_exchange(integrator, tei, P)
-        G = J - 0.5 * K
-        F = T + V + G
-        energy = 0.5 * np.einsum('ji,ij', P, T+V+F) + nuc_rep
-        if energies:
-            energies[-1] = energy
 
         gradient = None
         if calc_forces:
@@ -323,6 +276,9 @@ class HF:
         sol = {
             "energy": energy,
             "converged": converged,
+            "stable": stable,
+            "stability_eigenvalue": lowest_eigenvalue,
+            "stability_restarts": restarts,
             "niter": len(energies),
             "nuclei" : self._nuclei,
             "cgfs": self._cgfs,
@@ -355,6 +311,150 @@ class HF:
             sol["dipole"] = self.__molecular_dipole(integrator, P, dipole_origin)
         return sol
 
+    def __rhf_scf(self, hcore, S, X, nuc_rep, coulomb_exchange, P, occ,
+                  itermax, use_diis, verbose, tolerance, tolerance_grad,
+                  include_first_diis, energies, iteration_times):
+        """Run one RHF attempt with a fresh DIIS subspace."""
+        fmats_diis = []
+        evs_diis = []
+        converged = False
+
+        # predefine outputs in case itermax==0
+        orbe = C = None
+
+        # start iterations
+        for niter in range(0,itermax):
+            # keep track of iterations
+            iterstart = time.time()
+
+            if niter > SUBSPACE_START and use_diis:
+                try:
+                    diis_coeff = self.__calculate_diis_coefficients(evs_diis)
+                except np.linalg.LinAlgError:
+                    # stop diis procedure and revert to linear stepping,
+                    # i.e. continue from the orbitals of the previous
+                    # iteration
+                    use_diis = False
+                    P = np.einsum('ik,jk,k->ij', C, C, occ)
+                else:
+                    F = self.__extrapolate_fock_from_diis_coefficients(fmats_diis, diis_coeff)
+                    Fprime = X.transpose() @ F @ X
+                    e, Cprime = np.linalg.eigh(Fprime)
+                    C = X @ Cprime
+                    P = np.einsum('ik,jk,k->ij', C, C, occ)
+
+            # calculate G
+            J, K = coulomb_exchange(P)
+            G = J - 0.5 * K
+
+            # build Fock matrix
+            F = hcore + G
+
+            # transform Fock matrix
+            Fprime = X.transpose() @ F @ X
+
+            # diagonalize F
+            orbe, Cprime = np.linalg.eigh(Fprime)
+
+            # back-transform
+            C = X @ Cprime
+
+            # calculate energy E
+            energy = 0.5 * np.einsum('ij,ji', P, hcore + F)
+
+            # add nuclear repulsion
+            energy += nuc_rep
+
+            # store energy for next iteration
+            energies.append(energy)
+
+            # calculate the error vector from the density matrix that was
+            # used to build the Fock matrix; it vanishes at self-consistency
+            err = F.dot(P.dot(S)) - S.dot(P.dot(F))
+            errmax = np.max(np.abs(X.transpose() @ err @ X))
+
+            # store Fock matrix and error vector for DIIS; the zero initial
+            # guess is skipped as its error vector vanishes trivially
+            if niter > 0 or include_first_diis:
+                fmats_diis.append(F)                            # add Fock matrix to list
+                evs_diis.append(err.flatten())                  # add error vector to list
+
+            # for the first few iterations, build a new density
+            # matrix from the coefficients, else, resort to the DIIS
+            # algorithm
+            if niter <= SUBSPACE_START or not use_diis:
+                P = np.einsum('ik,jk,k->ij', C, C, occ)
+
+            # prune size of the old Fock, density and error vector lists
+            # only SUBSPACE_LENGTH iterations are used to guess the new
+            # solution
+            if len(fmats_diis) > SUBSPACE_LENGTH:
+                fmats_diis = fmats_diis[-SUBSPACE_LENGTH:]
+                evs_diis = evs_diis[-SUBSPACE_LENGTH:]
+
+            # store iteration time
+            iterend = time.time()
+            iteration_times.append(iterend - iterstart)
+
+            # print info for this iteration
+            if verbose:
+                print("Iteration: %2i | Energy: %12.6f Ht | Error: %8.2e | Time: %6.4f s" % (niter, energy, errmax, iteration_times[-1]))
+
+            # calculate energy difference between this and the previous
+            # iteration; terminate the loop when both the energy difference
+            # and the error vector are less than their thresholds
+            if niter > 4: # require at least 4 steps
+                ediff = np.abs(energies[-2] - energies[-1])
+
+                if ediff < tolerance and errmax < tolerance_grad:
+                    converged = True
+
+                    # terminate self-convergence cycle
+                    if verbose:
+                        print("Stopping SCF cycle, convergence reached.")
+                    break
+
+        if itermax > 0 and not converged:
+            warnings.warn(
+                f"RHF did not converge within {itermax} iterations "
+                f"(last energy change {ediff if niter > 4 else float('nan'):.2e} Ht, "
+                f"error {errmax:.2e}).",
+                RuntimeWarning, stacklevel=3,
+            )
+
+        # build the density matrix from the final orbitals and the Fock
+        # matrix and energy that belong to it; without any iterations, the
+        # initial guess density is retained
+        if C is not None:
+            P = np.einsum('ik,jk,k->ij', C, C, occ)
+        J, K = coulomb_exchange(P)
+        G = J - 0.5 * K
+        F = hcore + G
+        energy = 0.5 * np.einsum('ji,ij', P, hcore + F) + nuc_rep
+        if energies:
+            energies[-1] = energy
+
+        return P, F, J, K, energy, orbe, C, converged
+
+    @staticmethod
+    def __follow_rhf_mode(orbitals, direction, energy, hcore, nuc_rep, coulomb_exchange):
+        """Find a downhill step along the unstable orbital rotation."""
+        for step in (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125):
+            best_density = None
+            best_energy = energy
+            for sign in (1, -1):
+                occupied = rotate_rhf_occupied(orbitals, sign * step * direction)
+                density = 2 * (occupied @ occupied.T)
+                coulomb, exchange = coulomb_exchange(density)
+                fock = hcore + coulomb - 0.5 * exchange
+                trial_energy = 0.5 * np.einsum('ij,ji', density, hcore + fock) + nuc_rep
+                if trial_energy < best_energy:
+                    best_energy = trial_energy
+                    best_density = density
+            if best_density is not None:
+                return best_density
+        return None
+
     def uhf(
             self,
             multiplicity: int,
@@ -367,6 +467,7 @@ class HF:
             nelec: Optional[int] = None,
             tolerance_grad: Optional[float] = None,
             *,
+            guess: str = "sad",
             calc_forces: bool = False,
             calc_dipole: bool = False,
             dipole_origin: Sequence[float] = (0.0, 0.0, 0.0),
@@ -395,11 +496,20 @@ class HF:
             Orthogonalization scheme ("canonical" or "symmetric"); see
             :meth:`rhf`.
         nelec
-            Number of electrons; defaults to the number of electrons of the
-            neutral molecule.
+            Number of electrons. Defaults to the molecular electron count
+            after applying its charge.
         tolerance_grad
             Threshold for the commutators FPS - SPF; defaults to
             sqrt(tolerance).
+        guess
+            ``"sad"`` (default) starts from the neutral atomic densities
+            described in :meth:`rhf`, split equally between alpha and beta.
+            This accounts for electronic repulsion in the first Fock build.
+            The first molecular diagonalization sets the two spin electron
+            counts from the requested charge and multiplicity. ``"core"``
+            starts both spin densities at zero. Supplied ``orbc_init`` takes
+            precedence. Multicenter and off-nucleus basis functions fall back
+            to the core guess.
         calc_forces
             Include the analytic nuclear energy gradient under ``forces``.
             The physical nuclear force is the negative of this gradient.
@@ -419,6 +529,9 @@ class HF:
             If the multiplicity is incompatible with the number of electrons
             or the basis set is too small to hold the alpha electrons.
         """
+
+        if guess not in ("core", "sad"):
+            raise ValueError(f"Unknown initial guess: {guess!r}")
 
         # electron counts
         if nelec is None:
@@ -469,9 +582,12 @@ class HF:
         occ_b = np.array([1 if i < nbeta  else 0 for i in range(M)], dtype=float)
 
         # initial guess densities
+        include_first_diis = True
         if orbc_init is None:
-            Pa = np.zeros_like(S)
-            Pb = np.zeros_like(S)
+            density = sad_density(self._cgfs, self._nuclei) if guess == "sad" else None
+            include_first_diis = density is not None
+            Pa = np.zeros_like(S) if density is None else 0.5 * density
+            Pb = Pa.copy()
         else:
             Ca0 = orbc_init.get("alpha", None)
             Cb0 = orbc_init.get("beta", None)
@@ -547,7 +663,7 @@ class HF:
 
             # store them for DIIS; the zero initial guess is skipped as its
             # error vectors vanish trivially
-            if niter > 0 or orbc_init is not None:
+            if niter > 0 or include_first_diis:
                 fmats_diis_a.append(Fa); evs_diis_a.append(err_a.flatten())
                 fmats_diis_b.append(Fb); evs_diis_b.append(err_b.flatten())
 

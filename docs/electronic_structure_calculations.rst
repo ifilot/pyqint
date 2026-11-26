@@ -16,6 +16,32 @@ Both approaches expose detailed intermediate results, allowing the user to
 inspect orbital coefficients, density matrices, Fock matrices, and energy
 contributions throughout the self-consistent field (SCF) procedure.
 
+Starting the SCF procedure
+--------------------------
+
+RHF and UHF use a superposition of atomic densities (SAD) by default. PyQInt
+solves a small SCF problem for each neutral atom in its own basis. In an open
+shell it shares the electrons equally among the degenerate orbitals. For
+example, each of nitrogen's three :math:`2p` orbitals carries one electron in
+the atomic guess. PyQInt places these densities in the molecular density
+matrix on the corresponding atomic blocks. In UHF it gives half the density
+to each spin. The first molecular Fock matrix then includes electron
+repulsion, and the first molecular diagonalization fills orbitals according
+to the requested electron count and spin.
+
+Use ``guess="core"`` to start at zero density. The first Fock matrix is then
+just the kinetic and nuclear attraction matrices. Use the following call to
+reproduce an RHF iteration history from the original core-Hamiltonian start.
+
+.. code-block:: python
+
+    result = HF(mol, "sto3g").rhf(guess="core", stability=False)
+
+Explicit ``orbc_init`` coefficients take precedence over either guess. If a
+custom basis function spans several centers or sits off a nucleus, SAD falls
+back to the core guess. With ``itermax=0`` the result contains the initial
+density and the energy evaluated with that density.
+
 Packed two-electron integrals
 -----------------------------
 
@@ -172,14 +198,22 @@ object. This dictionary objects contains the following keys
      - Final energy of the electronic structure calculation
    * - :code:`converged`
      - Whether the convergence criteria were met
+   * - :code:`stable`
+     - Whether the converged result is stable to real RHF orbital rotations.
+       ``None`` if the stability check was disabled or could not be completed.
+   * - :code:`stability_eigenvalue`
+     - Lowest eigenvalue of the RHF stability matrix :math:`A + B`, in hartree.
+       ``None`` when no eigenvalue was computed.
+   * - :code:`stability_restarts`
+     - Number of SCF restarts used to follow unstable orbital rotations
    * - :code:`niter`
-     - Number of SCF iterations
+     - Total number of SCF iterations across all attempts
    * - :code:`nuclei`
      - List of elements and their position in Bohr units
    * - :code:`cgfs`
      - List of contracted Gaussian functional objects
    * - :code:`energies`
-     - List of energies during the self-convergence procedure
+     - Energies during SCF, including any stability restarts
    * - :code:`orbe`
      - Orbital energies (converged) (array of M elements)
    * - :code:`orbc`
@@ -279,6 +313,15 @@ also the error vector used by the DIIS procedure.
 When these criteria are not met within :code:`itermax` iterations (default 100),
 a :code:`RuntimeWarning` is issued. The :code:`converged` entry of the result
 dictionary reports the outcome and :code:`niter` the number of iterations used.
+
+After convergence, RHF checks whether a real rotation between occupied and
+virtual orbitals can lower the energy. An eigenvalue below :math:`-10^{-5}` Ht
+indicates an instability. RHF follows that mode and starts a fresh SCF attempt
+using the same ``itermax`` limit. It allows up to three restarts by default and
+issues a ``RuntimeWarning`` if the final state is still unstable. Set
+``stability_max_restarts=0`` to diagnose without restarting or
+``stability=False`` to skip the check. The check is local to real restricted
+determinants. UHF does not perform this check.
 
 .. code-block:: python
 
@@ -465,11 +508,9 @@ versa. Otherwise, a :code:`ValueError` is raised.
 
 .. warning::
 
-   The UHF procedure starts from the core Hamiltonian guess. For some
-   open-shell systems, e.g. triplet O\ :sub:`2`, this guess may lead to a
-   self-consistent solution which is not the ground state. Comparing the
-   result with a calculation started from different initial orbitals (via the
-   :code:`orbc_init` argument) is advised in such cases.
+   UHF can converge to different self-consistent solutions for the same spin
+   multiplicity. For open-shell systems such as triplet O\ :sub:`2`, compare
+   energies from different initial orbitals supplied via ``orbc_init``.
 
 Custom basis sets
 -----------------

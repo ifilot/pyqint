@@ -133,15 +133,17 @@ class TestHF(unittest.TestCase):
 
         # perform HF calculation with coefficient matrix from previous
         # calculation to speed up the convergence
-        results2 = HF(mol, 'sto3g').rhf(orbc_init=results1['orbc'])
+        hf = HF(mol, 'sto3g')
+        results2 = hf.rhf(guess='core', orbc_init=results1['orbc'])
 
         # assess that the energy of the perturbed result is different
         # (and also higher)
         en = -39.34538546003782
         np.testing.assert_almost_equal(results2['energies'][-1], en, 5)
 
-        # check that the convergence is quicker
-        self.assertTrue(len(results1['energies']) > len(results2['energies']))
+        # compare with a cold start at the same geometry
+        cold_start = hf.rhf(guess='core')
+        self.assertGreater(cold_start['niter'], results2['niter'])
 
 if __name__ == '__main__':
     unittest.main()

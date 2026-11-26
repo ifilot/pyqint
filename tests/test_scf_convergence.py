@@ -93,19 +93,38 @@ class TestSCFConvergence(unittest.TestCase):
         """
         mol = water()
 
-        res = HF(mol, 'sto3g').rhf(itermax=0)
+        res = HF(mol, 'sto3g').rhf(itermax=0, guess='core')
         self.assertFalse(res['converged'])
         self.assertEqual(res['niter'], 0)
         self.assertIsNone(res['orbc'])
         np.testing.assert_almost_equal(res['energy'], res['enucrep'], 12)
 
-        res = HF(mol, 'sto3g').uhf(multiplicity=1, itermax=0)
+        res = HF(mol, 'sto3g').uhf(multiplicity=1, itermax=0, guess='core')
         self.assertEqual(res['niter'], 0)
         np.testing.assert_almost_equal(res['energy'], res['enucrep'], 12)
 
         # forces require converged orbitals
         with self.assertRaises(ValueError):
             HF(mol, 'sto3g').rhf(itermax=0, calc_forces=True)
+
+    def test_default_guess_without_iterations(self):
+        mol = water()
+        mol.set_charge(1)
+        solver = HF(mol, 'sto3g')
+        uhf = solver.uhf(multiplicity=2, itermax=0)
+        self.assertEqual(uhf['niter'], 0)
+        self.assertFalse(uhf['converged'])
+        self.assertIsNone(uhf['orbc_alpha'])
+        np.testing.assert_allclose(uhf['density_alpha'], uhf['density_beta'])
+        self.assertAlmostEqual(np.trace(uhf['density'] @ uhf['overlap']), 10.0)
+
+        rhf = HF(water(), 'sto3g').rhf(itermax=0)
+        self.assertEqual(rhf['niter'], 0)
+        self.assertFalse(rhf['converged'])
+        self.assertIsNone(rhf['orbc'])
+        self.assertIsNone(rhf['stable'])
+        np.testing.assert_allclose(rhf['density'], uhf['density'])
+        np.testing.assert_allclose(rhf['density'][:5, 5:], 0.0)
 
     def test_diis_failure_fallback(self):
         """

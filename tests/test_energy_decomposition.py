@@ -62,7 +62,8 @@ class TestEnergyDecomposition(unittest.TestCase):
         mol.add_atom('H', -0.5 * R,  0.5 * sqrt3 * R, 0.0)
         mol.add_atom('H', -0.5 * R, -0.5 * sqrt3 * R, 0.0)
 
-        res = HF(mol, 'sto3g').uhf(multiplicity=2)
+        # Use the legacy trajectory for the tight dense/packed comparison.
+        res = HF(mol, 'sto3g').uhf(multiplicity=2, guess='core')
         Pa = res['density_alpha']
         Pb = res['density_beta']
         P = res['density']
@@ -95,7 +96,7 @@ class TestEnergyDecomposition(unittest.TestCase):
         self.assertLess(res['ex_alpha'], res['ex_beta'])
         self.assertLess(res['ex_beta'], 0.0)
 
-        packed = HF(mol, 'sto3g', eri_storage='packed').uhf(multiplicity=2)
+        packed = HF(mol, 'sto3g', eri_storage='packed').uhf(multiplicity=2, guess='core')
         self.assertTrue(packed['converged'])
         self.assertIsNone(packed['tetensor'])
         self.assertEqual(packed['packed_tei'].ndim, 1)

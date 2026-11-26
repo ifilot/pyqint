@@ -53,9 +53,15 @@ pull requests on GitHub. Versions before 1.0.0 are not covered; see the
   removes rigid translations and rotations, accepts isotope masses, and
   supports custom CGFs whose primitives follow their associated nuclei.
   [#80](https://github.com/ifilot/pyqint/issues/80)
+- RHF checks the converged orbitals for internal instability and can restart
+  along an energy-lowering real orbital rotation. The result includes
+  `stable`, `stability_eigenvalue`, and `stability_restarts`.
 
 ### Changed
 
+- RHF and UHF start from a superposition of atomic densities by default.
+  Use `guess="core"` for the zero-density start, with `stability=False` in
+  RHF to reproduce the original SCF history.
 - The C++ ERI implementations are grouped into Hellsing, Huzinaga, and Rys
   subdirectories, with shared dispatch and contraction code.
 
